@@ -423,7 +423,6 @@ export const coinPackages: CoinPackage[] = [
 ];
 
 export const adminAllocations: AdminAllocation[] = [
-    { category: 'Affiliate Marketing', percentage: 2, description: 'Rewards for bringing new users to the platform.' },
     { category: 'Public Demand', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
     { category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
     { category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
