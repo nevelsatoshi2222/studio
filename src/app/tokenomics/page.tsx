@@ -347,11 +347,11 @@ export default function TokenomicsPage() {
                                 <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="relative w-full h-full min-h-[150px] rounded-lg overflow-hidden border">
                                         <Image
-                                            src="https://picsum.photos/seed/igc-logo/600/400"
+                                            src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
                                             alt="IGC Logo"
                                             fill
-                                            style={{ objectFit: 'cover' }}
-                                            data-ai-hint="governance structure"
+                                            style={{ objectFit: 'contain' }}
+                                            data-ai-hint="governance coin"
                                         />
                                     </div>
                                     <Card>
@@ -600,8 +600,7 @@ export default function TokenomicsPage() {
                                     <Input id="igc-amount" type="number" placeholder="1000 IGC" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="igc-duration">Lock-in Period</Label>
-                                    <Select>
+                                    <Label htmlFor="igc-duration">Lock-in Period</Label>                                    <Select>
                                         <SelectTrigger id="igc-duration">
                                             <SelectValue placeholder="Select duration" />
                                         </SelectTrigger>
@@ -796,4 +795,5 @@ export default function TokenomicsPage() {
   );
 }
 
+    
     
