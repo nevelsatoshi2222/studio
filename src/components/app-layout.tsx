@@ -46,6 +46,7 @@ import {
   LogOut,
   Shield,
   Scale,
+  Rss,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -61,6 +62,7 @@ import { Skeleton } from './ui/skeleton';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
+  { href: '/social-media', icon: Rss, label: 'Social Media' },
   { href: '/users', icon: Users, label: 'User Management' },
   { href: '/transactions', icon: Repeat, label: 'Transactions' },
   { href: '/forum', icon: MessageSquare, label: 'Forum / Governance' },
