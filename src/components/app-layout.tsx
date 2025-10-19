@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -13,6 +12,9 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import {
   Home,
@@ -35,12 +37,16 @@ import {
   ShoppingCart,
   Building2,
   BookUser,
+  ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { users } from '@/lib/data';
+import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
@@ -58,14 +64,38 @@ const navItems = [
   { href: '/affiliate-marketing', icon: Share2, label: 'Affiliate Marketing'},
   { href: '/influencer', icon: Megaphone, label: 'Influencer'},
   { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
-  { href: '/franchisee', icon: Building2, label: 'Franchisee'},
   { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
+];
+
+const franchiseeSubmenu = [
+    { name: 'Main' },
+    { name: 'Services' },
+    { name: 'Food' },
+    { name: 'Vegetables' },
+    { name: 'Grains' },
+    { name: 'Pulses' },
+    { name: 'Milk' },
+    { name: 'Dairy products' },
+    { name: 'Beverages' },
+    { name: 'Oils' },
+    { name: 'Education' },
+    { name: 'Travel' },
+];
+
+const franchiseeLevels = [
+    { name: 'Street Franchisee' },
+    { name: 'Village/Ward Franchisee' },
+    { name: 'Block/Kasba Franchisee' },
+    { name: 'Taluka franchisee' },
+    { name: 'District franchisee' },
+    { name: 'Area Franchisee' },
+    { name: 'State Franchisee' },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const adminUser = users.find(user => user.id === 'usr_admin');
+  const [openFranchiseSubMenu, setOpenFranchiseSubMenu] = useState('');
 
   const sidebarContent = (
     <>
@@ -87,6 +117,45 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </SidebarMenuItem>
           ))}
+            <SidebarMenuItem>
+                <Collapsible>
+                    <CollapsibleTrigger className="w-full">
+                        <SidebarMenuButton>
+                            <Building2 />
+                            <span>Franchisee</span>
+                        </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                         <SidebarMenuSub>
+                            {franchiseeSubmenu.map((item) => (
+                                <SidebarMenuSubItem key={item.name}>
+                                     <Collapsible>
+                                        <CollapsibleTrigger className="w-full">
+                                            <SidebarMenuSubButton>
+                                                <span>{item.name}</span>
+                                                <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
+                                            </SidebarMenuSubButton>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent>
+                                            <SidebarMenuSub>
+                                                {franchiseeLevels.map((level) => (
+                                                    <SidebarMenuSubItem key={level.name}>
+                                                        <Link href="#" passHref>
+                                                            <SidebarMenuSubButton>
+                                                                - {level.name}
+                                                            </SidebarMenuSubButton>
+                                                        </Link>
+                                                    </SidebarMenuSubItem>
+                                                ))}
+                                            </SidebarMenuSub>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </SidebarMenuSubItem>
+                            ))}
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
