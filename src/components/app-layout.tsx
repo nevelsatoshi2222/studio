@@ -38,6 +38,7 @@ import {
   Building2,
   BookUser,
   ChevronDown,
+  UserPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -50,6 +51,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
+  { href: '/register', icon: UserPlus, label: 'Register' },
   { href: '/users', icon: Users, label: 'User Management' },
   { href: '/transactions', icon: Repeat, label: 'Transactions' },
   { href: '/forum', icon: MessageSquare, label: 'Forum / Governance' },
@@ -130,7 +132,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             {franchiseeSubmenu.map((item) => (
                                 <SidebarMenuSubItem key={item.name}>
                                      <Collapsible>
-                                        <CollapsibleTrigger className="w-full">
+                                        <CollapsibleTrigger asChild className="w-full">
                                             <SidebarMenuSubButton>
                                                 <span>{item.name}</span>
                                                 <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
