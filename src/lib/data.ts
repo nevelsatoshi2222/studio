@@ -26,7 +26,7 @@ import {
   TeamMember,
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
-import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe } from 'lucide-react';
+import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network } from 'lucide-react';
 
 
 export const users: User[] = [
@@ -551,3 +551,5 @@ export const teamMembers: TeamMember[] = [
     { id: 'tm009', name: 'James Thomas', avatarId: 'user-avatar-1', level: 7, joinDate: '2024-06-01', earnings: 5.80 },
     { id: 'tm010', name: 'Sophia Taylor', avatarId: 'user-avatar-2', level: 8, joinDate: '2024-06-02', earnings: 4.20 },
 ];
+
+    
