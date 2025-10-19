@@ -1,24 +1,14 @@
-
 'use client';
-import { useState } from 'react';
+
 import { AppLayout } from '@/components/app-layout';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -27,95 +17,193 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  stakedPositions,
-  lockDurations,
-  tokenStages,
-  coinPackages,
-  adminAllocations,
-} from '@/lib/data';
-import { StakedPosition, CoinPackage } from '@/lib/types';
-import {
-  Lightbulb,
-  Banknote,
-  Recycle,
-  Sprout,
-  Heart,
-  Landmark,
-  Scale,
-  Award,
-  Trophy,
-  Briefcase,
-  Building2,
-  Globe,
-} from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution } from '@/lib/data';
+import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from 'recharts';
+import React, { useState } from 'react';
 
-const icons: { [key: string]: React.ElementType } = {
-  'Global Peace & Development': Heart,
-  'Anti-Corruption Initiative': Landmark,
-  'AI Education': Lightbulb,
-  'Plant a Tree Initiative': Sprout,
-  'International Issues': Globe,
-  'National Issues': Landmark,
-  'Sports Development': Trophy,
-  'Arts Development': Scale,
-  'Niche-Based Job Creation': Briefcase,
-  'Idea governance': Scale,
-  'Creator Fund': Award,
-};
+const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981", "#f59e0b", "#8b5cf6", "#22c55e", "#6366f1", "#d946ef", "#14b8a6", "#a855f7",];
 
 
-const coins = [
-    { id: 'ITC', name: 'International Trade Coin (ITC)', supply: 8_000_000_000 },
-    { id: 'ICE', name: 'International Crypto Exchange (ICE)', supply: 8_000_000_000 },
-    { id: 'IGC', name: 'Idea Governance Coin (IGC)', supply: 8_000_000_000, hasTokenomics: true },
-    { id: 'FRC', name: 'Franchisee Coin (FRC)', supply: 1_000_000_000, hasTokenomics: true },
-    { id: 'LOAN', name: 'Loan Coin (LOAN)', supply: 1_000_000_000, hasTokenomics: true },
-    { id: 'JBC', name: 'Job Coin (JBC)', supply: 1_000_000_000, hasTokenomics: true },
-    { id: 'COMP', name: 'Competition Coin (COMP)', supply: 8_000_000_000, hasTokenomics: true },
-];
-
-const PIE_CHART_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  '#f59e0b',
-  '#10b981',
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#6b7280'
-];
-
-const tokenSupplyDistribution = [
-  { name: 'Public Sale', value: 35.0 },
-  { name: 'Coin Split Bonus', value: 5.1 },
-  { name: 'Global Causes & Development', value: 20.0 },
-  { name: 'Public Demand Fund', value: 39.9 }
-];
+const coinInfo = [
+    { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe },
+    { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins },
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Scale },
+    { id: 'genz', name: 'GenZ', fullName: 'GenZ', icon: UsersIcon },
+]
 
 export default function TokenomicsPage() {
-  const [currentStage, setCurrentStage] = useState(1);
-  const [selectedCoin, setSelectedCoin] = useState('IGC');
+  const totalSupply = 8_000_000_000;
+  const adminUser = users.find(u => u.id === 'usr_admin');
+  const circulatingSupply = totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100;
+  const totalStaked = stakedPositions.filter(p => p.status === 'Staked').reduce((acc, p) => acc + p.amount, 0);
 
-  const handleStageChange = (stage: number) => {
-    setCurrentStage(stage);
+  const [selectedStage, setSelectedStage] = useState('stage1');
+
+  const icons: { [key: string]: React.ElementType } = {
+    'System Creator': UserCog,
+    'System Management': Settings,
+    'Global Peace & Development': Handshake,
+    'Anti-Corruption': Shield,
+    'AI Education': Brain,
+    'Plant a Tree Initiative': Leaf,
+    'International Issues': Globe,
+    'National Issues': Landmark,
+    'Niche Job Creation': Briefcase,
+    'Influencer Prize Pool': Share2,
+    'Sports Development': Trophy,
+    'Arts Development': Palette,
+    'Idea governance': Scale,
+    'Creator Fund': Award,
   };
 
-  const getPackagesForStage = (stage: number): CoinPackage[] => {
-    const multiplier = stage === 1 ? 1 : stage === 2 ? 2 : 5;
-    return coinPackages.map(pkg => ({
-      ...pkg,
-      available: pkg.available * multiplier
-    }));
-  };
-  
-  const currentPackages = getPackagesForStage(currentStage);
+
+  const FundAllocationCard = () => (
+    <Card>
+        <CardHeader>
+            <CardTitle>Fund Allocation from Token Sales</CardTitle>
+            <CardDescription>A transparent breakdown of how revenue from token sales is used to fund development and global causes.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="rounded-lg border bg-amber-500/10 p-4">
+                <h3 className="font-headline text-lg font-semibold text-amber-800 flex items-center gap-2">
+                    <Award className="h-5 w-5"/>
+                    Phase 1: Creator Fund
+                </h3>
+                <p className="mt-2 text-muted-foreground">
+                    The first <span className="font-bold text-foreground">$1 Million USD</span> collected from all revenue sources is allocated to the Creator Fund. This is to reward the initial creation and development of this Nobel App solution for the world.
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground font-mono break-all">
+                    USDT Wallet: TBwF87o3CtHuCaqJ5wZDV9h9bMSttXQ47s
+                </p>
+            </div>
+
+            <div className="rounded-lg border bg-card p-4">
+                 <h3 className="font-headline text-lg font-semibold">
+                    Phase 2: Post-Creator Funding Allocation
+                </h3>
+                 <p className="mt-2 text-muted-foreground">
+                    After the Creator Fund milestone is reached, all subsequent revenue is allocated according to the following percentages:
+                </p>
+                <div className="mt-4 grid gap-8 md:grid-cols-2">
+                    <div className="h-64">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                            <Pie
+                                data={adminAllocations.filter(a => a.category !== 'Creator Fund')}
+                                dataKey="percentage"
+                                nameKey="category"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                labelLine={false}
+                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                                    const RADIAN = Math.PI / 180;
+                                    const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
+                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                    return (
+                                    <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
+                                        {`${(percent * 100).toFixed(1)}%`}
+                                    </text>
+                                    );
+                                }}
+                            >
+                                {adminAllocations.filter(a => a.category !== 'Creator Fund').map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background))',
+                                    borderColor: 'hsl(var(--border))',
+                                }}
+                            />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-4">
+                        {adminAllocations.filter(a => a.category !== 'Creator Fund').map((alloc, index) => {
+                            const Icon = icons[alloc.category] || CircleDollarSign;
+                            return (
+                                <div key={alloc.category} className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg mt-1 shrink-0" style={{ backgroundColor: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] + '1A' }}>
+                                        <Icon className="h-5 w-5" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }}/>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">{alloc.category} - {alloc.percentage}%</p>
+                                        <p className="text-sm text-muted-foreground">{alloc.description}</p>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+  );
+
+    const TokenomicsChartCard = ({ coinName }: { coinName: string }) => (
+        <Card>
+            <CardHeader>
+                <CardTitle>{coinName} Token Supply Distribution</CardTitle>
+                <CardDescription>A breakdown of the total supply allocation for {coinName}.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <div className="w-full h-[250px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={tokenSupplyDistribution}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                                nameKey="name"
+                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+                            >
+                                {tokenSupplyDistribution.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background))',
+                                    borderColor: 'hsl(var(--border))',
+                                }}
+                                formatter={(value: number, name: string) => [`${value}%`, name]}
+                            />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </CardContent>
+        </Card>
+    );
 
   return (
     <AppLayout>
@@ -123,248 +211,364 @@ export default function TokenomicsPage() {
         <div>
           <h1 className="font-headline text-3xl font-bold">Coins n Tokenomics</h1>
           <p className="text-muted-foreground">
-            Understand the economic model of the platform's tokens.
+            Understand the distribution, supply, and staking mechanisms of the platform's tokens.
           </p>
         </div>
+        
+        <Tabs defaultValue="itc" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+                {coinInfo.map(coin => (
+                    <TabsTrigger key={coin.id} value={coin.id}>{coin.name}</TabsTrigger>
+                ))}
+            </TabsList>
+            {coinInfo.map(coin => {
+                const Icon = coin.icon;
+                return (
+                    <TabsContent key={coin.id} value={coin.id} className="mt-6 space-y-6">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>{coin.name} Total Supply</CardTitle>
+                                <Icon className="h-5 w-5 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                <div className="text-3xl font-bold">{totalSupply.toLocaleString('en-US')} {coin.name}</div>
+                                <p className="text-xs text-muted-foreground">The maximum number of {coin.name} to ever exist.</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Circulating Supply</CardTitle>
+                                <Zap className="h-5 w-5 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                <div className="text-3xl font-bold">{circulatingSupply.toLocaleString('en-US')} {coin.name}</div>
+                                <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
+                                </CardContent>
+                            </Card>
+                             <Card className="lg:col-span-2">
+                                <CardHeader>
+                                <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
+                                <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center justify-between gap-1">
+                                        {tokenStages.map((stage) => (
+                                            <div key={stage.stage} className="flex flex-col items-center gap-2 text-center flex-1">
+                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full border-2", 
+                                                    stage.status === 'Active' ? 'bg-primary/20 border-primary' : '',
+                                                    stage.status === 'Completed' ? 'bg-muted border-muted-foreground' : 'border-border'
+                                                )}>
+                                                    {stage.status === 'Locked' ? <Lock className="h-4 w-4 text-muted-foreground"/> : <Unlock className="h-4 w-4 text-primary"/>}
+                                                </div>
+                                                <div className="text-xs font-semibold">{stage.supplyPercentage}%</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <Progress value={tokenStages.filter(s => s.status !== 'Locked').length * (100 / tokenStages.length)} className="mt-2 h-2" />
+                                </CardContent>
+                            </Card>
+                        </div>
 
-        <Tabs defaultValue="IGC" className="w-full" onValueChange={setSelectedCoin}>
-          <TabsList className="grid w-full grid-cols-7">
-            {coins.map(coin => (
-              <TabsTrigger key={coin.id} value={coin.id}>{coin.id}</TabsTrigger>
-            ))}
-          </TabsList>
-          {coins.map(coin => (
-            <TabsContent key={coin.id} value={coin.id} className="mt-6 space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{coin.name}</CardTitle>
-                  <CardDescription>Supply details and release schedule.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6 md:grid-cols-2">
-                   <div>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-semibold">Total Supply</h3>
-                            <span className="text-lg font-bold text-primary">{coin.supply.toLocaleString('en-US')} {coin.id}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-semibold">Circulating Supply</h3>
-                            <span className="text-lg font-bold">{(coin.supply * 0.001).toLocaleString('en-US')} {coin.id}</span>
-                        </div>
-                        <Progress value={0.1} />
-                        <p className="text-sm text-muted-foreground">Next unlock: Stage 2 in ~15 days</p>
-                    </div>
-                     <div className="mt-6 space-y-4">
-                        <h3 className="font-semibold">Supply Release Schedule</h3>
-                        <div className="grid grid-cols-4 gap-2 text-center">
-                          {tokenStages.map(stage => (
-                              <div key={stage.stage} className={`p-2 rounded-md ${stage.stage <= 1 ? 'bg-primary/20' : 'bg-muted'}`}>
-                                  <p className="text-sm font-bold">Stage {stage.stage}</p>
-                                  <p className="text-xs">{stage.supplyPercentage}%</p>
-                              </div>
-                          ))}
-                        </div>
-                    </div>
-                  </div>
-                  { (coin.hasTokenomics) &&
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Token Supply Distribution</h3>
-                     <ResponsiveContainer width="100%" height={200}>
-                        <PieChart>
-                          <Pie data={tokenSupplyDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                            {tokenSupplyDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                          <Legend iconSize={10} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                  </div>
-                  }
-                </CardContent>
-              </Card>
-
-              {coin.id === 'IGC' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>IGC Tokenomics: Locker & Split</CardTitle>
-                    <CardDescription>A unique price and supply model for the first 4 stages.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <h3 className="font-semibold">How It Works</h3>
-                        <div className="text-muted-foreground text-sm space-y-2">
-                          <p>
-                            IGC's initial price is $1.00. The first 0.1% of supply is divided into 1,000 "lockers."
-                            Each locker contains 8,000 coins. The price for each subsequent locker increases by $0.001.
-                          </p>
-                          <p>
-                            At the end of each of the first four stages, a "coin split" occurs.
-                            If you have staked your IGC, you receive a 1:1 bonus—doubling your staked amount. The price then resets to $1.00 for the next stage.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-primary/10 rounded-lg">
-                        <h4 className="font-semibold text-primary">How Early Buyers Get More Benefit (An Example):</h4>
-                        <p className="text-muted-foreground text-sm mt-2">
-                          The power of this system is in compounding. An early buyer benefits from every subsequent split.
-                        </p>
-                        <ul className="text-muted-foreground text-sm mt-2 list-disc pl-5 space-y-1">
-                          <li>You buy and stake <strong>100 IGC</strong> during Stage 1.</li>
-                          <li>At the end of Stage 1, a split occurs. Your 100 coins become <strong>200 coins</strong>.</li>
-                          <li>At the end of Stage 2, another split occurs. Your 200 coins become <strong>400 coins</strong>.</li>
-                          <li>At the end of Stage 3, a third split happens. Your 400 coins become <strong>800 coins</strong>.</li>
-                          <li>At the end of Stage 4, the final split happens. Your 800 coins become <strong>1,600 coins</strong>.</li>
-                        </ul>
-                         <p className="text-muted-foreground text-sm mt-2 font-semibold">
-                          Your initial 100 coins have grown to 1,600 coins simply by staking early!
-                        </p>
-                      </div>
-                  </CardContent>
-                </Card>
-              )}
-                
-              {coin.hasTokenomics && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Phase 2: Post-Creator Funding Allocation</CardTitle>
-                    <CardDescription>
-                      After the initial Creator Fund milestone, revenue from {coin.id} sales is allocated to these global causes.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid md:grid-cols-2 gap-8 items-center">
-                    <div className="space-y-4">
-                      {adminAllocations.map((item, index) => {
-                          const Icon = icons[item.name];
-                          return (
-                            <div key={item.name} className="flex items-center">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center mr-4" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }}>
-                                {Icon && <Icon className="w-5 h-5" />}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex justify-between items-center">
-                                  <p className="font-medium">{item.name}</p>
-                                  <p className="font-semibold text-primary">{item.value}%</p>
-                                </div>
-                                <p className="text-sm text-muted-foreground">{item.description}</p>
-                              </div>
+                        {coin.id !== 'itc' && (
+                            <div className="grid gap-6 lg:grid-cols-2">
+                                <TokenomicsChartCard coinName={coin.name} />
+                                <FundAllocationCard />
                             </div>
-                          );
-                      })}
-                    </div>
-                    <div>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie data={adminAllocations} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2} labelLine={false} label>
-                            {adminAllocations.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                        )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Buy Coin Packages</CardTitle>
-                   <div className="flex items-center space-x-2">
-                    <Tabs defaultValue="stage-1" className="w-auto">
-                      <TabsList>
-                        <TabsTrigger value="stage-1" onClick={() => handleStageChange(1)}>Stage 1</TabsTrigger>
-                        <TabsTrigger value="stage-2" onClick={() => handleStageChange(2)}>Stage 2</TabsTrigger>
-                        <TabsTrigger value="stage-3" onClick={() => handleStageChange(3)}>Stage 3</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                    <Badge variant="secondary">Packages available for Stage {currentStage}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Table>
+                        {coin.id === 'igc' && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>IGC Price Mechanics: Locker & Split System</CardTitle>
+                                    <CardDescription>A unique system for the first 4 stages to ensure stable growth and reward early stakers.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                                        <div className="border p-4 rounded-lg">
+                                            <h4 className="font-semibold">Stage 1</h4>
+                                            <p className="text-sm text-muted-foreground">0.1% Supply (8M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 8k</p>
+                                            <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
+                                        </div>
+                                        <div className="border p-4 rounded-lg">
+                                            <h4 className="font-semibold">Stage 2</h4>
+                                            <p className="text-sm text-muted-foreground">0.2% Supply (16M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 16k</p>
+                                            <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
+                                        </div>
+                                        <div className="border p-4 rounded-lg">
+                                            <h4 className="font-semibold">Stage 3</h4>
+                                            <p className="text-sm text-muted-foreground">0.4% Supply (32M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 32k</p>
+                                            <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
+                                        </div>
+                                        <div className="border p-4 rounded-lg">
+                                            <h4 className="font-semibold">Stage 4</h4>
+                                            <p className="text-sm text-muted-foreground">1% Supply (80M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 80k</p>
+                                            <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-lg bg-muted/50 p-6">
+                                        <h4 className="font-semibold text-lg">How It Works: A Detailed Breakdown</h4>
+                                        <ol className="list-decimal list-inside space-y-4 mt-4 text-muted-foreground text-sm">
+                                            <li>
+                                                <span className="font-semibold text-foreground">The Locker System:</span> Each of the first 4 stages divides its coin supply into 1,000 "lockers". As each locker sells out, the price for the next locker increases by a tiny fraction ($0.001), ensuring a steady, predictable price appreciation within each stage.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold text-foreground">What is a Coin Split?</span> When all 1,000 lockers in a stage are sold, the stage is complete. At this moment, a "Coin Split" is triggered. This is a powerful event that doubles the holdings of every user who has their IGC staked.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold text-foreground">The 1:1 Staking Bonus:</span> If you have your IGC staked in our Smart Contract Locker when a split occurs, you receive an equal number of coins as a bonus. For every 1 coin you have staked, you get 1 additional coin, instantly doubling your staked amount.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold text-foreground">How Early Buyers Get More Benefit (An Example):</span> The power of this system is in compounding. An early buyer benefits from every subsequent split.
+                                                <ul className="list-disc list-inside pl-6 mt-2 space-y-2 text-sm bg-background/50 p-4 rounded-md border">
+                                                    <li><strong>You buy and stake 100 IGC during Stage 1.</strong></li>
+                                                    <li>At the end of Stage 1, a split occurs. Your 100 coins become <span className="font-bold text-primary">200 coins</span>.</li>
+                                                    <li>At the end of Stage 2, another split occurs. Your 200 coins become <span className="font-bold text-primary">400 coins</span>.</li>
+                                                    <li>At the end of Stage 3, a third split happens. Your 400 coins become <span className="font-bold text-primary">800 coins</span>.</li>
+                                                    <li>At the end of Stage 4, the final split happens. Your 800 coins become <span className="font-bold text-primary">1,600 coins</span>.</li>
+                                                    <li className="font-semibold text-foreground">Your initial 100 coins have grown to 1,600 coins simply by staking early!</li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold text-foreground">Price Reset & Market Trading:</span> After each split, the IGC market price resets to ~$1.000 for the start of the next stage. This ensures a fair entry point for new buyers. From Stage 5 onwards, the price is determined by the free market on the exchange.
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+                )
+            })}
+        </Tabs>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Buy Coin Packages</CardTitle>
+                <CardDescription>Purchase coins in pre-defined packages. Availability is for the entire project lifecycle.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Package</TableHead>
-                        <TableHead>Coins</TableHead>
-                        <TableHead>Available Packages</TableHead>
-                        <TableHead>Total Coins in Tier</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
+                        <TableRow>
+                            <TableHead>Package Tier</TableHead>
+                            <TableHead>Coins per Package</TableHead>
+                            <TableHead>Packages Available</TableHead>
+                            <TableHead>Total Coins in Tier</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {currentPackages.map(pkg => (
-                        <TableRow key={pkg.name}>
-                          <TableCell className="font-semibold flex items-center">
-                            <span className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: pkg.color }}></span>
-                            {pkg.name}
-                          </TableCell>
-                          <TableCell>{pkg.coins.toLocaleString('en-US')}</TableCell>
-                          <TableCell>{pkg.available.toLocaleString('en-US')}</TableCell>
-                          <TableCell>{(pkg.coins * pkg.available).toLocaleString('en-US')}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="outline" size="sm">Buy Package</Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Smart Contract Staking Locker</CardTitle>
-                  <CardDescription>
-                    Lock your {coin.id} for a set period to earn rewards.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Select an amount of {coin.id} and a lock duration. Your coins will be locked in a smart contract and will be automatically released to your wallet once the time period is complete.
-                    </p>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select lock duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {lockDurations.map(duration => (
-                          <SelectItem key={duration.value} value={String(duration.value)}>
-                            {duration.label}
-                          </SelectItem>
+                        {coinPackages.map((pkg) => (
+                            <TableRow key={pkg.name}>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn("h-2.5 w-2.5 rounded-full", pkg.color)}></div>
+                                        <span className="font-medium">{pkg.name}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{pkg.coins.toLocaleString('en-US')}</TableCell>
+                                <TableCell>{pkg.packagesAvailable.toLocaleString('en-US')}</TableCell>
+                                <TableCell>{(pkg.coins * pkg.packagesAvailable).toLocaleString('en-US')}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button size="sm" disabled={pkg.name === 'Diamond'}>Buy Package</Button>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                      </SelectContent>
-                    </Select>
-                    <Button className="w-full">Stake {coin.id}</Button>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-4">My Staked Positions</h3>
-                    <div className="space-y-3">
-                      {stakedPositions.filter(p => p.coin === coin.id).map((pos, i) => (
-                        <div key={i} className="flex justify-between items-center rounded-lg border p-3">
-                          <div>
-                            <p className="font-semibold">{pos.amount.toLocaleString('en-US')} {pos.coin}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Staked for {pos.duration > 12 ? `${pos.duration/12} years` : `${pos.duration} months`}
-                            </p>
-                          </div>
-                          <Badge variant={pos.status === 'Staked' ? 'default' : 'secondary'}>{pos.status}</Badge>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+        
+        <Tabs defaultValue="igc" className="w-full">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Smart Contract Staking Locker</CardTitle>
+                    <CardDescription>Lock your coins for a fixed period to earn rewards, including coin split bonuses for IGC.</CardDescription>
+                    <TabsList className="grid w-full grid-cols-4 mt-4">
+                        <TabsTrigger value="itc">Stake ITC</TabsTrigger>
+                        <TabsTrigger value="ice">Stake ICE</TabsTrigger>
+                        <TabsTrigger value="igc">Stake IGC</TabsTrigger>
+                        <TabsTrigger value="genz">Stake GenZ</TabsTrigger>
+                    </TabsList>
+                </CardHeader>
+                <CardContent>
+                    <TabsContent value="itc">
+                        <div className="grid gap-6 md:grid-cols-2">
+                            <div>
+                                <h3 className="text-lg font-medium">Staking ITC</h3>
+                                <p className="text-sm text-muted-foreground">Rules and rewards for staking International Trade Coin.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="itc-amount">Amount to Stake</Label>
+                                    <Input id="itc-amount" type="number" placeholder="1000 ITC" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="itc-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="itc-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">Calculated upon confirmation...</span></p>
+                                </div>
+                                <Button>Stake ITC</Button>
+                            </div>
                         </div>
-                      ))}
-                      {stakedPositions.filter(p => p.coin === coin.id).length === 0 && (
-                          <p className="text-sm text-muted-foreground text-center py-4">You have no active staking positions for {coin.id}.</p>
-                      )}
-                    </div>
-                  </div>
+                    </TabsContent>
+                     <TabsContent value="ice">
+                        <div className="grid gap-6 md:grid-cols-2">
+                           <div>
+                                <h3 className="text-lg font-medium">Staking ICE</h3>
+                                <p className="text-sm text-muted-foreground">Rules and rewards for staking International Crypto Exchange coin.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="ice-amount">Amount to Stake</Label>
+                                    <Input id="ice-amount" type="number" placeholder="1000 ICE" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="ice-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="ice-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">Calculated upon confirmation...</span></p>
+                                </div>
+                                <Button>Stake ICE</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="igc">
+                        <div className="grid gap-6 md:grid-cols-2">
+                             <div>
+                                <h3 className="text-lg font-medium">Staking IGC</h3>
+                                <p className="text-sm text-muted-foreground">Stake IGC to be eligible for coin split bonuses at the end of each of the first 4 stages.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="igc-amount">Amount to Stake</Label>
+                                    <Input id="igc-amount" type="number" placeholder="1000 IGC" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="igc-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="igc-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">1:1 Coin Bonus per split + standard APY.</span></p>
+                                </div>
+                                <Button>Stake IGC</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="genz">
+                        <div className="grid gap-6 md:grid-cols-2">
+                            <div>
+                                <h3 className="text-lg font-medium">Staking GenZ</h3>
+                                <p className="text-sm text-muted-foreground">Rules and rewards for staking GenZ.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="genz-amount">Amount to Stake</Label>
+                                    <Input id="genz-amount" type="number" placeholder="1000 GenZ" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="genz-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="genz-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">Calculated upon confirmation...</span></p>
+                                </div>
+                                <Button>Stake GenZ</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
                 </CardContent>
-              </Card>
-
-            </TabsContent>
-          ))}
+            </Card>
         </Tabs>
+
+         <Card>
+          <CardHeader>
+            <CardTitle>My Staked Positions</CardTitle>
+            <CardDescription>A list of your current and past fixed deposits across all coins.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Asset</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stakedPositions.map(pos => (
+                  <TableRow key={pos.id}>
+                    <TableCell><Badge variant="secondary">{pos.asset}</Badge></TableCell>
+                    <TableCell className="font-medium">{pos.amount.toLocaleString('en-US')}</TableCell>
+                    <TableCell>{pos.startDate}</TableCell>
+                    <TableCell>{pos.endDate}</TableCell>
+                    <TableCell>{pos.durationMonths} Months</TableCell>
+                    <TableCell>
+                      <Badge variant={pos.status === 'Staked' ? 'default' : 'destructive'}>{pos.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" disabled={pos.status === 'Staked'}>
+                        Unstake
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="mt-4 flex justify-end">
+                <p className="font-bold text-lg">Total Staked Value (USD): $15,500.00</p>
+            </div>
+          </CardContent>
+        </Card>
+
       </div>
     </AppLayout>
   );

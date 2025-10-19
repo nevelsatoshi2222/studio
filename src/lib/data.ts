@@ -21,6 +21,7 @@ import {
   CompetitionPhase,
   SportsItem,
   ArtItem,
+  TokenSupplyDistribution
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 
@@ -250,7 +251,7 @@ export const tradeHistory: Trade[] = [
 ];
 
 export const tokenStages: TokenStage[] = [
-    { stage: 1, supplyPercentage: 0.1, status: 'Complete', unfreezesIn: '' },
+    { stage: 1, supplyPercentage: 0.1, status: 'Completed', unfreezesIn: '' },
     { stage: 2, supplyPercentage: 0.2, status: 'Active', unfreezesIn: '15 days' },
     { stage: 3, supplyPercentage: 0.4, status: 'Locked', unfreezesIn: '' },
     { stage: 4, supplyPercentage: 1, status: 'Locked', unfreezesIn: '' },
@@ -262,74 +263,20 @@ export const tokenStages: TokenStage[] = [
 
 
 export const lockDurations: LockDuration[] = [
-    { value: 7, label: '7 Days' },
-    { value: 30, label: '30 Days' },
-    { value: 60, label: '2 Months' },
-    { value: 180, label: '6 Months' },
-    { value: 365, label: '12 Months' },
-    { value: 545, label: '18 Months' },
-    { value: 730, label: '24 Months' },
-    { value: 1095, label: '36 Months' },
-    { value: 1460, label: '48 Months' },
-    { value: 1825, label: '60 Months' },
-    { value: 2190, label: '72 Months' },
-    { value: 2555, label: '84 Months' },
-    { value: 2920, label: '96 Months' },
-    { value: 3285, label: '108 Months' },
-    { value: 3650, label: '120 Months' },
-    { value: 7300, label: '240 Months' },
+  { value: 1, unit: 'month', label: '1 Month' },
+  { value: 3, unit: 'month', label: '3 Months' },
+  { value: 6, unit: 'month', label: '6 Months' },
+  { value: 12, unit: 'month', label: '1 Year' },
+  { value: 24, unit: 'month', label: '2 Years' },
+  { value: 36, unit: 'month', label: '3 Years' },
 ];
 
+
 export const stakedPositions: StakedPosition[] = [
-  {
-    coin: 'IGC',
-    amount: 5000,
-    stakedAt: '2024-01-10',
-    duration: 12,
-    status: 'Staked',
-  },
-  {
-    coin: 'ITC',
-    amount: 10000,
-    stakedAt: '2023-12-01',
-    duration: 24,
-    status: 'Staked',
-  },
-  {
-    coin: 'ICE',
-    amount: 2500,
-    stakedAt: '2024-03-15',
-    duration: 6,
-    status: 'Staked',
-  },
-  {
-    coin: 'LOAN',
-    amount: 1200,
-    stakedAt: '2023-11-01',
-    duration: 36,
-    status: 'Staked',
-  },
-  {
-    coin: 'JBC',
-    amount: 800,
-    stakedAt: '2024-02-20',
-    duration: 18,
-    status: 'Staked',
-  },
-  {
-    coin: 'COMP',
-    amount: 15000,
-    stakedAt: '2024-04-01',
-    duration: 12,
-    status: 'Staked',
-  },
-  {
-    coin: 'FRC',
-    amount: 3000,
-    stakedAt: '2024-04-10',
-    duration: 6,
-    status: 'Staked'
-  }
+  { id: 'stake1', asset: 'IGC', amount: 5000, startDate: '2024-01-10', endDate: '2025-01-10', durationMonths: 12, status: 'Staked' },
+  { id: 'stake2', asset: 'ITC', amount: 10000, startDate: '2023-12-01', endDate: '2025-12-01', durationMonths: 24, status: 'Staked' },
+  { id: 'stake3', asset: 'ICE', amount: 2500, startDate: '2024-03-15', endDate: '2024-09-15', durationMonths: 6, status: 'Staked' },
+  { id: 'stake4', asset: 'GenZ', amount: 800, startDate: '2023-11-20', endDate: '2024-05-20', durationMonths: 6, status: 'Unstaked' },
 ];
 
 export const countries = [
@@ -459,25 +406,34 @@ export const socialPosts: SocialPost[] = [
 ];
 
 export const coinPackages: CoinPackage[] = [
-    { name: 'Red', coins: 8_000, available: 1_000, color: '#ef4444' },
-    { name: 'Orange', coins: 4_000, available: 2_000, color: '#f97316' },
-    { name: 'Yellow', coins: 2_000, available: 4_000, color: '#eab308' },
-    { name: 'Green', coins: 1_000, available: 8_000, color: '#22c55e' },
-    { name: 'Blue', coins: 500, available: 16_000, color: '#3b82f6' },
-    { name: 'Indigo', coins: 250, available: 32_000, color: '#6366f1' },
-    { name: 'Violet', coins: 125, available: 64_000, color: '#8b5cf6' },
+    { name: 'Diamond', coins: 100000, packagesAvailable: 8000, color: 'bg-cyan-300' },
+    { name: 'Platinum', coins: 50000, packagesAvailable: 16000, color: 'bg-slate-400' },
+    { name: 'Gold', coins: 25000, packagesAvailable: 32000, color: 'bg-amber-400' },
+    { name: 'Silver', coins: 12500, packagesAvailable: 64000, color: 'bg-zinc-400' },
+    { name: 'Bronze', coins: 6250, packagesAvailable: 128000, color: 'bg-orange-400' },
 ];
 
 export const adminAllocations: AdminAllocation[] = [
-    { name: 'Global Peace & Development', value: 10, description: 'Peacekeeping & humanitarian aid' },
-    { name: 'Anti-Corruption Initiative', value: 50, description: 'Funding anti-corruption efforts' },
-    { name: 'AI Education', value: 5, description: 'Free AI education programs' },
-    { name: 'Plant a Tree Initiative', value: 10, description: 'Reforestation projects' },
-    { name: 'International Issues', value: 5, description: 'Addressing global challenges' },
-    { name: 'National Issues', value: 5, description: 'Supporting country-specific projects' },
-    { name: 'Sports Development', value: 5, description: 'Promoting sports and athletes' },
-    { name: 'Arts Development', value: 5, description: 'Supporting artists and creators' },
-    { name: 'Niche-Based Job Creation', value: 5, description: 'Creating specialized job markets' }
+    { category: 'Creator Fund', percentage: 100, description: 'Initial $1M USD for app creation and development.' },
+    { category: 'System Creator', percentage: 10, description: 'Ongoing rewards for the original architects of the system.' },
+    { category: 'System Management', percentage: 10, description: 'Covers operational costs, servers, and staff.' },
+    { category: 'Global Peace & Development', percentage: 10, description: 'Funds for global peacekeeping and humanitarian aid.' },
+    { category: 'Anti-Corruption', percentage: 20, description: 'Bounties and resources for fighting corruption.' },
+    { category: 'AI Education', percentage: 5, description: 'Providing free AI education and tools.' },
+    { category: 'Plant a Tree Initiative', percentage: 5, description: 'Global reforestation and environmental projects.' },
+    { category: 'International Issues', percentage: 5, description: 'Funding for tackling global challenges voted on by the community.' },
+    { category: 'National Issues', percentage: 5, description: 'Country-specific projects and initiatives.' },
+    { category: 'Niche Job Creation', percentage: 5, description: 'Developing and funding specialized job markets.' },
+    { category: 'Influencer Prize Pool', percentage: 5, description: 'Rewards for content creators promoting the platform.' },
+    { category: 'Sports Development', percentage: 10, description: 'Sponsoring athletes and developing sports infrastructure.' },
+    { category: 'Arts Development', percentage: 10, description: 'Grants and platforms for artists and cultural projects.' },
+];
+
+export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
+    { name: 'Public Sale', value: 35.0 },
+    { name: 'Coin Split Bonus', value: 5.1 },
+    { name: 'Global Causes & Development', value: 20.0 },
+    { name: 'Public Demand Fund', value: 39.9 }
 ];
 
 export const sportsAndArtsItems: SportsAndArtsItem[] = [

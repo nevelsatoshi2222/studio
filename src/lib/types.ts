@@ -48,22 +48,25 @@ export type Trade = {
 };
 
 export type StakedPosition = {
-  coin: string;
+  id: string;
+  asset: string;
   amount: number;
-  stakedAt: string;
-  duration: number; // in months/days
+  startDate: string;
+  endDate: string;
+  durationMonths: number;
   status: 'Staked' | 'Unstaking' | 'Unstaked';
 };
 
 export type LockDuration = {
   value: number;
+  unit: 'day' | 'month' | 'year';
   label: string;
 };
 
 export type TokenStage = {
   stage: number;
   supplyPercentage: number;
-  status: 'Complete' | 'Active' | 'Locked';
+  status: 'Completed' | 'Active' | 'Locked';
   unfreezesIn: string;
 };
 
@@ -127,16 +130,20 @@ export type SocialPost = {
 export type CoinPackage = {
     name: string;
     coins: number;
-    available: number;
+    packagesAvailable: number;
     color: string;
-    description?: string;
 }
 
 export type AdminAllocation = {
-  name: string;
-  value: number;
+  category: string;
+  percentage: number;
   description: string;
 }
+
+export type TokenSupplyDistribution = {
+    name: string;
+    value: number;
+};
 
 export type SportsAndArtsItem = {
   id: number;
@@ -160,4 +167,5 @@ export type SportsItem = {
 export type ArtItem = {
   id: number;
   name: string;
-  description:
+  description: string;
+}
