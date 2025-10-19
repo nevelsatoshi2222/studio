@@ -119,7 +119,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           ))}
             <SidebarMenuItem>
                 <Collapsible>
-                    <CollapsibleTrigger className="w-full">
+                    <CollapsibleTrigger asChild className="w-full">
                         <SidebarMenuButton>
                             <Building2 />
                             <span>Franchisee</span>
