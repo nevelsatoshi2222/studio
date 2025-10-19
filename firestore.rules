@@ -1,0 +1,202 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces user-ownership for user profiles. Only the authenticated user can read or write their own profile data.
+     * @path /users/{userId}
+     * @allow (create, update, get, list) if the authenticated user's ID matches the 'userId' path parameter.
+     * @deny (create, update, get, list) if the authenticated user's ID does not match the 'userId' path parameter.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false; // User listing is disabled for privacy.
+      allow create: if isOwner(userId) && request.auth.uid == userId;
+      allow update: if isOwner(userId); // Enforce immutability of userId.
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for transactions. Only the authenticated user can read or write their own transaction data.
+     * @path /users/{userId}/transactions/{transactionId}
+     * @allow (create, update, get, list) if the authenticated user's ID matches the 'userId' path parameter.
+     * @deny (create, update, get, list) if the authenticated user's ID does not match the 'userId' path parameter.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/transactions/{transactionId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId); // Enforce immutability of userId.
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Allows public read access to forum posts, but restricts write access to authenticated users.
+     * @path /forums/{forumId}
+     * @allow (get, list) to anyone.
+     * @allow (create) if the request is authenticated.
+     * @deny (update, delete) to non-authenticated users.
+     * @principle Allows public read access with authentication required for writes.
+     */
+    match /forums/{forumId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn(); //Authenticated users can update
+      allow delete: if false; // No delete allowed
+    }
+
+    /**
+     * @description Defines admin roles based on document existence. If a document exists under /roles_admin/{userId}, the user is considered an admin.
+     * @path /roles_admin/{userId}
+     * @allow (get, create) if the authenticated user's ID matches the 'userId' path parameter.
+     * @deny (get, create) if the authenticated user's ID does not match the 'userId' path parameter.
+     * @principle Implements role-based access control using document existence.
+     */
+    match /roles_admin/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false; // Admin listing is disabled.
+      allow create: if isOwner(userId);
+      allow update: if false; // No update allowed
+      allow delete: if false; // No delete allowed
+    }
+
+    /**
+     * @description Restricts access to quiz questions to admins only.
+     * @path /quiz_questions/{quizQuestionId}
+     * @allow (get, create, update, delete) if the request is made by an admin.
+     * @deny (get, create, update, delete) if the request is not made by an admin.
+     */
+    match /quiz_questions/{quizQuestionId} {
+      function isAdmin() {
+        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      }
+
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Allows authenticated users to manage their own staked positions.
+     * @path /staked_positions/{stakedPositionId}
+     */
+    match /staked_positions/{stakedPositionId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+        function isOwner(stakedPositionId) {
+        return request.auth != null && request.auth.uid == resource.data.userId;
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isOwner(stakedPositionId);
+      allow delete: if isOwner(stakedPositionId);
+    }
+
+    /**
+     * @description Allows public read access to causes, but restricts write access.
+     * @path /causes/{causeId}
+     */
+    match /causes/{causeId} {
+          function isSignedIn() {
+        return request.auth != null;
+      }
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to e-commerce products, but restricts write access.
+     * @path /ecomm_products/{ecommProductId}
+     */
+    match /ecomm_products/{ecommProductId} {
+          function isSignedIn() {
+        return request.auth != null;
+      }
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+        /**
+     * @description Allows public read access to social media posts, but restricts write access to authenticated users.
+     * @path /social_posts/{socialPostId}
+     * @allow (get, list) to anyone.
+     * @allow (create) if the request is authenticated.
+     * @deny (update, delete) to non-authenticated users.
+     * @principle Allows public read access with authentication required for writes.
+     */
+    match /social_posts/{socialPostId} {
+            function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+            function isSignedIn() {
+        return request.auth != null;
+      }
+      allow get: if true;
+      allow list: if true;
+            allow create: if isSignedIn();
+      allow update: if isSignedIn(); //Authenticated user can update
+      allow delete: if false; // No delete allowed
+    }
+
+        /**
+     * @description Allows public read access to referral links, but restricts write access to authenticated users.
+     * @path /referrals/{referralId}
+     * @allow (get, list) to anyone.
+     * @allow (create) if the request is authenticated.
+     * @deny (update, delete) to non-authenticated users.
+     * @principle Allows public read access with authentication required for writes.
+     */
+    match /referrals/{referralId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+                  function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+      allow get: if true;
+      allow list: if true;
+            allow create: if isSignedIn();
+      allow update: if isSignedIn(); //Authenticated user can update
+      allow delete: if false; // No delete allowed
+    }
+  }
+}
