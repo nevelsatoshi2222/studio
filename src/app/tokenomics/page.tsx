@@ -53,7 +53,7 @@ const coinInfo = [
     { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
     { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
     { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
-    { id: 'genz', name: 'GenZ', fullName: 'GenZ', icon: UsersIcon, totalSupply: 1_000_000_000 },
+    { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
 ]
 
 export default function TokenomicsPage() {
@@ -370,14 +370,14 @@ export default function TokenomicsPage() {
                             </Card>
                         </div>
 
-                        {['ice', 'igc', 'job', 'frn', 'work'].includes(coin.id) && (
+                        {['ice', 'igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (
                             <div className="grid gap-6 lg:grid-cols-2">
                                 <TokenomicsChartCard coinName={coin.name} />
                                 <FundAllocationCard />
                             </div>
                         )}
 
-                        {['igc', 'job', 'frn', 'work'].includes(coin.id) && (
+                        {['igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (
                             <Card>
                                 <CardHeader>
                                     <CardTitle>{coin.name} Price Mechanics: Locker &amp; Split System</CardTitle>
@@ -496,7 +496,7 @@ export default function TokenomicsPage() {
                         <TabsTrigger value="job">Stake JOB</TabsTrigger>
                         <TabsTrigger value="frn">Stake FRN</TabsTrigger>
                         <TabsTrigger value="work">Stake WORK</TabsTrigger>
-                        <TabsTrigger value="genz">Stake GenZ</TabsTrigger>
+                        <TabsTrigger value="quiz">Stake Quiz</TabsTrigger>
                     </TabsList>
                 </CardHeader>
                 <CardContent>
@@ -686,21 +686,21 @@ export default function TokenomicsPage() {
                             </div>
                         </div>
                     </TabsContent>
-                    <TabsContent value="genz">
+                    <TabsContent value="quiz">
                         <div className="grid gap-6 md:grid-cols-2">
-                            <div>
-                                <h3 className="text-lg font-medium">Staking GenZ</h3>
-                                <p className="text-sm text-muted-foreground">Rules and rewards for staking GenZ.</p>
+                             <div>
+                                <h3 className="text-lg font-medium">Staking Quiz</h3>
+                                <p className="text-sm text-muted-foreground">Stake Quiz coin to be eligible for coin split bonuses at the end of each of the first 4 stages.</p>
                             </div>
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="genz-amount">Amount to Stake</Label>
-                                    <Input id="genz-amount" type="number" placeholder="1000 GenZ" />
+                                    <Label htmlFor="quiz-amount">Amount to Stake</Label>
+                                    <Input id="quiz-amount" type="number" placeholder="1000 Quiz" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="genz-duration">Lock-in Period</Label>
+                                    <Label htmlFor="quiz-duration">Lock-in Period</Label>
                                     <Select>
-                                        <SelectTrigger id="genz-duration">
+                                        <SelectTrigger id="quiz-duration">
                                             <SelectValue placeholder="Select duration" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -711,9 +711,9 @@ export default function TokenomicsPage() {
                                     </Select>
                                 </div>
                                 <div className="rounded-md border bg-muted/50 p-3 text-sm">
-                                    <p>Estimated Rewards: <span className="font-medium text-primary">Calculated upon confirmation...</span></p>
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">1:1 Coin Bonus per split + standard APY.</span></p>
                                 </div>
-                                <Button>Stake GenZ</Button>
+                                <Button>Stake Quiz</Button>
                             </div>
                         </div>
                     </TabsContent>

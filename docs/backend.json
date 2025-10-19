@@ -245,7 +245,7 @@
         },
         "coinType": {
           "type": "string",
-          "description": "The type of coin being staked (ITC, ICE, ISVC, GenZ)."
+          "description": "The type of coin being staked (ITC, ICE, ISVC, Quiz)."
         },
         "amount": {
           "type": "number",

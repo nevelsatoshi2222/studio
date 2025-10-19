@@ -234,6 +234,9 @@ export const tradingPairs: TradingPair[] = [
   { from: 'WORK', to: 'USDT' },
   { from: 'WORK', to: 'ETH' },
   { from: 'WORK', to: 'BTC' },
+  { from: 'Quiz', to: 'USDT' },
+  { from: 'Quiz', to: 'ETH' },
+  { from: 'Quiz', to: 'BTC' },
 ];
 
 export const orderBook: { buys: Order[]; sells: Order[] } = {
@@ -289,7 +292,7 @@ export const stakedPositions: StakedPosition[] = [
   { id: 'stake1', asset: 'IGC', amount: 5000, startDate: '2024-01-10', endDate: '2025-01-10', durationMonths: 12, status: 'Staked' },
   { id: 'stake2', asset: 'ITC', amount: 10000, startDate: '2023-12-01', endDate: '2025-12-01', durationMonths: 24, status: 'Staked' },
   { id: 'stake3', asset: 'ICE', amount: 2500, startDate: '2024-03-15', endDate: '2024-09-15', durationMonths: 6, status: 'Staked' },
-  { id: 'stake4', asset: 'GenZ', amount: 800, startDate: '2023-11-20', endDate: '2024-05-20', durationMonths: 6, status: 'Unstaked' },
+  { id: 'stake4', asset: 'Quiz', amount: 800, startDate: '2023-11-20', endDate: '2024-05-20', durationMonths: 6, status: 'Unstaked' },
 ];
 
 export const countries = [
