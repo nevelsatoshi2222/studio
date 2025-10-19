@@ -342,7 +342,6 @@ export default function TokenomicsPage() {
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
-                            
                             <Card className="lg:col-span-2">
                                 <CardHeader>
                                 <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
@@ -372,17 +371,20 @@ export default function TokenomicsPage() {
                                 </CardContent>
                             </Card>
                         </div>
+                        
                         {coin.id === 'igc' && (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                                <div className="relative w-full h-full min-h-[150px] rounded-lg overflow-hidden border lg:col-span-2">
+                               <div className="lg:col-span-2">
+                                  <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
                                     <Image
-                                        src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
-                                        alt="IGC Logo"
-                                        fill
-                                        style={{ objectFit: 'contain' }}
-                                        data-ai-hint="governance coin"
+                                      src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
+                                      alt="IGC Logo"
+                                      fill
+                                      style={{ objectFit: 'contain' }}
+                                      data-ai-hint="governance coin"
                                     />
-                                </div>
+                                  </div>
+                               </div>
                             </div>
                         )}
 
@@ -784,6 +786,3 @@ export default function TokenomicsPage() {
     </AppLayout>
   );
 }
-
-    
-    
