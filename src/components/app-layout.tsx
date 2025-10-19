@@ -45,6 +45,7 @@ import {
   LogIn,
   LogOut,
   Shield,
+  Scale,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -130,8 +131,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <Briefcase className="h-6 w-6 text-primary" />
-          <h1 className="text-lg font-semibold">IBC Platform</h1>
+          <Scale className="h-6 w-6 text-primary" />
+          <h1 className="text-lg font-semibold">Public Governance</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>

@@ -1,3 +1,4 @@
+
 'use client';
 import { Suspense } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -136,7 +137,7 @@ function RegistrationForm() {
             </div>
             <div>
                 <CardTitle className="text-2xl font-headline">Create Your Account</CardTitle>
-                <CardDescription>Join the IBC Connect platform and be part of the future.</CardDescription>
+                <CardDescription>Join the Public Governance platform and be part of the future.</CardDescription>
             </div>
         </div>
       </CardHeader>
