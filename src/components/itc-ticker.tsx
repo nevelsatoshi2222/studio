@@ -1,3 +1,4 @@
+
 'use client';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
@@ -21,8 +22,8 @@ export function ItcTicker() {
         const goldPricePerGram = data.gold;
         
         // 1 gram = 1000 mg, so price per mg is price per gram / 1000
-        // 1 ITC = 10mg gold
-        const itcPrice = (goldPricePerGram / 1000) * 10;
+        // 1 ITC = 100mg gold
+        const itcPrice = (goldPricePerGram / 1000) * 100;
         
         setPrice(itcPrice);
 
@@ -34,7 +35,7 @@ export function ItcTicker() {
       } catch (error) {
         console.error("Error fetching gold price:", error);
         // In case of API error, fallback to a stable price
-        setPrice(0.75); 
+        setPrice(7.5); 
       }
     };
 
