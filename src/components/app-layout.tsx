@@ -41,20 +41,24 @@ import {
   ChevronDown,
   UserPlus,
   Users2,
-  DollarSign
+  DollarSign,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { users } from '@/lib/data';
+import { useUser, useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { signOut } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from './ui/skeleton';
 
 
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
-  { href: '/register', icon: UserPlus, label: 'Register' },
   { href: '/users', icon: Users, label: 'User Management' },
   { href: '/transactions', icon: Repeat, label: 'Transactions' },
   { href: '/forum', icon: MessageSquare, label: 'Forum / Governance' },
@@ -99,8 +103,27 @@ const franchiseeLevels = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-  const adminUser = users.find(user => user.id === 'usr_admin');
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const { toast } = useToast();
   const [openFranchiseSubMenu, setOpenFranchiseSubMenu] = useState('');
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      console.error("Error signing out: ", error);
+       toast({
+        variant: "destructive",
+        title: "Sign Out Failed",
+        description: "There was an error signing you out. Please try again.",
+      });
+    }
+  };
 
   const sidebarContent = (
     <>
@@ -122,6 +145,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </SidebarMenuItem>
           ))}
+          {!user && (
+             <SidebarMenuItem>
+                <Link href="/register" passHref>
+                  <SidebarMenuButton>
+                      <UserPlus />
+                      <span>Register</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+          )}
             <SidebarMenuItem>
                 <Collapsible>
                     <CollapsibleTrigger asChild className="w-full">
@@ -136,19 +169,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 <SidebarMenuSubItem key={item.name}>
                                      <Collapsible>
                                         <CollapsibleTrigger asChild className="w-full">
-                                            <SidebarMenuSubButton>
-                                                <span>{item.name}</span>
-                                                <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
-                                            </SidebarMenuSubButton>
+                                            <a href="#" className="w-full">
+                                                <SidebarMenuSubButton>
+                                                    <span>{item.name}</span>
+                                                    <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
+                                                </SidebarMenuSubButton>
+                                            </a>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent>
                                             <SidebarMenuSub>
                                                 {franchiseeLevels.map((level) => (
                                                     <SidebarMenuSubItem key={level.name}>
                                                         <Link href="#" passHref>
-                                                            <SidebarMenuSubButton>
-                                                                - {level.name}
-                                                            </SidebarMenuSubButton>
+                                                            <a href="#">
+                                                                <SidebarMenuSubButton>
+                                                                    - {level.name}
+                                                                </SidebarMenuSubButton>
+                                                            </a>
                                                         </Link>
                                                     </SidebarMenuSubItem>
                                                 ))}
@@ -164,35 +201,43 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
                 <Collapsible>
                     <CollapsibleTrigger asChild className="w-full">
-                        <SidebarMenuButton>
-                            <Users2 />
-                            <span>Team</span>
-                        </SidebarMenuButton>
+                         <a href="/team" className="w-full">
+                            <SidebarMenuButton>
+                                <Users2 />
+                                <span>Team</span>
+                            </SidebarMenuButton>
+                         </a>
                     </CollapsibleTrigger>
                      <CollapsibleContent>
                         <SidebarMenuSub>
                             <SidebarMenuSubItem>
-                                <Link href="/team" passHref>
-                                    <SidebarMenuSubButton>
-                                        <Users className="mr-2"/>
-                                        <span>Team Members</span>
-                                    </SidebarMenuSubButton>
+                                <Link href="/team#team-members" passHref>
+                                    <a href="/team#team-members">
+                                        <SidebarMenuSubButton>
+                                            <Users className="mr-2"/>
+                                            <span>Team Members</span>
+                                        </SidebarMenuSubButton>
+                                    </a>
                                 </Link>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
-                                <Link href="/team" passHref>
-                                    <SidebarMenuSubButton>
-                                        <UserPlus className="mr-2"/>
-                                        <span>Direct Members</span>
-                                    </SidebarMenuSubButton>
+                                <Link href="/team#direct-members" passHref>
+                                     <a href="/team#direct-members">
+                                        <SidebarMenuSubButton>
+                                            <UserPlus className="mr-2"/>
+                                            <span>Direct Members</span>
+                                        </SidebarMenuSubButton>
+                                     </a>
                                 </Link>
                             </SidebarMenuSubItem>
                              <SidebarMenuSubItem>
-                                <Link href="/team" passHref>
-                                    <SidebarMenuSubButton>
-                                        <DollarSign className="mr-2"/>
-                                        <span>Earning</span>
-                                    </SidebarMenuSubButton>
+                                <Link href="/team#earnings" passHref>
+                                    <a href="/team#earnings">
+                                        <SidebarMenuSubButton>
+                                            <DollarSign className="mr-2"/>
+                                            <span>Earning</span>
+                                        </SidebarMenuSubButton>
+                                    </a>
                                 </Link>
                             </SidebarMenuSubItem>
                         </SidebarMenuSub>
@@ -230,14 +275,34 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-xl font-semibold hidden md:block">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-             <Avatar>
-                <AvatarImage src={`https://picsum.photos/seed/${adminUser?.avatarId}/40/40`} />
-                <AvatarFallback>{adminUser?.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium">{adminUser?.name}</p>
-              <p className="text-xs text-muted-foreground">{adminUser?.email}</p>
-            </div>
+             {isUserLoading ? (
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                </div>
+             ) : user ? (
+                <div className="flex items-center gap-4">
+                 <Avatar>
+                    <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`} />
+                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{user.displayName || user.email}</p>
+                  <p className="text-xs text-muted-foreground">Online</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                    <span className="sr-only">Sign Out</span>
+                </Button>
+                </div>
+             ) : (
+                <Button asChild>
+                    <Link href="/register">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Login / Register
+                    </Link>
+                </Button>
+             )}
           </div>
         </header>
         <SidebarInset className="p-4 md:p-6">
