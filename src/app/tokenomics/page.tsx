@@ -373,18 +373,16 @@ export default function TokenomicsPage() {
                         </div>
                         
                         {coin.id === 'igc' && (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                               <div className="lg:col-span-2">
-                                  <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
-                                    <Image
-                                      src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
-                                      alt="IGC Logo"
-                                      fill
-                                      style={{ objectFit: 'contain' }}
-                                      data-ai-hint="governance coin"
-                                    />
-                                  </div>
-                               </div>
+                            <div className="lg:col-span-2 mt-6">
+                                <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
+                                <Image
+                                    src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
+                                    alt="IGC Logo"
+                                    fill
+                                    style={{ objectFit: 'contain' }}
+                                    data-ai-hint="governance coin"
+                                />
+                                </div>
                             </div>
                         )}
 
