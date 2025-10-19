@@ -49,9 +49,9 @@ const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981",
 
 
 const coinInfo = [
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
-    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
     { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
     { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
     { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
@@ -63,7 +63,7 @@ export default function TokenomicsPage() {
   const totalStaked = stakedPositions.filter(p => p.status === 'Staked').reduce((acc, p) => acc + p.amount, 0);
 
   const [selectedStage, setSelectedStage] = useState('stage1');
-  const [selectedCoinId, setSelectedCoinId] = useState('itc');
+  const [selectedCoinId, setSelectedCoinId] = useState('igc');
 
   const selectedCoin = coinInfo.find(c => c.id === selectedCoinId) || coinInfo[0];
   const totalSupply = selectedCoin.totalSupply;
@@ -308,7 +308,7 @@ export default function TokenomicsPage() {
           </p>
         </div>
         
-        <Tabs defaultValue="itc" onValueChange={setSelectedCoinId} className="w-full">
+        <Tabs defaultValue="igc" onValueChange={setSelectedCoinId} className="w-full">
             <TabsList className="grid w-full grid-cols-7">
                 {coinInfo.map(coin => (
                     <TabsTrigger key={coin.id} value={coin.id}>{coin.name}</TabsTrigger>
@@ -342,7 +342,7 @@ export default function TokenomicsPage() {
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
-                            <Card className="lg:col-span-2">
+                             <Card className="lg:col-span-2">
                                 <CardHeader>
                                 <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
                                 <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
@@ -373,8 +373,7 @@ export default function TokenomicsPage() {
                         </div>
                         
                         {coin.id === 'igc' && (
-                            <div className="lg:col-span-2 mt-6">
-                                <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
+                            <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
                                 <Image
                                     src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
                                     alt="IGC Logo"
@@ -382,7 +381,6 @@ export default function TokenomicsPage() {
                                     style={{ objectFit: 'contain' }}
                                     data-ai-hint="governance coin"
                                 />
-                                </div>
                             </div>
                         )}
 
