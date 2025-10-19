@@ -267,8 +267,8 @@ export const tradeHistory: Trade[] = [
 ];
 
 export const tokenStages: TokenStage[] = [
-    { stage: 1, supplyPercentage: 0.1, status: 'Completed', unfreezesIn: '' },
-    { stage: 2, supplyPercentage: 0.2, status: 'Active', unfreezesIn: '15 days' },
+    { stage: 1, supplyPercentage: 0.1, status: 'Active', unfreezesIn: '' },
+    { stage: 2, supplyPercentage: 0.2, status: 'Locked', unfreezesIn: '' },
     { stage: 3, supplyPercentage: 0.4, status: 'Locked', unfreezesIn: '' },
     { stage: 4, supplyPercentage: 1, status: 'Locked', unfreezesIn: '' },
     { stage: 5, supplyPercentage: 2, status: 'Locked', unfreezesIn: '' },
@@ -282,7 +282,7 @@ export const lockDurations: LockDuration[] = [
   { value: 1, unit: 'month', label: '1 Month' },
   { value: 3, unit: 'month', label: '3 Months' },
   { value: 6, unit: 'month', label: '6 Months' },
-  { value: 12, unit: 'month', label: '1 Year' },
+  { value: 12, unit: 'year', label: '1 Year' },
   { value: 24, unit: 'month', label: '2 Years' },
   { value: 36, unit: 'month', label: '3 Years' },
 ];
