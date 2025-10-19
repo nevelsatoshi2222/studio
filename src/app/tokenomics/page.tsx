@@ -181,7 +181,7 @@ export default function TokenomicsPage() {
             <div className="rounded-lg border bg-card p-4">
                  <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
                     <Settings className="h-5 w-5 text-primary"/>
-                    20% for Core Operations & Initiatives
+                    20% for World Initiative
                 </h3>
                  <p className="mt-2 text-muted-foreground">
                     The remaining 20% is allocated to fixed categories that support the platform's growth and core mission.
@@ -360,7 +360,7 @@ export default function TokenomicsPage() {
                         {['igc', 'job', 'frn', 'work'].includes(coin.id) && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>{coin.name} Price Mechanics: Locker & Split System</CardTitle>
+                                    <CardTitle>{coin.name} Price Mechanics: Locker &amp; Split System</CardTitle>
                                     <CardDescription>A unique system for the first 4 stages to ensure stable growth and reward early stakers.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
@@ -414,7 +414,7 @@ export default function TokenomicsPage() {
                                                 </ul>
                                             </li>
                                             <li>
-                                                <span className="font-semibold text-foreground">Price Reset & Market Trading:</span> After each split, the {coin.name} market price resets to ~$1.000 for the start of the next stage. This ensures a fair entry point for new buyers. From Stage 5 onwards, the price is determined by the free market on the exchange.
+                                                <span className="font-semibold text-foreground">Price Reset &amp; Market Trading:</span> After each split, the {coin.name} market price resets to ~$1.000 for the start of the next stage. This ensures a fair entry point for new buyers. From Stage 5 onwards, the price is determined by the free market on the exchange.
                                             </li>
                                         </ol>
                                     </div>

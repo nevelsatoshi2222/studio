@@ -438,7 +438,7 @@ export const adminAllocations: AdminAllocation[] = [
   // 20% Fixed
   { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
   { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
-  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
+  { type: 'fixed', category: 'Global Peace &amp; Development', percentage: 1.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
   { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.' },
   { type: 'fixed', category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.' },
   { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
@@ -448,12 +448,13 @@ export const adminAllocations: AdminAllocation[] = [
   { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.' },
   { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.' },
   { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.' },
+  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.' },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
     { name: 'Public Sale', value: 35.0 },
     { name: 'Coin Split Bonus', value: 5.1 },
-    { name: 'Global Causes & Development', value: 20.0 },
+    { name: 'Global Causes &amp; Development', value: 20.0 },
     { name: 'Public Demand Fund', value: 39.9 }
 ];
 
@@ -480,7 +481,7 @@ export const sportsList: SportsItem[] = [
   { id: 2, name: 'Cricket', description: 'A bat-and-ball game with a huge following.' },
   { id: 3, name: 'Basketball', description: 'A fast-paced court game of skill and agility.' },
   { id: 4, name: 'Tennis', description: 'A global racket sport for individuals or pairs.' },
-  { id: 5, name: 'Athletics (Track & Field)', description: 'Competitions including running, jumping, and throwing.' },
+  { id: 5, name: 'Athletics (Track &amp; Field)', description: 'Competitions including running, jumping, and throwing.' },
   { id: 6, name: 'Hockey', description: 'Includes both field hockey and ice hockey.' },
   { id: 7, name: 'Swimming', description: 'Competitive swimming across various distances and strokes.' },
   { id: 8, name: 'Badminton', description: 'A fast-paced indoor racket sport.' },
@@ -500,7 +501,7 @@ export const sportsList: SportsItem[] = [
   { id: 22, name: 'Sailing', description: 'Competitive racing on water using wind power.' },
   { id_23: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
   { id: 24, name: 'Wrestling', description: 'A combat sport involving grappling techniques.' },
-  { id: 25, name: 'Snooker & Billiards', description: 'Cue sports requiring precision and strategy.' },
+  { id: 25, name: 'Snooker &amp; Billiards', description: 'Cue sports requiring precision and strategy.' },
 ];
 
 export const artsList: ArtItem[] = [
@@ -522,7 +523,7 @@ export const artsList: ArtItem[] = [
   { id: 16, name: 'Jewelry Design', description: 'Designing and creating wearable art.' },
   { id: 17, name: 'Street Art', description: 'Murals, graffiti, and public installations.' },
   { id: 18, name: 'Stand-up Comedy', description: 'The art of making people laugh.' },
-  { id: 19, name: 'Magic & Illusion', description: 'The art of creating illusions and performing magic.' },
+  { id: 19, name: 'Magic &amp; Illusion', description: 'The art of creating illusions and performing magic.' },
   { id: 20, name: 'Culinary Arts', description: 'The art of preparing, cooking, and presenting food.' },
   { id: 21, name: 'Tattoo Art', description: 'The art of decorating the skin with permanent ink.' },
   { id: 22, name: 'Origami', description: 'The Japanese art of paper folding.' },
@@ -530,5 +531,3 @@ export const artsList: ArtItem[] = [
   { id: 24, 'name': 'Puppetry', 'description': 'The art of manipulating puppets.' },
   { id: 25, name: 'Ventriloquism', description: 'The art of "throwing" one\'s voice.' },
 ];
-
-    
