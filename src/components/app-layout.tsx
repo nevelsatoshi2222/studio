@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -171,7 +172,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                      <CollapsibleContent>
                         <SidebarMenuSub>
                             <SidebarMenuSubItem>
-                                <Link href="/team#team-members" passHref>
+                                <Link href="/team" passHref>
                                     <SidebarMenuSubButton>
                                         <Users className="mr-2"/>
                                         <span>Team Members</span>
@@ -179,7 +180,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 </Link>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
-                                <Link href="/team#direct-members" passHref>
+                                <Link href="/team" passHref>
                                     <SidebarMenuSubButton>
                                         <UserPlus className="mr-2"/>
                                         <span>Direct Members</span>
@@ -187,7 +188,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 </Link>
                             </SidebarMenuSubItem>
                              <SidebarMenuSubItem>
-                                <Link href="/team#earnings" passHref>
+                                <Link href="/team" passHref>
                                     <SidebarMenuSubButton>
                                         <DollarSign className="mr-2"/>
                                         <span>Earning</span>
