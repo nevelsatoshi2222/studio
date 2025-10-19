@@ -62,6 +62,32 @@
         "balance": {
           "type": "number",
           "description": "User's ITC balance."
+        },
+        "bankName": {
+            "type": "string",
+            "description": "User's bank name."
+        },
+        "accountNumber": {
+            "type": "string",
+            "description": "User's bank account number."
+        },
+        "ifscCode": {
+            "type": "string",
+            "description": "User's bank IFSC or SWIFT code."
+        },
+        "accountHolderName": {
+            "type": "string",
+            "description": "Name of the bank account holder."
+        },
+        "nationalIdUrl": {
+            "type": "string",
+            "description": "URL to the uploaded national ID card image.",
+            "format": "uri"
+        },
+        "taxIdUrl": {
+            "type": "string",
+            "description": "URL to the uploaded tax ID card image.",
+            "format": "uri"
         }
       },
       "required": [
@@ -245,7 +271,7 @@
         },
         "coinType": {
           "type": "string",
-          "description": "The type of coin being staked (ITC, ICE, ISVC, Quiz)."
+          "description": "The type of coin being staked (ITC, ICE, IGC, JOB, FRN, WORK, Quiz)."
         },
         "amount": {
           "type": "number",
