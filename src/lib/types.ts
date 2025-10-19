@@ -85,11 +85,16 @@ export type Cause = {
 };
 
 export type VotingPoll = {
-  id: number;
-  geography: 'Street' | 'Village' | 'Kasba/Block' | 'Taluka' | 'District' | 'Area' | 'State' | 'Nation' | 'Continental' | 'World';
+  id: string;
+  geography: string;
+  category: 'Proposal' | 'Issue' | 'Election';
   title: string;
   description: string;
-  votes: { option: string, count: number }[];
+  results: {
+    option: string;
+    percentage: number;
+    color: string;
+  }[];
 };
 
 export type EcommCategory = {
