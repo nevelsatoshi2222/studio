@@ -2,6 +2,7 @@
 import { AppLayout } from '@/components/app-layout';
 import { IceTicker } from '@/components/ice-ticker';
 import { ItcTicker } from '@/components/itc-ticker';
+import { IgcTicker } from '@/components/igc-ticker';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -51,6 +52,15 @@ export default function Dashboard() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
+              <CardTitle>IGC Ticker</CardTitle>
+              <CardDescription>Idea Governance Coin, the core of the platform.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IgcTicker />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
               <CardTitle>ITC Ticker</CardTitle>
               <CardDescription>Stablecoin pegged to 10mg of Gold. Price updated live from international gold rates.</CardDescription>
             </CardHeader>
@@ -67,7 +77,7 @@ export default function Dashboard() {
               <IceTicker />
             </CardContent>
           </Card>
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>My Wallet</CardTitle>
               <CardDescription>Your personal ITC wallet details.</CardDescription>
