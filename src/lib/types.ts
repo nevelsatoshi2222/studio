@@ -154,10 +154,10 @@ export type SportsItem = {
   id: number;
   name: string;
   description: string;
+  id_23?: number;
 }
 
 export type ArtItem = {
   id: number;
   name: string;
-  description: string;
-}
+  description:

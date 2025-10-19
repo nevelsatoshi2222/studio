@@ -451,28 +451,6 @@ export const votingPolls: VotingPoll[] = [
   },
 ];
 
-export const ecommCategories: EcommCategory[] = [
-  {
-    title: 'Art',
-    subItems: [{ title: 'Paintings' }, { title: 'Sculptures' }, { title: 'Digital Art' }],
-  },
-  {
-    title: 'Sports',
-    subItems: [{ title: 'Cricket' }, { title: 'Football' }, { title: 'Tennis' }],
-  },
-  {
-    title: 'Niche-based Job Creation',
-    subItems: [{ title: 'Graphic Design' }, { title: 'Content Writing' }, { title: 'Web Development' }],
-  },
-];
-
-export const ecommProducts: EcommProduct[] = [
-  { id: 1, name: 'Sunset Over the Ocean', description: 'A beautiful oil painting capturing a serene sunset.', priceITC: 500, priceUSD: 50, imageId: 'ecomm-art-1', category: 'Art', subcategory: 'Paintings' },
-  { id: 2, name: 'Bronze Stag', description: 'A majestic bronze sculpture of a stag.', priceITC: 1500, priceUSD: 150, imageId: 'ecomm-art-2', category: 'Art', subcategory: 'Sculptures' },
-  { id: 3, name: 'Signed Cricket Bat', description: 'A cricket bat signed by the 2023 championship team.', priceITC: 1000, priceUSD: 100, imageId: 'ecomm-sports-1', category: 'Sports', subcategory: 'Cricket' },
-  { id: 4, name: 'Custom Logo Design', description: 'A professional logo design for your brand.', priceITC: 250, priceUSD: 25, imageId: 'ecomm-job-1', category: 'Niche-based Job Creation', subcategory: 'Graphic Design' },
-];
-
 export const socialPosts: SocialPost[] = [
   { id: 'post1', authorId: 'usr_002', content: 'Loving the new features on the IBC platform! Staking is so smooth. #crypto #ibc', timestamp: '2h ago', likes: 15, comments: 4 },
   { id: 'post2', authorId: 'usr_003', content: 'Just submitted my evidence for the anti-corruption initiative. Feels good to be part of the change.', timestamp: '5h ago', likes: 45, comments: 12 },
@@ -539,7 +517,7 @@ export const sportsList: SportsItem[] = [
   { id: 16, name: 'Rugby', description: 'A full-contact team sport.' },
   { id: 17, name: 'American Football', description: 'A strategic and physical team sport.' },
   { id: 18, name: 'Esports', description: 'Competitive video gaming at a professional level.' },
-  { id: 19, name: 'Archery', description: 'The sport of using a bow to shoot arrows.' },
+  { id: 19, 'name': 'Archery', 'description': 'The sport of using a bow to shoot arrows.' },
   { id: 20, name: 'Gymnastics', description: 'A sport requiring balance, strength, and flexibility.' },
   { id: 21, name: 'Fencing', description: 'The martial art of fighting with blades.' },
   { id: 22, name: 'Sailing', description: 'Competitive racing on water using wind power.' },
