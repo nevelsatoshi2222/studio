@@ -17,6 +17,7 @@ const issues = [
   { href: '/issues/cybersecurity', label: 'Cybersecurity' },
   { href: '/issues/refugee-crisis', label: 'Refugee Crisis' },
   { href: '/issues/trade-disputes', label: 'Trade Disputes' },
+  { href: '/issues/no-war-world', label: 'NO-WAR WORLD' },
 ];
 
 export default function InternationalIssuesPage() {
