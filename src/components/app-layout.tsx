@@ -80,11 +80,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <Link href={item.href} passHref>
-                <SidebarMenuButton asChild>
-                  <a>
+                <SidebarMenuButton>
                     <item.icon />
                     <span>{item.label}</span>
-                  </a>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
