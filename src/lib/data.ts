@@ -564,7 +564,6 @@ export const sportsAndArtsItems: SportsAndArtsItem[] = [
 export const competitionPhases: CompetitionPhase[] = [
   { phase: 1, title: 'Creator Fund', description: 'Earn based on social media views. 5% of country-based revenue is pooled for creators. Your earnings are your view count divided by total views, multiplied by the prize pool.' },
   { phase: 2, title: 'Global/National Development', description: 'Revenue is split: 50% to Anti-Corruption, 10% to Peace Initiatives, 10% to Reforestation, 30% to issue-based development funds.' },
-  { phase_3: 'Idea-Based Competition', description: 'Pitch an idea. If it wins a 75% majority vote at any governance level (from street to state), you become the project head. 0.5% of revenue from that jurisdiction funds your project.' },
+  { phase: 3, title: 'Idea-Based Competition', description: 'Pitch an idea. If it wins a 75% majority vote at any governance level (from street to state), you become the project head. 0.5% of revenue from that jurisdiction funds your project.' },
   { phase: 4, title: 'Niche Job Creation', description: 'Compete to create jobs in specific niches. The most effective job creators are rewarded.' }
 ];
-
