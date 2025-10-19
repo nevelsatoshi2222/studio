@@ -47,22 +47,26 @@ const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981",
 
 
 const coinInfo = [
-    { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe },
-    { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins },
-    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Scale },
-    { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase },
-    { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2 },
-    { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog },
-    { id: 'genz', name: 'GenZ', fullName: 'GenZ', icon: UsersIcon },
+    { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
+    { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Scale, totalSupply: 8_000_000_000 },
+    { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
+    { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
+    { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
+    { id: 'genz', name: 'GenZ', fullName: 'GenZ', icon: UsersIcon, totalSupply: 1_000_000_000 },
 ]
 
 export default function TokenomicsPage() {
-  const totalSupply = 1_000_000_000;
   const adminUser = users.find(u => u.id === 'usr_admin');
-  const circulatingSupply = totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100;
   const totalStaked = stakedPositions.filter(p => p.status === 'Staked').reduce((acc, p) => acc + p.amount, 0);
 
   const [selectedStage, setSelectedStage] = useState('stage1');
+  const [selectedCoinId, setSelectedCoinId] = useState('itc');
+
+  const selectedCoin = coinInfo.find(c => c.id === selectedCoinId) || coinInfo[0];
+  const totalSupply = selectedCoin.totalSupply;
+  const circulatingSupply = totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100;
+
 
   const icons: { [key: string]: React.ElementType } = {
     'Creator': UserCog,
@@ -295,7 +299,7 @@ export default function TokenomicsPage() {
           </p>
         </div>
         
-        <Tabs defaultValue="itc" className="w-full">
+        <Tabs defaultValue="itc" onValueChange={setSelectedCoinId} className="w-full">
             <TabsList className="grid w-full grid-cols-7">
                 {coinInfo.map(coin => (
                     <TabsTrigger key={coin.id} value={coin.id}>{coin.name}</TabsTrigger>
@@ -312,7 +316,7 @@ export default function TokenomicsPage() {
                                 <Icon className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                <div className="text-3xl font-bold">{totalSupply.toLocaleString('en-US')} {coin.name}</div>
+                                <div className="text-3xl font-bold">{coin.totalSupply.toLocaleString('en-US')} {coin.name}</div>
                                 <p className="text-xs text-muted-foreground">The maximum number of {coin.name} to ever exist.</p>
                                 </CardContent>
                             </Card>
@@ -322,7 +326,7 @@ export default function TokenomicsPage() {
                                 <Zap className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                <div className="text-3xl font-bold">{circulatingSupply.toLocaleString('en-US')} {coin.name}</div>
+                                <div className="text-3xl font-bold">{(coin.totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100).toLocaleString('en-US')} {coin.name}</div>
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
@@ -367,26 +371,26 @@ export default function TokenomicsPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 1</h4>
-                                            <p className="text-sm text-muted-foreground">0.1% Supply (1M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 1k</p>
+                                            <p className="text-sm text-muted-foreground">0.1% Supply ({ (coin.totalSupply * 0.001).toLocaleString('en-US') } Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of { (coin.totalSupply * 0.001 / 1000).toLocaleString('en-US') }</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 2</h4>
-                                            <p className="text-sm text-muted-foreground">0.2% Supply (2M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 2k</p>
+                                            <p className="text-sm text-muted-foreground">0.2% Supply ({ (coin.totalSupply * 0.002).toLocaleString('en-US') } Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of { (coin.totalSupply * 0.002 / 1000).toLocaleString('en-US') }</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 3</h4>
-                                            <p className="text-sm text-muted-foreground">0.4% Supply (4M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 4k</p>
+                                            <p className="text-sm text-muted-foreground">0.4% Supply ({ (coin.totalSupply * 0.004).toLocaleString('en-US') } Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of { (coin.totalSupply * 0.004 / 1000).toLocaleString('en-US') }</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 4</h4>
-                                            <p className="text-sm text-muted-foreground">1% Supply (10M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 10k</p>
+                                            <p className="text-sm text-muted-foreground">1% Supply ({ (coin.totalSupply * 0.01).toLocaleString('en-US') } Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of { (coin.totalSupply * 0.01 / 1000).toLocaleString('en-US') }</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                     </div>
