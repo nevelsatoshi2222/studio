@@ -65,7 +65,14 @@ export default function TokenomicsPage() {
 
   const selectedCoin = coinInfo.find(c => c.id === selectedCoinId) || coinInfo[0];
   const totalSupply = selectedCoin.totalSupply;
-  const circulatingSupply = totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100;
+  
+  const totalUnlockedSupplyPercentage = tokenStages
+    .filter(s => s.status === 'Active' || s.status === 'Completed')
+    .reduce((acc, stage) => acc + stage.supplyPercentage, 0);
+
+  const circulatingSupply = totalSupply * totalUnlockedSupplyPercentage / 100;
+  
+  const progressValue = tokenStages.filter(s => s.status !== 'Locked').length * (100 / tokenStages.length);
 
 
   const icons: { [key: string]: React.ElementType } = {
@@ -307,6 +314,9 @@ export default function TokenomicsPage() {
             </TabsList>
             {coinInfo.map(coin => {
                 const Icon = coin.icon;
+                const currentTotalSupply = coin.totalSupply;
+                const currentCirculatingSupply = currentTotalSupply * totalUnlockedSupplyPercentage / 100;
+                
                 return (
                     <TabsContent key={coin.id} value={coin.id} className="mt-6 space-y-6">
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -316,7 +326,7 @@ export default function TokenomicsPage() {
                                 <Icon className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                <div className="text-3xl font-bold">{coin.totalSupply.toLocaleString('en-US')} {coin.name}</div>
+                                <div className="text-3xl font-bold">{currentTotalSupply.toLocaleString('en-US')} {coin.name}</div>
                                 <p className="text-xs text-muted-foreground">The maximum number of {coin.name} to ever exist.</p>
                                 </CardContent>
                             </Card>
@@ -326,7 +336,7 @@ export default function TokenomicsPage() {
                                 <Zap className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                <div className="text-3xl font-bold">{(coin.totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100).toLocaleString('en-US')} {coin.name}</div>
+                                <div className="text-3xl font-bold">{currentCirculatingSupply.toLocaleString('en-US')} {coin.name}</div>
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
@@ -336,20 +346,26 @@ export default function TokenomicsPage() {
                                 <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="flex items-center justify-between gap-1">
-                                        {tokenStages.map((stage) => (
-                                            <div key={stage.stage} className="flex flex-col items-center gap-2 text-center flex-1">
-                                                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full border-2", 
-                                                    stage.status === 'Active' ? 'bg-primary/20 border-primary' : '',
-                                                    stage.status === 'Completed' ? 'bg-muted border-muted-foreground' : 'border-border'
-                                                )}>
-                                                    {stage.status === 'Locked' ? <Lock className="h-4 w-4 text-muted-foreground"/> : <Unlock className="h-4 w-4 text-primary"/>}
+                                    <div className="space-y-2">
+                                        <Progress value={progressValue} className="h-2" />
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            {tokenStages.map(stage => (
+                                                <div key={stage.stage} className="flex-1 text-center">
+                                                    <p className={cn("font-semibold", stage.status !== 'Locked' && 'text-primary')}>
+                                                        Stage {stage.stage}
+                                                    </p>
+                                                    <p>{stage.supplyPercentage}%</p>
+                                                    <p className={cn(
+                                                        "capitalize",
+                                                        stage.status === 'Active' && 'text-green-500',
+                                                        stage.status === 'Completed' && 'text-blue-500'
+                                                    )}>
+                                                        {stage.status}
+                                                    </p>
                                                 </div>
-                                                <div className="text-xs font-semibold">{stage.supplyPercentage}%</div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                    <Progress value={tokenStages.filter(s => s.status !== 'Locked').length * (100 / tokenStages.length)} className="mt-2 h-2" />
                                 </CardContent>
                             </Card>
                         </div>
