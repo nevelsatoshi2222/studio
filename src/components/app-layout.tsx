@@ -23,10 +23,18 @@ import {
   FileText,
   Settings,
   HelpCircle,
-  Menu,
-  X,
   Repeat,
   PieChart as PieChartIcon,
+  Globe,
+  Landmark,
+  Trophy,
+  Paintbrush,
+  Vote,
+  Share2,
+  Megaphone,
+  ShoppingCart,
+  Building2,
+  BookUser,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -41,6 +49,17 @@ const navItems = [
   { href: '/forum', icon: MessageSquare, label: 'Forum / Governance' },
   { href: '/exchange', icon: BarChart2, label: 'Crypto Exchange' },
   { href: '/tokenomics', icon: PieChartIcon, label: 'Coins & Tokenomics' },
+  { href: '/international-issues', icon: Globe, label: 'International Issues'},
+  { href: '/national-issues', icon: Landmark, label: 'National Issues'},
+  { href: '/quiz', icon: Trophy, label: 'Quiz Competition'},
+  { href: '/sports', icon: Trophy, label: 'Sports Competition'},
+  { href: '/arts', icon: Paintbrush, label: 'Arts Competition'},
+  { href: '/voting', icon: Vote, label: 'Voting'},
+  { href: '/affiliate-marketing', icon: Share2, label: 'Affiliate Marketing'},
+  { href: '/influencer', icon: Megaphone, label: 'Influencer'},
+  { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
+  { href: '/franchisee', icon: Building2, label: 'Franchisee'},
+  { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
