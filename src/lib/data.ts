@@ -173,7 +173,7 @@ export const tradingPairs: TradingPair[] = [
   { from: 'IGC', to: 'BTC' },
   { from: 'IGC', to: 'SOL' },
   { from: 'IGC', to: 'BNB' },
-  { from: 'IGC', to 'XRP' },
+  { from: 'IGC', to: 'XRP' },
   { from: 'IGC', to: 'USDC' },
   { from: 'IGC', to: 'ADA' },
   { from: 'IGC', to: 'DOGE' },
@@ -214,7 +214,7 @@ export const tradingPairs: TradingPair[] = [
   { from: 'JBC', to: 'SOL' },
   { from: 'JBC', to: 'BNB' },
   { from: 'JBC', to: 'XRP' },
-  { fromJBC', to: 'USDC' },
+  { from: 'JBC', to: 'USDC' },
   { from: 'JBC', to: 'ADA' },
   { from: 'JBC', to: 'DOGE' },
   { from: 'JBC', to: 'AVAX' },
@@ -465,99 +465,106 @@ export const votingPolls: VotingPoll[] = [
     description: 'A proposal to create a fund of 1M IGC to upgrade equipment and facilities at the main district hospital.',
     votes: [
       { option: '0% Agree', count: 50 },
-      { option:string;
-  amount: number;
-  stakedAt: string;
-  duration: number; // in months/days
-  status: 'Staked' | 'Unstaking' | 'Unstaked';
-};
+      { option: '25% Agree', count: 200 },
+      { option: '50% Agree', count: 1200 },
+      { option: '75% Agree', count: 4500 },
+      { option: '100% Agree', count: 8000 },
+    ],
+  },
+  {
+    id: 6,
+    geography: 'Area',
+    title: 'Area-wide Water Purification Project',
+    description: 'A 5M IGC proposal to build three new water purification plants to serve the entire area.',
+    votes: [
+      { option: '0% Agree', count: 100 },
+      { option: '25% Agree', count: 400 },
+      { option: '50% Agree', count: 2000 },
+      { option: '75% Agree', count: 8000 },
+      { option: '100% Agree', count: 15000 },
+    ],
+  },
+  {
+    id: 7,
+    geography: 'State',
+    title: 'High-Speed Rail Network Initiative',
+    description: 'Should the state allocate 2B IGC to begin development of a high-speed rail network connecting major cities?',
+    votes: [
+      { option: '0% Agree', count: 1000 },
+      { option: '25% Agree', count: 5000 },
+      { option: '50% Agree', count: 25000 },
+      { option: '75% Agree', count: 100000 },
+      { option: '100% Agree', count: 50000 },
+    ],
+  },
+];
 
-export type LockDuration = {
-  value: number;
-  label: string;
-};
+export const ecommCategories: EcommCategory[] = [
+  {
+    title: 'Art',
+    subItems: [{ title: 'Paintings' }, { title: 'Sculptures' }, { title: 'Digital Art' }],
+  },
+  {
+    title: 'Sports',
+    subItems: [{ title: 'Cricket' }, { title: 'Football' }, { title: 'Tennis' }],
+  },
+  {
+    title: 'Niche-based Job Creation',
+    subItems: [{ title: 'Graphic Design' }, { title: 'Content Writing' }, { title: 'Web Development' }],
+  },
+];
 
-export type TokenStage = {
-  stage: number;
-  supplyPercentage: number;
-  status: 'Complete' | 'Active' | 'Locked';
-  unfreezesIn: string;
-};
+export const ecommProducts: EcommProduct[] = [
+  { id: 1, name: 'Sunset Over the Ocean', description: 'A beautiful oil painting capturing a serene sunset.', priceITC: 500, priceUSD: 50, imageId: 'ecomm-art-1', category: 'Art', subcategory: 'Paintings' },
+  { id: 2, name: 'Bronze Stag', description: 'A majestic bronze sculpture of a stag.', priceITC: 1500, priceUSD: 150, imageId: 'ecomm-art-2', category: 'Art', subcategory: 'Sculptures' },
+  { id: 3, name: 'Signed Cricket Bat', description: 'A cricket bat signed by the 2023 championship team.', priceITC: 1000, priceUSD: 100, imageId: 'ecomm-sports-1', category: 'Sports', subcategory: 'Cricket' },
+  { id: 4, name: 'Custom Logo Design', description: 'A professional logo design for your brand.', priceITC: 250, priceUSD: 25, imageId: 'ecomm-job-1', category: 'Niche-based Job Creation', subcategory: 'Graphic Design' },
+];
 
-export type QuizQuestion = {
-  id: number;
-  level: number;
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  prize: number;
-};
+export const socialPosts: SocialPost[] = [
+  { id: 'post1', authorId: 'usr_002', content: 'Loving the new features on the IBC platform! Staking is so smooth. #crypto #ibc', timestamp: '2h ago', likes: 15, comments: 4 },
+  { id: 'post2', authorId: 'usr_003', content: 'Just submitted my evidence for the anti-corruption initiative. Feels good to be part of the change.', timestamp: '5h ago', likes: 45, comments: 12 },
+  { id: 'post3', authorId: 'usr_005', content: 'Check out this awesome digital art I bought on the marketplace!', imageUrl: `https://picsum.photos/seed/social-art-1/600/400`, imageHint: 'digital art', timestamp: '1d ago', likes: 102, comments: 23 },
+  { id: 'post4', authorId: 'usr_006', content: 'The community governance proposals are getting really interesting. Time to vote!', timestamp: '2d ago', likes: 33, comments: 8 },
+];
 
-export type Cause = {
-  id: number;
-  title: string;
-  description: string;
-  icon: string;
-  buttonText: string;
-};
+export const coinPackages: CoinPackage[] = [
+    { name: 'Red', coins: 8_000, available: 1_000, color: '#ef4444' },
+    { name: 'Orange', coins: 4_000, available: 2_000, color: '#f97316' },
+    { name: 'Yellow', coins: 2_000, available: 4_000, color: '#eab308' },
+    { name: 'Green', coins: 1_000, available: 8_000, color: '#22c55e' },
+    { name: 'Blue', coins: 500, available: 16_000, color: '#3b82f6' },
+    { name: 'Indigo', coins: 250, available: 32_000, color: '#6366f1' },
+    { name: 'Violet', coins: 125, available: 64_000, color: '#8b5cf6' },
+];
 
-export type VotingPoll = {
-  id: number;
-  geography: 'Street' | 'Village' | 'Kasba/Block' | 'Taluka' | 'District' | 'Area' | 'State' | 'Nation' | 'Continental' | 'World';
-  title: string;
-  description: string;
-  votes: { option: string, count: number }[];
-};
+export const adminAllocations: AdminAllocation[] = [
+    { name: 'Global Peace & Development', value: 10, description: 'Peacekeeping & humanitarian aid' },
+    { name: 'Anti-Corruption Initiative', value: 50, description: 'Funding anti-corruption efforts' },
+    { name: 'AI Education', value: 5, description: 'Free AI education programs' },
+    { name: 'Plant a Tree Initiative', value: 10, description: 'Reforestation projects' },
+    { name: 'International Issues', value: 5, description: 'Addressing global challenges' },
+    { name: 'National Issues', value: 5, description: 'Supporting country-specific projects' },
+    { name: 'Sports Development', value: 5, description: 'Promoting sports and athletes' },
+    { name: 'Arts Development', value: 5, description: 'Supporting artists and creators' },
+    { name: 'Niche-Based Job Creation', value: 5, description: 'Creating specialized job markets' }
+];
 
-export type EcommCategory = {
-    title: string;
-    subItems: { title: string }[];
-};
+export const sportsAndArtsItems: SportsAndArtsItem[] = [
+    { id: 1, name: "Women's Cricket", description: 'Promoting and funding women\'s cricket leagues and teams.'},
+    { id: 2, name: "Men's Cricket", description: 'Supporting grassroots and professional men\'s cricket.'},
+    { id: 3, name: "Women's Football", description: 'Developing women\'s football from local clubs to national teams.'},
+    { id: 4, name: "Men's Football", description: 'Investing in football academies and tournaments for men.'},
+    { id: 5, name: "Painting", description: 'Grants and platforms for painters to showcase and sell their work.'},
+    { id: 6, name: "Sculpture", description: 'Funding for public art projects and sculpture exhibitions.'},
+    { id: 7, name: "Digital Art", description: 'Supporting digital artists with tools, education, and NFT marketplace integration.'},
+];
 
-export type EcommProduct = {
-    id: number;
-    name: string;
-    description: string;
-    priceITC: number;
-    priceUSD: number;
-    imageId: string;
-    category: string;
-    subcategory: string;
-};
 
-export type SocialPost = {
-  id: string;
-  authorId: string;
-  content: string;
-  imageUrl?: string;
-  imageHint?: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-}
+export const competitionPhases: CompetitionPhase[] = [
+  { phase: 1, title: 'Creator Fund', description: 'Earn based on social media views. 5% of country-based revenue is pooled for creators. Your earnings are your view count divided by total views, multiplied by the prize pool.' },
+  { phase: 2, title: 'Global/National Development', description: 'Revenue is split: 50% to Anti-Corruption, 10% to Peace Initiatives, 10% to Reforestation, 30% to issue-based development funds.' },
+  { phase_3: 'Idea-Based Competition', description: 'Pitch an idea. If it wins a 75% majority vote at any governance level (from street to state), you become the project head. 0.5% of revenue from that jurisdiction funds your project.' },
+  { phase: 4, title: 'Niche Job Creation', description: 'Compete to create jobs in specific niches. The most effective job creators are rewarded.' }
+];
 
-export type CoinPackage = {
-    name: string;
-    coins: number;
-    available: number;
-    color: string;
-    description?: string;
-}
-
-export type AdminAllocation = {
-  name: string;
-  value: number;
-  description: string;
-}
-
-export type SportsAndArtsItem = {
-  id: number;
-  name: string;
-  description: string;
-}
-
-export type CompetitionPhase = {
-  phase: number;
-  title: string;
-  description: string;
-}
