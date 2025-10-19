@@ -35,6 +35,10 @@
           "type": "string",
           "description": "User's village or ward."
         },
+        "block": {
+          "type": "string",
+          "description": "User's block or kasba."
+        },
         "taluka": {
           "type": "string",
           "description": "User's taluka."
@@ -42,6 +46,10 @@
         "district": {
           "type": "string",
           "description": "User's district."
+        },
+        "area": {
+          "type": "string",
+          "description": "User's area."
         },
         "state": {
           "type": "string",

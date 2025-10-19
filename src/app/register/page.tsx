@@ -46,8 +46,10 @@ const registrationSchema = z.object({
   phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
   street: z.string().min(1, { message: 'Street is required.' }),
   village: z.string().min(1, { message: 'Village/Town is required.' }),
+  block: z.string().optional(),
   taluka: z.string().min(1, { message: 'Taluka is required.' }),
   district: z.string().min(1, { message: 'District is required.' }),
+  area: z.string().optional(),
   state: z.string().min(1, { message: 'State is required.' }),
   country: z.string().min(1, { message: 'Country is required.' }),
   referralCode: z.string(),
@@ -71,8 +73,10 @@ function RegistrationForm() {
       phone: '',
       street: '',
       village: '',
+      block: '',
       taluka: '',
       district: '',
+      area: '',
       state: '',
       country: '',
     },
@@ -90,8 +94,10 @@ function RegistrationForm() {
         phone: data.phone,
         street: data.street,
         village: data.village,
+        block: data.block,
         taluka: data.taluka,
         district: data.district,
+        area: data.area,
         state: data.state,
         country: data.country,
         balance: 0, // Initial balance
@@ -209,6 +215,19 @@ function RegistrationForm() {
                   />
                    <FormField
                     control={form.control}
+                    name="block"
+                    render={({ field }) => (
+                      <FormItem className="pl-4">
+                        <FormLabel>Block / Kasba (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Kasba" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
                     name="taluka"
                     render={({ field }) => (
                       <FormItem className="pl-4">
@@ -228,6 +247,19 @@ function RegistrationForm() {
                         <FormLabel>District</FormLabel>
                         <FormControl>
                           <Input placeholder="Shelbyville District" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem className="pl-4">
+                        <FormLabel>Area (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Downtown" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
