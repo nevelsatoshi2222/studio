@@ -52,7 +52,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>ITC Ticker</CardTitle>
-              <CardDescription>Stablecoin pegged to 100mg of Gold, backed by physical reserves.</CardDescription>
+              <CardDescription>Stablecoin pegged to 10mg of Gold. Price updated live from international gold rates.</CardDescription>
             </CardHeader>
             <CardContent>
               <ItcTicker />
