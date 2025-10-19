@@ -31,7 +31,7 @@ export const users: User[] = [
     name: 'Admin',
     email: 'admin@ibc.com',
     country: 'United States',
-    balance: 8_000_000_000,
+    balance: 1_000_000_000,
     status: 'Active',
     registeredAt: '2023-01-15',
     avatarId: 'user-avatar-1',
@@ -221,6 +221,15 @@ export const tradingPairs: TradingPair[] = [
   { from: 'JBC', to: 'ADA' },
   { from: 'JBC', to: 'DOGE' },
   { from: 'JBC', to: 'AVAX' },
+  { from: 'JOB', to: 'USDT' },
+  { from: 'JOB', to: 'ETH' },
+  { from: 'JOB', to: 'BTC' },
+  { from: 'FRN', to: 'USDT' },
+  { from: 'FRN', to: 'ETH' },
+  { from: 'FRN', to: 'BTC' },
+  { from: 'WORK', to: 'USDT' },
+  { from: 'WORK', to: 'ETH' },
+  { from: 'WORK', to: 'BTC' },
 ];
 
 export const orderBook: { buys: Order[]; sells: Order[] } = {
@@ -414,18 +423,15 @@ export const coinPackages: CoinPackage[] = [
 ];
 
 export const adminAllocations: AdminAllocation[] = [
-    { category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
-    { category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
-    { category: 'Global Peace & Development', percentage: 3.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
-    { category: 'Anti-Corruption', percentage: 5, description: 'Bounties and resources for fighting corruption.' },
-    { category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.' },
-    { category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
-    { category: 'International Issues', percentage: 1, description: 'Funding for tackling global challenges voted on by the community.' },
-    { category: 'National Issues', percentage: 1, description: 'Country-specific projects and initiatives.' },
-    { category: 'Niche Job Creation', percentage: 1, description: 'Developing and funding specialized job markets.' },
-    { category: 'Influencer Prize Pool', percentage: 1, description: 'Rewards for content creators promoting the platform.' },
-    { category: 'Sports Development', percentage: 1, description: 'Sponsoring athletes and developing sports infrastructure.' },
-    { category: 'Arts Development', percentage: 1, description: 'Grants and platforms for artists and cultural projects.' },
+    { category: 'Affiliate Marketing', percentage: 2, description: 'Rewards for bringing new users to the platform.' },
+    { category: 'Public Demand', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
+    { category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
+    { category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
+    { category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
+    { category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
+    { category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
+    { category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
+    { category: 'Country Development', percentage: 5, description: 'National level development funds.' },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
@@ -508,3 +514,5 @@ export const artsList: ArtItem[] = [
   { id: 24, 'name': 'Puppetry', 'description': 'The art of manipulating puppets.' },
   { id: 25, name: 'Ventriloquism', description: 'The art of "throwing" one\'s voice.' },
 ];
+
+    

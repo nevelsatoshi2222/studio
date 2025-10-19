@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
@@ -50,11 +51,14 @@ const coinInfo = [
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins },
     { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Scale },
+    { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase },
+    { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2 },
+    { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog },
     { id: 'genz', name: 'GenZ', fullName: 'GenZ', icon: UsersIcon },
 ]
 
 export default function TokenomicsPage() {
-  const totalSupply = 8_000_000_000;
+  const totalSupply = 1_000_000_000;
   const adminUser = users.find(u => u.id === 'usr_admin');
   const circulatingSupply = totalSupply * (tokenStages.find(s => s.status === 'Active')?.supplyPercentage ?? 0) / 100;
   const totalStaked = stakedPositions.filter(p => p.status === 'Staked').reduce((acc, p) => acc + p.amount, 0);
@@ -75,6 +79,15 @@ export default function TokenomicsPage() {
     'Sports Development': Trophy,
     'Arts Development': Palette,
     'Idea governance': Scale,
+    'Affiliate Marketing': Share2,
+    'Public Demand': UsersIcon,
+    'Society/Street Development': Building2,
+    'Village/Ward Development': Building2,
+    'Block/Kasbah Development': Building2,
+    'Taluka Development': Building2,
+    'District Development': Building2,
+    'State Development': Building2,
+    'Country Development': Landmark
   };
 
 
@@ -111,7 +124,7 @@ export default function TokenomicsPage() {
                                     const y = cy + radius * Math.sin(-midAngle * RADIAN);
                                     return (
                                     <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
-                                        {`${(percent * 100).toFixed(1)}%`}
+                                        {`${(percent * 100).toFixed(0)}%`}
                                     </text>
                                     );
                                 }}
@@ -202,7 +215,7 @@ export default function TokenomicsPage() {
         </div>
         
         <Tabs defaultValue="itc" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-7">
                 {coinInfo.map(coin => (
                     <TabsTrigger key={coin.id} value={coin.id}>{coin.name}</TabsTrigger>
                 ))}
@@ -256,43 +269,43 @@ export default function TokenomicsPage() {
                             </Card>
                         </div>
 
-                        {coin.id !== 'itc' && (
+                        {['ice', 'igc', 'job', 'frn', 'work', 'genz'].includes(coin.id) && (
                             <div className="grid gap-6 lg:grid-cols-2">
                                 <TokenomicsChartCard coinName={coin.name} />
                                 <FundAllocationCard />
                             </div>
                         )}
 
-                        {coin.id === 'igc' && (
+                        {['igc', 'job', 'frn', 'work'].includes(coin.id) && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>IGC Price Mechanics: Locker & Split System</CardTitle>
+                                    <CardTitle>{coin.name} Price Mechanics: Locker & Split System</CardTitle>
                                     <CardDescription>A unique system for the first 4 stages to ensure stable growth and reward early stakers.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 1</h4>
-                                            <p className="text-sm text-muted-foreground">0.1% Supply (8M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 8k</p>
+                                            <p className="text-sm text-muted-foreground">0.1% Supply (1M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 1k</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 2</h4>
-                                            <p className="text-sm text-muted-foreground">0.2% Supply (16M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 16k</p>
+                                            <p className="text-sm text-muted-foreground">0.2% Supply (2M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 2k</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 3</h4>
-                                            <p className="text-sm text-muted-foreground">0.4% Supply (32M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 32k</p>
+                                            <p className="text-sm text-muted-foreground">0.4% Supply (4M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 4k</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                         <div className="border p-4 rounded-lg">
                                             <h4 className="font-semibold">Stage 4</h4>
-                                            <p className="text-sm text-muted-foreground">1% Supply (80M Coins)</p>
-                                            <p className="text-sm text-muted-foreground">1000 Lockers of 80k</p>
+                                            <p className="text-sm text-muted-foreground">1% Supply (10M Coins)</p>
+                                            <p className="text-sm text-muted-foreground">1000 Lockers of 10k</p>
                                             <p className="font-mono text-xs">Price: $1.001 - $2.000</p>
                                         </div>
                                     </div>
@@ -303,15 +316,15 @@ export default function TokenomicsPage() {
                                                 <span className="font-semibold text-foreground">The Locker System:</span> Each of the first 4 stages divides its coin supply into 1,000 "lockers". As each locker sells out, the price for the next locker increases by a tiny fraction ($0.001), ensuring a steady, predictable price appreciation within each stage.
                                             </li>
                                             <li>
-                                                <span className="font-semibold text-foreground">What is a Coin Split?</span> When all 1,000 lockers in a stage are sold, the stage is complete. At this moment, a "Coin Split" is triggered. This is a powerful event that doubles the holdings of every user who has their IGC staked.
+                                                <span className="font-semibold text-foreground">What is a Coin Split?</span> When all 1,000 lockers in a stage are sold, the stage is complete. At this moment, a "Coin Split" is triggered. This is a powerful event that doubles the holdings of every user who has their {coin.name} staked.
                                             </li>
                                             <li>
-                                                <span className="font-semibold text-foreground">The 1:1 Staking Bonus:</span> If you have your IGC staked in our Smart Contract Locker when a split occurs, you receive an equal number of coins as a bonus. For every 1 coin you have staked, you get 1 additional coin, instantly doubling your staked amount.
+                                                <span className="font-semibold text-foreground">The 1:1 Staking Bonus:</span> If you have your {coin.name} staked in our Smart Contract Locker when a split occurs, you receive an equal number of coins as a bonus. For every 1 coin you have staked, you get 1 additional coin, instantly doubling your staked amount.
                                             </li>
                                             <li>
                                                 <span className="font-semibold text-foreground">How Early Buyers Get More Benefit (An Example):</span> The power of this system is in compounding. An early buyer benefits from every subsequent split.
                                                 <ul className="list-disc list-inside pl-6 mt-2 space-y-2 text-sm bg-background/50 p-4 rounded-md border">
-                                                    <li><strong>You buy and stake 100 IGC during Stage 1.</strong></li>
+                                                    <li><strong>You buy and stake 100 {coin.name} during Stage 1.</strong></li>
                                                     <li>At the end of Stage 1, a split occurs. Your 100 coins become <span className="font-bold text-primary">200 coins</span>.</li>
                                                     <li>At the end of Stage 2, another split occurs. Your 200 coins become <span className="font-bold text-primary">400 coins</span>.</li>
                                                     <li>At the end of Stage 3, a third split happens. Your 400 coins become <span className="font-bold text-primary">800 coins</span>.</li>
@@ -320,7 +333,7 @@ export default function TokenomicsPage() {
                                                 </ul>
                                             </li>
                                             <li>
-                                                <span className="font-semibold text-foreground">Price Reset & Market Trading:</span> After each split, the IGC market price resets to ~$1.000 for the start of the next stage. This ensures a fair entry point for new buyers. From Stage 5 onwards, the price is determined by the free market on the exchange.
+                                                <span className="font-semibold text-foreground">Price Reset & Market Trading:</span> After each split, the {coin.name} market price resets to ~$1.000 for the start of the next stage. This ensures a fair entry point for new buyers. From Stage 5 onwards, the price is determined by the free market on the exchange.
                                             </li>
                                         </ol>
                                     </div>
@@ -375,10 +388,13 @@ export default function TokenomicsPage() {
                 <CardHeader>
                     <CardTitle>Smart Contract Staking Locker</CardTitle>
                     <CardDescription>Lock your coins for a fixed period to earn rewards, including coin split bonuses for IGC.</CardDescription>
-                    <TabsList className="grid w-full grid-cols-4 mt-4">
+                    <TabsList className="grid w-full grid-cols-7 mt-4">
                         <TabsTrigger value="itc">Stake ITC</TabsTrigger>
                         <TabsTrigger value="ice">Stake ICE</TabsTrigger>
                         <TabsTrigger value="igc">Stake IGC</TabsTrigger>
+                        <TabsTrigger value="job">Stake JOB</TabsTrigger>
+                        <TabsTrigger value="frn">Stake FRN</TabsTrigger>
+                        <TabsTrigger value="work">Stake WORK</TabsTrigger>
                         <TabsTrigger value="genz">Stake GenZ</TabsTrigger>
                     </TabsList>
                 </CardHeader>
@@ -476,6 +492,99 @@ export default function TokenomicsPage() {
                             </div>
                         </div>
                     </TabsContent>
+                    <TabsContent value="job">
+                        <div className="grid gap-6 md:grid-cols-2">
+                             <div>
+                                <h3 className="text-lg font-medium">Staking JOB</h3>
+                                <p className="text-sm text-muted-foreground">Stake JOB to be eligible for coin split bonuses at the end of each of the first 4 stages.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="job-amount">Amount to Stake</Label>
+                                    <Input id="job-amount" type="number" placeholder="1000 JOB" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="job-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="job-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">1:1 Coin Bonus per split + standard APY.</span></p>
+                                </div>
+                                <Button>Stake JOB</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                     <TabsContent value="frn">
+                        <div className="grid gap-6 md:grid-cols-2">
+                             <div>
+                                <h3 className="text-lg font-medium">Staking FRN</h3>
+                                <p className="text-sm text-muted-foreground">Stake FRN to be eligible for coin split bonuses at the end of each of the first 4 stages.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="frn-amount">Amount to Stake</Label>
+                                    <Input id="frn-amount" type="number" placeholder="1000 FRN" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="frn-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="frn-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">1:1 Coin Bonus per split + standard APY.</span></p>
+                                </div>
+                                <Button>Stake FRN</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
+                     <TabsContent value="work">
+                        <div className="grid gap-6 md:grid-cols-2">
+                             <div>
+                                <h3 className="text-lg font-medium">Staking WORK</h3>
+                                <p className="text-sm text-muted-foreground">Stake WORK to be eligible for coin split bonuses at the end of each of the first 4 stages.</p>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="work-amount">Amount to Stake</Label>
+                                    <Input id="work-amount" type="number" placeholder="1000 WORK" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="work-duration">Lock-in Period</Label>
+                                    <Select>
+                                        <SelectTrigger id="work-duration">
+                                            <SelectValue placeholder="Select duration" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {lockDurations.map(duration => (
+                                                <SelectItem key={`${duration.value}-${duration.unit}`} value={`${duration.value}-${duration.unit}`}>{duration.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="rounded-md border bg-muted/50 p-3 text-sm">
+                                    <p>Estimated Rewards: <span className="font-medium text-primary">1:1 Coin Bonus per split + standard APY.</span></p>
+                                </div>
+                                <Button>Stake WORK</Button>
+                            </div>
+                        </div>
+                    </TabsContent>
                     <TabsContent value="genz">
                         <div className="grid gap-6 md:grid-cols-2">
                             <div>
@@ -559,3 +668,5 @@ export default function TokenomicsPage() {
     </AppLayout>
   );
 }
+
+    

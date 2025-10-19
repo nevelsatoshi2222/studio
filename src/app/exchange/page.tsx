@@ -45,6 +45,9 @@ const tabs = [
   { id: 'LOAN', name: 'Trade LOAN' },
   { id: 'JBC', name: 'Trade JBC' },
   { id: 'COMP', name: 'Trade COMP' },
+  { id: 'JOB', name: 'Trade JOB' },
+  { id: 'FRN', name: 'Trade FRN' },
+  { id: 'WORK', name: 'Trade WORK' },
 ];
 
 const chartData = [
@@ -248,7 +251,7 @@ export default function ExchangePage() {
         </div>
 
         <Tabs defaultValue="ITC" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-10">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id}>{tab.name}</TabsTrigger>
             ))}
@@ -263,3 +266,5 @@ export default function ExchangePage() {
     </AppLayout>
   );
 }
+
+    
