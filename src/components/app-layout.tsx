@@ -39,6 +39,8 @@ import {
   BookUser,
   ChevronDown,
   UserPlus,
+  Users2,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -154,6 +156,44 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                     </Collapsible>
                                 </SidebarMenuSubItem>
                             ))}
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+                <Collapsible>
+                    <CollapsibleTrigger asChild className="w-full">
+                        <SidebarMenuButton>
+                            <Users2 />
+                            <span>Team</span>
+                        </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                     <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                                <Link href="/team#team-members" passHref>
+                                    <SidebarMenuSubButton>
+                                        <Users className="mr-2"/>
+                                        <span>Team Members</span>
+                                    </SidebarMenuSubButton>
+                                </Link>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                                <Link href="/team#direct-members" passHref>
+                                    <SidebarMenuSubButton>
+                                        <UserPlus className="mr-2"/>
+                                        <span>Direct Members</span>
+                                    </SidebarMenuSubButton>
+                                </Link>
+                            </SidebarMenuSubItem>
+                             <SidebarMenuSubItem>
+                                <Link href="/team#earnings" passHref>
+                                    <SidebarMenuSubButton>
+                                        <DollarSign className="mr-2"/>
+                                        <span>Earning</span>
+                                    </SidebarMenuSubButton>
+                                </Link>
+                            </SidebarMenuSubItem>
                         </SidebarMenuSub>
                     </CollapsibleContent>
                 </Collapsible>

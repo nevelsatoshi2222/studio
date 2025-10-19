@@ -21,9 +21,12 @@ import {
   CompetitionPhase,
   SportsItem,
   ArtItem,
-  TokenSupplyDistribution
+  TokenSupplyDistribution,
+  TeamMember,
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
+import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe } from 'lucide-react';
+
 
 export const users: User[] = [
   {
@@ -424,37 +427,37 @@ export const coinPackages: CoinPackage[] = [
 
 export const adminAllocations: AdminAllocation[] = [
   // 40% Geographic
-  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
-  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
-  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
-  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
-  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
-  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
-  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.' },
+  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.', icon: Building2 },
+  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.', icon: Building2 },
+  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.', icon: Building2 },
+  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.', icon: Building2 },
+  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.', icon: Building2 },
+  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.', icon: Landmark },
+  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.', icon: Globe },
   
   // 40% Voting
-  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
+  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.', icon: Vote },
 
-  // 20% Fixed
-  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
-  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
-  { type: 'fixed', category: 'Global Peace &amp; Development', percentage: 1.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
-  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.' },
-  { type: 'fixed', category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.' },
-  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
-  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.' },
-  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.' },
-  { type: 'fixed', category: 'Niche Job Creation', percentage: 1.0, description: 'Developing and funding specialized job markets.' },
-  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.' },
-  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.' },
-  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.' },
-  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.' },
+  // 20% Fixed (World Initiative)
+  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.', icon: UserCog },
+  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.', icon: Settings },
+  { type: 'fixed', category: 'Global Peace & Development', percentage: 1.5, description: 'Funds for global peacekeeping and humanitarian aid.', icon: Handshake },
+  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.', icon: Shield },
+  { type: 'fixed', category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.', icon: Brain },
+  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.', icon: Leaf },
+  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.', icon: Globe },
+  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.', icon: Landmark },
+  { type: 'fixed', category: 'Niche Job Creation', percentage: 1.0, description: 'Developing and funding specialized job markets.', icon: Briefcase },
+  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.', icon: Share2 },
+  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.', icon: Trophy },
+  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.', icon: Palette },
+  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.', icon: Share2 },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
     { name: 'Public Sale', value: 35.0 },
     { name: 'Coin Split Bonus', value: 5.1 },
-    { name: 'Global Causes &amp; Development', value: 20.0 },
+    { name: 'Global Causes & Development', value: 20.0 },
     { name: 'Public Demand Fund', value: 39.9 }
 ];
 
@@ -481,7 +484,7 @@ export const sportsList: SportsItem[] = [
   { id: 2, name: 'Cricket', description: 'A bat-and-ball game with a huge following.' },
   { id: 3, name: 'Basketball', description: 'A fast-paced court game of skill and agility.' },
   { id: 4, name: 'Tennis', description: 'A global racket sport for individuals or pairs.' },
-  { id: 5, name: 'Athletics (Track &amp; Field)', description: 'Competitions including running, jumping, and throwing.' },
+  { id: 5, name: 'Athletics (Track & Field)', description: 'Competitions including running, jumping, and throwing.' },
   { id: 6, name: 'Hockey', description: 'Includes both field hockey and ice hockey.' },
   { id: 7, name: 'Swimming', description: 'Competitive swimming across various distances and strokes.' },
   { id: 8, name: 'Badminton', description: 'A fast-paced indoor racket sport.' },
@@ -501,7 +504,7 @@ export const sportsList: SportsItem[] = [
   { id: 22, name: 'Sailing', description: 'Competitive racing on water using wind power.' },
   { id_23: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
   { id: 24, name: 'Wrestling', description: 'A combat sport involving grappling techniques.' },
-  { id: 25, name: 'Snooker &amp; Billiards', description: 'Cue sports requiring precision and strategy.' },
+  { id: 25, name: 'Snooker & Billiards', description: 'Cue sports requiring precision and strategy.' },
 ];
 
 export const artsList: ArtItem[] = [
@@ -523,11 +526,24 @@ export const artsList: ArtItem[] = [
   { id: 16, name: 'Jewelry Design', description: 'Designing and creating wearable art.' },
   { id: 17, name: 'Street Art', description: 'Murals, graffiti, and public installations.' },
   { id: 18, name: 'Stand-up Comedy', description: 'The art of making people laugh.' },
-  { id: 19, name: 'Magic &amp; Illusion', description: 'The art of creating illusions and performing magic.' },
+  { id: 19, name: 'Magic & Illusion', description: 'The art of creating illusions and performing magic.' },
   { id: 20, name: 'Culinary Arts', description: 'The art of preparing, cooking, and presenting food.' },
   { id: 21, name: 'Tattoo Art', description: 'The art of decorating the skin with permanent ink.' },
   { id: 22, name: 'Origami', description: 'The Japanese art of paper folding.' },
   { id: 23, name: 'Glassblowing', description: 'Creating glass objects by inflating molten glass.' },
   { id: 24, 'name': 'Puppetry', 'description': 'The art of manipulating puppets.' },
   { id: 25, name: 'Ventriloquism', description: 'The art of "throwing" one\'s voice.' },
+];
+
+export const teamMembers: TeamMember[] = [
+    { id: 'tm001', name: 'Liam Garcia', avatarId: 'user-avatar-1', level: 1, joinDate: '2024-05-10', earnings: 150.75 },
+    { id: 'tm002', name: 'Olivia Martinez', avatarId: 'user-avatar-2', level: 1, joinDate: '2024-05-12', earnings: 220.50 },
+    { id: 'tm003', name: 'Noah Rodriguez', avatarId: 'user-avatar-3', level: 2, joinDate: '2024-05-15', earnings: 75.20 },
+    { id: 'tm004', name: 'Emma Hernandez', avatarId: 'user-avatar-4', level: 2, joinDate: '2024-05-18', earnings: 95.40 },
+    { id: 'tm005', name: 'Oliver Lopez', avatarId: 'user-avatar-1', level: 3, joinDate: '2024-05-20', earnings: 40.10 },
+    { id: 'tm006', name: 'Ava Gonzalez', avatarId: 'user-avatar-2', level: 4, joinDate: '2024-05-22', earnings: 25.00 },
+    { id: 'tm007', name: 'Elijah Wilson', avatarId: 'user-avatar-3', level: 5, joinDate: '2024-05-25', earnings: 15.50 },
+    { id: 'tm008', name: 'Charlotte Anderson', avatarId: 'user-avatar-4', level: 6, joinDate: '2024-05-28', earnings: 10.00 },
+    { id: 'tm009', name: 'James Thomas', avatarId: 'user-avatar-1', level: 7, joinDate: '2024-06-01', earnings: 5.80 },
+    { id: 'tm010', name: 'Sophia Taylor', avatarId: 'user-avatar-2', level: 8, joinDate: '2024-06-02', earnings: 4.20 },
 ];

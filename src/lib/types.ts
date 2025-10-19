@@ -139,6 +139,7 @@ export type AdminAllocation = {
   category: string;
   percentage: number;
   description: string;
+  icon?: React.ElementType;
 }
 
 export type TokenSupplyDistribution = {
@@ -170,3 +171,12 @@ export type ArtItem = {
   name: string;
   description: string;
 }
+
+export type TeamMember = {
+  id: string;
+  name: string;
+  avatarId: string;
+  level: number;
+  joinDate: string;
+  earnings: number;
+};
