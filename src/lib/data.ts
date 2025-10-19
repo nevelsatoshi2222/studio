@@ -19,7 +19,8 @@ import {
   AdminAllocation,
   SportsAndArtsItem,
   CompetitionPhase,
-  SportsItem
+  SportsItem,
+  ArtItem,
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 
@@ -545,4 +546,32 @@ export const sportsList: SportsItem[] = [
   { id_23: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
   { id: 24, name: 'Wrestling', description: 'A combat sport involving grappling techniques.' },
   { id: 25, name: 'Snooker & Billiards', description: 'Cue sports requiring precision and strategy.' },
+];
+
+export const artsList: ArtItem[] = [
+  { id: 1, name: 'Painting', description: 'Covering oil, acrylic, watercolor, and more.' },
+  { id: 2, name: 'Sculpture', description: 'From traditional clay and stone to modern installations.' },
+  { id: 3, name: 'Digital Art', description: 'Includes 2D, 3D, animation, and generative art.' },
+  { id: 4, name: 'Photography', description: 'Fine art, photojournalism, and commercial photography.' },
+  { id: 5, name: 'Music', description: 'Composition, performance, and production across all genres.' },
+  { id: 6, name: 'Filmmaking', description: 'From short films to feature-length documentaries.' },
+  { id: 7, name: 'Dance', description: 'Classical, contemporary, and cultural dance forms.' },
+  { id: 8, 'name': 'Theatre', 'description': 'Acting, directing, and stage design.' },
+  { id: 9, name: 'Literature', description: 'Poetry, prose, and creative non-fiction.' },
+  { id: 10, name: 'Architecture', description: 'Innovative and sustainable building design.' },
+  { id: 11, name: 'Fashion Design', description: 'Creating clothing and accessories.' },
+  { id: 12, name: 'Graphic Design', description: 'Visual communication and problem-solving.' },
+  { id: 13, name: 'Illustration', description: 'Creating images for books, magazines, and more.' },
+  { id: 14, name: 'Calligraphy', description: 'The art of beautiful handwriting.' },
+  { id: 15, name: 'Ceramics', description: 'Creating objects from clay and other ceramic materials.' },
+  { id: 16, name: 'Jewelry Design', description: 'Designing and creating wearable art.' },
+  { id: 17, name: 'Street Art', description: 'Murals, graffiti, and public installations.' },
+  { id: 18, name: 'Stand-up Comedy', description: 'The art of making people laugh.' },
+  { id: 19, name: 'Magic & Illusion', description: 'The art of creating illusions and performing magic.' },
+  { id: 20, name: 'Culinary Arts', description: 'The art of preparing, cooking, and presenting food.' },
+  { id: 21, name: 'Tattoo Art', description: 'The art of decorating the skin with permanent ink.' },
+  { id: 22, name: 'Origami', description: 'The Japanese art of paper folding.' },
+  { id: 23, name: 'Glassblowing', description: 'Creating glass objects by inflating molten glass.' },
+  { id: 24, 'name': 'Puppetry', 'description': 'The art of manipulating puppets.' },
+  { id: 25, name: 'Ventriloquism', description: 'The art of "throwing" one\'s voice.' },
 ];

@@ -155,3 +155,9 @@ export type SportsItem = {
   name: string;
   description: string;
 }
+
+export type ArtItem = {
+  id: number;
+  name: string;
+  description: string;
+}
