@@ -43,7 +43,8 @@ import {
   Users2,
   DollarSign,
   LogIn,
-  LogOut
+  LogOut,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -146,7 +147,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenuItem>
           ))}
           {!user && (
-             <SidebarMenuItem>
+            <>
+              <SidebarMenuItem>
+                <Link href="/login" passHref>
+                  <SidebarMenuButton>
+                      <LogIn />
+                      <span>Login</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <Link href="/register" passHref>
                   <SidebarMenuButton>
                       <UserPlus />
@@ -154,6 +164,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+            </>
           )}
             <SidebarMenuItem>
                 <Collapsible>
@@ -244,6 +255,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </CollapsibleContent>
                 </Collapsible>
             </SidebarMenuItem>
+             <SidebarMenuItem>
+                <Link href="/admin" passHref>
+                  <SidebarMenuButton>
+                      <Shield />
+                      <span>Admin</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
@@ -296,12 +315,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Button>
                 </div>
              ) : (
-                <Button asChild>
-                    <Link href="/register">
-                        <LogIn className="mr-2 h-4 w-4" />
-                        Login / Register
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button asChild variant="ghost">
+                        <Link href="/login">
+                            <LogIn className="mr-2 h-4 w-4" />
+                            Login
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/register">
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Register
+                        </Link>
+                    </Button>
+                </div>
              )}
           </div>
         </header>
