@@ -62,7 +62,7 @@ export default function TokenomicsPage() {
   const [selectedStage, setSelectedStage] = useState('stage1');
 
   const icons: { [key: string]: React.ElementType } = {
-    'System Creator': UserCog,
+    'Creator': UserCog,
     'System Management': Settings,
     'Global Peace & Development': Handshake,
     'Anti-Corruption': Shield,
@@ -75,7 +75,6 @@ export default function TokenomicsPage() {
     'Sports Development': Trophy,
     'Arts Development': Palette,
     'Idea governance': Scale,
-    'Creator Fund': Award,
   };
 
 
@@ -86,32 +85,19 @@ export default function TokenomicsPage() {
             <CardDescription>A transparent breakdown of how revenue from token sales is used to fund development and global causes.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="rounded-lg border bg-amber-500/10 p-4">
-                <h3 className="font-headline text-lg font-semibold text-amber-800 flex items-center gap-2">
-                    <Award className="h-5 w-5"/>
-                    Phase 1: Creator Fund
-                </h3>
-                <p className="mt-2 text-muted-foreground">
-                    The first <span className="font-bold text-foreground">$1 Million USD</span> collected from all revenue sources is allocated to the Creator Fund. This is to reward the initial creation and development of this Nobel App solution for the world.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground font-mono break-all">
-                    USDT Wallet: TBwF87o3CtHuCaqJ5wZDV9h9bMSttXQ47s
-                </p>
-            </div>
-
             <div className="rounded-lg border bg-card p-4">
                  <h3 className="font-headline text-lg font-semibold">
-                    Phase 2: Post-Creator Funding Allocation
+                    Funding Allocation
                 </h3>
                  <p className="mt-2 text-muted-foreground">
-                    After the Creator Fund milestone is reached, all subsequent revenue is allocated according to the following percentages:
+                    All revenue is allocated according to the following percentages:
                 </p>
                 <div className="mt-4 grid gap-8 md:grid-cols-2">
                     <div className="h-64">
                          <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                             <Pie
-                                data={adminAllocations.filter(a => a.category !== 'Creator Fund')}
+                                data={adminAllocations}
                                 dataKey="percentage"
                                 nameKey="category"
                                 cx="50%"
@@ -130,7 +116,7 @@ export default function TokenomicsPage() {
                                     );
                                 }}
                             >
-                                {adminAllocations.filter(a => a.category !== 'Creator Fund').map((entry, index) => (
+                                {adminAllocations.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
                                 ))}
                             </Pie>
@@ -144,7 +130,7 @@ export default function TokenomicsPage() {
                         </ResponsiveContainer>
                     </div>
                     <div className="space-y-4">
-                        {adminAllocations.filter(a => a.category !== 'Creator Fund').map((alloc, index) => {
+                        {adminAllocations.map((alloc, index) => {
                             const Icon = icons[alloc.category] || CircleDollarSign;
                             return (
                                 <div key={alloc.category} className="flex items-start gap-3">

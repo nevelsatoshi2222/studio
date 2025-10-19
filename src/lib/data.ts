@@ -414,19 +414,18 @@ export const coinPackages: CoinPackage[] = [
 ];
 
 export const adminAllocations: AdminAllocation[] = [
-    { category: 'Creator Fund', percentage: 100, description: 'Initial $1M USD for app creation and development.' },
-    { category: 'System Creator', percentage: 10, description: 'Ongoing rewards for the original architects of the system.' },
-    { category: 'System Management', percentage: 10, description: 'Covers operational costs, servers, and staff.' },
-    { category: 'Global Peace & Development', percentage: 10, description: 'Funds for global peacekeeping and humanitarian aid.' },
-    { category: 'Anti-Corruption', percentage: 20, description: 'Bounties and resources for fighting corruption.' },
-    { category: 'AI Education', percentage: 5, description: 'Providing free AI education and tools.' },
-    { category: 'Plant a Tree Initiative', percentage: 5, description: 'Global reforestation and environmental projects.' },
-    { category: 'International Issues', percentage: 5, description: 'Funding for tackling global challenges voted on by the community.' },
-    { category: 'National Issues', percentage: 5, description: 'Country-specific projects and initiatives.' },
-    { category: 'Niche Job Creation', percentage: 5, description: 'Developing and funding specialized job markets.' },
-    { category: 'Influencer Prize Pool', percentage: 5, description: 'Rewards for content creators promoting the platform.' },
-    { category: 'Sports Development', percentage: 10, description: 'Sponsoring athletes and developing sports infrastructure.' },
-    { category: 'Arts Development', percentage: 10, description: 'Grants and platforms for artists and cultural projects.' },
+    { category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
+    { category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
+    { category: 'Global Peace & Development', percentage: 3.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
+    { category: 'Anti-Corruption', percentage: 5, description: 'Bounties and resources for fighting corruption.' },
+    { category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.' },
+    { category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
+    { category: 'International Issues', percentage: 1, description: 'Funding for tackling global challenges voted on by the community.' },
+    { category: 'National Issues', percentage: 1, description: 'Country-specific projects and initiatives.' },
+    { category: 'Niche Job Creation', percentage: 1, description: 'Developing and funding specialized job markets.' },
+    { category: 'Influencer Prize Pool', percentage: 1, description: 'Rewards for content creators promoting the platform.' },
+    { category: 'Sports Development', percentage: 1, description: 'Sponsoring athletes and developing sports infrastructure.' },
+    { category: 'Arts Development', percentage: 1, description: 'Grants and platforms for artists and cultural projects.' },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
