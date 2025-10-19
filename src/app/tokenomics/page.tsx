@@ -43,6 +43,7 @@ import {
   Legend,
 } from 'recharts';
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981", "#f59e0b", "#8b5cf6", "#22c55e", "#6366f1", "#d946ef", "#14b8a6", "#a855f7",];
 
@@ -341,34 +342,58 @@ export default function TokenomicsPage() {
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
-                             <Card className="lg:col-span-2">
-                                <CardHeader>
-                                <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
-                                <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <Progress value={progressValue} className="h-2" />
-                                        <div className="flex justify-between text-xs text-muted-foreground">
-                                            {tokenStages.map(stage => (
-                                                <div key={stage.stage} className="flex-1 text-center">
-                                                    <p className={cn("font-semibold", stage.status !== 'Locked' && 'text-primary')}>
-                                                        Stage {stage.stage}
-                                                    </p>
-                                                    <p>{stage.supplyPercentage}%</p>
-                                                    <p className={cn(
-                                                        "capitalize",
-                                                        stage.status === 'Active' && 'text-green-500',
-                                                        stage.status === 'Completed' && 'text-blue-500'
-                                                    )}>
-                                                        {stage.status}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
+                            
+                            {coin.id === 'igc' ? (
+                                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="relative w-full h-full min-h-[150px] rounded-lg overflow-hidden border">
+                                        <Image
+                                            src="https://picsum.photos/seed/igc-logo/600/400"
+                                            alt="IGC Logo"
+                                            fill
+                                            style={{ objectFit: 'cover' }}
+                                            data-ai-hint="governance structure"
+                                        />
                                     </div>
-                                </CardContent>
-                            </Card>
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Supply Release Schedule (IGC)</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                             <Progress value={progressValue} className="h-2" />
+                                             <p className="text-xs text-muted-foreground mt-2">IGC is released in controlled stages to ensure stability.</p>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            ) : (
+                                <Card className="lg:col-span-2">
+                                    <CardHeader>
+                                    <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
+                                    <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2">
+                                            <Progress value={progressValue} className="h-2" />
+                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                                {tokenStages.map(stage => (
+                                                    <div key={stage.stage} className="flex-1 text-center">
+                                                        <p className={cn("font-semibold", stage.status !== 'Locked' && 'text-primary')}>
+                                                            Stage {stage.stage}
+                                                        </p>
+                                                        <p>{stage.supplyPercentage}%</p>
+                                                        <p className={cn(
+                                                            "capitalize",
+                                                            stage.status === 'Active' && 'text-green-500',
+                                                            stage.status === 'Completed' && 'text-blue-500'
+                                                        )}>
+                                                            {stage.status}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </div>
 
                         {['ice', 'igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (
