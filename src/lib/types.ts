@@ -149,3 +149,9 @@ export type CompetitionPhase = {
   title: string;
   description: string;
 }
+
+export type SportsItem = {
+  id: number;
+  name: string;
+  description: string;
+}

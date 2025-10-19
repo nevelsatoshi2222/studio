@@ -18,7 +18,8 @@ import {
   CoinPackage,
   AdminAllocation,
   SportsAndArtsItem,
-  CompetitionPhase
+  CompetitionPhase,
+  SportsItem
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 
@@ -516,4 +517,32 @@ export const competitionPhases: CompetitionPhase[] = [
   { phase: 2, title: 'Global/National Development', description: 'Revenue is split: 50% to Anti-Corruption, 10% to Peace Initiatives, 10% to Reforestation, 30% to issue-based development funds.' },
   { phase: 3, title: 'Idea-Based Competition', description: 'Pitch an idea. If it wins a 75% majority vote at any governance level (from street to state), you become the project head. 0.5% of revenue from that jurisdiction funds your project.' },
   { phase: 4, title: 'Niche Job Creation', description: 'Compete to create jobs in specific niches. The most effective job creators are rewarded.' }
+];
+
+export const sportsList: SportsItem[] = [
+  { id: 1, name: 'Football (Soccer)', description: 'The world\'s most popular sport.' },
+  { id: 2, name: 'Cricket', description: 'A bat-and-ball game with a huge following.' },
+  { id: 3, name: 'Basketball', description: 'A fast-paced court game of skill and agility.' },
+  { id: 4, name: 'Tennis', description: 'A global racket sport for individuals or pairs.' },
+  { id: 5, name: 'Athletics (Track & Field)', description: 'Competitions including running, jumping, and throwing.' },
+  { id: 6, name: 'Hockey', description: 'Includes both field hockey and ice hockey.' },
+  { id: 7, name: 'Swimming', description: 'Competitive swimming across various distances and strokes.' },
+  { id: 8, name: 'Badminton', description: 'A fast-paced indoor racket sport.' },
+  { id: 9, name: 'Volleyball', description: 'A team sport played with a ball over a net.' },
+  { id: 10, name: 'Table Tennis', description: 'A high-speed racket sport played on a tabletop.' },
+  { id: 11, name: 'Baseball', description: 'A classic American bat-and-ball sport.' },
+  { id: 12, name: 'Golf', description: 'A precision club-and-ball sport.' },
+  { id: 13, name: 'Martial Arts', description: 'Includes Karate, Judo, Taekwondo, and more.' },
+  { id: 14, name: 'Boxing', description: 'A combat sport of strength, speed, and reflexes.' },
+  { id: 15, name: 'Cycling', description: 'Road racing, track cycling, and mountain biking.' },
+  { id: 16, name: 'Rugby', description: 'A full-contact team sport.' },
+  { id: 17, name: 'American Football', description: 'A strategic and physical team sport.' },
+  { id: 18, name: 'Esports', description: 'Competitive video gaming at a professional level.' },
+  { id: 19, name: 'Archery', description: 'The sport of using a bow to shoot arrows.' },
+  { id: 20, name: 'Gymnastics', description: 'A sport requiring balance, strength, and flexibility.' },
+  { id: 21, name: 'Fencing', description: 'The martial art of fighting with blades.' },
+  { id: 22, name: 'Sailing', description: 'Competitive racing on water using wind power.' },
+  { id_23: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
+  { id: 24, name: 'Wrestling', description: 'A combat sport involving grappling techniques.' },
+  { id: 25, name: 'Snooker & Billiards', description: 'Cue sports requiring precision and strategy.' },
 ];
