@@ -135,6 +135,7 @@ export type CoinPackage = {
 }
 
 export type AdminAllocation = {
+  type: 'geographic' | 'voting' | 'fixed';
   category: string;
   percentage: number;
   description: string;

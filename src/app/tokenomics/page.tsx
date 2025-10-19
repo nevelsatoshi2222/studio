@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
@@ -32,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution } from '@/lib/data';
-import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog } from 'lucide-react';
+import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   PieChart,
@@ -80,7 +79,8 @@ export default function TokenomicsPage() {
     'Arts Development': Palette,
     'Idea governance': Scale,
     'Affiliate Marketing': Share2,
-    'Public Demand': UsersIcon,
+    'Public Demand (Geographic)': UsersIcon,
+    'Public Demand (Voting)': Vote,
     'Society/Street Development': Building2,
     'Village/Ward Development': Building2,
     'Block/Kasbah Development': Building2,
@@ -90,27 +90,32 @@ export default function TokenomicsPage() {
     'Country Development': Landmark
   };
 
+  const fixedAllocations = adminAllocations.filter(a => a.type === 'fixed');
+  const geographicAllocations = adminAllocations.filter(a => a.type === 'geographic');
+  const votingAllocations = adminAllocations.filter(a => a.type === 'voting');
 
   const FundAllocationCard = () => (
     <Card>
         <CardHeader>
             <CardTitle>Fund Allocation from Token Sales</CardTitle>
-            <CardDescription>A transparent breakdown of how revenue from token sales is used to fund development and global causes.</CardDescription>
+            <CardDescription>A transparent breakdown of how revenue from token sales is distributed across three core areas.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
+            {/* Geographic Public Demand */}
             <div className="rounded-lg border bg-card p-4">
-                 <h3 className="font-headline text-lg font-semibold">
-                    Funding Allocation
+                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
+                    <UsersIcon className="h-5 w-5 text-primary"/>
+                    40% for Geographic Public Demand
                 </h3>
                  <p className="mt-2 text-muted-foreground">
-                    All revenue is allocated according to the following percentages:
+                    40% of all revenue is automatically allocated for development projects based on the geographic level where the revenue was generated.
                 </p>
                 <div className="mt-4 grid gap-8 md:grid-cols-2">
                     <div className="h-64">
                          <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                             <Pie
-                                data={adminAllocations}
+                                data={geographicAllocations}
                                 dataKey="percentage"
                                 nameKey="category"
                                 cx="50%"
@@ -124,12 +129,12 @@ export default function TokenomicsPage() {
                                     const y = cy + radius * Math.sin(-midAngle * RADIAN);
                                     return (
                                     <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
-                                        {`${(percent * 100).toFixed(0)}%`}
+                                        {`${geographicAllocations[index].percentage}%`}
                                     </text>
                                     );
                                 }}
                             >
-                                {adminAllocations.map((entry, index) => (
+                                {geographicAllocations.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
                                 ))}
                             </Pie>
@@ -143,7 +148,83 @@ export default function TokenomicsPage() {
                         </ResponsiveContainer>
                     </div>
                     <div className="space-y-4">
-                        {adminAllocations.map((alloc, index) => {
+                        {geographicAllocations.map((alloc, index) => {
+                            const Icon = icons[alloc.category] || CircleDollarSign;
+                            return (
+                                <div key={alloc.category} className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg mt-1 shrink-0" style={{ backgroundColor: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] + '1A' }}>
+                                        <Icon className="h-5 w-5" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }}/>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">{alloc.category} - {alloc.percentage}%</p>
+                                        <p className="text-sm text-muted-foreground">{alloc.description}</p>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </div>
+
+             {/* Voting Public Demand */}
+            <div className="rounded-lg border bg-card p-4">
+                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
+                    <Vote className="h-5 w-5 text-primary"/>
+                    40% for Voted Public Demand
+                </h3>
+                 <p className="mt-2 text-muted-foreground">
+                   Another 40% of all revenue is held in a central fund. The community decides how to use these funds by discussing and voting for specific issues, problems, events, causes, and projects.
+                </p>
+            </div>
+
+             {/* Fixed Allocations */}
+            <div className="rounded-lg border bg-card p-4">
+                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-primary"/>
+                    20% for Core Operations & Initiatives
+                </h3>
+                 <p className="mt-2 text-muted-foreground">
+                    The remaining 20% is allocated to fixed categories that support the platform's growth and core mission.
+                </p>
+                <div className="mt-4 grid gap-8 md:grid-cols-2">
+                    <div className="h-64">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                            <Pie
+                                data={fixedAllocations}
+                                dataKey="percentage"
+                                nameKey="category"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                labelLine={false}
+                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                                    const RADIAN = Math.PI / 180;
+                                    const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
+                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                    return (
+                                    <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
+                                        {`${fixedAllocations[index].percentage}%`}
+                                    </text>
+                                    );
+                                }}
+                            >
+                                {fixedAllocations.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(var(--background))',
+                                    borderColor: 'hsl(var(--border))',
+                                }}
+                            />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-4">
+                        {fixedAllocations.map((alloc, index) => {
                             const Icon = icons[alloc.category] || CircleDollarSign;
                             return (
                                 <div key={alloc.category} className="flex items-start gap-3">
@@ -269,7 +350,7 @@ export default function TokenomicsPage() {
                             </Card>
                         </div>
 
-                        {['ice', 'igc', 'job', 'frn', 'work', 'genz'].includes(coin.id) && (
+                        {['ice', 'igc', 'job', 'frn', 'work'].includes(coin.id) && (
                             <div className="grid gap-6 lg:grid-cols-2">
                                 <TokenomicsChartCard coinName={coin.name} />
                                 <FundAllocationCard />
@@ -668,5 +749,3 @@ export default function TokenomicsPage() {
     </AppLayout>
   );
 }
-
-    

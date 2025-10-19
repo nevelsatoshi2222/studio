@@ -423,14 +423,31 @@ export const coinPackages: CoinPackage[] = [
 ];
 
 export const adminAllocations: AdminAllocation[] = [
-    { category: 'Public Demand', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
-    { category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
-    { category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
-    { category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
-    { category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
-    { category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
-    { category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
-    { category: 'Country Development', percentage: 5, description: 'National level development funds.' },
+  // 40% Geographic
+  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
+  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
+  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
+  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
+  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
+  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
+  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.' },
+  
+  // 40% Voting
+  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
+
+  // 20% Fixed
+  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
+  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
+  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.5, description: 'Funds for global peacekeeping and humanitarian aid.' },
+  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.' },
+  { type: 'fixed', category: 'AI Education', percentage: 1.5, description: 'Providing free AI education and tools.' },
+  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
+  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.' },
+  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.' },
+  { type: 'fixed', category: 'Niche Job Creation', percentage: 1.0, description: 'Developing and funding specialized job markets.' },
+  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.' },
+  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.' },
+  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.' },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
