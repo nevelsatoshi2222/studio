@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
@@ -32,7 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution } from '@/lib/data';
-import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Network } from 'lucide-react';
+import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Network, Key, UserCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   PieChart,
@@ -100,7 +101,10 @@ export default function TokenomicsPage() {
     'Taluka Development': Building2,
     'District Development': Building2,
     'State Development': Building2,
-    'Country Development': Landmark
+    'Country Development': Landmark,
+    'Main franchisee commission': Building2,
+    'Guide benefit': UserCheck,
+    'Initial investor': Key,
   };
 
   const fixedAllocations = adminAllocations.filter(a => a.type === 'fixed');
@@ -342,47 +346,49 @@ export default function TokenomicsPage() {
                                 <p className="text-xs text-muted-foreground">The amount of {coin.name} currently in circulation.</p>
                                 </CardContent>
                             </Card>
-                             <Card className="lg:col-span-2">
-                                <CardHeader>
-                                <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
-                                <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <Progress value={progressValue} className="h-2" />
-                                        <div className="flex justify-between text-xs text-muted-foreground">
-                                            {tokenStages.map(stage => (
-                                                <div key={stage.stage} className="flex-1 text-center">
-                                                    <p className={cn("font-semibold", stage.status !== 'Locked' && 'text-primary')}>
-                                                        Stage {stage.stage}
-                                                    </p>
-                                                    <p>{stage.supplyPercentage}%</p>
-                                                    <p className={cn(
-                                                        "capitalize",
-                                                        stage.status === 'Active' && 'text-green-500',
-                                                        stage.status === 'Completed' && 'text-blue-500'
-                                                    )}>
-                                                        {stage.status}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
+                             {coin.id === 'igc' && (
+                                <div className="lg:col-span-2 grid grid-cols-1">
+                                    <div className="relative w-full h-full min-h-[150px] rounded-lg overflow-hidden border">
+                                        <Image
+                                            src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
+                                            alt="IGC Logo"
+                                            fill
+                                            style={{ objectFit: 'contain' }}
+                                            data-ai-hint="governance coin"
+                                        />
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            )}
                         </div>
                         
-                        {coin.id === 'igc' && (
-                            <div className="relative w-full h-[250px] rounded-lg overflow-hidden border">
-                                <Image
-                                    src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
-                                    alt="IGC Logo"
-                                    fill
-                                    style={{ objectFit: 'contain' }}
-                                    data-ai-hint="governance coin"
-                                />
-                            </div>
-                        )}
+                        <Card>
+                            <CardHeader>
+                            <CardTitle>Supply Release Schedule ({coin.name})</CardTitle>
+                            <CardDescription>{coin.name} is released in controlled stages to ensure stability.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    <Progress value={progressValue} className="h-2" />
+                                    <div className="flex justify-between text-xs text-muted-foreground">
+                                        {tokenStages.map(stage => (
+                                            <div key={stage.stage} className="flex-1 text-center">
+                                                <p className={cn("font-semibold", stage.status !== 'Locked' && 'text-primary')}>
+                                                    Stage {stage.stage}
+                                                </p>
+                                                <p>{stage.supplyPercentage}%</p>
+                                                <p className={cn(
+                                                    "capitalize",
+                                                    stage.status === 'Active' && 'text-green-500',
+                                                    stage.status === 'Completed' && 'text-blue-500'
+                                                )}>
+                                                    {stage.status}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
 
                         {['ice', 'igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (
                             <div className="grid gap-6 lg:grid-cols-2">

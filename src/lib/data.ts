@@ -26,7 +26,7 @@ import {
   TeamMember,
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
-import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network } from 'lucide-react';
+import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network, Key, UserCheck } from 'lucide-react';
 
 
 export const users: User[] = [
@@ -451,13 +451,13 @@ export const adminAllocations: AdminAllocation[] = [
   { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.', icon: Leaf },
   { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.', icon: Globe },
   { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.', icon: Landmark },
-  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchisees.', icon: Building2 },
-  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Benefit for guides.', icon: Users },
-  { type: 'fixed', category: 'Initial Investor benefit', percentage: 0.5, description: 'Benefit for initial investors.', icon: CircleDollarSign },
   { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.', icon: Share2 },
   { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.', icon: Trophy },
   { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.', icon: Palette },
   { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.', icon: Share2 },
+  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchise holders.', icon: Building2 },
+  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Rewards for platform guides and mentors.', icon: UserCheck },
+  { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.', icon: Key },
 ];
 
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
@@ -508,7 +508,7 @@ export const sportsList: SportsItem[] = [
   { id: 20, name: 'Gymnastics', description: 'A sport requiring balance, strength, and flexibility.' },
   { id: 21, name: 'Fencing', description: 'The martial art of fighting with blades.' },
   { id: 22, name: 'Sailing', description: 'Competitive racing on water using wind power.' },
-  { id: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
+  { id_23: 23, name: 'Equestrian', description: 'The art and sport of horsemanship.' },
   { id: 24, name: 'Wrestling', description: 'A combat sport involving grappling techniques.' },
   { id: 25, name: 'Snooker & Billiards', description: 'Cue sports requiring precision and strategy.' },
 ];
