@@ -1,1 +1,2 @@
 export const ADMIN_WALLET_ADDRESS = 'AGrrknPZHNMKy1c94UyT5X8NmP52xKDXqTCfeWTEQvyq';
+export const IGC_TOKEN_MINT_ADDRESS = 'CjKE4q6gtaHwvjnwPXyFSG9pySg5uBArFVRNseFqzWCp';

@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import { IceTicker } from '@/components/ice-ticker';
 import { ItcTicker } from '@/components/itc-ticker';
@@ -25,9 +26,47 @@ import { transactions, forumPosts, users } from '@/lib/data';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
+import { IGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
+  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const [igcBalance, setIgcBalance] = useState<number | null>(null);
+  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+
   const adminUser = users.find(u => u.id === 'usr_admin');
+
+  useEffect(() => {
+    if (publicKey && connection) {
+      setIsBalanceLoading(true);
+      const fetchBalance = async () => {
+        try {
+          const igcMint = new PublicKey(IGC_TOKEN_MINT_ADDRESS);
+          const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+            mint: igcMint,
+          });
+
+          if (tokenAccounts.value.length > 0) {
+            const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+            setIgcBalance(balance);
+          } else {
+            setIgcBalance(0);
+          }
+        } catch (error) {
+          console.error("Failed to fetch IGC balance:", error);
+          setIgcBalance(null);
+        } finally {
+          setIsBalanceLoading(false);
+        }
+      };
+      fetchBalance();
+    } else {
+      setIgcBalance(null);
+    }
+  }, [publicKey, connection]);
 
   const getAvatarUrl = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
@@ -80,20 +119,30 @@ export default function Dashboard() {
           <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>My Wallet</CardTitle>
-              <CardDescription>Your personal ITC wallet details.</CardDescription>
+              <CardDescription>Your personal wallet details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Wallet Address</p>
-                <p className="font-mono text-sm break-all">
-                  0x1a2B3c4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B
-                </p>
+                {publicKey ? (
+                   <p className="font-mono text-sm break-all">
+                     {publicKey.toBase58()}
+                   </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Please connect your wallet.</p>
+                )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Balance</p>
-                <p className="text-2xl font-bold">{adminUser?.balance.toLocaleString('en-US') ?? '0'} ITC</p>
+                <p className="text-sm font-medium text-muted-foreground">IGC Balance</p>
+                {isBalanceLoading ? (
+                  <Skeleton className="h-8 w-32" />
+                ) : publicKey ? (
+                  <p className="text-2xl font-bold">{igcBalance?.toLocaleString('en-US') ?? '0'} IGC</p>
+                ) : (
+                   <p className="text-2xl font-bold">-- IGC</p>
+                )}
               </div>
-              <Button>Send / Receive</Button>
+              <Button disabled={!publicKey}>Send / Receive</Button>
             </CardContent>
           </Card>
         </div>
