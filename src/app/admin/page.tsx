@@ -13,11 +13,16 @@ import {
 } from '@/components/ui/card';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { publicKey } = useWallet();
+
+  const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
   // Memoize the document reference
   const adminRoleRef = useMemoFirebase(() => {
@@ -27,15 +32,17 @@ export default function AdminPage() {
 
   const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
 
+  const isFirebaseAdmin = !!adminRole;
+
   useEffect(() => {
-    // If not loading and the user is either not logged in or doesn't have an admin role doc
-    if (!isUserLoading && !isRoleLoading && (!user || !adminRole)) {
+    // If not loading and the user is neither a Firebase admin nor a wallet admin
+    if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
       router.replace('/admin/login');
     }
-  }, [user, adminRole, isUserLoading, isRoleLoading, router]);
+  }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
 
   // Show a loading state while we verify auth and role
-  if (isUserLoading || isRoleLoading) {
+  if (isUserLoading || (user && isRoleLoading)) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -55,8 +62,8 @@ export default function AdminPage() {
     );
   }
 
-  // If user is verified as admin, show the dashboard
-  if (user && adminRole) {
+  // If user is verified as admin (either way), show the dashboard
+  if (isFirebaseAdmin || isWalletAdmin) {
     return (
       <AppLayout>
         <div className="flex flex-col gap-8">

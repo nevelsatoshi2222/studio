@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
 import {
@@ -29,6 +29,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, LogIn } from 'lucide-react';
 import { doc } from 'firebase/firestore';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -118,6 +120,9 @@ export default function AdminLoginPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { wallet, publicKey } = useWallet();
+
+  const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -126,22 +131,39 @@ export default function AdminLoginPage() {
 
   const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
 
-  if (isUserLoading || (user && isRoleLoading)) {
+  useEffect(() => {
+    // Redirect if wallet admin is connected
+    if (isWalletAdmin) {
+      router.replace('/admin');
+      return;
+    }
+
+    // Redirect if Firebase user is admin
+    if (!isUserLoading && user && !isRoleLoading && adminRole) {
+      router.replace('/admin');
+      return;
+    }
+  
+    // If a user is logged in but not an admin, redirect them away.
+    if (!isUserLoading && user && !isRoleLoading && !adminRole) {
+       router.replace('/');
+       return;
+    }
+  }, [user, adminRole, isUserLoading, isRoleLoading, router, isWalletAdmin]);
+
+
+  // While checking auth, show loading
+  if (isUserLoading || (user && isRoleLoading) || (wallet && publicKey === null)) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
   
-  if (user && adminRole) {
-    router.replace('/admin');
+  // If user is already identified as an admin (either via wallet or Firebase), they'll be redirected.
+  // We return null here to prevent flashing the login form during the redirect.
+  if (isWalletAdmin || (user && adminRole)) {
     return null;
   }
-  
-  if (user && !adminRole) {
-     // If a user is logged in but not an admin, they can't see this page.
-     // Redirect them to the main dashboard.
-     router.replace('/');
-     return null;
-  }
 
+  // Show login form only if no admin is identified.
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <AdminLoginForm />
