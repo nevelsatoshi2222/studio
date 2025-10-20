@@ -10,6 +10,7 @@ import {
     WalletModalProvider,
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 export const WalletProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
