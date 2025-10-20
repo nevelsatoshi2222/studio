@@ -67,7 +67,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletButton } from './wallet-button';
 
 
 const navItems = [
@@ -366,7 +366,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-xl font-semibold hidden md:block">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-             <WalletMultiButton />
+             <WalletButton />
              <UserAccountDropdown />
           </div>
         </header>
@@ -378,5 +378,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
