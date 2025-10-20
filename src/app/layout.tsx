@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { WalletProvider } from '@/components/wallet-provider';
 
 export const metadata: Metadata = {
   title: 'Firebase Studio App',
@@ -20,9 +21,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <FirebaseClientProvider>
-          {children}
-        </FirebaseClientProvider>
+        <WalletProvider>
+          <FirebaseClientProvider>
+            {children}
+          </FirebaseClientProvider>
+        </WalletProvider>
       </body>
     </html>
   );

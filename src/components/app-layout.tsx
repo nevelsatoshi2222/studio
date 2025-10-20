@@ -67,6 +67,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 
 const navItems = [
@@ -306,54 +307,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-xl font-semibold hidden md:block">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-             {isUserLoading ? (
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
-                </div>
-             ) : user ? (
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`} />
-                                <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <span className="hidden md:inline">{user.displayName || user.email}</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href="/profile"><User className="mr-2 h-4 w-4" />Profile</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                             <Link href="/settings"><Settings className="mr-2 h-4 w-4" />Settings</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Sign Out</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-             ) : (
-                <div className="flex items-center gap-2">
-                    <Button asChild variant="ghost">
-                        <Link href="/login">
-                            <LogIn className="mr-2 h-4 w-4" />
-                            Login
-                        </Link>
-                    </Button>
-                    <Button asChild>
-                        <Link href="/register">
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Register
-                        </Link>
-                    </Button>
-                </div>
-             )}
+             <WalletMultiButton />
           </div>
         </header>
         <SidebarInset className="p-4 md:p-6">
