@@ -181,3 +181,10 @@ export type TeamMember = {
   joinDate: string;
   earnings: number;
 };
+
+export type AirdropReward = {
+  name: string;
+  percentage: number;
+  description: string;
+  icon: React.ElementType;
+};

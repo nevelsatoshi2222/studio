@@ -32,8 +32,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution } from '@/lib/data';
-import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Network, Key, UserCheck } from 'lucide-react';
+import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution, airdropRewards } from '@/lib/data';
+import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Network, Key, UserCheck, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   PieChart,
@@ -302,6 +302,41 @@ export default function TokenomicsPage() {
         </Card>
     );
 
+    const AirdropCard = () => (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+          <Gift className="h-8 w-8 text-primary" />
+          <div>
+            <CardTitle>Airdrop Rewards</CardTitle>
+            <CardDescription>
+              0.001% of the total supply is reserved for airdrops to reward early adopters and community builders.
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {airdropRewards.map((reward) => {
+          const Icon = reward.icon;
+          return (
+            <div key={reward.name} className="flex items-start gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mt-1">
+                <Icon className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold text-lg">{reward.name}</h4>
+                  <div className="text-lg font-bold text-primary">{reward.percentage}%</div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{reward.description}</p>
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
@@ -325,7 +360,7 @@ export default function TokenomicsPage() {
                 
                 return (
                     <TabsContent key={coin.id} value={coin.id} className="mt-6 space-y-6">
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>{coin.name} Total Supply</CardTitle>
@@ -347,16 +382,14 @@ export default function TokenomicsPage() {
                                 </CardContent>
                             </Card>
                              {coin.id === 'igc' && (
-                                <div className="lg:col-span-2 grid grid-cols-1">
-                                    <div className="relative w-full h-full min-h-[150px] rounded-lg overflow-hidden border">
-                                        <Image
-                                            src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
-                                            alt="IGC Logo"
-                                            fill
-                                            style={{ objectFit: 'contain' }}
-                                            data-ai-hint="governance coin"
-                                        />
-                                    </div>
+                                <div className="relative lg:col-span-2 row-span-2 h-full min-h-[160px] rounded-lg overflow-hidden border">
+                                    <Image
+                                        src="https://storage.googleapis.com/stey-dev-public-resources/public-governance-859029-c316e-logo.png"
+                                        alt="IGC Logo"
+                                        fill
+                                        style={{ objectFit: 'contain', padding: '1rem' }}
+                                        data-ai-hint="governance coin"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -395,6 +428,10 @@ export default function TokenomicsPage() {
                                 <TokenomicsChartCard coinName={coin.name} />
                                 <FundAllocationCard />
                             </div>
+                        )}
+
+                        {coin.id === 'igc' && (
+                            <AirdropCard />
                         )}
 
                         {['igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (

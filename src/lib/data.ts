@@ -24,9 +24,10 @@ import {
   ArtItem,
   TokenSupplyDistribution,
   TeamMember,
+  AirdropReward,
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
-import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network, Key, UserCheck } from 'lucide-react';
+import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network, Key, UserCheck, Gift, UserPlus, Diamond } from 'lucide-react';
 
 
 export const users: User[] = [
@@ -516,7 +517,7 @@ export const sportsList: SportsItem[] = [
 export const artsList: ArtItem[] = [
   { id: 1, name: 'Painting', description: 'Covering oil, acrylic, watercolor, and more.' },
   { id: 2, name: 'Sculpture', description: 'From traditional clay and stone to modern installations.' },
-  { id: 3, name: 'Digital Art', description: 'Includes 2D, 3D, animation, and generative art.' },
+  { id: 3, name: 'Digital Art', description: 'Includes 2D, D, animation, and generative art.' },
   { id: 4, name: 'Photography', description: 'Fine art, photojournalism, and commercial photography.' },
   { id: 5, name: 'Music', description: 'Composition, performance, and production across all genres.' },
   { id: 6, name: 'Filmmaking', description: 'From short films to feature-length documentaries.' },
@@ -554,4 +555,14 @@ export const teamMembers: TeamMember[] = [
     { id: 'tm010', name: 'Sophia Taylor', avatarId: 'user-avatar-2', level: 8, joinDate: '2024-06-02', earnings: 4.20 },
 ];
 
+export const airdropRewards: AirdropReward[] = [
+  { name: 'Early Registration', percentage: 25, description: 'Reserved for the first users who register on the platform.', icon: UserPlus },
+  { name: 'Affiliate Sharer', percentage: 20, description: 'Reserved for users who share their affiliate link with at least 10 people.', icon: Share2 },
+  { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.', icon: Award },
+  { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Bronze Reward.', icon: Award },
+  { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.', icon: Award },
+  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.', icon: Award },
+  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.', icon: Diamond },
+];
     
+
