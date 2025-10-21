@@ -416,24 +416,16 @@ export const votingPolls: VotingPoll[] = [
   },
 ];
 
-const generateSolutionResults = () => [
-    { level: '100% Agree', percentage: Math.floor(Math.random() * 30) + 20, color: 'bg-green-600' },
-    { level: '75% Agree', percentage: Math.floor(Math.random() * 20) + 15, color: 'bg-green-400' },
-    { level: '50% Agree', percentage: Math.floor(Math.random() * 15) + 10, color: 'bg-yellow-400' },
-    { level: '25% Agree', percentage: Math.floor(Math.random() * 10) + 5, color: 'bg-orange-400' },
-    { level: '0% Agree', percentage: Math.floor(Math.random() * 5), color: 'bg-red-500' },
-];
-
 export const indiaIssuesPolls: IndiaIssuePoll[] = [
     {
         id: 'india-unemployment',
         title: 'Tackling Unemployment',
         description: 'Millions of educated youth in India lack suitable jobs. Which approaches should be prioritized?',
         solutions: [
-            { id: 'sol-1-1', text: 'Promote skill-based education aligned with industries.', results: generateSolutionResults() },
-            { id: 'sol-1-2', text: 'Support startups & MSMEs through easy loans and tax relief.', results: generateSolutionResults() },
-            { id: 'sol-1-3', text: 'Expand vocational training via digital platforms (e.g., Skill India 2.0).', results: generateSolutionResults() },
-            { id: 'sol-1-4', text: 'Encourage green jobs in renewable energy and EV sectors.', results: generateSolutionResults() },
+            { id: 'sol-1-1', text: 'Promote skill-based education aligned with industries.', results: [] },
+            { id: 'sol-1-2', text: 'Support startups & MSMEs through easy loans and tax relief.', results: [] },
+            { id: 'sol-1-3', text: 'Expand vocational training via digital platforms (e.g., Skill India 2.0).', results: [] },
+            { id: 'sol-1-4', text: 'Encourage green jobs in renewable energy and EV sectors.', results: [] },
         ],
     },
     {
@@ -441,9 +433,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Reducing Corruption',
         description: 'Corruption is a major issue due to weak enforcement and bureaucratic delays. What are the best solutions?',
         solutions: [
-            { id: 'sol-2-1', text: 'Enforce real-time e-governance and digital payments.', results: generateSolutionResults() },
-            { id: 'sol-2-2', text: 'Strengthen Lokpal/Lokayukta and whistleblower protection laws.', results: generateSolutionResults() },
-            { id: 'sol-2-3', text: 'Encourage blockchain-based transparency in government tenders.', results: generateSolutionResults() },
+            { id: 'sol-2-1', text: 'Enforce real-time e-governance and digital payments.', results: [] },
+            { id: 'sol-2-2', text: 'Strengthen Lokpal/Lokayukta and whistleblower protection laws.', results: [] },
+            { id: 'sol-2-3', text: 'Encourage blockchain-based transparency in government tenders.', results: [] },
         ],
     },
     {
@@ -451,9 +443,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Alleviating Poverty',
         description: 'Over 20 crore people live below the poverty line. What is the best strategy to lift them out?',
         solutions: [
-            { id: 'sol-3-1', text: 'Direct cash transfer (DBT) and food subsidies to genuine beneficiaries.', results: generateSolutionResults() },
-            { id: 'sol-3-2', text: 'Encourage micro-enterprises and self-help groups (SHGs).', results: generateSolutionResults() },
-            { id: 'sol-3-3', text: 'Affordable housing, healthcare, and education reforms.', results: generateSolutionResults() },
+            { id: 'sol-3-1', text: 'Direct cash transfer (DBT) and food subsidies to genuine beneficiaries.', results: [] },
+            { id: 'sol-3-2', text: 'Encourage micro-enterprises and self-help groups (SHGs).', results: [] },
+            { id: 'sol-3-3', text: 'Affordable housing, healthcare, and education reforms.', results: [] },
         ],
     },
     {
@@ -461,9 +453,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Improving Education Quality',
         description: 'The education system often focuses on rote learning. What is the best way to improve it?',
         solutions: [
-            { id: 'sol-4-1', text: 'Introduce AI-driven smart classrooms in government schools.', results: generateSolutionResults() },
-            { id: 'sol-4-2', text: 'Focus on critical thinking & digital literacy.', results: generateSolutionResults() },
-            { id: 'sol-4-3', text: 'Improve teacher training and reduce dropouts with incentives.', results: generateSolutionResults() },
+            { id: 'sol-4-1', text: 'Introduce AI-driven smart classrooms in government schools.', results: [] },
+            { id: 'sol-4-2', text: 'Focus on critical thinking & digital literacy.', results: [] },
+            { id: 'sol-4-3', text: 'Improve teacher training and reduce dropouts with incentives.', results: [] },
         ],
     },
     {
@@ -471,9 +463,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Managing Population Growth',
         description: 'Rapid population growth strains national resources. Which strategy is most effective?',
         solutions: [
-            { id: 'sol-5-1', text: 'Awareness campaigns on family planning.', results: generateSolutionResults() },
-            { id: 'sol-5-2', text: 'Free contraceptives and women’s health services.', results: generateSolutionResults() },
-            { id: 'sol-5-3', text: 'Empower women through education and employment.', results: generateSolutionResults() },
+            { id: 'sol-5-1', text: 'Awareness campaigns on family planning.', results: [] },
+            { id: 'sol-5-2', text: 'Free contraceptives and women’s health services.', results: [] },
+            { id: 'sol-5-3', text: 'Empower women through education and employment.', results: [] },
         ],
     },
     {
@@ -481,9 +473,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Addressing Healthcare Deficiency',
         description: 'Rural areas lack access to adequate hospitals and doctors. What is the best immediate solution?',
         solutions: [
-            { id: 'sol-6-1', text: 'Expand telemedicine and mobile clinics.', results: generateSolutionResults() },
-            { id: 'sol-6-2', text: 'Promote Ayushman Bharat with local partnerships.', results: generateSolutionResults() },
-            { id: 'sol-6-3', text: 'Increase public health spending to 3–5% of GDP.', results: generateSolutionResults() },
+            { id: 'sol-6-1', text: 'Expand telemedicine and mobile clinics.', results: [] },
+            { id: 'sol-6-2', text: 'Promote Ayushman Bharat with local partnerships.', results: [] },
+            { id: 'sol-6-3', text: 'Increase public health spending to 3–5% of GDP.', results: [] },
         ],
     },
     {
@@ -491,9 +483,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Combating Pollution & Environmental Degradation',
         description: 'Air, water, and soil pollution are at alarming levels. What should be the top priority?',
         solutions: [
-            { id: 'sol-7-1', text: 'Promote electric vehicles (EVs) and renewable energy.', results: generateSolutionResults() },
-            { id: 'sol-7-2', text: 'Strict industrial emission laws.', results: generateSolutionResults() },
-            { id: 'sol-7-3', text: 'Encourage tree plantation and waste segregation at source.', results: generateSolutionResults() },
+            { id: 'sol-7-1', text: 'Promote electric vehicles (EVs) and renewable energy.', results: [] },
+            { id: 'sol-7-2', text: 'Strict industrial emission laws.', results: [] },
+            { id: 'sol-7-3', text: 'Encourage tree plantation and waste segregation at source.', results: [] },
         ],
     },
     {
@@ -501,9 +493,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Tackling Water Scarcity',
         description: 'India faces depleting groundwater and frequent droughts. Which solution is most impactful?',
         solutions: [
-            { id: 'sol-8-1', text: 'Rainwater harvesting mandatory for all buildings.', results: generateSolutionResults() },
-            { id: 'sol-8-2', text: 'River-linking and watershed development projects.', results: generateSolutionResults() },
-            { id: 'sol-8-3', text: 'Promote drip irrigation for farmers.', results: generateSolutionResults() },
+            { id: 'sol-8-1', text: 'Rainwater harvesting mandatory for all buildings.', results: [] },
+            { id: 'sol-8-2', text: 'River-linking and watershed development projects.', results: [] },
+            { id: 'sol-8-3', text: 'Promote drip irrigation for farmers.', results: [] },
         ],
     },
     {
@@ -511,9 +503,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Improving Women Safety & Gender Inequality',
         description: 'Harassment and unequal opportunities persist. Which actions are most critical?',
         solutions: [
-            { id: 'sol-9-1', text: 'Fast-track courts for crimes against women.', results: generateSolutionResults() },
-            { id: 'sol-9-2', text: 'Promote women-led entrepreneurship.', results: generateSolutionResults() },
-            { id: 'sol-9-3', text: 'Equal pay laws and digital safety campaigns.', results: generateSolutionResults() },
+            { id: 'sol-9-1', text: 'Fast-track courts for crimes against women.', results: [] },
+            { id: 'sol-9-2', text: 'Promote women-led entrepreneurship.', results: [] },
+            { id: 'sol-9-3', text: 'Equal pay laws and digital safety campaigns.', results: [] },
         ],
     },
     {
@@ -521,9 +513,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Solving Farmer Distress',
         description: 'Farmers face low income, debt, and crop failures. What is the most effective support?',
         solutions: [
-            { id: 'sol-10-1', text: 'MSP reform and crop insurance coverage.', results: generateSolutionResults() },
-            { id: 'sol-10-2', text: 'Promote organic & smart farming technologies.', results: generateSolutionResults() },
-            { id: 'sol-10-3', text: 'Strengthen direct-to-market farmer e-platforms.', results: generateSolutionResults() },
+            { id: 'sol-10-1', text: 'MSP reform and crop insurance coverage.', results: [] },
+            { id: 'sol-10-2', text: 'Promote organic & smart farming technologies.', results: [] },
+            { id: 'sol-10-3', text: 'Strengthen direct-to-market farmer e-platforms.', results: [] },
         ],
     },
     {
@@ -531,9 +523,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Closing Infrastructure Gaps',
         description: 'Poor roads, transport, and logistics hinder growth. How should we prioritize investment?',
         solutions: [
-            { id: 'sol-11-1', text: 'Integrate Smart City and PM Gati Shakti projects.', results: generateSolutionResults() },
-            { id: 'sol-11-2', text: 'Private-public partnership (PPP) in infrastructure.', results: generateSolutionResults() },
-            { id: 'sol-11-3', text: 'Encourage electric public transport and smart grids.', results: generateSolutionResults() },
+            { id: 'sol-11-1', text: 'Integrate Smart City and PM Gati Shakti projects.', results: [] },
+            { id: 'sol-11-2', text: 'Private-public partnership (PPP) in infrastructure.', results: [] },
+            { id: 'sol-11-3', text: 'Encourage electric public transport and smart grids.', results: [] },
         ],
     },
     {
@@ -541,9 +533,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Reducing Judicial Delays',
         description: 'Crores of court cases are pending, denying timely justice. What is the best reform?',
         solutions: [
-            { id: 'sol-12-1', text: 'Increase number of judges & fast-track courts.', results: generateSolutionResults() },
-            { id: 'sol-12-2', text: 'Use AI-based legal document management.', results: generateSolutionResults() },
-            { id: 'sol-12-3', text: 'Promote online hearings for small cases.', results: generateSolutionResults() },
+            { id: 'sol-12-1', text: 'Increase number of judges & fast-track courts.', results: [] },
+            { id: 'sol-12-2', text: 'Use AI-based legal document management.', results: [] },
+            { id: 'sol-12-3', text: 'Promote online hearings for small cases.', results: [] },
         ],
     },
     {
@@ -551,9 +543,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Curbing Black Money',
         description: 'A parallel cash economy weakens the formal system. Which measure is most effective?',
         solutions: [
-            { id: 'sol-13-1', text: 'Promote UPI, digital rupee (CBDC).', results: generateSolutionResults() },
-            { id: 'sol-13-2', text: 'Stronger income tracking and cross-border cooperation.', results: generateSolutionResults() },
-            { id: 'sol-13-3', text: 'Reward honest taxpayers.', results: generateSolutionResults() },
+            { id: 'sol-13-1', text: 'Promote UPI, digital rupee (CBDC).', results: [] },
+            { id: 'sol-13-2', text: 'Stronger income tracking and cross-border cooperation.', results: [] },
+            { id: 'sol-13-3', text: 'Reward honest taxpayers.', results: [] },
         ],
     },
     {
@@ -561,9 +553,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Fighting Caste & Religious Discrimination',
         description: 'Discrimination divides society and politics. What is the most constructive approach?',
         solutions: [
-            { id: 'sol-14-1', text: 'Promote inter-caste education & employment programs.', results: generateSolutionResults() },
-            { id: 'sol-14-2', text: 'Strict action against hate speech and violence.', results: generateSolutionResults() },
-            { id: 'sol-14-3', text: 'Encourage unity through community development.', results: generateSolutionResults() },
+            { id: 'sol-14-1', text: 'Promote inter-caste education & employment programs.', results: [] },
+            { id: 'sol-14-2', text: 'Strict action against hate speech and violence.', results: [] },
+            { id: 'sol-14-3', text: 'Encourage unity through community development.', results: [] },
         ],
     },
     {
@@ -571,9 +563,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Controlling Inflation',
         description: 'The rising cost of living affects middle and poor classes. How can the government provide relief?',
         solutions: [
-            { id: 'sol-15-1', text: 'Control supply chains and reduce hoarding.', results: generateSolutionResults() },
-            { id: 'sol-15-2', text: 'Boost domestic manufacturing (Make in India).', results: generateSolutionResults() },
-            { id: 'sol-15-3', text: 'Smart subsidies for essential goods.', results: generateSolutionResults() },
+            { id: 'sol-15-1', text: 'Control supply chains and reduce hoarding.', results: [] },
+            { id: 'sol-15-2', text: 'Boost domestic manufacturing (Make in India).', results: [] },
+            { id: 'sol-15-3', text: 'Smart subsidies for essential goods.', results: [] },
         ],
     },
     {
@@ -581,9 +573,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Improving Crime & Law Enforcement',
         description: 'Police infrastructure is often weak and outdated. What is the most needed upgrade?',
         solutions: [
-            { id: 'sol-16-1', text: 'Modernize police with body cams & digital record systems.', results: generateSolutionResults() },
-            { id: 'sol-16-2', text: 'Recruit & train more police personnel.', results: generateSolutionResults() },
-            { id: 'sol-16-3', text: 'Community policing for trust building.', results: generateSolutionResults() },
+            { id: 'sol-16-1', text: 'Modernize police with body cams & digital record systems.', results: [] },
+            { id: 'sol-16-2', text: 'Recruit & train more police personnel.', results: [] },
+            { id: 'sol-16-3', text: 'Community policing for trust building.', results: [] },
         ],
     },
     {
@@ -591,9 +583,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Solving the Energy Crisis',
         description: 'India is heavily dependent on coal and energy imports. What is the path to energy independence?',
         solutions: [
-            { id: 'sol-17-1', text: 'Expand solar, wind, and hydro capacity.', results: generateSolutionResults() },
-            { id: 'sol-17-2', text: 'Encourage EV adoption with battery recycling.', results: generateSolutionResults() },
-            { id: 'sol-17-3', text: 'Promote energy efficiency in industries and homes.', results: generateSolutionResults() },
+            { id: 'sol-17-1', text: 'Expand solar, wind, and hydro capacity.', results: [] },
+            { id: 'sol-17-2', text: 'Encourage EV adoption with battery recycling.', results: [] },
+            { id: 'sol-17-3', text: 'Promote energy efficiency in industries and homes.', results: [] },
         ],
     },
     {
@@ -601,9 +593,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Managing Urbanization & Slums',
         description: 'Unplanned growth of cities leads to overcrowding and slums. What is the best urban planning strategy?',
         solutions: [
-            { id: 'sol-18-1', text: 'Develop smart satellite towns.', results: generateSolutionResults() },
-            { id: 'sol-18-2', text: 'Affordable housing & rental reforms.', results: generateSolutionResults() },
-            { id: 'sol-18-3', text: 'Improve waste management and sanitation.', results: generateSolutionResults() },
+            { id: 'sol-18-1', text: 'Develop smart satellite towns.', results: [] },
+            { id: 'sol-18-2', text: 'Affordable housing & rental reforms.', results: [] },
+            { id: 'sol-18-3', text: 'Improve waste management and sanitation.', results: [] },
         ],
     },
     {
@@ -611,9 +603,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Fixing Transportation Problems',
         description: 'Traffic congestion and poor connectivity plague major cities. What is the priority?',
         solutions: [
-            { id: 'sol-19-1', text: 'Promote metro, EV buses, cycling tracks.', results: generateSolutionResults() },
-            { id: 'sol-19-2', text: 'Develop logistics corridors.', results: generateSolutionResults() },
-            { id: 'sol-19-3', text: 'Smart traffic systems with AI.', results: generateSolutionResults() },
+            { id: 'sol-19-1', text: 'Promote metro, EV buses, cycling tracks.', results: [] },
+            { id: 'sol-19-2', text: 'Develop logistics corridors.', results: [] },
+            { id: 'sol-19-3', text: 'Smart traffic systems with AI.', results: [] },
         ],
     },
     {
@@ -621,9 +613,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Addressing Cybercrime & Data Security',
         description: 'Online frauds and hacking are increasing. How can citizens and data be protected?',
         solutions: [
-            { id: 'sol-20-1', text: 'Strengthen Cybersecurity laws & awareness.', results: generateSolutionResults() },
-            { id: 'sol-20-2', text: 'Use AI-based fraud detection tools.', results: generateSolutionResults() },
-            { id: 'sol-20-3', text: 'Train police in cyber forensics.', results: generateSolutionResults() },
+            { id: 'sol-20-1', text: 'Strengthen Cybersecurity laws & awareness.', results: [] },
+            { id: 'sol-20-2', text: 'Use AI-based fraud detection tools.', results: [] },
+            { id: 'sol-20-3', text: 'Train police in cyber forensics.', results: [] },
         ],
     },
     {
@@ -631,9 +623,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Reversing Brain Drain',
         description: 'Skilled Indians are migrating abroad for better opportunities. How can we retain talent?',
         solutions: [
-            { id: 'sol-21-1', text: 'Build research & innovation hubs.', results: generateSolutionResults() },
-            { id: 'sol-21-2', text: 'Competitive pay & startup ecosystem.', results: generateSolutionResults() },
-            { id: 'sol-21-3', text: 'Incentivize return of skilled professionals.', results: generateSolutionResults() },
+            { id: 'sol-21-1', text: 'Build research & innovation hubs.', results: [] },
+            { id: 'sol-21-2', text: 'Competitive pay & startup ecosystem.', results: [] },
+            { id: 'sol-21-3', text: 'Incentivize return of skilled professionals.', results: [] },
         ],
     },
     {
@@ -641,9 +633,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Curing Public Sector Inefficiency',
         description: 'Bureaucratic delays and outdated systems slow down governance. What reform is most needed?',
         solutions: [
-            { id: 'sol-22-1', text: 'Introduce performance-based evaluation.', results: generateSolutionResults() },
-            { id: 'sol-22-2', text: 'Privatize loss-making PSUs.', results: generateSolutionResults() },
-            { id: 'sol-22-3', text: 'AI-driven service delivery platforms.', results: generateSolutionResults() },
+            { id: 'sol-22-1', text: 'Introduce performance-based evaluation.', results: [] },
+            { id: 'sol-22-2', text: 'Privatize loss-making PSUs.', results: [] },
+            { id: 'sol-22-3', text: 'AI-driven service delivery platforms.', results: [] },
         ],
     },
     {
@@ -651,9 +643,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Improving Road Safety',
         description: 'India has high accident rates due to negligence and poor infrastructure. What is the most urgent fix?',
         solutions: [
-            { id: 'sol-23-1', text: 'Strict traffic rule enforcement & camera systems.', results: generateSolutionResults() },
-            { id: 'sol-23-2', text: 'Road quality improvement.', results: generateSolutionResults() },
-            { id: 'sol-23-3', text: 'Awareness campaigns and driver training.', results: generateSolutionResults() },
+            { id: 'sol-23-1', text: 'Strict traffic rule enforcement & camera systems.', results: [] },
+            { id: 'sol-23-2', text: 'Road quality improvement.', results: [] },
+            { id: 'sol-23-3', text: 'Awareness campaigns and driver training.', results: [] },
         ],
     },
     {
@@ -661,9 +653,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Reducing Food Wastage',
         description: 'Millions go hungry while tons of food is wasted. What is the most practical solution?',
         solutions: [
-            { id: 'sol-24-1', text: 'Create food banks & cold storage networks.', results: generateSolutionResults() },
-            { id: 'sol-24-2', text: 'Encourage food donation apps and awareness drives.', results: generateSolutionResults() },
-            { id: 'sol-24-3', text: 'Educate restaurants on responsible waste management.', results: generateSolutionResults() },
+            { id: 'sol-24-1', text: 'Create food banks & cold storage networks.', results: [] },
+            { id: 'sol-24-2', text: 'Encourage food donation apps and awareness drives.', results: [] },
+            { id: 'sol-24-3', text: 'Educate restaurants on responsible waste management.', results: [] },
         ],
     },
     {
@@ -671,9 +663,9 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         title: 'Fixing Political Polarization & Poor Governance',
         description: 'Divisive politics reduces focus on development. How can accountability be improved?',
         solutions: [
-            { id: 'sol-25-1', text: 'Promote transparency and accountability in parties.', results: generateSolutionResults() },
-            { id: 'sol-25-2', text: 'Educate voters on performance-based voting.', results: generateSolutionResults() },
-            { id: 'sol-25-3', text: 'Limit money power in elections via digital monitoring.', results: generateSolutionResults() },
+            { id: 'sol-25-1', text: 'Promote transparency and accountability in parties.', results: [] },
+            { id: 'sol-25-2', text: 'Educate voters on performance-based voting.', results: [] },
+            { id: 'sol-25-3', text: 'Limit money power in elections via digital monitoring.', results: [] },
         ],
     },
 ];
@@ -830,3 +822,4 @@ export const airdropRewards: AirdropReward[] = [
     
 
     
+

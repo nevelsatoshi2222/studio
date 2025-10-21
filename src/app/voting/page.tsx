@@ -21,9 +21,9 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { votingPolls, indiaIssuesPolls } from '@/lib/data';
+import { votingPolls, indiaIssuesPolls as initialIndiaIssuesPolls } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
@@ -70,8 +70,30 @@ const PollCard = ({ poll }: { poll: typeof votingPolls[0] }) => {
   );
 };
 
-const IndiaIssuePollCard = ({ poll }: { poll: IndiaIssuePoll }) => {
+const generateSolutionResults = () => [
+    { level: '100% Agree', percentage: Math.floor(Math.random() * 30) + 20, color: 'bg-green-600' },
+    { level: '75% Agree', percentage: Math.floor(Math.random() * 20) + 15, color: 'bg-green-400' },
+    { level: '50% Agree', percentage: Math.floor(Math.random() * 15) + 10, color: 'bg-yellow-400' },
+    { level: '25% Agree', percentage: Math.floor(Math.random() * 10) + 5, color: 'bg-orange-400' },
+    { level: '0% Agree', percentage: Math.floor(Math.random() * 5), color: 'bg-red-500' },
+];
+
+
+const IndiaIssuePollCard = ({ poll: initialPoll }: { poll: IndiaIssuePoll }) => {
   const [selectedSolutions, setSelectedSolutions] = useState<Record<string, string>>({});
+  const [poll, setPoll] = useState<IndiaIssuePoll | null>(null);
+
+  useEffect(() => {
+    // Generate results on the client side to avoid hydration mismatch
+    const clientSidePoll = {
+        ...initialPoll,
+        solutions: initialPoll.solutions.map(s => ({
+            ...s,
+            results: generateSolutionResults()
+        }))
+    };
+    setPoll(clientSidePoll);
+  }, [initialPoll]);
 
   const handleCheckboxChange = (solutionId: string, checked: boolean | 'indeterminate') => {
     setSelectedSolutions(prev => {
@@ -93,6 +115,10 @@ const IndiaIssuePollCard = ({ poll }: { poll: IndiaIssuePoll }) => {
   };
   
   const isAnySolutionSelected = Object.keys(selectedSolutions).length > 0;
+  
+  if (!poll) {
+    return <Card className="col-span-1 lg:col-span-2 animate-pulse bg-muted/50 h-96"></Card>;
+  }
 
   return (
     <Card className="col-span-1 lg:col-span-2">
@@ -174,11 +200,11 @@ const IndiaIssuePollCard = ({ poll }: { poll: IndiaIssuePoll }) => {
 
 
 export default function VotingPage() {
-  const [selectedGeography, setSelectedGeography] = useState('World');
+  const [selectedGeography, setSelectedGeography] = useState('India Issues');
 
   const getPollsByGeography = (geo: string) => {
     if (geo === 'India Issues') {
-        return indiaIssuesPolls;
+        return initialIndiaIssuesPolls;
     }
     return votingPolls.filter(poll => poll.geography === geo);
   };
