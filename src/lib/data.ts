@@ -415,6 +415,107 @@ export const votingPolls: VotingPoll[] = [
   },
 ];
 
+export const indiaIssuesPolls: VotingPoll[] = [
+    {
+        id: 'poll-india-1',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to best tackle unemployment?',
+        description: 'Millions of educated youth in India lack suitable jobs. Which approach should be prioritized?',
+        results: [
+            { option: 'Promote skill-based education & vocational training', percentage: 40, color: 'bg-blue-500' },
+            { option: 'Support startups & MSMEs with easy loans', percentage: 35, color: 'bg-green-500' },
+            { option: 'Expand green jobs in renewable energy', percentage: 15, color: 'bg-yellow-500' },
+            { option: 'Other', percentage: 10, color: 'bg-gray-500' },
+        ],
+    },
+    {
+        id: 'poll-india-2',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'What is the most effective way to reduce corruption?',
+        description: 'Corruption is a major issue due to weak enforcement and bureaucratic delays. What is the best solution?',
+        results: [
+            { option: 'Enforce real-time e-governance and digital payments', percentage: 55, color: 'bg-blue-500' },
+            { option: 'Strengthen Lokpal and whistleblower protection laws', percentage: 25, color: 'bg-green-500' },
+            { option: 'Use blockchain for transparency in government tenders', percentage: 20, color: 'bg-yellow-500' },
+        ],
+    },
+    {
+        id: 'poll-india-3',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to alleviate poverty effectively?',
+        description: 'Over 20 crore people live below the poverty line. What is the best strategy to lift them out?',
+        results: [
+            { option: 'Direct cash transfer (DBT) and food subsidies', percentage: 30, color: 'bg-blue-500' },
+            { option: 'Encourage micro-enterprises and self-help groups (SHGs)', percentage: 45, color: 'bg-green-500' },
+            { option: 'Affordable housing, healthcare, and education reforms', percentage: 25, color: 'bg-yellow-500' },
+        ],
+    },
+    {
+        id: 'poll-india-4',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to improve education quality?',
+        description: 'The education system often focuses on rote learning. What is the best way to improve it?',
+        results: [
+            { option: 'Introduce AI-driven smart classrooms in government schools', percentage: 25, color: 'bg-blue-500' },
+            { option: 'Focus on critical thinking & digital literacy', percentage: 50, color: 'bg-green-500' },
+            { option: 'Improve teacher training and reduce dropouts', percentage: 25, color: 'bg-yellow-500' },
+        ],
+    },
+     {
+        id: 'poll-india-5',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to best manage population growth?',
+        description: 'Rapid population growth strains national resources. Which strategy is most effective?',
+        results: [
+            { option: 'Awareness campaigns on family planning', percentage: 35, color: 'bg-blue-500' },
+            { option: 'Provide free contraceptives and women’s health services', percentage: 25, color: 'bg-green-500' },
+            { option: 'Empower women through education and employment', percentage: 40, color: 'bg-yellow-500' },
+        ],
+    },
+    {
+        id: 'poll-india-6',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to address healthcare deficiencies, especially in rural areas?',
+        description: 'Rural areas lack access to adequate hospitals and doctors. What is the best immediate solution?',
+        results: [
+            { option: 'Expand telemedicine and mobile health clinics', percentage: 50, color: 'bg-blue-500' },
+            { option: 'Promote Ayushman Bharat with local partnerships', percentage: 30, color: 'bg-green-500' },
+            { option: 'Increase public health spending to 3-5% of GDP', percentage: 20, color: 'bg-yellow-500' },
+        ],
+    },
+    {
+        id: 'poll-india-7',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'What is the most critical step to combat pollution?',
+        description: 'Air, water, and soil pollution are at alarming levels. What should be the top priority?',
+        results: [
+            { option: 'Promote electric vehicles (EVs) and renewable energy', percentage: 45, color: 'bg-blue-500' },
+            { option: 'Enforce strict industrial emission laws', percentage: 35, color: 'bg-green-500' },
+            { option: 'Encourage mass tree plantation and waste segregation', percentage: 20, color: 'bg-yellow-500' },
+        ],
+    },
+    {
+        id: 'poll-india-8',
+        geography: 'India Issues',
+        category: 'Issue',
+        title: 'How to best tackle water scarcity?',
+        description: 'India faces depleting groundwater and frequent droughts. Which solution is most impactful?',
+        results: [
+            { option: 'Mandate rainwater harvesting for all new buildings', percentage: 30, color: 'bg-blue-500' },
+            { option: 'Invest in river-linking and watershed development projects', percentage: 40, color: 'bg-green-500' },
+            { option: 'Promote drip irrigation and efficient water use for farmers', percentage: 30, color: 'bg-yellow-500' },
+        ],
+    },
+];
+
+
 export const socialPosts: SocialPost[] = [
   { id: 'post1', authorId: 'usr_002', content: 'Loving the new features on the IBC platform! Staking is so smooth. #crypto #ibc', timestamp: '2h ago', likes: 15, comments: 4 },
   { id: 'post2', authorId: 'usr_003', content: 'Just submitted my evidence for the anti-corruption initiative. Feels good to be part of the change.', timestamp: '5h ago', likes: 45, comments: 12 },
@@ -561,8 +662,9 @@ export const airdropRewards: AirdropReward[] = [
   { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.', icon: Award },
   { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Bronze Reward.', icon: Award },
   { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.', icon: Award },
-  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.', icon: Award },
-  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.', icon: Diamond },
+  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.', icon: Award },
+  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Diamond Reward.', icon: Diamond },
 ];
     
 
+    
