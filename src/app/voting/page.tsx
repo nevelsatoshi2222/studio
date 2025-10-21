@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowRight, Globe, Landmark, Building, Map, MapPin } from 'lucide-react';
+import { ArrowRight, Globe, Landmark, Building, Map, MapPin, Home } from 'lucide-react';
 import Link from 'next/link';
 
 const votingLevels = [
@@ -42,9 +42,15 @@ const votingLevels = [
     icon: Map,
   },
   {
-    title: 'Village / Street Issues',
-    description: 'Have your say on hyper-local matters that affect your immediate community.',
-    href: '/voting/local',
+    title: 'Village / Ward Issues',
+    description: 'Have your say on matters that affect your village or ward community.',
+    href: '/voting/village',
+    icon: Home,
+  },
+  {
+    title: 'Street Issues',
+    description: 'Address hyper-local matters like sanitation and repairs on your own street.',
+    href: '/voting/street',
     icon: MapPin,
   },
 ];
