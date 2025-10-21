@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -25,7 +26,7 @@ export default function NationalIssuesPage() {
 
   const handleNavigate = () => {
     if (selectedCountry) {
-      router.push(`/national-issues/${encodeURIComponent(selectedCountry)}`);
+      router.push(`/voting/national/${encodeURIComponent(selectedCountry)}`);
     }
   };
 
