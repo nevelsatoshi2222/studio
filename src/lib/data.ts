@@ -26,7 +26,8 @@ import {
   TokenSupplyDistribution,
   TeamMember,
   AirdropReward,
-  IndiaGeography
+  IndiaGeography,
+  FundAllocation
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network, Key, UserCheck, Gift, UserPlus, Diamond } from 'lucide-react';
@@ -951,6 +952,40 @@ export const adminAllocations: AdminAllocation[] = [
   { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.', icon: Key },
 ];
 
+export const fundAllocationsByStage: { [key: number]: FundAllocation[] } = {
+  1: [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 20, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 20, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  2: [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  3: [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  4: [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  // Stages 5 and beyond use the default allocation
+  default: [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Voted Public Demand', value: 40, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ]
+};
+
+
 export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
     { name: 'Public Sale', value: 35.0 },
     { name: 'Coin Split Bonus', value: 5.1 },
@@ -1168,6 +1203,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 

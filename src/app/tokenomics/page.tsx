@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution, airdropRewards } from '@/lib/data';
+import { tokenStages, users, stakedPositions, lockDurations, adminAllocations, coinPackages, tokenSupplyDistribution, airdropRewards, fundAllocationsByStage } from '@/lib/data';
 import { Lock, Unlock, Zap, Coins, Globe, Heart, Users as UsersIcon, Landmark, CircleDollarSign, Share2, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Network, Key, UserCheck, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -45,6 +45,8 @@ import {
 } from 'recharts';
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { FundAllocation } from '@/lib/types';
+
 
 const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981", "#f59e0b", "#8b5cf6", "#22c55e", "#6366f1", "#d946ef", "#14b8a6", "#a855f7",];
 
@@ -58,6 +60,78 @@ const coinInfo = [
     { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
     { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
 ]
+
+const FundAllocationCard = ({ stage }: { stage: number }) => {
+    const allocations: FundAllocation[] = fundAllocationsByStage[stage] || fundAllocationsByStage.default;
+    const title = stage <= 4 ? `Stage ${stage} Fund Allocation` : 'Fund Allocation (Stage 5+)';
+    const description = `A transparent breakdown of how revenue from token sales is distributed in Stage ${stage}.`;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={allocations}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={80}
+                                    labelLine={false}
+                                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                                        const RADIAN = Math.PI / 180;
+                                        const radius = innerRadius + (outerRadius - innerRadius) * 1.25;
+                                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                        return (
+                                            <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
+                                                {`${(percent * 100).toFixed(0)}%`}
+                                            </text>
+                                        );
+                                    }}
+                                >
+                                    {allocations.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--background))',
+                                        borderColor: 'hsl(var(--border))',
+                                    }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-4">
+                        {allocations.map((alloc, index) => {
+                            const Icon = alloc.icon;
+                            return (
+                                <div key={alloc.name} className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg mt-1 shrink-0" style={{ backgroundColor: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] + '1A' }}>
+                                        <Icon className="h-5 w-5" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">{alloc.name} - {alloc.value}%</p>
+                                        <p className="text-sm text-muted-foreground">{alloc.description}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export default function TokenomicsPage() {
   const adminUser = users.find(u => u.id === 'usr_admin');
@@ -110,157 +184,6 @@ export default function TokenomicsPage() {
   const fixedAllocations = adminAllocations.filter(a => a.type === 'fixed');
   const geographicAllocations = adminAllocations.filter(a => a.type === 'geographic');
   const votingAllocations = adminAllocations.filter(a => a.type === 'voting');
-
-  const FundAllocationCard = () => (
-    <Card>
-        <CardHeader>
-            <CardTitle>Fund Allocation from Token Sales</CardTitle>
-            <CardDescription>A transparent breakdown of how revenue from token sales is distributed across three core areas.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-            {/* Geographic Public Demand */}
-            <div className="rounded-lg border bg-card p-4">
-                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
-                    <UsersIcon className="h-5 w-5 text-primary"/>
-                    40% for Geographic Public Demand
-                </h3>
-                 <p className="mt-2 text-muted-foreground">
-                    40% of all revenue is automatically allocated for development projects based on the geographic level where the revenue was generated.
-                </p>
-                <div className="mt-4 grid gap-8 md:grid-cols-2">
-                    <div className="h-64">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                            <Pie
-                                data={geographicAllocations}
-                                dataKey="percentage"
-                                nameKey="category"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={80}
-                                labelLine={false}
-                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
-                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                                    return (
-                                    <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
-                                        {`${geographicAllocations[index].percentage}%`}
-                                    </text>
-                                    );
-                                }}
-                            >
-                                {geographicAllocations.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'hsl(var(--background))',
-                                    borderColor: 'hsl(var(--border))',
-                                }}
-                            />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="space-y-4">
-                        {geographicAllocations.map((alloc, index) => {
-                            const Icon = icons[alloc.category] || CircleDollarSign;
-                            return (
-                                <div key={alloc.category} className="flex items-start gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg mt-1 shrink-0" style={{ backgroundColor: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] + '1A' }}>
-                                        <Icon className="h-5 w-5" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }}/>
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold">{alloc.category} - {alloc.percentage}%</p>
-                                        <p className="text-sm text-muted-foreground">{alloc.description}</p>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </div>
-
-             {/* Voting Public Demand */}
-            <div className="rounded-lg border bg-card p-4">
-                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
-                    <Vote className="h-5 w-5 text-primary"/>
-                    40% for Voted Public Demand
-                </h3>
-                 <p className="mt-2 text-muted-foreground">
-                   Another 40% of all revenue is held in a central fund. The community decides how to use these funds by discussing and voting for specific issues, problems, events, causes, and projects.
-                </p>
-            </div>
-
-             {/* Fixed Allocations */}
-            <div className="rounded-lg border bg-card p-4">
-                 <h3 className="font-headline text-lg font-semibold flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-primary"/>
-                    20% for World Initiative
-                </h3>
-                 <p className="mt-2 text-muted-foreground">
-                    The remaining 20% is allocated to fixed categories that support the platform's growth and core mission.
-                </p>
-                <div className="mt-4 grid gap-8 md:grid-cols-2">
-                    <div className="h-64">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                            <Pie
-                                data={fixedAllocations}
-                                dataKey="percentage"
-                                nameKey="category"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={80}
-                                labelLine={false}
-                                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
-                                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                                    return (
-                                    <text x={x} y={y} fill="currentColor" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs">
-                                        {`${fixedAllocations[index].percentage}%`}
-                                    </text>
-                                    );
-                                }}
-                            >
-                                {fixedAllocations.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'hsl(var(--background))',
-                                    borderColor: 'hsl(var(--border))',
-                                }}
-                            />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="space-y-4">
-                        {fixedAllocations.map((alloc, index) => {
-                            const Icon = icons[alloc.category] || CircleDollarSign;
-                            return (
-                                <div key={alloc.category} className="flex items-start gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg mt-1 shrink-0" style={{ backgroundColor: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] + '1A' }}>
-                                        <Icon className="h-5 w-5" style={{ color: PIE_CHART_COLORS[index % PIE_CHART_COLORS.length] }}/>
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold">{alloc.category} - {alloc.percentage}%</p>
-                                        <p className="text-sm text-muted-foreground">{alloc.description}</p>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-  );
 
     const TokenomicsChartCard = ({ coinName }: { coinName: string }) => (
         <Card>
@@ -424,10 +347,24 @@ export default function TokenomicsPage() {
                         </Card>
 
                         {['ice', 'igc', 'job', 'frn', 'work', 'quiz'].includes(coin.id) && (
-                            <div className="grid gap-6 lg:grid-cols-2">
-                                <TokenomicsChartCard coinName={coin.name} />
-                                <FundAllocationCard />
-                            </div>
+                           <Tabs defaultValue="stage1" className="w-full">
+                                <CardHeader>
+                                    <CardTitle>Fund Allocation from Token Sales</CardTitle>
+                                    <CardDescription>Select a stage to see the specific fund allocation. After Stage 4, the allocation becomes fixed.</CardDescription>
+                                     <TabsList className="grid w-full grid-cols-5">
+                                        <TabsTrigger value="stage1">Stage 1</TabsTrigger>
+                                        <TabsTrigger value="stage2">Stage 2</TabsTrigger>
+                                        <TabsTrigger value="stage3">Stage 3</TabsTrigger>
+                                        <TabsTrigger value="stage4">Stage 4</TabsTrigger>
+                                        <TabsTrigger value="stage5">Stage 5+</TabsTrigger>
+                                    </TabsList>
+                                </CardHeader>
+                                <TabsContent value="stage1"><FundAllocationCard stage={1} /></TabsContent>
+                                <TabsContent value="stage2"><FundAllocationCard stage={2} /></TabsContent>
+                                <TabsContent value="stage3"><FundAllocationCard stage={3} /></TabsContent>
+                                <TabsContent value="stage4"><FundAllocationCard stage={4} /></TabsContent>
+                                <TabsContent value="stage5"><FundAllocationCard stage={5} /></TabsContent>
+                            </Tabs>
                         )}
 
                         {coin.id === 'igc' && (

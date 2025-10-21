@@ -214,3 +214,10 @@ export type IndiaGeography = {
         }[];
     }[];
 }
+
+export type FundAllocation = {
+  name: string;
+  value: number;
+  description: string;
+  icon: React.ElementType;
+}
