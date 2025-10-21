@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { indiaGeography } from '@/lib/data';
+import { indiaGeography, countries } from '@/lib/data';
 
 const votingLevels = [
   {
@@ -118,7 +118,7 @@ export default function VotingHubPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Link href={`/voting/state?name=${selectedState}`} passHref>
+                  <Link href={`/voting/state/${encodeURIComponent(selectedState)}`} passHref>
                       <Button variant="outline" className="w-full sm:w-auto" disabled={!selectedState}>State Issues</Button>
                   </Link>
               </div>
