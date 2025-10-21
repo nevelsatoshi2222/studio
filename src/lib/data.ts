@@ -952,36 +952,36 @@ export const adminAllocations: AdminAllocation[] = [
   { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.', icon: Key },
 ];
 
-export const fundAllocationsByStage: { [key: number]: FundAllocation[] } = {
-  1: [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 20, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 20, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  2: [
+export const fundAllocationsByStage: { [key: string]: FundAllocation[] } = {
+  'stage1': [
     { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
     { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
     { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
     { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ],
-  3: [
+  'stage2': [
     { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
     { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
     { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
     { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ],
-  4: [
+  'stage3': [
     { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
     { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
     { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
     { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ],
-  // Stages 5 and beyond use the default allocation
-  default: [
+  'stage4': [
     { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
     { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Voted Public Demand', value: 40, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  'default': [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 1, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 39, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ]
 };
 
@@ -1203,6 +1203,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
