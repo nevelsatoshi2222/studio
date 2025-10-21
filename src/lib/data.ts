@@ -1,6 +1,5 @@
 
 
-
 import {
   Transaction,
   User,
@@ -1076,15 +1075,35 @@ export const indiaGeography: IndiaGeography[] = [
         {
           name: 'Pune',
           talukas: [
-            { name: 'Haveli', villages: ['Kothrud', 'Wagholi', 'Hinjewadi'] },
-            { name: 'Maval', villages: ['Lonavla', 'Talegaon', 'Kamshet'] }
+            { name: 'Haveli', villages: ['Kothrud', 'Wagholi', 'Hinjewadi', 'Pimpri-Chinchwad'] },
+            { name: 'Maval', villages: ['Lonavla', 'Talegaon Dabhade', 'Kamshet'] },
+            { name: 'Mulshi', villages: ['Bhugaon', 'Bhukum', 'Pirangut'] },
+            { name: 'Shirur', villages: ['Koregaon Bhima', 'Sanaswadi', 'Shikrapur'] },
           ]
         },
         {
-          name: 'Mumbai',
+          name: 'Mumbai Suburban',
           talukas: [
-            { name: 'Mumbai City', villages: ['Dadar', 'Andheri', 'Bandra'] }
+            { name: 'Andheri', villages: ['Andheri East', 'Andheri West', 'Vile Parle'] },
+            { name: 'Borivali', villages: ['Borivali East', 'Borivali West', 'Dahisar'] },
+            { name: 'Kurla', villages: ['Kurla East', 'Kurla West', 'Ghatkopar'] }
           ]
+        },
+        {
+          name: 'Nagpur',
+          talukas: [
+              { name: 'Nagpur City', villages: ['Sitabuldi', 'Mahal', 'Sadar'] },
+              { name: 'Hingna', villages: ['Hingna', 'Wadi', 'Gumgaon'] },
+              { name: 'Kamptee', villages: ['Kamptee', 'Kanhan', 'Tekadi'] },
+          ]
+        },
+        {
+            name: 'Nashik',
+            talukas: [
+                { name: 'Nashik', villages: ['Nashik City', 'Deolali', 'Panchavati'] },
+                { name: 'Igatpuri', villages: ['Igatpuri', 'Ghoti', 'Bhandardara'] },
+                { name: 'Sinnar', villages: ['Sinnar', 'Wavi', 'Muslagaon'] },
+            ]
         }
       ]
     },
@@ -1114,4 +1133,5 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
