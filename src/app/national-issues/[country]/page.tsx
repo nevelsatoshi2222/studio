@@ -25,7 +25,7 @@ import { useParams } from 'next/navigation';
 
 type Poll = NationalIssuesOutput[0];
 
-const agreementLevels = ['100%', '75%', '50%', '25%'];
+const agreementLevels = ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
 
 function PollCard({ poll }: { poll: Poll }) {
   const [selectedSolutions, setSelectedSolutions] = useState<Record<string, string>>({});
