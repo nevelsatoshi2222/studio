@@ -203,3 +203,14 @@ export type IndiaIssuePoll = {
     }[];
   }[];
 };
+
+export type IndiaGeography = {
+    name: string; // State name
+    districts: {
+        name: string; // District name
+        talukas: {
+            name: string; // Taluka name
+            villages: string[]; // Array of village names
+        }[];
+    }[];
+}
