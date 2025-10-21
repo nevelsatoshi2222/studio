@@ -19,71 +19,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
+import { generateStateIssues, type StateIssuesOutput } from '@/ai/flows/state-issues-flow';
 import { Loader2, Info } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-type PollSolution = {
-  text: string;
-};
-
-type Poll = {
-  title: string;
-  description: string;
-  solutions: PollSolution[];
-};
+type Poll = StateIssuesOutput[0];
 
 const agreementLevels = ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
-
-const gujaratIssues: Poll[] = [
-    {
-        title: "Water Scarcity & Management",
-        description: "Large parts of Gujarat, especially Saurashtra and Kutch, are drought-prone, facing severe water shortages for agriculture and drinking.",
-        solutions: [
-            { text: "Expand the Narmada canal network to reach the most arid regions." },
-            { text: "Promote mandatory rainwater harvesting and micro-irrigation (drip, sprinklers) with subsidies." },
-            { text: "Invest in large-scale desalination plants along the coastline." },
-            { text: "Revive and interlink traditional water bodies (talavs) to recharge groundwater." }
-        ]
-    },
-    {
-        title: "Employment for Youth",
-        description: "Despite being an industrial hub, there's a mismatch between the skills of the youth and the jobs available, leading to underemployment.",
-        solutions: [
-            { text: "Launch skill development centers in partnership with industries for job-specific training." },
-            { text: "Create a state-backed venture capital fund to support local startups and entrepreneurs." },
-            { text: "Reform the curriculum in technical institutes (ITIs) to align with modern industry needs." }
-        ]
-    },
-    {
-        title: "Agricultural Distress",
-        description: "Farmers face challenges like fluctuating market prices for cash crops (like cotton and groundnut), high input costs, and crop damage from unpredictable weather.",
-        solutions: [
-            { text: "Strengthen the MSP (Minimum Support Price) procurement process for key crops." },
-            { text: "Promote crop diversification and horticulture, providing farmers with alternative income streams." },
-            { text: "Establish a network of cold storages and food processing units at the taluka level." }
-        ]
-    },
-    {
-        title: "Industrial Pollution",
-        description: "Industrial zones in the 'Golden Corridor' (Vapi to Mehsana) face severe air and water pollution, affecting public health.",
-        solutions: [
-            { text: "Enforce a 'zero liquid discharge' policy for all chemical and textile industries." },
-            { text: "Set up real-time, online pollution monitoring systems for industrial estates." },
-            { text: "Incentivize industries to adopt green technologies and renewable energy sources." }
-        ]
-    },
-    {
-        title: "Urban Infrastructure Strain",
-        description: "Rapid urbanization in cities like Ahmedabad, Surat, and Rajkot is putting immense pressure on housing, transport, and waste management.",
-        solutions: [
-            { text: "Develop satellite towns with robust connectivity to major cities to decentralize population growth." },
-            { text: "Invest in expanding public transportation like metro and electric bus networks." },
-            { text: "Implement a city-wide solid waste segregation and recycling program." }
-        ]
-    }
-];
 
 function PollCard({ poll, state }: { poll: Poll; state: string }) {
   const { user, isUserLoading } = useUser();
@@ -110,7 +54,7 @@ function PollCard({ poll, state }: { poll: Poll; state: string }) {
   
   const isAnySolutionSelected = Object.keys(selectedSolutions).length > 0;
   // TODO: In a real app, user.state would come from a user profile in Firestore
-  const canVote = !isUserLoading && user && user.country === state;
+  const canVote = !isUserLoading && user && user.state === state;
 
   return (
     <Card>
@@ -127,18 +71,18 @@ function PollCard({ poll, state }: { poll: Poll; state: string }) {
                 <div className="flex items-start gap-4">
                   <Checkbox
                     id={`${poll.title}-sol-${index}`}
-                    onCheckedChange={(checked) => handleCheckboxChange(solution.text, checked)}
+                    onCheckedChange={(checked) => handleCheckboxChange(solution, checked)}
                     className="mt-1"
                   />
                   <div className="flex-1 space-y-4">
                     <Label htmlFor={`${poll.title}-sol-${index}`} className="font-normal text-base leading-snug">
-                      {solution.text}
+                      {solution}
                     </Label>
-                    {selectedSolutions[solution.text] && (
+                    {selectedSolutions[solution] && (
                         <div className="w-full sm:w-1/2">
                           <Select
-                            value={selectedSolutions[solution.text]}
-                            onValueChange={(value) => handleAgreementChange(solution.text, value)}
+                            value={selectedSolutions[solution]}
+                            onValueChange={(value) => handleAgreementChange(solution, value)}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Set agreement level" />
@@ -167,7 +111,7 @@ function PollCard({ poll, state }: { poll: Poll; state: string }) {
             <Info className="h-4 w-4" />
             <AlertTitle>Voting Restricted</AlertTitle>
             <AlertDescription>
-              You can only vote on issues for your own state. Your profile indicates you are from '{user.country}', but these polls are for {state}. Please complete your profile KYC to participate.
+              You can only vote on issues for your own state. Your profile indicates you are from '{user.state}', but these polls are for {state}. Please complete your profile KYC to participate.
             </AlertDescription>
           </Alert>
         )}
@@ -190,32 +134,63 @@ export default function StateIssuesPage() {
   const params = useParams();
   const state = params.state ? decodeURIComponent(params.state as string) : '';
 
-  // For this example, we are hardcoding the issues for Gujarat.
-  // A more dynamic app might fetch these based on the `state` param.
-  const issues = state.toLowerCase() === 'gujarat' ? gujaratIssues : null;
+  const [isLoading, setIsLoading] = useState(true);
+  const [issues, setIssues] = useState<StateIssuesOutput | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!state) return;
+
+    async function fetchIssues() {
+      setIsLoading(true);
+      setError(null);
+      setIssues(null);
+      try {
+        const result = await generateStateIssues(state);
+        setIssues(result);
+      } catch (e: any) {
+        setError('Failed to generate issues. Please try again.');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchIssues();
+  }, [state]);
 
   return (
     <AppLayout>
-        {!issues && (
-            <Card>
-                <CardHeader>
-                    <CardTitle>No Polls Available</CardTitle>
-                    <CardDescription>There are currently no voting polls available for {state}.</CardDescription>
-                </CardHeader>
-            </Card>
-        )}
+      <div>
+        <h1 className="font-headline text-3xl font-bold">Voting Polls for {state}</h1>
+        <p className="text-muted-foreground">
+            Vote on the top problems and potential solutions for {state}, generated by AI.
+        </p>
+      </div>
 
-        {issues && (
-             <div className="space-y-6">
-                <h1 className="font-headline text-3xl font-bold">Voting Polls for {state}</h1>
-                <p className="text-muted-foreground">
-                    Vote on the top problems and potential solutions for {state}.
-                </p>
-                {issues.map((issue, index) => (
-                    <PollCard key={index} poll={issue} state={state} />
-                ))}
-            </div>
-        )}
+      {isLoading && (
+          <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg border mt-6">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Generating polls for {state}...</p>
+          </div>
+      )}
+      
+      {error && (
+          <Card className="border-destructive mt-6">
+              <CardHeader>
+                  <CardTitle className="text-destructive">Error</CardTitle>
+                  <CardDescription>{error}</CardDescription>
+              </CardHeader>
+          </Card>
+      )}
+
+      {issues && (
+           <div className="space-y-6 mt-6">
+              {issues.map((issue, index) => (
+                  <PollCard key={index} poll={issue} state={state} />
+              ))}
+          </div>
+      )}
     </AppLayout>
   );
 }
