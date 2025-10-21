@@ -8,23 +8,25 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { countries } from '@/lib/data';
 import { useRouter } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 export default function NationalIssuesPage() {
   const router = useRouter();
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
 
-  const handleCountrySelect = (countryLabel: string) => {
-    // Navigate to the dynamic route for the selected country
-    router.push(`/national-issues/${encodeURIComponent(countryLabel)}`);
+  const handleNavigate = () => {
+    if (selectedCountry) {
+      router.push(`/national-issues/${encodeURIComponent(selectedCountry)}`);
+    }
   };
 
   return (
@@ -44,25 +46,22 @@ export default function NationalIssuesPage() {
               Choose a country from the list below to generate its voting page.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Command className="rounded-lg border shadow-md">
-              <CommandInput placeholder="Search for a country..." />
-              <CommandList>
-                <CommandEmpty>No country found.</CommandEmpty>
-                <CommandGroup>
-                  {countries.map((country) => (
-                    <CommandItem
-                      key={country.value}
-                      onSelect={() => handleCountrySelect(country.label)}
-                      className="cursor-pointer flex justify-between items-center"
-                    >
-                      <span>{country.label}</span>
-                      <ChevronRight className="h-4 w-4" />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+          <CardContent className="flex flex-col gap-4 md:flex-row">
+            <Select onValueChange={setSelectedCountry} value={selectedCountry}>
+              <SelectTrigger className="w-full md:w-[280px]">
+                <SelectValue placeholder="Select a country..." />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((country) => (
+                  <SelectItem key={country.value} value={country.label}>
+                    {country.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleNavigate} disabled={!selectedCountry}>
+              View Issues
+            </Button>
           </CardContent>
         </Card>
       </div>
