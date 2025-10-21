@@ -22,12 +22,9 @@ import { ChevronRight } from 'lucide-react';
 export default function NationalIssuesPage() {
   const router = useRouter();
 
-  const handleCountrySelect = (countryValue: string) => {
-    const country = countries.find(c => c.value === countryValue);
-    if (country) {
-        // Navigate to the dynamic route for the selected country
-        router.push(`/national-issues/${country.label}`);
-    }
+  const handleCountrySelect = (countryLabel: string) => {
+    // Navigate to the dynamic route for the selected country
+    router.push(`/national-issues/${encodeURIComponent(countryLabel)}`);
   };
 
   return (
@@ -56,7 +53,7 @@ export default function NationalIssuesPage() {
                   {countries.map((country) => (
                     <CommandItem
                       key={country.value}
-                      onSelect={() => handleCountrySelect(country.value)}
+                      onSelect={() => handleCountrySelect(country.label)}
                       className="cursor-pointer flex justify-between items-center"
                     >
                       <span>{country.label}</span>
