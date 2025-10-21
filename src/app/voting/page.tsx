@@ -104,74 +104,83 @@ export default function VotingHubPage() {
         <Card>
           <CardHeader>
             <CardTitle>Vote on Local Issues in India</CardTitle>
-            <CardDescription>Drill down to your specific region to vote on local matters. The relevant voting page will appear once you make a selection.</CardDescription>
+            <CardDescription>Drill down to your specific region to vote on local matters. The next dropdown will appear after you make a selection.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2">
-                <Select onValueChange={handleStateChange} value={selectedState}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select State" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {indiaGeography.map(state => (
-                      <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                 <Link href={`/voting/state?name=${selectedState}`} passHref>
-                    <Button variant="outline" className="w-full" disabled={!selectedState}>State Issues</Button>
-                </Link>
-            </div>
-            <div className="space-y-2">
-                <Select onValueChange={handleDistrictChange} value={selectedDistrict} disabled={!selectedState}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select District" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {districts?.map(district => (
-                      <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                 <Link href={`/voting/district?name=${selectedDistrict}`} passHref>
-                    <Button variant="outline" className="w-full" disabled={!selectedDistrict}>District Issues</Button>
-                </Link>
-            </div>
-             <div className="space-y-2">
-                <Select onValueChange={handleTalukaChange} value={selectedTaluka} disabled={!selectedDistrict}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Taluka" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {talukas?.map(taluka => (
-                      <SelectItem key={taluka.name} value={taluka.name}>{taluka.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                 <Link href={`/voting/taluka?name=${selectedTaluka}`} passHref>
-                    <Button variant="outline" className="w-full" disabled={!selectedTaluka}>Taluka/Block Issues</Button>
-                </Link>
-            </div>
-             <div className="space-y-2">
-                <Select onValueChange={handleVillageChange} value={selectedVillage} disabled={!selectedTaluka}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Village" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {villages?.map(village => (
-                      <SelectItem key={village} value={village}>{village}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="grid grid-cols-2 gap-2">
-                     <Link href={`/voting/village?name=${selectedVillage}`} passHref>
-                        <Button variant="outline" className="w-full" disabled={!selectedVillage}>Village Issues</Button>
-                    </Link>
-                    <Link href={`/voting/street?name=${selectedVillage}`} passHref>
-                        <Button variant="outline" className="w-full" disabled={!selectedVillage}>Street Issues</Button>
+          <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                  <Select onValueChange={handleStateChange} value={selectedState}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select State" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {indiaGeography.map(state => (
+                        <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Link href={`/voting/state?name=${selectedState}`} passHref>
+                      <Button variant="outline" className="w-full sm:w-auto" disabled={!selectedState}>State Issues</Button>
+                  </Link>
+              </div>
+
+              {selectedState && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Select onValueChange={handleDistrictChange} value={selectedDistrict}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select District" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts?.map(district => (
+                          <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Link href={`/voting/district?name=${selectedDistrict}`} passHref>
+                        <Button variant="outline" className="w-full sm:w-auto" disabled={!selectedDistrict}>District Issues</Button>
                     </Link>
                 </div>
-            </div>
+              )}
+
+              {selectedDistrict && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Select onValueChange={handleTalukaChange} value={selectedTaluka}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Taluka" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {talukas?.map(taluka => (
+                          <SelectItem key={taluka.name} value={taluka.name}>{taluka.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                     <Link href={`/voting/taluka?name=${selectedTaluka}`} passHref>
+                        <Button variant="outline" className="w-full sm:w-auto" disabled={!selectedTaluka}>Taluka/Block Issues</Button>
+                    </Link>
+                </div>
+              )}
+
+              {selectedTaluka && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Select onValueChange={handleVillageChange} value={selectedVillage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Village" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {villages?.map(village => (
+                          <SelectItem key={village} value={village}>{village}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="grid grid-cols-2 gap-2 w-full sm:w-auto">
+                         <Link href={`/voting/village?name=${selectedVillage}`} passHref>
+                            <Button variant="outline" className="w-full" disabled={!selectedVillage}>Village Issues</Button>
+                        </Link>
+                        <Link href={`/voting/street?name=${selectedVillage}`} passHref>
+                            <Button variant="outline" className="w-full" disabled={!selectedVillage}>Street Issues</Button>
+                        </Link>
+                    </div>
+                </div>
+              )}
           </CardContent>
         </Card>
 
