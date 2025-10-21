@@ -188,3 +188,18 @@ export type AirdropReward = {
   description: string;
   icon: React.ElementType;
 };
+
+export type IndiaIssuePoll = {
+  id: string;
+  title: string;
+  description: string;
+  solutions: {
+    id: string;
+    text: string;
+    results: {
+      level: string;
+      percentage: number;
+      color: string;
+    }[];
+  }[];
+};

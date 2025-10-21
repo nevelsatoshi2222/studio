@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -10,7 +11,14 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { votingPolls, indiaIssuesPolls } from '@/lib/data';
@@ -20,16 +28,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
+import type { IndiaIssuePoll } from '@/lib/types';
+
 
 const geographies = [
     'World', 'Continental', 'India Issues', 'Nation', 'State', 'Area', 'District', 'Taluka', 'Kasba/Block', 'Village', 'Street'
 ];
 
+const agreementLevels = ['100%', '75%', '50%', '25%'];
+
 const PollCard = ({ poll }: { poll: typeof votingPolls[0] }) => {
-  const [selectedVote, setSelectedVote] = useState<string | null>(null);
-
-  const voteOptions = poll.results.map(r => r.option);
-
+  // This is the original simple poll card, we can enhance it later if needed.
   return (
     <Card>
       <CardHeader>
@@ -40,22 +49,7 @@ const PollCard = ({ poll }: { poll: typeof votingPolls[0] }) => {
         <CardTitle className="mt-2">{poll.title}</CardTitle>
         <CardDescription>{poll.description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h4 className="font-semibold mb-4">Cast Your Vote</h4>
-          <RadioGroup 
-            onValueChange={setSelectedVote}
-            className="gap-4"
-          >
-            {voteOptions.map((option) => (
-              <div key={option} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`${poll.id}-${option}`} />
-                <Label htmlFor={`${poll.id}-${option}`}>{option}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-        <div className="space-y-4">
+      <CardContent className="space-y-4">
           <h4 className="font-semibold">Current Results</h4>
           <div className="space-y-3">
             {poll.results.map((result) => (
@@ -68,16 +62,116 @@ const PollCard = ({ poll }: { poll: typeof votingPolls[0] }) => {
               </div>
             ))}
           </div>
+      </CardContent>
+      <CardFooter>
+        <Button>View Details & Vote</Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+const IndiaIssuePollCard = ({ poll }: { poll: IndiaIssuePoll }) => {
+  const [selectedSolutions, setSelectedSolutions] = useState<Record<string, string>>({});
+
+  const handleCheckboxChange = (solutionId: string, checked: boolean | 'indeterminate') => {
+    setSelectedSolutions(prev => {
+      const newSelected = { ...prev };
+      if (checked) {
+        newSelected[solutionId] = '100%'; // Default to 100% agreement
+      } else {
+        delete newSelected[solutionId];
+      }
+      return newSelected;
+    });
+  };
+
+  const handleAgreementChange = (solutionId: string, agreement: string) => {
+    setSelectedSolutions(prev => ({
+      ...prev,
+      [solutionId]: agreement,
+    }));
+  };
+  
+  const isAnySolutionSelected = Object.keys(selectedSolutions).length > 0;
+
+  return (
+    <Card className="col-span-1 lg:col-span-2">
+       <CardHeader>
+        <div className="flex items-center gap-2">
+          <Badge variant="destructive">India Issues</Badge>
+        </div>
+        <CardTitle className="mt-2">{poll.title}</CardTitle>
+        <CardDescription>{poll.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        <div>
+          <h4 className="font-semibold mb-4">Select solutions and your level of agreement:</h4>
+          <div className="space-y-6">
+            {poll.solutions.map(solution => (
+              <div key={solution.id} className="p-4 border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-4">
+                  <Checkbox 
+                    id={solution.id}
+                    onCheckedChange={(checked) => handleCheckboxChange(solution.id, checked)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 space-y-4">
+                    <Label htmlFor={solution.id} className="font-normal text-base leading-snug">
+                      {solution.text}
+                    </Label>
+                    {selectedSolutions[solution.id] && (
+                        <div className="w-full sm:w-1/2">
+                          <Select 
+                            value={selectedSolutions[solution.id]} 
+                            onValueChange={(value) => handleAgreementChange(solution.id, value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Set agreement level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {agreementLevels.map(level => (
+                                <SelectItem key={level} value={level}>{level} Agreement</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+            <h4 className="font-semibold">Community Consensus (Live Results)</h4>
+            {poll.solutions.map(solution => (
+                <div key={`result-${solution.id}`} className="p-4 border rounded-lg">
+                    <p className="font-medium mb-3">{solution.text}</p>
+                    <div className="space-y-2">
+                        {solution.results.map(result => (
+                             <div key={result.level} className="space-y-1">
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>{result.level}</span>
+                                    <span>{result.percentage}%</span>
+                                </div>
+                                <Progress value={result.percentage} className={cn("h-1.5", result.color)} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
         </div>
       </CardContent>
       <CardFooter>
-        <Button disabled={!selectedVote}>
-          {selectedVote ? 'Submit Vote' : 'Select an option to vote'}
+        <Button disabled={!isAnySolutionSelected}>
+          Submit Votes
         </Button>
       </CardFooter>
     </Card>
   );
 };
+
 
 export default function VotingPage() {
   const [selectedGeography, setSelectedGeography] = useState('World');
@@ -107,7 +201,7 @@ export default function VotingPage() {
           </Button>
         </div>
         
-        <Tabs defaultValue="World" onValueChange={setSelectedGeography} className="w-full">
+        <Tabs defaultValue="India Issues" onValueChange={setSelectedGeography} className="w-full">
             <ScrollArea>
               <TabsList>
                 {geographies.map(geo => (
@@ -122,9 +216,10 @@ export default function VotingPage() {
                     <TabsContent key={geo} value={geo} className="mt-6">
                         {polls.length > 0 ? (
                             <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-                                {polls.map(poll => (
-                                    <PollCard key={poll.id} poll={poll} />
-                                ))}
+                                {geo === 'India Issues'
+                                    ? (polls as IndiaIssuePoll[]).map(poll => <IndiaIssuePollCard key={poll.id} poll={poll} />)
+                                    : (polls as typeof votingPolls).map(poll => <PollCard key={poll.id} poll={poll} />)
+                                }
                             </div>
                         ) : (
                             <Card className="mt-6">
@@ -144,5 +239,3 @@ export default function VotingPage() {
     </AppLayout>
   );
 }
-
-    
