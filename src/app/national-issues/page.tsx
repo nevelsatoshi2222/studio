@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -19,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,7 +74,7 @@ function PollCard({ poll }: { poll: Poll }) {
   const isAnySolutionSelected = Object.keys(selectedSolutions).length > 0;
 
   return (
-    <Card className="col-span-1 lg:col-span-2">
+    <Card>
        <CardHeader>
         <CardTitle className="mt-2">{poll.title}</CardTitle>
         <CardDescription>{poll.description}</CardDescription>
@@ -193,7 +191,7 @@ export default function NationalIssuesPage() {
                             >
                               {field.value
                                 ? countries.find(
-                                    (country) => country.label === field.value
+                                    (country) => country.value === field.value
                                   )?.label
                                 : "Select country"}
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -210,14 +208,14 @@ export default function NationalIssuesPage() {
                                   value={country.label}
                                   key={country.value}
                                   onSelect={() => {
-                                    form.setValue("country", country.label)
-                                    form.handleSubmit(onSubmit)();
+                                    form.setValue("country", country.value)
+                                    onSubmit({ country: country.value });
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      country.label === field.value
+                                      country.value === field.value
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
@@ -256,7 +254,7 @@ export default function NationalIssuesPage() {
 
         {issues && (
              <div className="space-y-6">
-                <h2 className="font-headline text-2xl font-bold">Voting Polls for {form.getValues('country')}</h2>
+                <h2 className="font-headline text-2xl font-bold">Voting Polls for {countries.find(c => c.value === form.getValues('country'))?.label}</h2>
                 {issues.map((issue, index) => (
                     <PollCard key={index} poll={issue} />
                 ))}
