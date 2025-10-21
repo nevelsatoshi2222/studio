@@ -35,10 +35,14 @@ import {
 import { generateNationalIssues, type NationalIssuesOutput } from '@/ai/flows/national-issues-flow';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { countries } from '@/lib/data';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 const formSchema = z.object({
   country: z.string().min(2, {
-    message: "Country name must be at least 2 characters.",
+    message: "You must select a country.",
   }),
 });
 
@@ -165,7 +169,7 @@ export default function NationalIssuesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Generate National Polls</CardTitle>
-            <CardDescription>Enter a country name to generate a voting page for its top 25 national problems and potential solutions.</CardDescription>
+            <CardDescription>Select a country to generate a voting page for its top 25 national problems and potential solutions.</CardDescription>
           </CardHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -174,25 +178,72 @@ export default function NationalIssuesPage() {
                   control={form.control}
                   name="country"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Country Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Brazil, Germany, Japan" {...field} />
-                      </FormControl>
+                       <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-[200px] justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? countries.find(
+                                    (country) => country.label === field.value
+                                  )?.label
+                                : "Select country"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search country..." />
+                            <CommandEmpty>No country found.</CommandEmpty>
+                            <CommandGroup>
+                              {countries.map((country) => (
+                                <CommandItem
+                                  value={country.label}
+                                  key={country.value}
+                                  onSelect={() => {
+                                    form.setValue("country", country.label)
+                                    form.handleSubmit(onSubmit)();
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      country.label === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {country.label}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isLoading ? 'Generating...' : 'Generate Voting Polls'}
-                </Button>
-              </CardFooter>
             </form>
           </Form>
         </Card>
+        
+        {isLoading && (
+            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg border">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">Generating polls for {form.getValues('country')}...</p>
+            </div>
+        )}
         
         {error && (
             <Card className="border-destructive">
