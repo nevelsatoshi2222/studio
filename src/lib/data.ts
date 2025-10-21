@@ -1,5 +1,6 @@
 
 
+
 import {
   Transaction,
   User,
@@ -1056,37 +1057,61 @@ export const airdropRewards: AirdropReward[] = [
 ];
 
 export const indiaGeography: IndiaGeography[] = [
+    { name: 'Andhra Pradesh', districts: [] },
+    { name: 'Arunachal Pradesh', districts: [] },
+    { name: 'Assam', districts: [] },
+    { name: 'Bihar', districts: [] },
+    { name: 'Chhattisgarh', districts: [] },
+    { name: 'Goa', districts: [] },
+    { name: 'Gujarat', districts: [] },
+    { name: 'Haryana', districts: [] },
+    { name: 'Himachal Pradesh', districts: [] },
+    { name: 'Jharkhand', districts: [] },
+    { name: 'Karnataka', districts: [] },
+    { name: 'Kerala', districts: [] },
+    { name: 'Madhya Pradesh', districts: [] },
     {
-        name: 'Maharashtra',
-        districts: [
-            {
-                name: 'Pune',
-                talukas: [
-                    { name: 'Haveli', villages: ['Kothrud', 'Wagholi', 'Hinjewadi'] },
-                    { name: 'Maval', villages: ['Lonavla', 'Talegaon', 'Kamshet'] }
-                ]
-            },
-            {
-                name: 'Mumbai',
-                talukas: [
-                    { name: 'Mumbai City', villages: ['Dadar', 'Andheri', 'Bandra'] }
-                ]
-            }
-        ]
+      name: 'Maharashtra',
+      districts: [
+        {
+          name: 'Pune',
+          talukas: [
+            { name: 'Haveli', villages: ['Kothrud', 'Wagholi', 'Hinjewadi'] },
+            { name: 'Maval', villages: ['Lonavla', 'Talegaon', 'Kamshet'] }
+          ]
+        },
+        {
+          name: 'Mumbai',
+          talukas: [
+            { name: 'Mumbai City', villages: ['Dadar', 'Andheri', 'Bandra'] }
+          ]
+        }
+      ]
     },
-    {
-        name: 'Karnataka',
-        districts: [
-            {
-                name: 'Bengaluru Urban',
-                talukas: [
-                    { name: 'Bengaluru North', villages: ['Yelahanka', 'Hesaraghatta'] },
-                    { name: 'Bengaluru South', villages: ['Kengeri', 'Uttarahalli'] }
-                ]
-            }
-        ]
-    }
+    { name: 'Manipur', districts: [] },
+    { name: 'Meghalaya', districts: [] },
+    { name: 'Mizoram', districts: [] },
+    { name: 'Nagaland', districts: [] },
+    { name: 'Odisha', districts: [] },
+    { name: 'Punjab', districts: [] },
+    { name: 'Rajasthan', districts: [] },
+    { name: 'Sikkim', districts: [] },
+    { name: 'Tamil Nadu', districts: [] },
+    { name: 'Telangana', districts: [] },
+    { name: 'Tripura', districts: [] },
+    { name: 'Uttar Pradesh', districts: [] },
+    { name: 'Uttarakhand', districts: [] },
+    { name: 'West Bengal', districts: [] },
+    { name: 'Andaman and Nicobar Islands', districts: [] },
+    { name: 'Chandigarh', districts: [] },
+    { name: 'Dadra and Nagar Haveli and Daman and Diu', districts: [] },
+    { name: 'Delhi', districts: [] },
+    { name: 'Jammu and Kashmir', districts: [] },
+    { name: 'Ladakh', districts: [] },
+    { name: 'Lakshadweep', districts: [] },
+    { name: 'Puducherry', districts: [] }
 ];
     
 
     
+
