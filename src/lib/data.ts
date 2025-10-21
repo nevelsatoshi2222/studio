@@ -977,11 +977,35 @@ export const fundAllocationsByStage: { [key: string]: FundAllocation[] } = {
     { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
     { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ],
+  'stage5': [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 5, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 35, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+   'stage6': [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  'stage7': [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
+  'stage8': [
+    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
+    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
+    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+  ],
   'default': [
     { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
     { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 2, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 38, description: 'Held in a central fund for community-voted projects.', icon: Vote },
+    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
+    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
   ]
 };
 
@@ -1203,6 +1227,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 

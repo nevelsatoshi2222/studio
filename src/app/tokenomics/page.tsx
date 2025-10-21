@@ -62,8 +62,9 @@ const coinInfo = [
 ]
 
 const FundAllocationCard = ({ stage }: { stage: number }) => {
-    const allocations: FundAllocation[] = fundAllocationsByStage[stage] || fundAllocationsByStage.default;
-    const title = stage <= 4 ? `Stage ${stage} Fund Allocation` : 'Fund Allocation (Stage 5+)';
+    const stageKey = `stage${stage}`;
+    const allocations: FundAllocation[] = fundAllocationsByStage[stageKey] || fundAllocationsByStage.default;
+    const title = stage <= 8 ? `Stage ${stage} Fund Allocation` : 'Fund Allocation (Stage 9+)';
     const description = `A transparent breakdown of how revenue from token sales is distributed in Stage ${stage}.`;
 
     return (
@@ -350,13 +351,16 @@ export default function TokenomicsPage() {
                            <Tabs defaultValue="stage1" className="w-full">
                                 <CardHeader>
                                     <CardTitle>Fund Allocation from Token Sales</CardTitle>
-                                    <CardDescription>Select a stage to see the specific fund allocation. After Stage 4, the allocation becomes fixed.</CardDescription>
-                                     <TabsList className="grid w-full grid-cols-5">
+                                    <CardDescription>Select a stage to see the specific fund allocation. After Stage 8, the allocation becomes fixed.</CardDescription>
+                                     <TabsList className="grid w-full grid-cols-8">
                                         <TabsTrigger value="stage1">Stage 1</TabsTrigger>
                                         <TabsTrigger value="stage2">Stage 2</TabsTrigger>
                                         <TabsTrigger value="stage3">Stage 3</TabsTrigger>
                                         <TabsTrigger value="stage4">Stage 4</TabsTrigger>
-                                        <TabsTrigger value="stage5">Stage 5+</TabsTrigger>
+                                        <TabsTrigger value="stage5">Stage 5</TabsTrigger>
+                                        <TabsTrigger value="stage6">Stage 6</TabsTrigger>
+                                        <TabsTrigger value="stage7">Stage 7</TabsTrigger>
+                                        <TabsTrigger value="stage8">Stage 8+</TabsTrigger>
                                     </TabsList>
                                 </CardHeader>
                                 <TabsContent value="stage1"><FundAllocationCard stage={1} /></TabsContent>
@@ -364,6 +368,9 @@ export default function TokenomicsPage() {
                                 <TabsContent value="stage3"><FundAllocationCard stage={3} /></TabsContent>
                                 <TabsContent value="stage4"><FundAllocationCard stage={4} /></TabsContent>
                                 <TabsContent value="stage5"><FundAllocationCard stage={5} /></TabsContent>
+                                <TabsContent value="stage6"><FundAllocationCard stage={6} /></TabsContent>
+                                <TabsContent value="stage7"><FundAllocationCard stage={7} /></TabsContent>
+                                <TabsContent value="stage8"><FundAllocationCard stage={8} /></TabsContent>
                             </Tabs>
                         )}
 
