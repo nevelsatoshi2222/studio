@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/app-layout';
 import { IceTicker } from '@/components/ice-ticker';
 import { ItcTicker } from '@/components/itc-ticker';
 import { IgcTicker } from '@/components/igc-ticker';
+import { PgcTicker } from '@/components/pgc-ticker';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -28,13 +30,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
-import { IGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
+import { IGC_TOKEN_MINT_ADDRESS, PGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [igcBalance, setIgcBalance] = useState<number | null>(null);
+  const [pgcBalance, setPgcBalance] = useState<number | null>(null);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
 
   const adminUser = users.find(u => u.id === 'usr_admin');
@@ -42,29 +45,45 @@ export default function Dashboard() {
   useEffect(() => {
     if (publicKey && connection) {
       setIsBalanceLoading(true);
-      const fetchBalance = async () => {
+      const fetchBalances = async () => {
         try {
+          // Fetch IGC Balance
           const igcMint = new PublicKey(IGC_TOKEN_MINT_ADDRESS);
-          const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+          const igcTokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
             mint: igcMint,
           });
-
-          if (tokenAccounts.value.length > 0) {
-            const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
-            setIgcBalance(balance);
+          if (igcTokenAccounts.value.length > 0) {
+            const igcBal = igcTokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+            setIgcBalance(igcBal);
           } else {
             setIgcBalance(0);
           }
+
+          // Fetch PGC Balance
+          const pgcMint = new PublicKey(PGC_TOKEN_MINT_ADDRESS);
+          const pgcTokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+            mint: pgcMint,
+          });
+
+          if (pgcTokenAccounts.value.length > 0) {
+            const pgcBal = pgcTokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+            setPgcBalance(pgcBal);
+          } else {
+            setPgcBalance(0);
+          }
+
         } catch (error) {
-          console.error("Failed to fetch IGC balance:", error);
+          console.error("Failed to fetch token balances:", error);
           setIgcBalance(null);
+          setPgcBalance(null);
         } finally {
           setIsBalanceLoading(false);
         }
       };
-      fetchBalance();
+      fetchBalances();
     } else {
       setIgcBalance(null);
+      setPgcBalance(null);
     }
   }, [publicKey, connection]);
 
@@ -88,11 +107,11 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader>
               <CardTitle>IGC Ticker</CardTitle>
-              <CardDescription>Idea Governance Coin, the core of the platform.</CardDescription>
+              <CardDescription>Idea Governance Coin.</CardDescription>
             </CardHeader>
             <CardContent>
               <IgcTicker />
@@ -100,8 +119,17 @@ export default function Dashboard() {
           </Card>
           <Card>
             <CardHeader>
+              <CardTitle>PGC Ticker</CardTitle>
+              <CardDescription>Public Governance Coin.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PgcTicker />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
               <CardTitle>ITC Ticker</CardTitle>
-              <CardDescription>Stablecoin pegged to 10mg of Gold. Price updated live from international gold rates.</CardDescription>
+              <CardDescription>Stablecoin pegged to Gold.</CardDescription>
             </CardHeader>
             <CardContent>
               <ItcTicker />
@@ -110,18 +138,18 @@ export default function Dashboard() {
            <Card>
             <CardHeader>
               <CardTitle>ICE Ticker</CardTitle>
-              <CardDescription>Live International Crypto Exchange coin price.</CardDescription>
+              <CardDescription>Exchange coin price.</CardDescription>
             </CardHeader>
             <CardContent>
               <IceTicker />
             </CardContent>
           </Card>
-          <Card className="lg:col-span-3">
+          <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle>My Wallet</CardTitle>
               <CardDescription>Your personal wallet details.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Wallet Address</p>
                 {publicKey ? (
@@ -142,8 +170,20 @@ export default function Dashboard() {
                    <p className="text-2xl font-bold">-- IGC</p>
                 )}
               </div>
-              <Button disabled={!publicKey}>Send / Receive</Button>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">PGC Balance</p>
+                {isBalanceLoading ? (
+                  <Skeleton className="h-8 w-32" />
+                ) : publicKey ? (
+                  <p className="text-2xl font-bold">{pgcBalance?.toLocaleString('en-US') ?? '0'} PGC</p>
+                ) : (
+                   <p className="text-2xl font-bold">-- PGC</p>
+                )}
+              </div>
             </CardContent>
+             <CardFooter>
+                 <Button disabled={!publicKey}>Send / Receive</Button>
+             </CardFooter>
           </Card>
         </div>
 
