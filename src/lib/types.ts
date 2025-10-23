@@ -1,5 +1,7 @@
 
 
+import { LucideIcon } from 'lucide-react';
+
 export type Transaction = {
   hash: string;
   block: number;
@@ -140,13 +142,7 @@ export type AdminAllocation = {
   category: string;
   percentage: number;
   description: string;
-  icon?: React.ElementType;
 }
-
-export type TokenSupplyDistribution = {
-    name: string;
-    value: number;
-};
 
 export type SportsAndArtsItem = {
   id: number;
@@ -186,7 +182,6 @@ export type AirdropReward = {
   name: string;
   percentage: number;
   description: string;
-  icon: React.ElementType;
 };
 
 export type IndiaIssuePoll = {
@@ -213,11 +208,4 @@ export type IndiaGeography = {
             villages: string[]; // Array of village names
         }[];
     }[];
-}
-
-export type FundAllocation = {
-  name: string;
-  value: number;
-  description: string;
-  icon: React.ElementType;
 }

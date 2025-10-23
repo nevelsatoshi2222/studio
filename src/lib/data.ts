@@ -23,14 +23,11 @@ import {
   CompetitionPhase,
   SportsItem,
   ArtItem,
-  TokenSupplyDistribution,
   TeamMember,
   AirdropReward,
-  IndiaGeography,
-  FundAllocation
+  IndiaGeography
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
-import { CircleDollarSign, Users, Leaf, Brain, MessageSquare, Shield, Trophy, Briefcase, Building2, Palette, Handshake, Award, Scale, Settings, UserCog, Vote, Users2, Share2, Landmark, Globe, Network, Key, UserCheck, Gift, UserPlus, Diamond } from 'lucide-react';
 
 
 export const users: User[] = [
@@ -923,98 +920,33 @@ export const coinPackages: CoinPackage[] = [
 
 export const adminAllocations: AdminAllocation[] = [
   // 40% Geographic
-  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.', icon: Building2 },
-  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.', icon: Building2 },
-  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.', icon: Building2 },
-  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.', icon: Building2 },
-  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.', icon: Building2 },
-  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.', icon: Landmark },
-  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.', icon: Globe },
+  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
+  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
+  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
+  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
+  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
+  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
+  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.' },
   
   // 40% Voting
-  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.', icon: Vote },
+  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
 
   // 20% Fixed (World Initiative)
-  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.', icon: UserCog },
-  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.', icon: Settings },
-  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.0, description: 'Funds for global peacekeeping and humanitarian aid.', icon: Handshake },
-  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.', icon: Shield },
-  { type: 'fixed', category: 'AI Education', percentage: 1.0, description: 'Providing free AI education and tools.', icon: Brain },
-  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.', icon: Leaf },
-  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.', icon: Globe },
-  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.', icon: Landmark },
-  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.', icon: Share2 },
-  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.', icon: Trophy },
-  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.', icon: Palette },
-  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.', icon: Share2 },
-  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchise holders.', icon: Building2 },
-  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Rewards for platform guides and mentors.', icon: UserCheck },
-  { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.', icon: Key },
-];
-
-export const fundAllocationsByStage: { [key: string]: FundAllocation[] } = {
-  'stage1': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage2': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage3': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage4': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 10, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 30, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage5': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 5, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 35, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-   'stage6': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage7': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'stage8': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ],
-  'default': [
-    { name: 'World Initiative', value: 20, description: 'Fixed allocation for global and platform growth initiatives.', icon: Settings },
-    { name: 'Geographic Public Demand', value: 40, description: 'Automatically allocated to development projects based on where revenue was generated.', icon: Users2 },
-    { name: 'Creator', value: 3, description: 'Directly rewards the original architects of the system.', icon: UserCog },
-    { name: 'Voted Public Demand', value: 37, description: 'Held in a central fund for community-voted projects.', icon: Vote },
-  ]
-};
-
-
-export const tokenSupplyDistribution: TokenSupplyDistribution[] = [
-    { name: 'Public Sale', value: 35.0 },
-    { name: 'Coin Split Bonus', value: 5.1 },
-    { name: 'Global Causes & Development', value: 20.0 },
-    { name: 'Public Demand Fund', value: 39.9 }
+  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
+  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
+  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.0, description: 'Funds for global peacekeeping and humanitarian aid.' },
+  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.' },
+  { type: 'fixed', category: 'AI Education', percentage: 1.0, description: 'Providing free AI education and tools.' },
+  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
+  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.' },
+  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.' },
+  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.' },
+  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.' },
+  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.' },
+  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.' },
+  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchise holders.' },
+  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Rewards for platform guides and mentors.' },
+  { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.' },
 ];
 
 export const sportsAndArtsItems: SportsAndArtsItem[] = [
@@ -1105,13 +1037,13 @@ export const teamMembers: TeamMember[] = [
 ];
 
 export const airdropRewards: AirdropReward[] = [
-  { name: 'Early Registration', percentage: 25, description: 'Reserved for the first users who register on the platform.', icon: UserPlus },
-  { name: 'Affiliate Sharer', percentage: 20, description: 'Reserved for users who share their affiliate link with at least 10 people.', icon: Share2 },
-  { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.', icon: Award },
-  { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.', icon: Award },
-  { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.', icon: Award },
-  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.', icon: Award },
-  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Diamond Reward.', icon: Diamond },
+  { name: 'Early Registration', percentage: 25, description: 'Reserved for the first users who register on the platform.' },
+  { name: 'Affiliate Sharer', percentage: 20, description: 'Reserved for users who share their affiliate link with at least 10 people.' },
+  { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.' },
+  { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.' },
+  { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.' },
+  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.' },
+  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Diamond Reward.' },
 ];
 
 export const indiaGeography: IndiaGeography[] = [
@@ -1227,6 +1159,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
