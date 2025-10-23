@@ -51,7 +51,7 @@ const PIE_CHART_COLORS = ["#3b82f6", "#ef4444", "#0ea5e9", "#f97316", "#10b981",
 
 const coinInfo = [
     { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
-    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: Users, totalSupply: 8_000_000_000 },
+    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: UsersIcon, totalSupply: 8_000_000_000 },
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
     { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
