@@ -32,6 +32,7 @@ import {
     UserCog,
     UserCheck,
     Gift,
+    Map,
 } from 'lucide-react';
 
 const iconMap: { [key: string]: React.FC<any> } = {
@@ -76,7 +77,7 @@ export function FundAllocationCard({ allocations }: { allocations: FundAllocatio
   return (
     <Card className="w-full">
         <CardContent className="grid md:grid-cols-2 gap-8 items-center pt-6">
-             <div className="h-[400px] w-full">
+             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
@@ -84,7 +85,7 @@ export function FundAllocationCard({ allocations }: { allocations: FundAllocatio
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            outerRadius={150}
+                            outerRadius={120}
                             fill="#8884d8"
                             dataKey="value"
                             nameKey="name"
