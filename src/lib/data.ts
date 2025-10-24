@@ -920,33 +920,32 @@ export const coinPackages: CoinPackage[] = [
 
 export const adminAllocations: AdminAllocation[] = [
   // 40% Geographic
-  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.' },
-  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.' },
-  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.' },
-  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.' },
-  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.' },
-  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.' },
-  { type: 'geographic', category: 'Country Development', percentage: 5, description: 'National level development funds.' },
+  { type: 'geographic', category: 'Society/Street Development', percentage: 15, description: 'Funding for hyper-local community projects.', color: '#14b8a6' },
+  { type: 'geographic', category: 'Village/Ward Development', percentage: 10, description: 'Funding for village and ward level initiatives.', color: '#06b6d4' },
+  { type: 'geographic', category: 'Block/Kasbah Development', percentage: 5, description: 'Development funds for blocks and kasbahs.', color: '#3b82f6' },
+  { type: 'geographic', category: 'Taluka Development', percentage: 2.5, description: 'Funds allocated for development at the Taluka level.', color: '#6366f1' },
+  { type: 'geographic', category: 'District Development', percentage: 2.5, description: 'Development funds for entire districts.', color: '#8b5cf6' },
+  { type: 'geographic', category: 'State Development', percentage: 5, description: 'Funding for state-wide projects and infrastructure.', color: '#a855f7' },
   
   // 40% Voting
-  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.' },
+  { type: 'voting', category: 'Public Demand (Voting)', percentage: 40, description: 'Decided by public voting for issues, events, and projects.', color: '#d946ef' },
 
   // 20% Fixed (World Initiative)
-  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.' },
-  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.' },
-  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.0, description: 'Funds for global peacekeeping and humanitarian aid.' },
-  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.' },
-  { type: 'fixed', category: 'AI Education', percentage: 1.0, description: 'Providing free AI education and tools.' },
-  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.' },
-  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.' },
-  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.' },
-  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.' },
-  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.' },
-  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.' },
-  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.' },
-  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchise holders.' },
-  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Rewards for platform guides and mentors.' },
-  { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.' },
+  { type: 'fixed', category: 'Creator', percentage: 0.1, description: 'Ongoing rewards for the original architects of the system.', color: '#f43f5e' },
+  { type: 'fixed', category: 'System Management', percentage: 0.4, description: 'Covers operational costs, servers, team, and staff.', color: '#ef4444' },
+  { type: 'fixed', category: 'Global Peace & Development', percentage: 3.0, description: 'Funds for global peacekeeping and humanitarian aid.', color: '#f97316' },
+  { type: 'fixed', category: 'Anti-Corruption', percentage: 5.0, description: 'Bounties and resources for fighting corruption.', color: '#f59e0b' },
+  { type: 'fixed', category: 'AI Education', percentage: 1.0, description: 'Providing free AI education and tools.', color: '#eab308' },
+  { type: 'fixed', category: 'Plant a Tree Initiative', percentage: 1.5, description: 'Global reforestation and environmental projects.', color: '#84cc16' },
+  { type: 'fixed', category: 'International Issues', percentage: 1.0, description: 'Funding for tackling global challenges voted on by the community.', color: '#22c55e' },
+  { type: 'fixed', category: 'National Issues', percentage: 1.0, description: 'Country-specific projects and initiatives.', color: '#10b981' },
+  { type: 'fixed', category: 'Influencer Prize Pool', percentage: 1.0, description: 'Rewards for content creators promoting the platform.', color: '#0ea5e9' },
+  { type: 'fixed', category: 'Sports Development', percentage: 1.0, description: 'Sponsoring athletes and developing sports infrastructure.', color: '#0284c7' },
+  { type: 'fixed', category: 'Arts Development', percentage: 1.0, description: 'Grants and platforms for artists and cultural projects.', color: '#4f46e5' },
+  { type: 'fixed', category: 'Affiliate Marketing', percentage: 2.0, description: 'Rewards for bringing new users to the platform.', color: '#7c3aed' },
+  { type: 'fixed', category: 'Main franchisee commission', percentage: 1.0, description: 'Commission for main franchise holders.', color: '#c026d3' },
+  { type: 'fixed', category: 'Guide benefit', percentage: 0.5, description: 'Rewards for platform guides and mentors.', color: '#db2777' },
+  { type: 'fixed', category: 'Initial investor', percentage: 0.5, description: 'Benefits reserved for initial investors.', color: '#e11d48' },
 ];
 
 export const sportsAndArtsItems: SportsAndArtsItem[] = [
@@ -1159,6 +1158,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
