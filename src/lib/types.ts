@@ -208,4 +208,29 @@ export type IndiaGeography = {
             villages: string[]; // Array of village names
         }[];
     }[];
-}
+};
+
+export type FundAllocation = {
+  name: string;
+  value: number;
+  color: string;
+  description?: string;
+};
+
+export type PgcSaleStage = {
+  stage: number;
+  percentOfTs: string;
+  coinsSoldB: number;
+  priceRange: string;
+  action: string;
+  reward: string;
+};
+
+export type PgcPotAllocation = {
+  name: string;
+  allocation: string;
+  coinsB: number;
+  valueT: string;
+  use: string;
+  color: string;
+};
