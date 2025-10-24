@@ -100,7 +100,7 @@ export function FundAllocationCard({ allocations }: { allocations: FundAllocatio
                 </ResponsiveContainer>
             </div>
             <div className="space-y-4">
-                {allocations.map(pot => {
+                {allocations.map((pot) => {
                     const Icon = iconMap[pot.name] || CircleDollarSign;
                     return (
                         <div key={pot.name} className="flex items-start gap-4">
