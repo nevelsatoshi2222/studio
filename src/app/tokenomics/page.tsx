@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   tokenStages,
   lockDurations,
-  coinPackages,
+  stakedPositions,
   adminAllocations,
 } from '@/lib/data';
 import {
@@ -57,14 +58,14 @@ import { FundAllocationCard } from '@/components/fund-allocation-card';
 import { PgcDisplay } from '@/components/pgc-display';
 
 const coinInfo = [
-  { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: UsersIcon, totalSupply: 800_000_000_000, isPgc: true },
-  { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
-  { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
-  { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
-  { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
-  { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
-  { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
-  { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
+    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: UsersIcon, totalSupply: 800_000_000_000, isPgc: true },
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
+    { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
+    { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
+    { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },
+    { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
+    { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
+    { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
 ];
 
 export default function TokenomicsPage() {
@@ -210,11 +211,10 @@ export default function TokenomicsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FundAllocationCard allocations={adminAllocations.map(a => ({...a, value: a.percentage, color: '#000'}))} />
+            <FundAllocationCard allocations={adminAllocations.map(a => ({...a, value: a.percentage, color: a.color}))} />
           </CardContent>
         </Card>
       </div>
     </AppLayout>
   );
 }
-
