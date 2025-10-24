@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils';
 import React from 'react';
 
 const stakeableCoins = [
+    { id: 'pgc', name: 'PGC' },
     { id: 'igc', name: 'IGC' },
     { id: 'itc', name: 'ITC' },
     { id: 'ice', name: 'ICE' },
@@ -45,7 +46,7 @@ const stakeableCoins = [
 ];
 
 export default function StakingPage() {
-    const [selectedCoinId, setSelectedCoinId] = useState('igc');
+    const [selectedCoinId, setSelectedCoinId] = useState('pgc');
 
     return (
         <AppLayout>
