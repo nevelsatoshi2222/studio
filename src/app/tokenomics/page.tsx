@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLayout } from '@/components/app-layout';
@@ -18,7 +19,7 @@ import {
   tokenStages,
   lockDurations,
   coinPackages,
-  fundAllocationsByStage,
+  adminAllocations,
 } from '@/lib/data';
 import {
   Lock,
@@ -68,7 +69,6 @@ const coinInfo = [
 
 export default function TokenomicsPage() {
   const [selectedCoinId, setSelectedCoinId] = useState('pgc');
-  const [selectedStage, setSelectedStage] = useState(1);
 
   const totalUnlockedSupplyPercentage = tokenStages
     .filter((s) => s.status === 'Active' || s.status === 'Completed')
@@ -203,35 +203,18 @@ export default function TokenomicsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Fund Allocation by Stage</CardTitle>
+            <CardTitle>Fund Allocation</CardTitle>
             <CardDescription>
               A portion of incoming funds are automatically allocated to various
-              development and community pots. The allocation changes as the
-              project matures.
+              development and community pots.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs
-              defaultValue="1"
-              onValueChange={(v) => setSelectedStage(parseInt(v, 10))}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-8">
-                {Object.keys(fundAllocationsByStage).map((stage) => (
-                  <TabsTrigger key={stage} value={stage}>
-                    Stage {stage}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {Object.entries(fundAllocationsByStage).map(([stage, allocations]) => (
-                 <TabsContent key={stage} value={stage} className="mt-6">
-                    <FundAllocationCard allocations={allocations} />
-                 </TabsContent>
-              ))}
-            </Tabs>
+            <FundAllocationCard allocations={adminAllocations.map(a => ({...a, value: a.percentage, color: '#000'}))} />
           </CardContent>
         </Card>
       </div>
     </AppLayout>
   );
 }
+
