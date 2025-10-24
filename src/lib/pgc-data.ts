@@ -1,3 +1,4 @@
+
 import { PgcSaleStage, PgcPotAllocation } from './types';
 
 export const pgcSaleStages: PgcSaleStage[] = [
@@ -33,7 +34,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     coinsSoldB: 0.8,
     priceRange: '$1.00 -> $2.50',
     action: '---',
-    reward: 'None',
+    reward: '1:0.6 Reward',
   },
   {
     stage: 5,
