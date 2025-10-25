@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -19,6 +20,7 @@ import {
   Lightbulb,
   Share2,
   Rocket,
+  PieChart
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -113,6 +115,22 @@ export default function VisionPage() {
               </Card>
             );
           })}
+           <Card className="flex flex-col lg:col-span-3">
+              <CardHeader className="flex-grow">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
+                  <PieChart className="h-6 w-6" />
+                </div>
+                <CardTitle>The PGC Token: Powering the Ecosystem</CardTitle>
+                <CardDescription className="pt-2">
+                  The Public Governance Coin (PGC) is the lifeblood of the platform. Its tokenomics are meticulously designed to ensure long-term sustainability, decentralization, and community ownership. Key features include a 9-stage deflationary sale, community-governed pots holding over 98% of the total supply, and reward mechanisms for participation. This is not just a token; it's your share in a new digital nation.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/tokenomics">View Detailed PGC Tokenomics</Link>
+                </Button>
+              </CardFooter>
+            </Card>
         </div>
 
         <Card className="text-center">

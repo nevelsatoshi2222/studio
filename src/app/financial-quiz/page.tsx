@@ -174,10 +174,12 @@ export default function FinancialQuizPage() {
   
   let coinReward = 0;
   if (quizFinished) {
-    if (score > 6) {
-        coinReward = 3;
+    if (score === 10) {
+      coinReward = 5;
+    } else if (score > 6) {
+      coinReward = 3;
     } else if (score >= 4) {
-        coinReward = 2;
+      coinReward = 2;
     }
   }
 
@@ -188,12 +190,24 @@ export default function FinancialQuizPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl font-headline">Financial Awareness Quiz</CardTitle>
-            <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards!</CardDescription>
+            <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards! Connect your wallet to receive rewards.</CardDescription>
           </CardHeader>
           
           {!quizFinished ? (
             <>
             <CardContent className="space-y-6">
+                <Alert className="border-primary">
+                    <Award className="h-4 w-4 text-primary" />
+                    <AlertTitle className="font-bold text-primary">Quiz Reward Rules</AlertTitle>
+                    <AlertDescription>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                            <li>Score 4 to 6 correct answers to earn **2 PGC**.</li>
+                            <li>Score more than 6 correct answers to earn **3 PGC**.</li>
+                            <li>Score a perfect 10 to earn a special bonus of **5 PGC**! (Limited to the first 1000 winners)</li>
+                            <li>Scores below 4 are not eligible for a reward.</li>
+                        </ul>
+                    </AlertDescription>
+                </Alert>
                 <Progress value={progressPercentage} className="w-full" />
                 <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {quizQuestions.length}</p>
                 <h2 className="text-xl font-semibold">{currentQuestion.question}</h2>
@@ -261,7 +275,10 @@ export default function FinancialQuizPage() {
                         <Award className="h-4 w-4 text-green-500" />
                         <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
                         <AlertDescription className="text-green-800">
-                            You've earned <span className="font-bold">{coinReward} PGC</span> for your excellent score! The reward has been sent to your connected wallet.
+                            {score === 10 ?
+                                `You've earned a special bonus of 5 PGC for a perfect score! This reward is limited to the first 1000 perfect scorers.` :
+                                `You've earned ${coinReward} PGC for your excellent score!`
+                            } The reward has been sent to your connected wallet.
                         </AlertDescription>
                     </Alert>
                 ) : (
