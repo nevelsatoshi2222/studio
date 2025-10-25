@@ -9,7 +9,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     coinsSoldB: 0.08,
     priceRange: '$1.00 -> $2.00',
     action: 'Split + Price Reset',
-    reward: '1:1 Bonus',
+    reward: '1:1 Bonus. Stage 1 revenue allocates: 75% to India Anti-Corruption, 20% to World Initiatives, 5% to Discretionary Fund.',
   },
   {
     stage: 2,
@@ -82,9 +82,9 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '71.4198',
-      coinsB: 571.3584,
-      valueT: '57.14',
+      allocation: '71.4098',
+      coinsB: 571.2784,
+      valueT: '57.13',
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
     },
@@ -119,6 +119,14 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       valueT: '2.06',
       use: 'For all 1:1 Bonus and 1:X Rewards during main sale stages.',
       color: '#a855f7', // purple-500
+    },
+     {
+      name: 'India Anti-Corruption Reward Pot',
+      allocation: '0.01',
+      coinsB: 0.08,
+      valueT: '0.008',
+      use: 'A special fund for rewarding anti-corruption efforts in India, funded by Stage 1 revenue.',
+      color: '#14b8a6', // teal-500
     },
     {
       name: 'Presale & Creator Fund',
