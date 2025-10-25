@@ -259,23 +259,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 <SidebarMenuSubItem key={item.name}>
                                      <Collapsible>
                                         <CollapsibleTrigger asChild className="w-full">
-                                            <a href="#" className="w-full">
-                                                <SidebarMenuSubButton>
-                                                    <span>{item.name}</span>
-                                                    <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
-                                                </SidebarMenuSubButton>
-                                            </a>
+                                            <SidebarMenuSubButton>
+                                                <span>{item.name}</span>
+                                                <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
+                                            </SidebarMenuSubButton>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent>
                                             <SidebarMenuSub>
                                                 {franchiseeLevels.map((level) => (
                                                     <SidebarMenuSubItem key={level.name}>
                                                         <Link href="#" passHref>
-                                                            <a href="#">
-                                                                <SidebarMenuSubButton>
-                                                                    - {level.name}
-                                                                </SidebarMenuSubButton>
-                                                            </a>
+                                                            <SidebarMenuSubButton>
+                                                                - {level.name}
+                                                            </SidebarMenuSubButton>
                                                         </Link>
                                                     </SidebarMenuSubItem>
                                                 ))}
@@ -291,43 +287,37 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
                 <Collapsible>
                     <CollapsibleTrigger asChild className="w-full">
-                         <a href="/team" className="w-full">
+                        <Link href="/team" passHref>
                             <SidebarMenuButton>
                                 <Users2 />
                                 <span>Team</span>
                             </SidebarMenuButton>
-                         </a>
+                         </Link>
                     </CollapsibleTrigger>
                      <CollapsibleContent>
                         <SidebarMenuSub>
                             <SidebarMenuSubItem>
                                 <Link href="/team#team-members" passHref>
-                                    <a href="/team#team-members">
-                                        <SidebarMenuSubButton>
-                                            <Users className="mr-2"/>
-                                            <span>Team Members</span>
-                                        </SidebarMenuSubButton>
-                                    </a>
+                                    <SidebarMenuSubButton>
+                                        <Users className="mr-2"/>
+                                        <span>Team Members</span>
+                                    </SidebarMenuSubButton>
                                 </Link>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
                                 <Link href="/team#direct-members" passHref>
-                                     <a href="/team#direct-members">
-                                        <SidebarMenuSubButton>
-                                            <UserPlus className="mr-2"/>
-                                            <span>Direct Members</span>
-                                        </SidebarMenuSubButton>
-                                     </a>
+                                    <SidebarMenuSubButton>
+                                        <UserPlus className="mr-2"/>
+                                        <span>Direct Members</span>
+                                    </SidebarMenuSubButton>
                                 </Link>
                             </SidebarMenuSubItem>
                              <SidebarMenuSubItem>
                                 <Link href="/team#earnings" passHref>
-                                    <a href="/team#earnings">
-                                        <SidebarMenuSubButton>
-                                            <DollarSign className="mr-2"/>
-                                            <span>Earning</span>
-                                        </SidebarMenuSubButton>
-                                    </a>
+                                    <SidebarMenuSubButton>
+                                        <DollarSign className="mr-2"/>
+                                        <span>Earning</span>
+                                    </SidebarMenuSubButton>
                                 </Link>
                             </SidebarMenuSubItem>
                         </SidebarMenuSub>
