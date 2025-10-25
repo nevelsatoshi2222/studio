@@ -127,7 +127,7 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1721831777732_0.png" alt="PGC Coin" width={40} height={40} />
+                <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" alt="PGC Coin" width={40} height={40} />
             </CardHeader>
             <CardContent>
               <PgcTicker />
