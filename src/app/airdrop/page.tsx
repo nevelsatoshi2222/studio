@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Percent, UserPlus, Share2 } from 'lucide-react';
+import { Gift, Star, UserPlus, Share2, Award, Users } from 'lucide-react';
 import { airdropRewards } from '@/lib/data';
 import Link from 'next/link';
 import {
@@ -23,12 +23,10 @@ import {
 
 const iconMap: { [key: string]: React.FC<any> } = {
     'Early Registration': UserPlus,
-    'Affiliate Referrer': Share2,
-    'Bronze Reward': Gift,
-    'Silver Reward': Gift,
-    'Gold Reward': Gift,
-    'Platinum Reward': Gift,
-    'Diamond Reward': Gift,
+    'Bronze Star Reward': Star,
+    'Silver Star Reward': Award,
+    'Gold Star Reward': Trophy,
+    'Influence & Reach Airdrop': Share2,
 };
 
 export default function AirdropPage() {
@@ -40,14 +38,14 @@ export default function AirdropPage() {
              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary border-2 border-primary mb-4">
                 <Gift className="h-8 w-8" />
             </div>
-            <h1 className="font-headline text-4xl font-bold">Platform Airdrop Strategy</h1>
+            <h1 className="font-headline text-4xl font-bold">Airdrop Strategy</h1>
             <p className="text-muted-foreground text-lg">
-              Rewarding our early adopters and community builders.
+              Rewarding our early adopters and community builders with a share of the presale.
             </p>
           </CardHeader>
           <CardContent className="text-center">
              <p className="text-muted-foreground max-w-2xl mx-auto">
-                A portion of the total token supply is reserved for an airdrop to reward users who contribute to the platform's growth in its crucial early stages. Below are the categories for airdrop rewards.
+                A total of 10% of the PGC presale is reserved for an airdrop to reward users who contribute to the platform's growth in its crucial early stages. Below are the categories for airdrop rewards.
              </p>
           </CardContent>
         </Card>

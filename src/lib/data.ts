@@ -1057,12 +1057,10 @@ export const teamMembers: TeamMember[] = [
 
 export const airdropRewards: AirdropReward[] = [
   { name: 'Early Registration', percentage: 25, description: 'Reserved for the first users who register on the platform.' },
-  { name: 'Affiliate Referrer', percentage: 20, description: 'Reserved for users who successfully refer at least 10 people to register.' },
-  { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.' },
-  { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.' },
-  { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.' },
-  { name: 'Platinum Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Platinum Reward.' },
-  { name: 'Diamond Reward', percentage: 5, description: 'Achieved when you help 5 of your referrals achieve the Diamond Reward.' },
+  { name: 'Bronze Star Reward', percentage: 10, description: 'Achieved when 5 users have successfully joined and made a payment using your affiliate link.' },
+  { name: 'Silver Star Reward', percentage: 5, description: 'Awarded when 5 of your referred users achieve the Bronze Star themselves.' },
+  { name: 'Gold Star Reward', percentage: 2.5, description: 'Awarded when 5 of your referred users achieve the Silver Star.' },
+  { name: 'Influence & Reach Airdrop', percentage: 17.5, description: 'A pool for creators on YouTube, Instagram, etc. Rewards are tiered based on verified views to incentivize reach and engagement.' },
 ];
 
 export const indiaGeography: IndiaGeography[] = [
@@ -1178,6 +1176,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
