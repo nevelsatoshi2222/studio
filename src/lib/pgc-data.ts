@@ -82,11 +82,19 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '71.4098',
-      coinsB: 571.2784,
-      valueT: '57.13',
+      allocation: '66.4098',
+      coinsB: 531.2784,
+      valueT: '53.13',
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
+    },
+    {
+      name: 'Quiz & Competition Rewards',
+      allocation: '5.00',
+      coinsB: 40.0,
+      valueT: '4.0',
+      use: 'A dedicated reserve for rewards from the Financial Awareness Quiz and other future competitions.',
+      color: '#14b8a6', // teal-500
     },
     {
       name: 'Creator Pot (CP)',
@@ -126,7 +134,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       coinsB: 0.08,
       valueT: '0.008',
       use: 'A donation-based fund for rewarding anti-corruption efforts in India. The public and organizations can contribute in USDT and other top 10 cryptocurrencies.',
-      color: '#14b8a6', // teal-500
+      color: '#64748b', // slate-500
     },
     {
       name: 'Presale & Creator Fund',

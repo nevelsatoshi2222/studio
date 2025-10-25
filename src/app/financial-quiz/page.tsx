@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -12,8 +13,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, ChevronRight, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, RotateCcw, Award } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const quizQuestions = [
     {
@@ -169,6 +171,10 @@ export default function FinancialQuizPage() {
   };
 
   const progressPercentage = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+  
+  const scorePercentage = (score / quizQuestions.length) * 100;
+  const coinReward = scorePercentage === 100 ? 2 : scorePercentage >= 50 ? 1 : 0;
+
 
   return (
     <AppLayout>
@@ -176,7 +182,7 @@ export default function FinancialQuizPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl font-headline">Financial Awareness Quiz</CardTitle>
-            <CardDescription>Test your knowledge and see how it connects to public governance.</CardDescription>
+            <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards!</CardDescription>
           </CardHeader>
           
           {!quizFinished ? (
@@ -243,6 +249,17 @@ export default function FinancialQuizPage() {
                 <h2 className="text-2xl font-bold text-primary">Quiz Complete!</h2>
                 <p className="text-lg text-muted-foreground">You scored</p>
                 <p className="text-5xl font-bold">{score} / {quizQuestions.length}</p>
+                
+                {coinReward > 0 && (
+                    <Alert className="max-w-md mx-auto text-left border-green-500 bg-green-500/10">
+                        <Award className="h-4 w-4 text-green-500" />
+                        <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
+                        <AlertDescription className="text-green-800">
+                            You've earned <span className="font-bold">{coinReward} PGC</span> for completing the quiz. The reward has been sent to your wallet.
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <p className="max-w-md mx-auto text-muted-foreground">
                     You have successfully completed the financial awareness quiz. This is the first step to becoming an informed citizen in a new system of governance!
                 </p>
