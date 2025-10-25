@@ -26,8 +26,11 @@ import { Trophy } from 'lucide-react';
 const iconMap: { [key: string]: React.FC<any> } = {
     'Early Registration': UserPlus,
     'Bronze Star Reward': Star,
+    'Bronze Reward': UserPlus,
     'Silver Star Reward': Award,
+    'Silver Reward': Award,
     'Gold Star Reward': Trophy,
+    'Gold Reward': Trophy,
     'Influence & Reach Airdrop': Share2,
 };
 
