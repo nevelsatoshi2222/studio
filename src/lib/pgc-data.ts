@@ -129,4 +129,3 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#fde047', // yellow-300
     }
   ];
-
