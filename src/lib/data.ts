@@ -1,4 +1,5 @@
 
+
 import {
   Transaction,
   User,
@@ -610,8 +611,8 @@ export const publicGovernancePoll = {
     solutions: [
         { text: "NEW LAW AND ORDER" },
         { text: "NEW JUDICIARY SYSTEM" },
-        { text: "NEW EDUCATION SYSTEM (MORE PRACTICAL BASE)" },
-        { text: "NEW TRAFFIC RULES AND DRIVING LICENCE RULES" }
+        { text: "NEW EDUCATION SYSTEM ( MORE PRACTICAL BASE )" },
+        { text: "NEW TRAFFIC RULES AND DRIVING LICENCE RULLES. HERE I WANT TO ACCEPT THIS ALL THOUGHTS AND LETS DISCUSS AND MAKE NEW IDEOLOGY FOR LIVING. GIVE OPTION 0 TO 100% ACEECPTING OPTION AS IN VOTING .THIS IS THE 1ST IN INDIA NATION VOTING ISSUE." }
     ]
 };
 
@@ -1061,9 +1062,9 @@ export const airdropRewards: AirdropReward[] = [
   { name: 'Bronze Reward', percentage: 15, description: 'Achieved when 5 users have successfully joined and completed the Quiz competition using your affiliate link (free users).' },
   { name: 'Bronze Star Reward', percentage: 10, description: 'Achieved when 5 users have successfully joined and made a payment using your affiliate link.' },
   { name: 'Silver Reward', percentage: 7.5, description: 'Awarded when 5 of your referred users achieve the Bronze Reward.' },
-  { name: 'Silver Star Reward', percentage: 5, description: 'Awarded when 5 of your referred users achieve the Bronze Star.' },
+  { name: 'Silver Star Reward', percentage: 7.5, description: 'Awarded when 5 of your referred users achieve the Bronze Star Reward.' },
   { name: 'Gold Reward', percentage: 5, description: 'Awarded when 5 of your referred users achieve the Silver Reward.' },
-  { name: 'Gold Star Reward', percentage: 2.5, description: 'Awarded when 5 of your referred users achieve the Silver Star.' },
+  { name: 'Gold Star Reward', percentage: 5, description: 'Awarded when 5 of your referred users achieve the Silver Star Reward.' },
   { name: 'Influence & Reach Airdrop', percentage: 20, description: 'A pool for creators on YouTube, Instagram, etc. Rewards are tiered based on verified views to incentivize reach and engagement.' },
 ];
 
@@ -1180,6 +1181,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
