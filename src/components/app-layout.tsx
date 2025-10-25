@@ -50,6 +50,7 @@ import {
   Lock,
   Rocket,
   Flame,
+  Gift,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -83,6 +84,7 @@ const navItems = [
   { href: '/exchange', icon: BarChart2, label: 'Crypto Exchange' },
   { href: '/tokenomics', icon: PieChartIcon, label: 'Coins & Tokenomics' },
   { href: '/staking', icon: Lock, label: 'Staking' },
+  { href: '/airdrop', icon: Gift, label: 'Airdrop' },
   { href: '/voting', icon: Vote, label: 'Voting Hub'},
   { href: '/quiz', icon: Trophy, label: 'Quiz Competition'},
   { href: '/sports', icon: Trophy, label: 'Sports Competition'},
