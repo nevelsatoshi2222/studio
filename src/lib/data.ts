@@ -603,6 +603,17 @@ export const causes: Cause[] = [
   },
 ];
 
+export const publicGovernancePoll = {
+    title: "Public Governance: A New Constitution",
+    description: `WE WANT A NEW "IDEA, THOUGHT, STRATEGY" DRIVEN DEMOCRACY BY VOTING OF ALL PUBLIC (OF THAT AREA). "NO DEMOCRACY BY LEADERS". HERE I WANT TO ACCEPT THIS ALL THOUGHTS AND LETS DISCUSS AND MAKE NEW IDEOLOGY FOR LIVING.`,
+    solutions: [
+        { text: "NEW LAW AND ORDER" },
+        { text: "NEW JUDICIARY SYSTEM" },
+        { text: "NEW EDUCATION SYSTEM (MORE PRACTICAL BASE)" },
+        { text: "NEW TRAFFIC RULES AND DRIVING LICENCE RULES" }
+    ]
+};
+
 export const votingPolls: VotingPoll[] = [
   {
     id: 'poll-world-1',
@@ -651,7 +662,7 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
     {
         id: 'india-public-governance',
         title: 'Public Governance: A New Model of Democracy',
-        description: 'We want a new "Idea, Thought, Strategy" driven democracy, decided by public vote, not by leaders. No democracy by leaders. Let\'s discuss and create a new ideology for living.',
+        description: 'We want a new "Idea, Thought, Strategy" driven democracy, decided by public vote, not by leaders. Let\'s discuss and create a new ideology for living.',
         solutions: [
             { id: 'sol-pg-1', text: 'New Law and Order', results: [] },
             { id: 'sol-pg-2', text: 'New Judiciary System', results: [] },
@@ -1167,6 +1178,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
