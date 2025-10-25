@@ -82,8 +82,8 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '71.419998',
-      coinsB: 571.359984,
+      allocation: '71.4198',
+      coinsB: 571.3584,
       valueT: '57.14',
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
@@ -122,10 +122,11 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Presale & Creator Fund',
-      allocation: '0.000002',
-      coinsB: 0.000016, // 16,000 coins (8k for sale, 8k for bonus)
+      allocation: '0.0002',
+      coinsB: 0.0016, // 1,600,000 coins (800k for sale, 800k for bonus)
       valueT: '~0',
-      use: '0.000001% for presale, 0.000001% for 1:1 bonus. All proceeds go to the Creator.',
+      use: '0.0001% for presale, 0.0001% for 1:1 bonus. All proceeds go to the Creator.',
       color: '#fde047', // yellow-300
     }
   ];
+
