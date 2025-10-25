@@ -110,9 +110,12 @@ export default function Dashboard() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader>
-              <CardTitle>IGC Ticker</CardTitle>
-              <CardDescription>Idea Governance Coin.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>IGC Ticker</CardTitle>
+                <CardDescription>Idea Governance Coin.</CardDescription>
+              </div>
+              <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png" alt="IGC Coin" width={32} height={32} />
             </CardHeader>
             <CardContent>
               <IgcTicker />
