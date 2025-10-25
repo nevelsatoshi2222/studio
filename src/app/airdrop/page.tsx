@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Star, UserPlus, Share2, Award, Users } from 'lucide-react';
+import { Gift, Star, UserPlus, Share2, Award } from 'lucide-react';
 import { airdropRewards } from '@/lib/data';
 import Link from 'next/link';
 import {
@@ -20,6 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Trophy } from 'lucide-react';
+
 
 const iconMap: { [key: string]: React.FC<any> } = {
     'Early Registration': UserPlus,
