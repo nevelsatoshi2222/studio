@@ -59,7 +59,7 @@ import { PgcDisplay } from '@/components/pgc-display';
 import Image from 'next/image';
 
 const coinInfo = [
-    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1721831777732_0.png" alt="PGC Coin" width={24} height={24} />, totalSupply: 800_000_000_000, isPgc: true },
+    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" alt="PGC Coin" width={24} height={24} />, totalSupply: 800_000_000_000, isPgc: true },
     { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png" alt="IGC Coin" width={20} height={20} />, totalSupply: 8_000_000_000 },
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
@@ -113,7 +113,7 @@ export default function TokenomicsPage() {
 
             if (coin.isPgc) {
               return (
-                <TabsContent key={coin.id} value={coin.id} className="mt-6 space-y-6">
+                <TabsContent key={coin.id} value={coin.id} className="mt-6">
                    <PgcDisplay />
                 </TabsContent>
               )
