@@ -1057,7 +1057,7 @@ export const teamMembers: TeamMember[] = [
 
 export const airdropRewards: AirdropReward[] = [
   { name: 'Early Registration', percentage: 25, description: 'Reserved for the first users who register on the platform.' },
-  { name: 'Affiliate Sharer', percentage: 20, description: 'Reserved for users who share their affiliate link with at least 10 people.' },
+  { name: 'Affiliate Referrer', percentage: 20, description: 'Reserved for users who successfully refer at least 10 people to register.' },
   { name: 'Bronze Reward', percentage: 20, description: 'Achieved when 5 referrals have joined under you.' },
   { name: 'Silver Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Silver Reward.' },
   { name: 'Gold Reward', percentage: 10, description: 'Achieved when you help 5 of your referrals achieve the Gold Reward.' },
@@ -1178,6 +1178,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 

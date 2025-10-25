@@ -23,7 +23,7 @@ import {
 
 const iconMap: { [key: string]: React.FC<any> } = {
     'Early Registration': UserPlus,
-    'Affiliate Sharer': Share2,
+    'Affiliate Referrer': Share2,
     'Bronze Reward': Gift,
     'Silver Reward': Gift,
     'Gold Reward': Gift,
