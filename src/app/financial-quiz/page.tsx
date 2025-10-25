@@ -172,8 +172,14 @@ export default function FinancialQuizPage() {
 
   const progressPercentage = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
   
-  const scorePercentage = (score / quizQuestions.length) * 100;
-  const coinReward = scorePercentage === 100 ? 2 : scorePercentage >= 50 ? 1 : 0;
+  let coinReward = 0;
+  if (quizFinished) {
+    if (score > 6) {
+        coinReward = 3;
+    } else if (score >= 4) {
+        coinReward = 2;
+    }
+  }
 
 
   return (
@@ -250,18 +256,26 @@ export default function FinancialQuizPage() {
                 <p className="text-lg text-muted-foreground">You scored</p>
                 <p className="text-5xl font-bold">{score} / {quizQuestions.length}</p>
                 
-                {coinReward > 0 && (
+                {coinReward > 0 ? (
                     <Alert className="max-w-md mx-auto text-left border-green-500 bg-green-500/10">
                         <Award className="h-4 w-4 text-green-500" />
                         <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
                         <AlertDescription className="text-green-800">
-                            You've earned <span className="font-bold">{coinReward} PGC</span> for completing the quiz. The reward has been sent to your wallet.
+                            You've earned <span className="font-bold">{coinReward} PGC</span> for your excellent score! The reward has been sent to your connected wallet.
+                        </AlertDescription>
+                    </Alert>
+                ) : (
+                     <Alert className="max-w-md mx-auto text-left">
+                        <Award className="h-4 w-4" />
+                        <AlertTitle>Keep Learning!</AlertTitle>
+                        <AlertDescription>
+                            You didn't score high enough for a reward this time, but you've taken the first step to becoming an informed citizen. Try again!
                         </AlertDescription>
                     </Alert>
                 )}
 
                 <p className="max-w-md mx-auto text-muted-foreground">
-                    You have successfully completed the financial awareness quiz. This is the first step to becoming an informed citizen in a new system of governance!
+                    This quiz is a crucial first step in understanding the power of public governance. Your participation is valuable.
                 </p>
             </CardContent>
             <CardFooter className="justify-center">
