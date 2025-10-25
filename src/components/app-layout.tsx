@@ -49,6 +49,7 @@ import {
   User,
   Lock,
   Rocket,
+  Flame,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -74,6 +75,7 @@ import { WalletButton } from './wallet-button';
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
   { href: '/vision', icon: Rocket, label: 'Our Vision' },
+  { href: '/presale', icon: Flame, label: 'Presale' },
   { href: '/social-media', icon: Rss, label: 'Social Media' },
   { href: '/users', icon: Users, label: 'User Management' },
   { href: '/transactions', icon: Repeat, label: 'Transactions' },
