@@ -59,8 +59,8 @@ import { PgcDisplay } from '@/components/pgc-display';
 import Image from 'next/image';
 
 const coinInfo = [
-    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: UsersIcon, totalSupply: 800_000_000_000, isPgc: true },
-    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: () => <Image src="/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fproject-spark-348216.appspot.com%2Fvision_public-governance-859029-c316e_1721245050854_1.png&w=640&q=75" alt="IGC Coin" width={20} height={20} />, totalSupply: 8_000_000_000 },
+    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1721831777732_0.png" alt="PGC Coin" width={24} height={24} />, totalSupply: 800_000_000_000, isPgc: true },
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png" alt="IGC Coin" width={20} height={20} />, totalSupply: 8_000_000_000 },
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
     { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },

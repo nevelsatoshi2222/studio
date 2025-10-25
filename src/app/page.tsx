@@ -32,6 +32,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { IGC_TOKEN_MINT_ADDRESS, PGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
 
 export default function Dashboard() {
   const { publicKey } = useWallet();
@@ -118,9 +119,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>PGC Ticker</CardTitle>
-              <CardDescription>Public Governance Coin.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                    <CardTitle>PGC Ticker</CardTitle>
+                    <CardDescription>Public Governance Coin.</CardDescription>
+                </div>
+                <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1721831777732_0.png" alt="PGC Coin" width={40} height={40} />
             </CardHeader>
             <CardContent>
               <PgcTicker />
