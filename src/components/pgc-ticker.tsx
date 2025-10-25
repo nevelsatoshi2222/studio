@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 export function PgcTicker() {
-  const [price, setPrice] = useState(0.50);
+  const [price, setPrice] = useState(1.00);
   const [change, setChange] = useState(0);
 
   // Simulate price changes

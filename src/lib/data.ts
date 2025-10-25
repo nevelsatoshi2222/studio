@@ -649,6 +649,17 @@ export const votingPolls: VotingPoll[] = [
 
 export const indiaIssuesPolls: IndiaIssuePoll[] = [
     {
+        id: 'india-public-governance',
+        title: 'Public Governance: A New Model of Democracy',
+        description: 'We want a new "Idea, Thought, Strategy" driven democracy, decided by public vote, not by leaders. No democracy by leaders. Let\'s discuss and create a new ideology for living.',
+        solutions: [
+            { id: 'sol-pg-1', text: 'New Law and Order', results: [] },
+            { id: 'sol-pg-2', text: 'New Judiciary System', results: [] },
+            { id: 'sol-pg-3', text: 'New Education System (More Practical Based)', results: [] },
+            { id: 'sol-pg-4', text: 'New Traffic Rules and Driving License Rules', results: [] },
+        ],
+    },
+    {
         id: 'india-unemployment',
         title: 'Tackling Unemployment',
         description: 'Millions of educated youth in India lack suitable jobs. Which approaches should be prioritized?',
@@ -951,9 +962,9 @@ export const sportsAndArtsItems: SportsAndArtsItem[] = [
     { id: 2, name: "Men's Cricket", description: 'Supporting grassroots and professional men\'s cricket.'},
     { id: 3, name: "Women's Football", description: 'Developing women\'s football from local clubs to national teams.'},
     { id: 4, name: "Men's Football", description: 'Investing in football academies and tournaments for men.'},
-    { id: 5, name: "Painting", description: 'Grants and platforms for painters to showcase and sell their work.'},
-    { id: 6, name: "Sculpture", description: 'Funding for public art projects and sculpture exhibitions.'},
-    { id: 7, name: "Digital Art", description: 'Supporting digital artists with tools, education, and NFT marketplace integration.'},
+    { id: 5, name: 'Painting', description: 'Grants and platforms for painters to showcase and sell their work.'},
+    { id: 6, name: 'Sculpture', description: 'Funding for public art projects and sculpture exhibitions.'},
+    { id: 7, name: 'Digital Art', description: 'Supporting digital artists with tools, education, and NFT marketplace integration.'},
 ];
 
 
@@ -1156,6 +1167,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 
