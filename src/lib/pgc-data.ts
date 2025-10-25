@@ -9,7 +9,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     coinsSoldB: 0.08,
     priceRange: '$1.00 -> $2.00',
     action: 'Split + Price Reset',
-    reward: '1:1 Bonus. Stage 1 revenue allocates: 75% to India Anti-Corruption, 20% to World Initiatives, 5% to Discretionary Fund.',
+    reward: '1:1 Bonus',
   },
   {
     stage: 2,
@@ -117,7 +117,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       allocation: '2.58',
       coinsB: 20.64,
       valueT: '2.06',
-      use: 'For all 1:1 Bonus and 1:X Rewards during main sale stages.',
+      use: 'A dedicated reserve for all bonus distributions during the 9-stage sale, including compounding split rewards.',
       color: '#a855f7', // purple-500
     },
      {
@@ -125,15 +125,15 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       allocation: '0.01',
       coinsB: 0.08,
       valueT: '0.008',
-      use: 'A special fund for rewarding anti-corruption efforts in India, funded by Stage 1 revenue.',
+      use: 'A donation-based fund for rewarding anti-corruption efforts in India. The public and organizations can contribute in USDT and other top 10 cryptocurrencies.',
       color: '#14b8a6', // teal-500
     },
     {
       name: 'Presale & Creator Fund',
       allocation: '0.0002',
-      coinsB: 0.0016, // 1,600,000 coins (800k for sale, 800k for bonus)
+      coinsB: 0.0016, // 1,600,000 coins
       valueT: '~0',
-      use: '0.0001% for presale, 0.0001% for 1:1 bonus. All proceeds go to the Creator.',
+      use: 'A micro-allocation for the exclusive presale (0.0001% for sale, 0.0001% for 1:1 bonus). All proceeds go to the Creator for foundational funding.',
       color: '#fde047', // yellow-300
     }
   ];
