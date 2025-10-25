@@ -82,17 +82,17 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '66.4098',
-      coinsB: 531.2784,
-      valueT: '53.13',
+      allocation: '63.9098',
+      coinsB: 511.2784,
+      valueT: '51.13',
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
     },
     {
       name: 'Quiz & Competition Rewards',
-      allocation: '5.00',
-      coinsB: 40.0,
-      valueT: '4.0',
+      allocation: '7.50',
+      coinsB: 60.0,
+      valueT: '6.0',
       use: 'A dedicated reserve for rewards from the Financial Awareness Quiz and other future competitions.',
       color: '#14b8a6', // teal-500
     },

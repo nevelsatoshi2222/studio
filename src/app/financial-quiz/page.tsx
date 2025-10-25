@@ -175,11 +175,13 @@ export default function FinancialQuizPage() {
   let coinReward = 0;
   if (quizFinished) {
     if (score === 10) {
-      coinReward = 5;
+      coinReward = 10;
     } else if (score > 6) {
-      coinReward = 3;
+      coinReward = 5;
     } else if (score >= 4) {
-      coinReward = 2;
+      coinReward = 2.5;
+    } else {
+        coinReward = 1.25;
     }
   }
 
@@ -200,11 +202,13 @@ export default function FinancialQuizPage() {
                     <Award className="h-4 w-4 text-primary" />
                     <AlertTitle className="font-bold text-primary">Quiz Reward Rules</AlertTitle>
                     <AlertDescription>
-                        <ul className="list-disc pl-5 text-muted-foreground">
-                            <li>Score 4 to 6 correct answers to earn **2 PGC**.</li>
-                            <li>Score more than 6 correct answers to earn **3 PGC**.</li>
-                            <li>Score a perfect 10 to earn a special bonus of **5 PGC**! (Limited to the first 1000 winners)</li>
-                            <li>Scores below 4 are not eligible for a reward.</li>
+                        <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
+                            <li>Score below 4 to earn **1.25 PGC** (Limited to the first 8000 winners).</li>
+                            <li>Score 4 to 6 correct answers to earn **2.5 PGC** (Limited to the first 4000 winners).</li>
+                            <li>Score more than 6 correct answers to earn **5 PGC** (Limited to the first 2000 winners).</li>
+                            <li>Score a perfect 10 to earn **10 PGC** and advance to the next round! (Limited to the first 1000 winners).</li>
+                            <li>**Semi-Finals:** Top 100 perfect scorers compete to win **100 PGC** each.</li>
+                            <li>**Finals:** Top 10 semi-finalists compete for the grand prize of **1000 PGC** each!</li>
                         </ul>
                     </AlertDescription>
                 </Alert>
@@ -276,7 +280,7 @@ export default function FinancialQuizPage() {
                         <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
                         <AlertDescription className="text-green-800">
                             {score === 10 ?
-                                `You've earned a special bonus of 5 PGC for a perfect score! This reward is limited to the first 1000 perfect scorers.` :
+                                `You've earned a special bonus of 10 PGC for a perfect score and qualified for the next round! This reward is limited to the first 1000 perfect scorers.` :
                                 `You've earned ${coinReward} PGC for your excellent score!`
                             } The reward has been sent to your connected wallet.
                         </AlertDescription>
