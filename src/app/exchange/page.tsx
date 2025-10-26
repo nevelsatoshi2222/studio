@@ -42,7 +42,6 @@ const tabs = [
   { id: 'IGC', name: 'Trade IGC' },
   { id: 'ITC', name: 'Trade ITC' },
   { id: 'ICE', name: 'Trade ICE' },
-  { id: 'FRC', name: 'Trade FRC' },
   { id: 'LOAN', name: 'Trade LOAN' },
   { id: 'JBC', name: 'Trade JBC' },
   { id: 'COMP', name: 'Trade COMP' },
@@ -252,7 +251,7 @@ export default function ExchangePage() {
         </div>
 
         <Tabs defaultValue="PGC" className="w-full">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-10">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id}>{tab.name}</TabsTrigger>
             ))}

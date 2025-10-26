@@ -199,16 +199,6 @@ export const tradingPairs: TradingPair[] = [
   { from: 'COMP', to: 'ADA' },
   { from: 'COMP', to: 'DOGE' },
   { from: 'COMP', to: 'AVAX' },
-  { from: 'FRC', to: 'USDT' },
-  { from: 'FRC', to: 'ETH' },
-  { from: 'FRC', to: 'BTC' },
-  { from: 'FRC', to: 'SOL' },
-  { from: 'FRC', to: 'BNB' },
-  { from: 'FRC', to: 'XRP' },
-  { from: 'FRC', to: 'USDC' },
-  { from: 'FRC', to: 'ADA' },
-  { from: 'FRC', to: 'DOGE' },
-  { from: 'FRC', to: 'AVAX' },
   { from: 'LOAN', to: 'USDT' },
   { from: 'LOAN', to: 'ETH' },
   { from: 'LOAN', to: 'BTC' },
@@ -232,9 +222,6 @@ export const tradingPairs: TradingPair[] = [
   { from: 'JOB', to: 'USDT' },
   { from: 'JOB', to: 'ETH' },
   { from: 'JOB', to: 'BTC' },
-  { from: 'FRN', to: 'USDT' },
-  { from: 'FRN', to: 'ETH' },
-  { from: 'FRN', to: 'BTC' },
   { from: 'WORK', to: 'USDT' },
   { from: 'WORK', to: 'ETH' },
   { from: 'WORK', to: 'BTC' },
@@ -1206,3 +1193,7 @@ export const indiaGeography: IndiaGeography[] = [
 
 
 
+
+
+
+    
