@@ -58,6 +58,7 @@ export function PgcDisplay() {
                 <TableHead>% of Total Supply</TableHead>
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
+                <TableHead>Incoming Fund (USD)</TableHead>
                 <TableHead>Action at End</TableHead>
                 <TableHead>Bonus/Reward</TableHead>
                 <TableHead>Value (USD)</TableHead>
@@ -70,6 +71,7 @@ export function PgcDisplay() {
                   <TableCell>{stage.percentOfTs}</TableCell>
                   <TableCell>{stage.coinsSoldB.toFixed(2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
+                  <TableCell className="font-semibold text-primary">{stage.incomingFund || '--'}</TableCell>
                   <TableCell>{stage.action}</TableCell>
                   <TableCell className="font-medium">{stage.reward}</TableCell>
                   <TableCell>

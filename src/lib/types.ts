@@ -225,6 +225,7 @@ export type PgcSaleStage = {
   action: string;
   reward: string;
   valueAt?: string;
+  incomingFund?: string;
 };
 
 export type PgcPotAllocation = {

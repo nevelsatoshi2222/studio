@@ -10,6 +10,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$1.00 -> $2.00',
     action: 'Split + Price Reset',
     reward: '1:1 Bonus',
+    incomingFund: '$120M',
   },
   {
     stage: 2,
@@ -18,6 +19,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$1.00 -> $2.00',
     action: 'Split + Price Reset',
     reward: '1:1 Bonus',
+    incomingFund: '$240M',
   },
   {
     stage: 3,
@@ -26,6 +28,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$1.00 -> $2.00',
     action: 'Split + Price Reset',
     reward: '1:1 Bonus',
+    incomingFund: '$600M',
   },
   // Phase 2: Price Climb & Decreasing Reward
   {
@@ -35,6 +38,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$1.00 -> $2.50',
     action: '---',
     reward: '1:0.6 Reward',
+    incomingFund: '$1.4B',
   },
   {
     stage: 5,
@@ -43,6 +47,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$2.50 -> $5.00',
     action: '---',
     reward: '1:0.5 Reward',
+    incomingFund: '$6B',
   },
   {
     stage: 6,
@@ -51,6 +56,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$5.00 -> $10.00',
     action: '---',
     reward: '1:0.4 Reward',
+    incomingFund: '$30B',
   },
   {
     stage: 7,
@@ -60,6 +66,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     action: 'Unlocks WGCP',
     reward: '1:0.35 Reward',
     valueAt: '$300B @ $37.5',
+    incomingFund: '$120B',
   },
   // Phase 3: Final Ascent
   {
@@ -69,7 +76,8 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$20.00 -> $50.00',
     action: '---',
     reward: '1:0.30 Reward',
-    valueAt: '$1200B @ $75',
+    valueAt: '$1.2T @ $75',
+    incomingFund: '$560B',
   },
   {
     stage: 9,
@@ -78,6 +86,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$50.00 -> $100.00',
     action: 'Sale Ends',
     reward: '1:0.25 Reward',
+    incomingFund: '$3T',
   },
 ];
 
