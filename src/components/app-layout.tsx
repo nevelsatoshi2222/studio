@@ -52,6 +52,7 @@ import {
   Flame,
   Gift,
   HelpCircleIcon,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -334,6 +335,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+              <SidebarMenuSub>
+                <SidebarMenuSubItem>
+                    <Link href="/admin/applications" passHref>
+                        <SidebarMenuSubButton>
+                            <ClipboardList className="mr-2"/>
+                            <span>Applications</span>
+                        </SidebarMenuSubButton>
+                    </Link>
+                </SidebarMenuSubItem>
+              </SidebarMenuSub>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

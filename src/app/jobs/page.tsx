@@ -67,7 +67,9 @@ export default function JobsPage() {
                         <CardDescription>{job.description}</CardDescription>
                     </CardHeader>
                     <CardFooter>
-                        <Button className="w-full">Apply Now</Button>
+                        <Button asChild className="w-full">
+                           <Link href={`/register?role=Job Seeker&title=${encodeURIComponent(job.title)}`}>Apply Now</Link>
+                        </Button>
                     </CardFooter>
                 </Card>
             ))}

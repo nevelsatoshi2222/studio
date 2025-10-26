@@ -54,6 +54,8 @@ const registrationSchema = z.object({
   state: z.string().min(1, { message: 'State is required.' }),
   country: z.string().min(1, { message: 'Country is required.' }),
   referralCode: z.string(),
+  role: z.string().optional(),
+  jobTitle: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -61,6 +63,9 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const referralCode = searchParams.get('ref') || 'ADMIN_REF_CODE';
+  const role = searchParams.get('role');
+  const jobTitle = searchParams.get('title');
+
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -69,6 +74,8 @@ function RegistrationForm() {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       referralCode,
+      role: role || '',
+      jobTitle: jobTitle || '',
       email: '',
       password: '',
       phone: '',
@@ -104,17 +111,18 @@ function RegistrationForm() {
         balance: 0, // Initial balance
         referralCode: data.referralCode,
         registeredAt: new Date().toISOString(),
-        status: 'Active',
-        avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`
+        status: 'Pending', // Default status for applicants
+        avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
+        role: data.role || 'User',
+        jobTitle: data.jobTitle || '',
       };
       
       const userDocRef = doc(firestore, 'users', user.uid);
-      // Use the non-blocking Firestore write function
       setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
 
       toast({
         title: 'Registration Successful!',
-        description: `Welcome, ${userProfile.name}! Your account has been created.`,
+        description: `Welcome, ${userProfile.name}! Your application has been submitted.`,
       });
       form.reset();
       
@@ -144,6 +152,21 @@ function RegistrationForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
+              {role && (
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Applying for Role</FormLabel>
+                      <FormControl>
+                        <Input {...field} readOnly className="bg-muted"/>
+                      </FormControl>
+                      {jobTitle && <FormDescription>Position: {jobTitle}</FormDescription>}
+                    </FormItem>
+                  )}
+                />
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -293,7 +316,7 @@ function RegistrationForm() {
                           </FormControl>
                           <SelectContent>
                               {countries.map(country => (
-                                  <SelectItem key={country.value} value={country.value}>
+                                  <SelectItem key={country.value} value={country.label}>
                                       {country.label}
                                   </SelectItem>
                               ))}
@@ -321,7 +344,7 @@ function RegistrationForm() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Registering...' : 'Register'}
+              {form.formState.isSubmitting ? 'Submitting Application...' : 'Register & Apply'}
             </Button>
           </CardFooter>
         </form>
