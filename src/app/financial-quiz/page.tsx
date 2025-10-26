@@ -206,8 +206,8 @@ export default function FinancialQuizPage() {
                             <li>
                                 <span className="font-semibold text-foreground">Initial Round:</span>
                                 <ul className="list-disc pl-5 space-y-1 mt-1">
-                                    <li>Score under 4 correct to earn **1.25 PGC** (Limited to first 8,000 winners).</li>
-                                    <li>Score 4 to 6 correct to earn **2.5 PGC** (Limited to first 4,000 winners).</li>
+                                    <li>Score under 4 correct to earn **1.25 PGC** (Limited to first 20,000 winners).</li>
+                                    <li>Score 4 to 6 correct to earn **2.5 PGC** (Limited to first 5,000 winners).</li>
                                     <li>Score 7 to 9 correct to earn **5 PGC** (Limited to first 2,000 winners).</li>
                                     <li>Score a perfect 10 to earn a **10 PGC** bonus and qualify for the next round! (Limited to first 1,000 winners).</li>
                                 </ul>
