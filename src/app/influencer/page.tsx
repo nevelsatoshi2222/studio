@@ -16,14 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import { AffiliateRewardTier } from '@/lib/types';
 
 
-const viewBasedRewards: Omit<AffiliateRewardTier, 'icon' | 'limit' | 'requirement'>[] = [
-    { name: "Gold Reward Achiever", reward: "4 Coins Extra" },
-    { name: "Emerald Reward Achiever", reward: "8 Coins Extra" },
-    { name: "Platinum Reward Achiever", reward: "25 Coins Extra" },
-    { name: "Diamond Reward Achiever", reward: "100 Coins Extra" },
-    { name: "Crown Reward Achiever", reward: "1000 Coins Extra" },
-];
-
 const tiers = [
     {
         icon: Users,
