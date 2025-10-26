@@ -72,10 +72,10 @@ const coinInfo = [
 
 
 const geographicAllocations: FundAllocation[] = [
-  { name: 'Ward/Society/Street Level', value: 15, color: '#14b8a6', description: 'Funding for hyper-local community projects.' },
-  { name: 'Village/City Level', value: 10, color: '#06b6d4', description: 'Funding for village and city-level initiatives.' },
-  { name: 'State Projects', value: 5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure.' },
-  { name: 'Country Projects', value: 10, color: '#3b82f6', description: 'Development funds for national-level projects.' },
+  { name: 'Ward/Society/Street Level', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total).' },
+  { name: 'Village/City Level', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total).' },
+  { name: 'State Projects', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total).' },
+  { name: 'Country Projects', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total).' },
 ];
 
 
