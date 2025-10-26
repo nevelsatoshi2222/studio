@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { pgcSaleStages, pgcPotAllocations } from '@/lib/pgc-data';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { Badge } from '@/components/ui/badge';
 
 export function PgcDisplay() {
     
@@ -59,6 +60,7 @@ export function PgcDisplay() {
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Action at End</TableHead>
                 <TableHead>Bonus/Reward</TableHead>
+                <TableHead>Value (USD)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,6 +72,13 @@ export function PgcDisplay() {
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell>{stage.action}</TableCell>
                   <TableCell className="font-medium">{stage.reward}</TableCell>
+                  <TableCell>
+                    {stage.valueAt ? (
+                      <Badge variant="secondary">{stage.valueAt}</Badge>
+                    ) : (
+                      '--'
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

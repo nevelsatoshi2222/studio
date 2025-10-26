@@ -59,6 +59,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$10.00 -> $20.00',
     action: 'Unlocks WGCP',
     reward: '1:0.35 Reward',
+    valueAt: '$300B @ $37.5',
   },
   // Phase 3: Final Ascent
   {
@@ -68,6 +69,7 @@ export const pgcSaleStages: PgcSaleStage[] = [
     priceRange: '$20.00 -> $50.00',
     action: '---',
     reward: '1:0.30 Reward',
+    valueAt: '$1200B @ $75',
   },
   {
     stage: 9,
