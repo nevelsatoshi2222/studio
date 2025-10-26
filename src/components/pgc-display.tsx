@@ -49,7 +49,7 @@ export function PgcDisplay() {
         <CardHeader>
           <CardTitle>20-Stage Token Sale Schedule</CardTitle>
           <CardDescription>
-            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open for sale, ensuring democratic control over the token supply.
+            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open for sale, ensuring democratic control over the token supply. A portion of the funds raised in each of these stages is allocated for public good.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -78,7 +78,7 @@ export function PgcDisplay() {
                   <TableCell>{stage.coinsSoldB.toFixed(2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
-                  <TableCell>{stage.wgcpReleasePercent}</TableCell>
+                  <TableCell>{stage.publicGoodReleasePercent}</TableCell>
                   <TableCell className="font-semibold text-green-500">{stage.publicGoodFundReleased}</TableCell>
                   <TableCell>
                     <Badge variant={stage.status === 'Locked' ? 'destructive' : 'secondary'} className="flex items-center gap-1.5">

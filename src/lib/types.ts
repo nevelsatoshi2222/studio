@@ -223,7 +223,7 @@ export type PgcSaleStage = {
   coinsSoldB: number;
   priceRange: string;
   incomingFund: string;
-  wgcpReleasePercent: string;
+  publicGoodReleasePercent: string;
   publicGoodFundReleased: string;
   status: string;
 };

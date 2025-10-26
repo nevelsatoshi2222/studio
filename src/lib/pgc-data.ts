@@ -19,21 +19,21 @@ const calculateStageData = (
     percentOfTs: number,
     priceLow: number,
     priceHigh: number,
-    wgcpReleasePercent: number,
+    publicGoodReleasePercent: number,
     status: string
 ): PgcSaleStage => {
     const coinsSoldB = 800 * (percentOfTs / 100);
     const avgPrice = (priceLow + priceHigh) / 2;
     const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
-    const publicGoodFundValue = incomingFundValue * (wgcpReleasePercent / 100);
+    const publicGoodFundValue = incomingFundValue * (publicGoodReleasePercent / 100);
 
     return {
         stage,
         percentOfTs: `${percentOfTs}%`,
         coinsSoldB,
-        priceRange: `$${priceLow}-$${priceHigh}`,
+        priceRange: `$${priceLow.toLocaleString()}-$${priceHigh.toLocaleString()}`,
         incomingFund: formatCurrency(incomingFundValue),
-        wgcpReleasePercent: `${wgcpReleasePercent}%`,
+        publicGoodReleasePercent: `${publicGoodReleasePercent}%`,
         publicGoodFundReleased: formatCurrency(publicGoodFundValue),
         status,
     };
@@ -41,13 +41,13 @@ const calculateStageData = (
 
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  // Vote-to-Unlock Stages
+  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  // Vote-to-Unlock Stages with Public Good Funding from PDP
   calculateStageData(7, 1, 10, 20, 10, 'Locked'),
   calculateStageData(8, 1, 20, 50, 8, 'Locked'),
   calculateStageData(9, 1, 50, 100, 7, 'Locked'),
@@ -70,7 +70,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       name: 'Public Demand Pot (PDP)',
       allocation: 71.3995,
       coinsB: 571.196,
-      use: 'Decided by Public Governance voting.',
+      use: 'Decided by Public Governance voting. Also funds public good initiatives upon stage completions.',
       color: '#3b82f6', // blue-500
     },
     {
@@ -94,7 +94,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       allocation: 5.00,
       coinsB: 40,
       valueT: '4.0',
-      use: 'Unlocks after Stage 7 for global initiatives.',
+      use: 'A reserve pot for future global initiatives, governed by the community.',
       color: '#f97316', // orange-500
     },
     {
