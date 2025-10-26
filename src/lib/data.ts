@@ -274,9 +274,14 @@ export const lockDurations: LockDuration[] = [
   { value: 1, unit: 'month', label: '1 Month' },
   { value: 3, unit: 'month', label: '3 Months' },
   { value: 6, unit: 'month', label: '6 Months' },
-  { value: 12, unit: 'year', label: '1 Year' },
-  { value: 24, unit: 'month', label: '2 Years' },
-  { value: 36, unit: 'month', label: '3 Years' },
+  { value: 1, unit: 'year', label: '1 Year' },
+  { value: 2, unit: 'year', label: '2 Years' },
+  { value: 3, unit: 'year', label: '3 Years' },
+  { value: 0, unit: 'stage', label: 'Till this stage complete' },
+  { value: 1, unit: 'stage', label: 'Till this stage and next stage complete' },
+  { value: 2, unit: 'stage', label: 'Till this stage and next 2 stages complete' },
+  { value: 3, unit: 'stage', label: 'Till this stage and next 3 stages complete' },
+  { value: 5, unit: 'stage', label: 'Till this stage and next 5 stages complete' },
 ];
 
 
@@ -938,10 +943,10 @@ export const incomingFundAllocations: FundAllocation[] = [
 ];
 
 export const geographicAllocations: FundAllocation[] = [
-  { name: 'Ward/Society/Street', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total incoming funds).' },
-  { name: 'Village/City', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total incoming funds).' },
-  { name: 'State Projects', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total incoming funds).' },
-  { name: 'Country Projects', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total incoming funds).' },
+  { name: 'Society/Street Development', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total incoming funds).' },
+  { name: 'Village/City Development', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total incoming funds).' },
+  { name: 'State Development', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total incoming funds).' },
+  { name: 'Country Development', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total incoming funds).' },
 ];
 
 export const publicDemandAllocations: FundAllocation[] = [
@@ -1229,3 +1234,4 @@ export const indiaGeography: IndiaGeography[] = [
 
 
     
+

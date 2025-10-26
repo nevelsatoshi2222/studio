@@ -62,7 +62,7 @@ export type StakedPosition = {
 
 export type LockDuration = {
   value: number;
-  unit: 'day' | 'month' | 'year';
+  unit: 'day' | 'month' | 'year' | 'stage';
   label: string;
 };
 

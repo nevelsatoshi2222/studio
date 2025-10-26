@@ -90,7 +90,7 @@ export default function StakingPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {lockDurations.map((duration) => (
-                                            <SelectItem key={duration.value} value={String(duration.value)}>
+                                            <SelectItem key={duration.label} value={duration.label}>
                                                 {duration.label}
                                             </SelectItem>
                                         ))}
