@@ -46,7 +46,7 @@ export default function PresalePage() {
           </CardHeader>
           <CardContent className="text-center space-y-4">
              <div className="flex justify-center items-center gap-4">
-                <Badge variant="secondary" className="text-base">Supply: 0.0001%</Badge>
+                <Badge variant="secondary" className="text-base">Sale Supply: 2,000,000 PGC (0.00025%)</Badge>
                 <Badge variant="secondary" className="text-base">Bonus: 1:1 Instant</Badge>
                 <Badge variant="secondary" className="text-base">No Staking Required</Badge>
              </div>

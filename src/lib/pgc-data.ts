@@ -93,16 +93,15 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '63.9098',
-      coinsB: 511.2784,
-      valueT: '51.13',
+      allocation: '63.8995',
+      coinsM: 511196,
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
     },
     {
       name: 'Quiz & Competition Rewards',
       allocation: '7.50',
-      coinsB: 60.0,
+      coinsM: 60000,
       valueT: '6.0',
       use: 'A dedicated reserve for rewards from the Financial Awareness Quiz and other future competitions.',
       color: '#14b8a6', // teal-500
@@ -110,7 +109,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Creator Pot (CP)',
       allocation: '11.00',
-      coinsB: 88.0,
+      coinsM: 88000,
       valueT: '8.8',
       use: '10% for Public Use, 1% for Creator Self-Use.',
       color: '#ef4444', // red-500
@@ -118,7 +117,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Country Wise Pot (CWP)',
       allocation: '10.00',
-      coinsB: 80.0,
+      coinsM: 80000,
       valueT: '8.0',
       use: 'Decided by country-specific public voting.',
       color: '#22c55e', // green-500
@@ -126,7 +125,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: "World's Good Cause Pot (WGCP)",
       allocation: '5.00',
-      coinsB: 40.0,
+      coinsM: 40000,
       valueT: '4.0',
       use: 'Unlocks after Stage 7 for global initiatives.',
       color: '#f97316', // orange-500
@@ -134,7 +133,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Reward Pot (RP)',
       allocation: '2.58',
-      coinsB: 20.64,
+      coinsM: 20640,
       valueT: '2.06',
       use: 'A dedicated reserve for all bonus distributions during the 9-stage sale, including compounding split rewards.',
       color: '#a855f7', // purple-500
@@ -142,17 +141,37 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
      {
       name: 'India Anti-Corruption Reward Pot',
       allocation: '0.01',
-      coinsB: 0.08,
+      coinsM: 80,
       valueT: '0.008',
       use: 'A donation-based fund for rewarding anti-corruption efforts in India. The public and organizations can contribute in USDT and other top 10 cryptocurrencies.',
       color: '#64748b', // slate-500
     },
     {
-      name: 'Presale & Creator Fund',
-      allocation: '0.0002',
-      coinsB: 0.0016, // 1,600,000 coins
-      valueT: '~0',
-      use: 'A micro-allocation for the exclusive presale (0.0001% for sale, 0.0001% for 1:1 bonus). All proceeds go to the Creator for foundational funding.',
+      name: 'Presale Fund',
+      allocation: '0.0005',
+      coinsM: 4, // 4 Million PGC (2M for sale, 2M for bonus)
+      use: 'A micro-allocation for the exclusive presale (0.00025% for sale, 0.00025% for 1:1 bonus). Proceeds go to the Creator.',
       color: '#fde047', // yellow-300
+    },
+    {
+      name: 'Presale Affiliate Reward Pot',
+      allocation: '0.0000275',
+      coinsM: 0.22, // 220,000 PGC
+      use: '11% of the 2M presale coins, reserved for the presale affiliate reward program.',
+      color: '#ec4899', // pink-500
+    },
+    {
+      name: 'Presale Influencer Reward Pot',
+      allocation: '0.0000125',
+      coinsM: 0.1, // 100,000 PGC
+      use: '5% of the 2M presale coins, reserved for the presale influencer reward program.',
+      color: '#d946ef', // fuchsia-500
+    },
+    {
+      name: 'Presale Financial Quiz Pot',
+      allocation: '0.00001',
+      coinsM: 0.08, // 80,000 PGC
+      use: '4% of the 2M presale coins, reserved for the presale financial quiz rewards.',
+      color: '#84cc16', // lime-500
     }
   ];

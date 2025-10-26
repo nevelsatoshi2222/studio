@@ -231,8 +231,16 @@ export type PgcSaleStage = {
 export type PgcPotAllocation = {
   name: string;
   allocation: string;
-  coinsB: number;
-  valueT: string;
+  coinsM: number;
+  valueT?: string;
   use: string;
   color: string;
+};
+
+export type AffiliateRewardTier = {
+    name: string;
+    icon: LucideIcon;
+    reward: string;
+    limit: string;
+    requirement: string;
 };
