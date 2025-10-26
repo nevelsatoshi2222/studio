@@ -2,93 +2,30 @@
 import { PgcSaleStage, PgcPotAllocation } from './types';
 
 export const pgcSaleStages: PgcSaleStage[] = [
-  // Phase 1: Split & 1:1 Bonus
-  {
-    stage: 1,
-    percentOfTs: '0.01%',
-    coinsSoldB: 0.08,
-    priceRange: '$1.00 -> $2.00',
-    action: 'Split + Price Reset',
-    reward: '1:1 Bonus',
-    incomingFund: '$120M',
-  },
-  {
-    stage: 2,
-    percentOfTs: '0.02%',
-    coinsSoldB: 0.16,
-    priceRange: '$1.00 -> $2.00',
-    action: 'Split + Price Reset',
-    reward: '1:1 Bonus',
-    incomingFund: '$240M',
-  },
-  {
-    stage: 3,
-    percentOfTs: '0.05%',
-    coinsSoldB: 0.4,
-    priceRange: '$1.00 -> $2.00',
-    action: 'Split + Price Reset',
-    reward: '1:1 Bonus',
-    incomingFund: '$600M',
-  },
-  // Phase 2: Price Climb & Decreasing Reward
-  {
-    stage: 4,
-    percentOfTs: '0.10%',
-    coinsSoldB: 0.8,
-    priceRange: '$1.00 -> $2.50',
-    action: '---',
-    reward: '1:0.6 Reward',
-    incomingFund: '$1.4B',
-  },
-  {
-    stage: 5,
-    percentOfTs: '0.20%',
-    coinsSoldB: 1.6,
-    priceRange: '$2.50 -> $5.00',
-    action: '---',
-    reward: '1:0.5 Reward',
-    incomingFund: '$6B',
-  },
-  {
-    stage: 6,
-    percentOfTs: '0.50%',
-    coinsSoldB: 4.0,
-    priceRange: '$5.00 -> $10.00',
-    action: '---',
-    reward: '1:0.4 Reward',
-    incomingFund: '$30B',
-  },
-  {
-    stage: 7,
-    percentOfTs: '1.00%',
-    coinsSoldB: 8.0,
-    priceRange: '$10.00 -> $20.00',
-    action: 'Unlocks WGCP',
-    reward: '1:0.35 Reward',
-    valueAt: '$300B @ $37.5',
-    incomingFund: '$120B',
-  },
-  // Phase 3: Final Ascent
-  {
-    stage: 8,
-    percentOfTs: '2.00%',
-    coinsSoldB: 16.0,
-    priceRange: '$20.00 -> $50.00',
-    action: '---',
-    reward: '1:0.30 Reward',
-    valueAt: '$1.2T @ $75',
-    incomingFund: '$560B',
-  },
-  {
-    stage: 9,
-    percentOfTs: '5.00%',
-    coinsSoldB: 40.0,
-    priceRange: '$50.00 -> $100.00',
-    action: 'Sale Ends',
-    reward: '1:0.25 Reward',
-    incomingFund: '$3T',
-  },
+  // Presale and Early Stages
+  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
+  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
+  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
+  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
+  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
+  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
+  // Vote-to-Unlock Stages
+  { stage: 7, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$10-20', incomingFund: '$120B', wgcpReleasePercent: '10%', wgcpFundReleased: '$80B', status: 'Locked' },
+  { stage: 8, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$20-50', incomingFund: '$280B', wgcpReleasePercent: '8%', wgcpFundReleased: '$160B', status: 'Locked' },
+  { stage: 9, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$50-100', incomingFund: '$600B', wgcpReleasePercent: '7%', wgcpFundReleased: '$280B', status: 'Locked' },
+  { stage: 10, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$100-200', incomingFund: '$1.2T', wgcpReleasePercent: '6%', wgcpFundReleased: '$480B', status: 'Locked' },
+  { stage: 11, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$200-500', incomingFund: '$2.8T', wgcpReleasePercent: '5%', wgcpFundReleased: '$1T', status: 'Locked' },
+  { stage: 12, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$500-1k', incomingFund: '$6T', wgcpReleasePercent: '4.5%', wgcpFundReleased: '$1.8T', status: 'Locked' },
+  { stage: 13, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$1k-1.5k', incomingFund: '$10T', wgcpReleasePercent: '4%', wgcpFundReleased: '$2.4T', status: 'Locked' },
+  { stage: 14, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$1.5k-2k', incomingFund: '$14T', wgcpReleasePercent: '3.5%', wgcpFundReleased: '$2.8T', status: 'Locked' },
+  { stage: 15, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$2k-2.5k', incomingFund: '$18T', wgcpReleasePercent: '3%', wgcpFundReleased: '$3T', status: 'Locked' },
+  { stage: 16, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$2.5k-3k', incomingFund: '$22T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$3T', status: 'Locked' },
+  { stage: 17, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$3k-3.5k', incomingFund: '$26T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$3.5T', status: 'Locked' },
+  { stage: 18, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$3.5k-4k', incomingFund: '$30T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$4T', status: 'Locked' },
+  { stage: 19, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$4k-4.5k', incomingFund: '$34T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$4.5T', status: 'Locked' },
+  { stage: 20, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$4.5k-5k', incomingFund: '$38T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$5T', status: 'Locked' },
 ];
+
 
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {

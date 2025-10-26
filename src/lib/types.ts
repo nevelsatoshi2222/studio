@@ -222,10 +222,10 @@ export type PgcSaleStage = {
   percentOfTs: string;
   coinsSoldB: number;
   priceRange: string;
-  action: string;
-  reward: string;
-  valueAt?: string;
-  incomingFund?: string;
+  incomingFund: string;
+  wgcpReleasePercent: string;
+  wgcpFundReleased: string;
+  status: string;
 };
 
 export type PgcPotAllocation = {

@@ -18,6 +18,8 @@ import {
 import { pgcSaleStages, pgcPotAllocations } from '@/lib/pgc-data';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Lock, Vote } from 'lucide-react';
 
 export function PgcDisplay() {
     
@@ -45,10 +47,9 @@ export function PgcDisplay() {
 
       <Card>
         <CardHeader>
-          <CardTitle>9-Stage Token Sale Schedule</CardTitle>
+          <CardTitle>20-Stage Token Sale Schedule</CardTitle>
           <CardDescription>
-            PGC is sold in 9 sequential stages, each with unique pricing,
-            supply, and reward mechanics. The price resets after Stage 3.
+            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open for sale, ensuring democratic control over the token supply.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,27 +61,30 @@ export function PgcDisplay() {
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Incoming Fund (USD)</TableHead>
-                <TableHead>Action at End</TableHead>
-                <TableHead>Bonus/Reward</TableHead>
-                <TableHead>Value (USD)</TableHead>
+                <TableHead>WGCP Release</TableHead>
+                <TableHead>WGCP Fund Value</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pgcSaleStages.map((stage) => (
-                <TableRow key={stage.stage} className={stage.stage <= 3 ? 'bg-blue-500/10' : stage.stage <= 7 ? 'bg-green-500/10' : 'bg-purple-500/10'}>
+                <TableRow key={stage.stage} className={cn(
+                    stage.stage <= 3 && 'bg-blue-500/10',
+                    stage.stage > 3 && stage.stage <= 6 && 'bg-green-500/10',
+                    stage.stage > 6 && 'bg-purple-500/10'
+                )}>
                   <TableCell className="font-bold">{stage.stage}</TableCell>
                   <TableCell>{stage.percentOfTs}</TableCell>
                   <TableCell>{stage.coinsSoldB.toFixed(2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
-                  <TableCell className="font-semibold text-primary">{stage.incomingFund || '--'}</TableCell>
-                  <TableCell>{stage.action}</TableCell>
-                  <TableCell className="font-medium">{stage.reward}</TableCell>
+                  <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
+                  <TableCell>{stage.wgcpReleasePercent}</TableCell>
+                  <TableCell className="font-semibold text-green-500">{stage.wgcpFundReleased}</TableCell>
                   <TableCell>
-                    {stage.valueAt ? (
-                      <Badge variant="secondary">{stage.valueAt}</Badge>
-                    ) : (
-                      '--'
-                    )}
+                    <Badge variant={stage.status === 'Locked' ? 'destructive' : 'secondary'} className="flex items-center gap-1.5">
+                        {stage.status === 'Locked' ? <Lock className="h-3 w-3" /> : <Vote className="h-3 w-3" />}
+                        {stage.status}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
