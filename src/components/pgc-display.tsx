@@ -61,7 +61,7 @@ export function PgcDisplay() {
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Bonus Ratio</TableHead>
                 <TableHead>Incoming Fund from Sale</TableHead>
-                <TableHead>Public Good Release %</TableHead>
+                <TableHead>PDP Release %</TableHead>
                 <TableHead>Value Released from PDP</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -102,8 +102,8 @@ export function PgcDisplay() {
             </CardDescription>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-8 items-start">
-            <div className="w-full h-[400px] flex items-center justify-center pt-16">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full flex items-center justify-center pt-8">
+                <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                         <Pie
                             data={pgcPotAllocations}
@@ -124,7 +124,7 @@ export function PgcDisplay() {
                     </PieChart>
                 </ResponsiveContainer>
             </div>
-            <div className="space-y-4 pt-16">
+            <div className="space-y-4 pt-8">
                 {pgcPotAllocations.map(pot => (
                     <div key={pot.name} className="flex items-start gap-4">
                         <div className="h-3 w-3 rounded-full mt-1.5" style={{backgroundColor: pot.color}} />
