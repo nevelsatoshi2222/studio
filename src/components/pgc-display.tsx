@@ -49,7 +49,7 @@ export function PgcDisplay() {
         <CardHeader>
           <CardTitle>20-Stage Token Sale Schedule</CardTitle>
           <CardDescription>
-            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open. The sale of tokens generates liquid funds (USDT), and completing each stage also unlocks a portion of the massive Public Demand Pot (PGC tokens) for community-voted initiatives.
+            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open. The sale of tokens generates liquid funds (USDT), and completing each stage also unlocks a portion of the massive Public Demand Pot (PDP) for community-voted initiatives.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,7 +60,8 @@ export function PgcDisplay() {
                 <TableHead>% of Total Supply</TableHead>
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
-                <TableHead>Incoming Fund (for Public Good)</TableHead>
+                <TableHead>Bonus Ratio</TableHead>
+                <TableHead>Incoming Fund from Sale (Public Good)</TableHead>
                 <TableHead>PDP Release %</TableHead>
                 <TableHead>Value Released from PDP</TableHead>
                 <TableHead>Status</TableHead>
@@ -77,6 +78,7 @@ export function PgcDisplay() {
                   <TableCell>{stage.percentOfTs}</TableCell>
                   <TableCell>{stage.coinsSoldB.toFixed(stage.coinsSoldB < 1 ? 4 : 2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
+                  <TableCell>{stage.bonusRatio}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
                   <TableCell>{stage.publicGoodReleasePercent}</TableCell>
                   <TableCell className="font-semibold text-green-500">{stage.publicGoodFundReleased}</TableCell>

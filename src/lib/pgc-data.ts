@@ -22,13 +22,13 @@ const calculateStageData = (
     priceLow: number,
     priceHigh: number,
     pdpReleasePercent: number,
+    bonusRatio: string,
     status: string
 ): PgcSaleStage => {
     const coinsSoldB = 800 * (percentOfTs / 100);
     const avgPrice = (priceLow + priceHigh) / 2;
     const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
     
-    // Calculate PGC released from PDP and its value at the end-of-stage price
     const pdpCoinsReleased = PDP_TOTAL_COINS * (pdpReleasePercent / 100);
     const pdpFundValue = pdpCoinsReleased * priceHigh;
 
@@ -40,34 +40,35 @@ const calculateStageData = (
         incomingFund: formatCurrency(incomingFundValue),
         publicGoodReleasePercent: `${pdpReleasePercent}%`,
         publicGoodFundReleased: formatCurrency(pdpFundValue),
+        bonusRatio,
         status,
     };
 };
 
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
-  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: 'N/A', status: '' },
+  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: 'N/A', status: '' },
+  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', bonusRatio: 'N/A', status: '' },
   
-  // Vote-to-Unlock Stages with dual funding model
-  calculateStageData(7, 1, 10, 20, 10, 'Locked'),
-  calculateStageData(8, 1, 20, 50, 8, 'Locked'),
-  calculateStageData(9, 1, 50, 100, 7, 'Locked'),
-  calculateStageData(10, 1, 100, 200, 6, 'Locked'),
-  calculateStageData(11, 1, 200, 500, 5, 'Locked'),
-  calculateStageData(12, 1, 500, 1000, 4.5, 'Locked'),
-  calculateStageData(13, 1, 1000, 1500, 4.5, 'Locked'),
-  calculateStageData(14, 1, 1500, 2000, 4, 'Locked'),
-  calculateStageData(15, 1, 2000, 3000, 4, 'Locked'),
-  calculateStageData(16, 1, 3000, 4000, 4, 'Locked'),
-  calculateStageData(17, 1, 4000, 5000, 4, 'Locked'),
-  calculateStageData(18, 1, 5000, 7500, 4, 'Locked'),
-  calculateStageData(19, 1, 7500, 10000, 4, 'Locked'),
-  calculateStageData(20, 1, 10000, 12500, 4, 'Locked'),
+  // Vote-to-Unlock Stages
+  calculateStageData(7, 1, 10, 20, 7.5, 'N/A', 'Locked'),
+  calculateStageData(8, 1, 20, 50, 7, 'N/A', 'Locked'),
+  calculateStageData(9, 1, 50, 100, 6.5, 'N/A', 'Locked'),
+  calculateStageData(10, 1, 100, 200, 6, 'N/A', 'Locked'),
+  calculateStageData(11, 1, 200, 500, 5.5, 'N/A', 'Locked'),
+  calculateStageData(12, 1, 500, 1000, 5, 'N/A', 'Locked'),
+  calculateStageData(13, 1, 1000, 1500, 4, 'N/A', 'Locked'),
+  calculateStageData(14, 1, 1500, 2000, 4, 'N/A', 'Locked'),
+  calculateStageData(15, 1, 2000, 3000, 4, 'N/A', 'Locked'),
+  calculateStageData(16, 1, 3000, 4000, 4, 'N/A', 'Locked'),
+  calculateStageData(17, 1, 4000, 5000, 3, 'N/A', 'Locked'),
+  calculateStageData(18, 1, 5000, 7500, 3, 'N/A', 'Locked'),
+  calculateStageData(19, 1, 7500, 10000, 3, 'N/A', 'Locked'),
+  calculateStageData(20, 1, 10000, 12500, 3, 'N/A', 'Locked'),
 ];
 
 
@@ -148,3 +149,4 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#84cc16', // lime-500
     }
   ];
+
