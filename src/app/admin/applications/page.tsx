@@ -1,19 +1,23 @@
+
 'use client';
 
-import { useState } from 'react';
-import { useMemoFirebase } from '@/firebase';
+import { useState, useEffect } from 'react';
+import { useMemoFirebase, useUser, useFirestore, useDoc, updateDocumentNonBlocking } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection, useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { useCollection } from '@/firebase';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Check, X } from 'lucide-react';
+import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
 import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 
 type User = {
     id: string;
@@ -46,22 +50,47 @@ const UserRowSkeleton = () => (
 )
 
 export default function ApplicationsPage() {
+    const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
+    const router = useRouter();
+    const { publicKey } = useWallet();
+    
     const [filter, setFilter] = useState('All');
 
-    // Memoize the query to prevent re-renders
+    const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
+
+    const adminRoleRef = useMemoFirebase(() => {
+        if (!user) return null;
+        return doc(firestore, 'roles_admin', user.uid);
+    }, [firestore, user]);
+
+    const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
+    const isFirebaseAdmin = !!adminRole;
+    const isAdmin = isWalletAdmin || isFirebaseAdmin;
+
+    // Memoize the query to prevent re-renders, and only run if admin
     const usersQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        if (!firestore || !isAdmin) return null; // <-- CRITICAL FIX: Don't query if not admin
+        
         const usersColRef = collection(firestore, 'users');
         if (filter === 'All') {
             return query(usersColRef, where('role', '!=', ''));
         }
         return query(usersColRef, where('role', '==', filter));
-    }, [firestore, filter]);
+    }, [firestore, filter, isAdmin]);
 
-    const { data: users, isLoading } = useCollection<User>(usersQuery);
+    const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
+    
+    useEffect(() => {
+        // If not loading and the user is neither a Firebase admin nor a wallet admin, redirect to login
+        if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
+            router.replace('/admin/login');
+        }
+    }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
+
 
     const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected') => {
+        if (!firestore) return;
         const userDocRef = doc(firestore, 'users', userId);
         updateDocumentNonBlocking(userDocRef, { status: newStatus });
     };
@@ -69,6 +98,37 @@ export default function ApplicationsPage() {
     const getAvatarUrl = (avatarId: string) => {
         return `https://picsum.photos/seed/${avatarId}/40/40`;
     };
+
+    // Show a loading state while we verify auth and role
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+    if (isCheckingAdmin) {
+        return (
+             <AppLayout>
+                <div className="flex items-center justify-center h-64">
+                    <p>Verifying admin privileges...</p>
+                </div>
+            </AppLayout>
+        )
+    }
+
+    if (!isAdmin) {
+        return (
+            <AppLayout>
+                <Card className="mt-8 border-destructive">
+                    <CardHeader className="text-center">
+                        <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+                        <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
+                        <CardDescription>
+                            You do not have the necessary permissions to view this page.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                         <Button onClick={() => router.push('/admin/login')}>Go to Admin Login</Button>
+                    </CardContent>
+                </Card>
+            </AppLayout>
+        );
+    }
 
     return (
         <AppLayout>
@@ -108,7 +168,7 @@ export default function ApplicationsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {isLoading ? (
+                                {areUsersLoading ? (
                                     <>
                                         <UserRowSkeleton />
                                         <UserRowSkeleton />
@@ -177,3 +237,5 @@ export default function ApplicationsPage() {
         </AppLayout>
     );
 }
+
+    
