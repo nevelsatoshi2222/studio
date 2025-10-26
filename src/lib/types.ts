@@ -230,8 +230,8 @@ export type PgcSaleStage = {
 
 export type PgcPotAllocation = {
   name: string;
-  allocation: string;
-  coinsM: number;
+  allocation: number;
+  coinsB: number;
   valueT?: string;
   use: string;
   color: string;

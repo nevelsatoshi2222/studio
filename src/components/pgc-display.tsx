@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -26,7 +27,7 @@ export function PgcDisplay() {
         <div className="p-2 border rounded-lg bg-background/80 shadow-lg">
           <p className="font-bold text-primary">{`${payload[0].name}`}</p>
           <p className="text-sm text-muted-foreground">{`Allocation: ${payload[0].value}%`}</p>
-           <p className="text-sm text-muted-foreground">{`${payload[0].payload.coinsB}B PGC`}</p>
+           <p className="text-sm text-muted-foreground">{`${payload[0].payload.coinsB.toLocaleString()}B PGC`}</p>
         </div>
       );
     }
@@ -125,7 +126,7 @@ export function PgcDisplay() {
                         <div>
                             <h4 className="font-semibold">{pot.name} ({pot.allocation}%)</h4>
                             <p className="text-sm text-muted-foreground">{pot.use}</p>
-                            <p className="text-xs font-mono text-primary/80">{pot.coinsB}B PGC = ~${pot.valueT}T at target price</p>
+                            <p className="text-xs font-mono text-primary/80">{pot.coinsB.toLocaleString()}B PGC = ~${pot.valueT}T at target price</p>
                         </div>
                     </div>
                 ))}

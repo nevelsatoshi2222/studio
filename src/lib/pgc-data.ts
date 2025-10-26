@@ -93,22 +93,14 @@ export const pgcSaleStages: PgcSaleStage[] = [
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: '63.8995',
-      coinsB: 511.196,
+      allocation: 71.3995,
+      coinsB: 571.196,
       use: 'Decided by Public Governance voting.',
       color: '#3b82f6', // blue-500
     },
     {
-      name: 'Quiz & Competition Rewards',
-      allocation: '7.50',
-      coinsB: 60,
-      valueT: '6.0',
-      use: 'A dedicated reserve for rewards from the Financial Awareness Quiz and other future competitions.',
-      color: '#14b8a6', // teal-500
-    },
-    {
       name: 'Creator Pot (CP)',
-      allocation: '11.00',
+      allocation: 11.00,
       coinsB: 88,
       valueT: '8.8',
       use: '10% for Public Use, 1% for Creator Self-Use.',
@@ -116,7 +108,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Country Wise Pot (CWP)',
-      allocation: '10.00',
+      allocation: 10.00,
       coinsB: 80,
       valueT: '8.0',
       use: 'Decided by country-specific public voting.',
@@ -124,7 +116,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: "World's Good Cause Pot (WGCP)",
-      allocation: '5.00',
+      allocation: 5.00,
       coinsB: 40,
       valueT: '4.0',
       use: 'Unlocks after Stage 7 for global initiatives.',
@@ -132,7 +124,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Reward Pot (RP)',
-      allocation: '2.58',
+      allocation: 2.58,
       coinsB: 20.64,
       valueT: '2.06',
       use: 'A dedicated reserve for all bonus distributions during the 9-stage sale, including compounding split rewards.',
@@ -140,7 +132,7 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
      {
       name: 'India Anti-Corruption Reward Pot',
-      allocation: '0.01',
+      allocation: 0.01,
       coinsB: 0.08,
       valueT: '0.008',
       use: 'A donation-based fund for rewarding anti-corruption efforts in India. The public and organizations can contribute in USDT and other top 10 cryptocurrencies.',
@@ -148,28 +140,28 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Presale Fund',
-      allocation: '0.0005',
+      allocation: 0.0005,
       coinsB: 0.004, // 4 Million PGC (2M for sale, 2M for bonus)
       use: 'A micro-allocation for the exclusive presale (0.00025% for sale, 0.00025% for 1:1 bonus). Proceeds go to the Creator.',
       color: '#fde047', // yellow-300
     },
     {
       name: 'Presale Affiliate Reward Pot',
-      allocation: '0.0000275',
+      allocation: 0.0000275,
       coinsB: 0.00022, // 220,000 PGC
       use: '11% of the 2M presale coins, reserved for the presale affiliate reward program.',
       color: '#ec4899', // pink-500
     },
     {
       name: 'Presale Influencer Reward Pot',
-      allocation: '0.0000125',
+      allocation: 0.0000125,
       coinsB: 0.0001, // 100,000 PGC
       use: '5% of the 2M presale coins, reserved for the presale influencer reward program.',
       color: '#d946ef', // fuchsia-500
     },
     {
       name: 'Presale Financial Quiz Pot',
-      allocation: '0.00001',
+      allocation: 0.00001,
       coinsB: 0.00008, // 80,000 PGC
       use: '4% of the 2M presale coins, reserved for the presale financial quiz rewards.',
       color: '#84cc16', // lime-500
