@@ -75,14 +75,15 @@ export function PgcDisplay() {
                 )}>
                   <TableCell className="font-bold">{stage.stage}</TableCell>
                   <TableCell>{stage.percentOfTs}</TableCell>
-                  <TableCell>{stage.coinsSoldB.toFixed(2)}</TableCell>
+                  <TableCell>{stage.coinsSoldB.toFixed(stage.coinsSoldB < 1 ? 4 : 2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
                   <TableCell>{stage.publicGoodReleasePercent}</TableCell>
                   <TableCell className="font-semibold text-green-500">{stage.publicGoodFundReleased}</TableCell>
                   <TableCell>
-                    <Badge variant={stage.status === 'Locked' ? 'destructive' : 'secondary'} className="flex items-center gap-1.5">
-                        {stage.status === 'Locked' ? <Lock className="h-3 w-3" /> : <Vote className="h-3 w-3" />}
+                    <Badge variant={stage.status === 'Locked' ? 'destructive' : stage.status === 'Split' ? 'secondary' : 'default'} className="flex items-center gap-1.5">
+                        {stage.status === 'Locked' && <Lock className="h-3 w-3" />}
+                        {stage.status === 'Split' && <Vote className="h-3 w-3" />}
                         {stage.status}
                     </Badge>
                   </TableCell>

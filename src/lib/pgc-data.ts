@@ -60,14 +60,14 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(10, 1, 100, 200, 6, 'Locked'),
   calculateStageData(11, 1, 200, 500, 5, 'Locked'),
   calculateStageData(12, 1, 500, 1000, 4.5, 'Locked'),
-  calculateStageData(13, 1, 1000, 1500, 4, 'Locked'),
-  calculateStageData(14, 1, 1500, 2000, 3.5, 'Locked'),
-  calculateStageData(15, 1, 2000, 2500, 3, 'Locked'),
-  calculateStageData(16, 1, 2500, 3000, 2.5, 'Locked'),
-  calculateStageData(17, 1, 3000, 3500, 2.5, 'Locked'),
-  calculateStageData(18, 1, 3500, 4000, 2.5, 'Locked'),
-  calculateStageData(19, 1, 4000, 4500, 2.5, 'Locked'),
-  calculateStageData(20, 1, 4500, 5000, 2.5, 'Locked'),
+  calculateStageData(13, 1, 1000, 1500, 4.5, 'Locked'),
+  calculateStageData(14, 1, 1500, 2000, 4, 'Locked'),
+  calculateStageData(15, 1, 2000, 3000, 4, 'Locked'),
+  calculateStageData(16, 1, 3000, 4000, 4, 'Locked'),
+  calculateStageData(17, 1, 4000, 5000, 4, 'Locked'),
+  calculateStageData(18, 1, 5000, 7500, 4, 'Locked'),
+  calculateStageData(19, 1, 7500, 10000, 4, 'Locked'),
+  calculateStageData(20, 1, 10000, 12500, 4, 'Locked'),
 ];
 
 
