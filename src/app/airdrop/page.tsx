@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -43,22 +44,22 @@ export default function AirdropPage() {
              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary border-2 border-primary mb-4">
                 <Gift className="h-8 w-8" />
             </div>
-            <h1 className="font-headline text-4xl font-bold">Airdrop Strategy</h1>
+            <h1 className="font-headline text-4xl font-bold">Early Registration Airdrop</h1>
             <p className="text-muted-foreground text-lg">
-              Rewarding our early adopters and community builders with a share of the presale.
+              Rewarding our earliest community members.
             </p>
           </CardHeader>
           <CardContent className="text-center">
              <p className="text-muted-foreground max-w-2xl mx-auto">
-                A total of 10% of the PGC presale is reserved for an airdrop to reward users who contribute to the platform's growth in its crucial early stages. Below are the categories for airdrop rewards.
+                A pool of 20,000 PGC (10% of the total airdrop fund) is reserved for early users who register and complete the Financial Awareness Quiz. Other airdrop opportunities are available through our Affiliate and Influencer programs.
              </p>
           </CardContent>
         </Card>
         
         <Card>
             <CardHeader>
-                <CardTitle>Airdrop Reward Tiers</CardTitle>
-                <CardDescription>Complete these actions to become eligible for a share of the airdrop pool.</CardDescription>
+                <CardTitle>Airdrop Reward</CardTitle>
+                <CardDescription>Complete the Financial Awareness Quiz to claim your share.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -88,10 +89,13 @@ export default function AirdropPage() {
                     </TableBody>
                 </Table>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex-col items-start gap-4">
                 <Button asChild>
-                    <Link href="/register">Register Now to Participate</Link>
+                    <Link href="/financial-quiz">Go to Quiz Now</Link>
                 </Button>
+                <p className="text-sm text-muted-foreground">
+                    Check out the <Link href="/affiliate-marketing" className="text-primary hover:underline">Affiliate</Link> and <Link href="/influencer" className="text-primary hover:underline">Influencer</Link> pages for more ways to earn.
+                </p>
             </CardFooter>
         </Card>
       </div>
