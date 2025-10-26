@@ -175,13 +175,11 @@ export default function FinancialQuizPage() {
   let coinReward = 0;
   if (quizFinished) {
     if (score === 10) {
-      coinReward = 10;
-    } else if (score > 6) {
       coinReward = 5;
+    } else if (score > 6) {
+      coinReward = 3;
     } else if (score >= 4) {
-      coinReward = 2.5;
-    } else {
-        coinReward = 1.25;
+      coinReward = 2;
     }
   }
 
@@ -191,7 +189,7 @@ export default function FinancialQuizPage() {
       <div className="flex flex-col gap-8 max-w-3xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl font-headline">Financial Awareness Quiz</CardTitle>
+            <CardTitle className="text-3xl font-headline">Financial Awareness Quiz Tournament</CardTitle>
             <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards! Connect your wallet to receive rewards.</CardDescription>
           </CardHeader>
           
@@ -200,15 +198,33 @@ export default function FinancialQuizPage() {
             <CardContent className="space-y-6">
                 <Alert className="border-primary">
                     <Award className="h-4 w-4 text-primary" />
-                    <AlertTitle className="font-bold text-primary">Quiz Reward Rules</AlertTitle>
+                    <AlertTitle className="font-bold text-primary">Quiz Tournament Rules & Rewards</AlertTitle>
                     <AlertDescription>
-                        <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-                            <li>Score below 4 to earn **1.25 PGC** (Limited to the first 8000 winners).</li>
-                            <li>Score 4 to 6 correct answers to earn **2.5 PGC** (Limited to the first 4000 winners).</li>
-                            <li>Score more than 6 correct answers to earn **5 PGC** (Limited to the first 2000 winners).</li>
-                            <li>Score a perfect 10 to earn **10 PGC** and advance to the next round! (Limited to the first 1000 winners).</li>
-                            <li>**Semi-Finals:** Top 100 perfect scorers compete to win **100 PGC** each.</li>
-                            <li>**Finals:** Top 10 semi-finalists compete for the grand prize of **1000 PGC** each!</li>
+                        <ul className="list-decimal space-y-3 pl-5 text-muted-foreground">
+                            <li>
+                                <span className="font-semibold text-foreground">Initial Round:</span>
+                                <ul className="list-disc pl-5 space-y-1 mt-1">
+                                    <li>Score 4 to 6 correct answers to earn **2 PGC** (Limited to the first 20,000 winners).</li>
+                                    <li>Score 7 to 9 correct answers to earn **3 PGC** (Limited to the first 5,000 winners).</li>
+                                    <li>Score a perfect 10 to earn **5 PGC** and qualify for the next round! (Limited to the first 2,000 winners).</li>
+                                </ul>
+                            </li>
+                             <li>
+                                <span className="font-semibold text-foreground">Qualifying Round:</span>
+                                <p>The top 2,000 scorers compete. The top 200 winners earn **20 PGC** each and advance to the Semi-Finals.</p>
+                            </li>
+                            <li>
+                                <span className="font-semibold text-foreground">Semi-Finals:</span>
+                                <p>The top 200 qualifiers compete. The top 20 scorers win **100 PGC** each and advance to the Grand Finale.</p>
+                            </li>
+                            <li>
+                                <span className="font-semibold text-foreground">Grand Finale:</span>
+                                 <ul className="list-disc pl-5 space-y-1 mt-1">
+                                    <li>The final 5 competitors battle for the championship.</li>
+                                    <li>**Grand Prize Winner (1st Place):** 4,000 PGC & the Champion's Trophy.</li>
+                                     <li>**Runners-up (4 winners):** 1,000 PGC each.</li>
+                                </ul>
+                            </li>
                         </ul>
                     </AlertDescription>
                 </Alert>
@@ -280,7 +296,7 @@ export default function FinancialQuizPage() {
                         <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
                         <AlertDescription className="text-green-800">
                             {score === 10 ?
-                                `You've earned a special bonus of 10 PGC for a perfect score and qualified for the next round! This reward is limited to the first 1000 perfect scorers.` :
+                                `You've earned ${coinReward} PGC and qualified for the next round!` :
                                 `You've earned ${coinReward} PGC for your excellent score!`
                             } The reward has been sent to your connected wallet.
                         </AlertDescription>
