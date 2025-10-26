@@ -248,10 +248,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
                 <Collapsible>
                     <CollapsibleTrigger asChild className="w-full">
-                        <SidebarMenuButton>
-                            <Building2 />
-                            <span>Franchisee</span>
-                        </SidebarMenuButton>
+                         <Link href="/franchisee" passHref>
+                            <SidebarMenuButton>
+                                <Building2 />
+                                <span>Franchisee</span>
+                            </SidebarMenuButton>
+                         </Link>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                          <SidebarMenuSub>
@@ -268,7 +270,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                             <SidebarMenuSub>
                                                 {franchiseeLevels.map((level) => (
                                                     <SidebarMenuSubItem key={level.name}>
-                                                        <Link href="#" passHref>
+                                                        <Link href={`/franchisee?category=${encodeURIComponent(item.name)}&level=${encodeURIComponent(level.name)}`} passHref>
                                                             <SidebarMenuSubButton>
                                                                 - {level.name}
                                                             </SidebarMenuSubButton>
