@@ -3,7 +3,7 @@ import { PgcSaleStage, PgcPotAllocation } from './types';
 
 const formatCurrency = (value: number) => {
     if (value >= 1e12) {
-        return `$${(value / 1e12).toFixed(2)}T`;
+        return `$${(value / 1e12).toFixed(3)}T`;
     }
     if (value >= 1e9) {
         return `$${(value / 1e9).toFixed(2)}B`;
@@ -14,18 +14,23 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
+const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995; // 571,196,000,000 PGC
+
 const calculateStageData = (
     stage: number,
     percentOfTs: number,
     priceLow: number,
     priceHigh: number,
-    publicGoodReleasePercent: number,
+    pdpReleasePercent: number,
     status: string
 ): PgcSaleStage => {
     const coinsSoldB = 800 * (percentOfTs / 100);
     const avgPrice = (priceLow + priceHigh) / 2;
     const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
-    const publicGoodFundValue = incomingFundValue * (publicGoodReleasePercent / 100);
+    
+    // Calculate PGC released from PDP and its value at the end-of-stage price
+    const pdpCoinsReleased = PDP_TOTAL_COINS * (pdpReleasePercent / 100);
+    const pdpFundValue = pdpCoinsReleased * priceHigh;
 
     return {
         stage,
@@ -33,8 +38,8 @@ const calculateStageData = (
         coinsSoldB,
         priceRange: `$${priceLow.toLocaleString()}-$${priceHigh.toLocaleString()}`,
         incomingFund: formatCurrency(incomingFundValue),
-        publicGoodReleasePercent: `${publicGoodReleasePercent}%`,
-        publicGoodFundReleased: formatCurrency(publicGoodFundValue),
+        publicGoodReleasePercent: `${pdpReleasePercent}%`,
+        publicGoodFundReleased: formatCurrency(pdpFundValue),
         status,
     };
 };
@@ -47,7 +52,8 @@ export const pgcSaleStages: PgcSaleStage[] = [
   { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
   { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
   { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', publicGoodReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
-  // Vote-to-Unlock Stages with Public Good Funding from PDP
+  
+  // Vote-to-Unlock Stages with dual funding model
   calculateStageData(7, 1, 10, 20, 10, 'Locked'),
   calculateStageData(8, 1, 20, 50, 8, 'Locked'),
   calculateStageData(9, 1, 50, 100, 7, 'Locked'),

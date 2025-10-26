@@ -49,7 +49,7 @@ export function PgcDisplay() {
         <CardHeader>
           <CardTitle>20-Stage Token Sale Schedule</CardTitle>
           <CardDescription>
-            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open for sale, ensuring democratic control over the token supply. A portion of the funds raised in each of these stages is allocated for public good.
+            PGC is sold in 20 sequential stages. Stages 7-20 are locked and require a 50% majority community vote to open. The sale of tokens generates liquid funds (USDT), and completing each stage also unlocks a portion of the massive Public Demand Pot (PGC tokens) for community-voted initiatives.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,9 +60,9 @@ export function PgcDisplay() {
                 <TableHead>% of Total Supply</TableHead>
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
-                <TableHead>Incoming Fund (USD)</TableHead>
-                <TableHead>Public Good Release %</TableHead>
-                <TableHead>Public Good Fund Released</TableHead>
+                <TableHead>Incoming Fund (for Public Good)</TableHead>
+                <TableHead>PDP Release %</TableHead>
+                <TableHead>Value Released from PDP</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
