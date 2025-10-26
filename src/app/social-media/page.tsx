@@ -31,6 +31,7 @@ import Link from 'next/link';
 import { useUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { placeholderImages } from '@/lib/placeholder-images.json';
+import { cn } from '@/lib/utils';
 
 const getAvatarUrl = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
@@ -41,7 +42,6 @@ const getAvatarHint = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
     return image ? image.imageHint : 'user avatar';
 }
-
 
 function CreatePostCard() {
     const { user } = useUser();
@@ -73,7 +73,7 @@ function CreatePostCard() {
             <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <Textarea
-            placeholder="What's on your mind?"
+            placeholder="What's on your mind? #PublicGovernance"
             className="flex-1 resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none p-0"
           />
         </div>
@@ -98,6 +98,8 @@ function CreatePostCard() {
 
 function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   const author = users.find((user) => user.id === post.authorId);
+  const postImageUrl = post.imageUrl ? placeholderImages.find(p => p.id === post.imageUrl)?.imageUrl : null;
+  const postImageHint = post.imageUrl ? placeholderImages.find(p => p.id === post.imageUrl)?.imageHint : null;
 
   return (
     <Card>
@@ -114,15 +116,41 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="mb-4">{post.content}</p>
-        {post.imageUrl && (
+        <p className="mb-4 whitespace-pre-wrap">
+            {post.content.split(' ').map((word, i) => {
+                if (word.startsWith('#')) {
+                    return <Link href="#" key={i} className="text-primary hover:underline">{word}</Link>
+                }
+                if (word.startsWith('$')) {
+                    const coin = word.substring(1).toUpperCase();
+                    if (coin === 'PGC' || coin === 'IGC') {
+                        return (
+                            <span key={i} className="inline-flex items-center gap-1 font-semibold">
+                                <Image 
+                                    src={coin === 'PGC' 
+                                        ? "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" 
+                                        : "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"}
+                                    alt={`${coin} logo`}
+                                    width={16}
+                                    height={16}
+                                    className="inline-block"
+                                />
+                                {word}
+                            </span>
+                        )
+                    }
+                }
+                return ` ${word} `;
+            })}
+        </p>
+        {postImageUrl && (
           <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
             <Image
-              src={post.imageUrl}
+              src={postImageUrl}
               alt="Post image"
               fill
               style={{ objectFit: 'cover' }}
-              data-ai-hint={post.imageHint}
+              data-ai-hint={postImageHint || 'social media image'}
             />
           </div>
         )}
@@ -152,11 +180,11 @@ const socialLinks = [
 ];
 
 const trendingTopics = [
-    { name: 'NewConstitution', posts: '1.2k' },
-    { name: 'PGCToken', posts: '980' },
-    { name: 'AntiCorruption', posts: '754' },
-    { name: 'Decentralization', posts: '512' },
-    { name: 'GlobalPeace', posts: '349' },
+    { name: 'PublicGovernance', posts: '15.2k' },
+    { name: 'PGC', posts: '11.8k' },
+    { name: 'Voting', posts: '9.3k' },
+    { name: 'DeFi', posts: '7.1k' },
+    { name: 'SocialImpact', posts: '5.9k' },
 ];
 
 

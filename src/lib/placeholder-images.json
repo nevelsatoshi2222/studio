@@ -1,3 +1,190 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "social-quiz",
+      "description": "A dynamic image representing a quiz or knowledge competition.",
+      "imageUrl": "https://picsum.photos/seed/social-quiz/600/400",
+      "imageHint": "quiz competition"
+    },
+    {
+      "id": "social-art",
+      "description": "An abstract, colorful image representing digital art.",
+      "imageUrl": "https://images.unsplash.com/photo-1593073862407-a3ce22748763?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkaWdpdGFsJTIwYXJ0fGVufDB8fHx8MTc2MTQ0NzE5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital art"
+    },
+    {
+      "id": "social-trees",
+      "description": "An image of a lush forest, representing environmental initiatives.",
+      "imageUrl": "https://images.unsplash.com/photo-1667591518659-6d25dbcbd393?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb3Jlc3QlMjBuYXR1cmV8ZW58MHx8fHwxNzYxNDcwMDA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "forest nature"
+    },
+    {
+      "id": "social-sports",
+      "description": "An action shot of a football match.",
+      "imageUrl": "https://images.unsplash.com/photo-1759022484965-13276a914c22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmb290YmFsbCUyMHNwb3J0fGVufDB8fHx8MTc2MTQ5MzUyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football sport"
+    },
+    {
+      "id": "social-vote",
+      "description": "An image representing democracy or voting, like a ballot box or a raised hand.",
+      "imageUrl": "https://images.unsplash.com/photo-1534293230397-c067fc201ab8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx2b3RpbmclMjBkZW1vY3JhY3l8ZW58MHx8fHwxNzYxNDY3NjU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "voting democracy"
+    },
+    {
+      "id": "social-peace",
+      "description": "A symbolic image of peace, like a dove or an olive branch.",
+      "imageUrl": "https://images.unsplash.com/photo-1650394995867-83dfb88b11ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZWFjZSUyMGRvdmV8ZW58MHx8fHwxNzYxNDkzNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "peace dove"
+    },
+    {
+      "id": "social-community",
+      "description": "A diverse group of people collaborating or celebrating.",
+      "imageUrl": "https://images.unsplash.com/photo-1688866852859-c9e6eb618fcb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb21tdW5pdHklMjBwZW9wbGV8ZW58MHx8fHwxNzYxNDE1NjM4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "community people"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a generic user.",
+      "imageUrl": "https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYxNDM4NzYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Avatar for a generic user.",
+      "imageUrl": "https://images.unsplash.com/photo-1544717304-a2db4a7b16ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMGZhY2V8ZW58MHx8fHwxNzYxMzg1MzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman face"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Avatar for a generic user.",
+      "imageUrl": "https://images.unsplash.com/photo-1623184663110-89ba5b565eb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2MTQ2NjAxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "user-avatar-4",
+      "description": "Avatar for a generic user.",
+      "imageUrl": "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb24lMjBoYXBweXxlbnwwfHx8fDE3NjE0MDY1OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person happy"
+    },
+    {
+      "id": "prod-wallet",
+      "description": "A leather wallet.",
+      "imageUrl": "https://images.unsplash.com/photo-1628483211662-9bcc692c46dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxsZWF0aGVyJTIwd2FsbGV0fGVufDB8fHx8MTc2MTM5NjQxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather wallet"
+    },
+    {
+      "id": "prod-headphones",
+      "description": "Wireless headphones.",
+      "imageUrl": "https://images.unsplash.com/photo-1619296794093-3df1ae6819a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3aXJlbGVzcyUyMGhlYWRwaG9uZXN8ZW58MHx8fHwxNzYxNDU3NDcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wireless headphones"
+    },
+    {
+      "id": "prod-tracker",
+      "description": "A smart fitness tracker watch.",
+      "imageUrl": "https://images.unsplash.com/photo-1587377839295-298e38763d9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmaXRuZXNzJTIwdHJhY2tlcnxlbnwwfHx8fDE3NjE0OTE5ODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fitness tracker"
+    },
+    {
+      "id": "prod-bottle",
+      "description": "A stainless steel water bottle.",
+      "imageUrl": "https://images.unsplash.com/photo-1616118133712-8c947f7b822c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3YXRlciUyMGJvdHRsZXxlbnwwfHx8fDE3NjE0MjE4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "water bottle"
+    },
+    {
+      "id": "prod-tshirt",
+      "description": "A plain t-shirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1632195217465-4f334314762f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y290dG9uJTIwdC1zaGlydHxlbnwwfHx8fDE3NjE0NTc5OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cotton t-shirt"
+    },
+    {
+      "id": "prod-vase",
+      "description": "A ceramic vase.",
+      "imageUrl": "https://images.unsplash.com/photo-1665512594386-051aad8b9f68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjZXJhbWljJTIwdmFzZXxlbnwwfHx8fDE3NjEzOTY4MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ceramic vase"
+    },
+    {
+      "id": "prod-knife",
+      "description": "A chef's knife.",
+      "imageUrl": "https://images.unsplash.com/photo-1548691597-8c8944ff28b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaGVmJTIwa25pZmV8ZW58MHx8fHwxNzYxMzc5NzI0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "chef knife"
+    },
+    {
+      "id": "prod-powerbank",
+      "description": "A portable power bank.",
+      "imageUrl": "https://images.unsplash.com/photo-1706275399494-fb26bbc5da63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3dlciUyMGJhbmt8ZW58MHx8fHwxNzYxNDkzNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "power bank"
+    },
+    {
+      "id": "prod-yogamat",
+      "description": "A yoga mat.",
+      "imageUrl": "https://images.unsplash.com/photo-1621886178958-be42369fc9e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx5b2dhJTIwbWF0fGVufDB8fHx8MTc2MTQ4MDg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "yoga mat"
+    },
+    {
+      "id": "prod-candle",
+      "description": "A scented candle.",
+      "imageUrl": "https://images.unsplash.com/photo-1603905179139-db12ab535ca9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzY2VudGVkJTIwY2FuZGxlfGVufDB8fHx8MTc2MTQzOTUzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "scented candle"
+    },
+    {
+      "id": "prod-messengerbag",
+      "description": "A leather messenger bag.",
+      "imageUrl": "https://images.unsplash.com/photo-1645276255969-680d5b62789d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtZXNzZW5nZXIlMjBiYWd8ZW58MHx8fHwxNzYxNDkzNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "messenger bag"
+    },
+    {
+      "id": "prod-drawingtablet",
+      "description": "A digital drawing tablet.",
+      "imageUrl": "https://images.unsplash.com/photo-1611241893603-3c359704e0ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkcmF3aW5nJTIwdGFibGV0fGVufDB8fHx8MTc2MTQ5MzUyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "drawing tablet"
+    },
+    {
+      "id": "prod-coffeebeans",
+      "description": "A bag of coffee beans.",
+      "imageUrl": "https://images.unsplash.com/photo-1442550528053-c431ecb55509?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb2ZmZWUlMjBiZWFuc3xlbnwwfHx8fDE3NjE0ODAyMDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee beans"
+    },
+    {
+      "id": "prod-novel",
+      "description": "A hardcover book.",
+      "imageUrl": "https://images.unsplash.com/photo-1624979393459-37e156d6ebce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxib29rJTIwbm92ZWx8ZW58MHx8fHwxNzYxNDkzNTI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "book novel"
+    },
+    {
+      "id": "prod-sunglasses",
+      "description": "A pair of sunglasses.",
+      "imageUrl": "https://images.unsplash.com/photo-1610021702221-5d941f6fb291?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhdmlhdG9yJTIwc3VuZ2xhc3Nlc3xlbnwwfHx8fDE3NjEzOTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "aviator sunglasses"
+    },
+    {
+      "id": "prod-keyboard",
+      "description": "A mechanical keyboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1512455011254-e2db8db4ef22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtZWNoYW5pY2FsJTIwa2V5Ym9hcmR8ZW58MHx8fHwxNzYxNDg5MzE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mechanical keyboard"
+    },
+    {
+      "id": "prod-necktie",
+      "description": "A silk necktie.",
+      "imageUrl": "https://images.unsplash.com/photo-1616057732603-0439d9ace394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzaWxrJTIwdGllfGVufDB8fHx8MTc2MTQ5MzUyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "silk tie"
+    },
+    {
+      "id": "prod-umbrella",
+      "description": "A travel umbrella.",
+      "imageUrl": "https://images.unsplash.com/photo-1565013447379-30aa7712e7f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx0cmF2ZWwlMjB1bWJyZWxsYXxlbnwwfHx8fDE3NjE0OTM1Mjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "travel umbrella"
+    },
+    {
+      "id": "prod-toothbrush",
+      "description": "An electric toothbrush.",
+      "imageUrl": "https://images.unsplash.com/photo-1695073623172-83ccd32fada9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxlbGVjdHJpYyUyMHRvb3RoYnJ1c2h8ZW58MHx8fHwxNzYxNDU3Mzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "electric toothbrush"
+    },
+    {
+      "id": "prod-gardentools",
+      "description": "A set of gardening tools.",
+      "imageUrl": "https://images.unsplash.com/photo-1661712663315-d851d40bcf07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxnYXJkZW5pbmclMjB0b29sc3xlbnwwfHx8fDE3NjE0NjA4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gardening tools"
+    }
+  ]
 }
