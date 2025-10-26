@@ -149,6 +149,19 @@ export const forumPosts: ForumPost[] = [
 ];
 
 export const tradingPairs: TradingPair[] = [
+  { from: 'PGC', to: 'USDT' },
+  { from: 'PGC', to: 'ETH' },
+  { from: 'PGC', to: 'BTC' },
+  { from: 'IGC', to: 'USDT' },
+  { from: 'IGC', to: 'ETH' },
+  { from: 'IGC', to: 'BTC' },
+  { from: 'IGC', to: 'SOL' },
+  { from: 'IGC', to: 'BNB' },
+  { from: 'IGC', to: 'XRP' },
+  { from: 'IGC', to: 'USDC' },
+  { from: 'IGC', to: 'ADA' },
+  { from: 'IGC', to: 'DOGE' },
+  { from: 'IGC', to: 'AVAX' },
   { from: 'ITC', to: 'USDT' },
   { from: 'ITC', to: 'ETH' },
   { from: 'ITC', to: 'BTC' },
@@ -176,16 +189,6 @@ export const tradingPairs: TradingPair[] = [
   { from: 'ICE', to: 'ADA' },
   { from: 'ICE', to: 'DOGE' },
   { from: 'ICE', to: 'AVAX' },
-  { from: 'IGC', to: 'USDT' },
-  { from: 'IGC', to: 'ETH' },
-  { from: 'IGC', to: 'BTC' },
-  { from: 'IGC', to: 'SOL' },
-  { from: 'IGC', to: 'BNB' },
-  { from: 'IGC', to: 'XRP' },
-  { from: 'IGC', to: 'USDC' },
-  { from: 'IGC', to: 'ADA' },
-  { from: 'IGC', to: 'DOGE' },
-  { from: 'IGC', to: 'AVAX' },
   { from: 'COMP', to: 'USDT' },
   { from: 'COMP', to: 'ETH' },
   { from: 'COMP', to: 'BTC' },
@@ -1181,6 +1184,7 @@ export const indiaGeography: IndiaGeography[] = [
     
 
     
+
 
 
 

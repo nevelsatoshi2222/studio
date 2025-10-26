@@ -38,9 +38,10 @@ import {
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 const tabs = [
+  { id: 'PGC', name: 'Trade PGC' },
+  { id: 'IGC', name: 'Trade IGC' },
   { id: 'ITC', name: 'Trade ITC' },
   { id: 'ICE', name: 'Trade ICE' },
-  { id: 'IGC', name: 'Trade IGC' },
   { id: 'FRC', name: 'Trade FRC' },
   { id: 'LOAN', name: 'Trade LOAN' },
   { id: 'JBC', name: 'Trade JBC' },
@@ -250,8 +251,8 @@ export default function ExchangePage() {
           </p>
         </div>
 
-        <Tabs defaultValue="ITC" className="w-full">
-          <TabsList className="grid w-full grid-cols-10">
+        <Tabs defaultValue="PGC" className="w-full">
+          <TabsList className="grid w-full grid-cols-11">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id}>{tab.name}</TabsTrigger>
             ))}
@@ -266,5 +267,3 @@ export default function ExchangePage() {
     </AppLayout>
   );
 }
-
-    
