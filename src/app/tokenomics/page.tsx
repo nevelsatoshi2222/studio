@@ -215,22 +215,9 @@ export default function TokenomicsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Total Fund Allocation</CardTitle>
+            <CardTitle>Geographic Fund Allocation (40% of Incoming Funds)</CardTitle>
             <CardDescription>
-              A portion of incoming funds are automatically allocated to various
-              development and community pots.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FundAllocationCard allocations={adminAllocations.map(a => ({...a, value: a.percentage, color: a.color}))} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Geographic Fund Allocation (40% of Total)</CardTitle>
-            <CardDescription>
-              A detailed breakdown of how the geographically-focused funds are distributed.
+              A detailed breakdown of how the geographically-focused funds are distributed. This chart shows the relative share of each level within the 40% allocation.
             </CardDescription>
           </CardHeader>
           <CardContent>
