@@ -25,7 +25,8 @@ import {
   ArtItem,
   TeamMember,
   AirdropReward,
-  IndiaGeography
+  IndiaGeography,
+  FundAllocation
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 
@@ -929,6 +930,37 @@ export const coinPackages: CoinPackage[] = [
     { name: 'Silver', coins: 12500, packagesAvailable: 64000, color: 'bg-zinc-400' },
     { name: 'Bronze', coins: 6250, packagesAvailable: 128000, color: 'bg-orange-400' },
 ];
+
+export const incomingFundAllocations: FundAllocation[] = [
+    { name: 'Geographic Allocation', value: 40, color: '#3b82f6', description: 'Funds distributed to various geographic levels for local development.' },
+    { name: 'Public Demand (Voting)', value: 40, color: '#8b5cf6', description: 'Funds allocated based on community votes for projects and initiatives.' },
+    { name: 'World Initiatives', value: 20, color: '#10b981', description: 'Fixed allocation for global good causes and platform operations.' },
+];
+
+export const geographicAllocations: FundAllocation[] = [
+  { name: 'Ward/Society/Street', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total incoming funds).' },
+  { name: 'Village/City', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total incoming funds).' },
+  { name: 'State Projects', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total incoming funds).' },
+  { name: 'Country Projects', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total incoming funds).' },
+];
+
+export const publicDemandAllocations: FundAllocation[] = [
+    { name: 'Public Demand (Voting)', value: 100, color: '#8b5cf6', description: '100% of this fund is allocated based on community votes for projects, issues, and initiatives across all levels.' }
+];
+
+export const worldInitiativeAllocations: FundAllocation[] = [
+  { name: 'System Management', value: 2, color: '#64748b', description: 'Covers operational costs, servers, team, and staff. (0.4% of total)' },
+  { name: 'Global Peace & Dev', value: 15, color: '#ef4444', description: 'Funds for global peacekeeping and humanitarian aid. (3% of total)' },
+  { name: 'Anti-Corruption', value: 25, color: '#f97316', description: 'Bounties and resources for fighting corruption. (5% of total)' },
+  { name: 'AI Education', value: 5, color: '#f59e0b', description: 'Providing free AI education and tools. (1% of total)' },
+  { name: 'Plant a Tree Initiative', value: 7.5, color: '#84cc16', description: 'Global reforestation and environmental projects. (1.5% of total)' },
+  { name: 'Intl & National Issues', value: 10, color: '#22c55e', description: 'Funding for tackling voted-on global & national challenges. (2% of total)' },
+  { name: 'Influencer Prize Pool', value: 5, color: '#0ea5e9', description: 'Rewards for content creators promoting the platform. (1% of total)' },
+  { name: 'Sports & Arts Dev', value: 10, color: '#0284c7', description: 'Sponsoring athletes, artists, and cultural projects. (2% of total)' },
+  { name: 'Affiliate Marketing', value: 10, color: '#7c3aed', description: 'Rewards for bringing new users to the platform. (2% of total)' },
+  { name: 'Other Fixed', value: 10.5, color: '#c026d3', description: 'Includes Creator, franchisee, guide, and investor benefits. (2.1% of total)' },
+];
+
 
 export const adminAllocations: AdminAllocation[] = [
   // 40% Geographic

@@ -20,7 +20,10 @@ import {
   tokenStages,
   lockDurations,
   stakedPositions,
-  adminAllocations,
+  incomingFundAllocations,
+  geographicAllocations,
+  publicDemandAllocations,
+  worldInitiativeAllocations,
 } from '@/lib/data';
 import {
   Lock,
@@ -68,14 +71,6 @@ const coinInfo = [
     { id: 'frn', name: 'FRN', fullName: 'Franchise Coin', icon: Building2, totalSupply: 1_000_000_000 },
     { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
     { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
-];
-
-
-const geographicAllocations: FundAllocation[] = [
-  { name: 'Ward/Society/Street Level', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total).' },
-  { name: 'Village/City Level', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total).' },
-  { name: 'State Projects', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total).' },
-  { name: 'Country Projects', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total).' },
 ];
 
 
@@ -214,18 +209,58 @@ export default function TokenomicsPage() {
         </Tabs>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Geographic Fund Allocation (40% of Incoming Funds)</CardTitle>
-            <CardDescription>
-              A detailed breakdown of how the geographically-focused funds are distributed. This chart shows the relative share of each level within the 40% allocation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FundAllocationCard allocations={geographicAllocations} />
-          </CardContent>
+            <CardHeader>
+                <CardTitle>Incoming Fund Allocation (100%)</CardTitle>
+                <CardDescription>
+                    This chart shows the top-level allocation of all incoming funds from token sales.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <FundAllocationCard allocations={incomingFundAllocations} />
+            </CardContent>
         </Card>
+
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Breakdown: Geographic Allocation (40%)</CardTitle>
+                    <CardDescription>
+                    How the 40% of funds dedicated to geographic development are split.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <FundAllocationCard allocations={geographicAllocations} />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Breakdown: Public Demand (40%)</CardTitle>
+                    <CardDescription>
+                    This entire fund is controlled by community voting.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <FundAllocationCard allocations={publicDemandAllocations} />
+                </CardContent>
+            </Card>
+        </div>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Breakdown: World Initiatives (20%)</CardTitle>
+                <CardDescription>
+                    How the 20% of funds for fixed-purpose global initiatives are allocated.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <FundAllocationCard allocations={worldInitiativeAllocations} />
+            </CardContent>
+        </Card>
+
 
       </div>
     </AppLayout>
   );
 }
+
