@@ -57,13 +57,12 @@ export function PgcDisplay() {
             <TableHeader>
               <TableRow>
                 <TableHead>Stage</TableHead>
-                <TableHead>% of Total Supply</TableHead>
-                <TableHead>Coins Sold (Billion)</TableHead>
+                <TableHead>Coins Sold (B)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Bonus Ratio</TableHead>
                 <TableHead>Incoming Fund from Sale</TableHead>
                 <TableHead>Public Good Release %</TableHead>
-                <TableHead>Public Good Fund Released</TableHead>
+                <TableHead>Value Released from PDP</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -75,7 +74,6 @@ export function PgcDisplay() {
                     stage.stage > 6 && 'bg-purple-500/10'
                 )}>
                   <TableCell className="font-bold">{stage.stage}</TableCell>
-                  <TableCell>{stage.percentOfTs}</TableCell>
                   <TableCell>{stage.coinsSoldB.toFixed(stage.coinsSoldB < 1 ? 4 : 2)}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell>{stage.bonusRatio}</TableCell>
@@ -104,7 +102,7 @@ export function PgcDisplay() {
             </CardDescription>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-8 items-start">
-            <div className="w-full h-[400px] flex items-center justify-center pt-8">
+            <div className="w-full h-[400px] flex items-center justify-center pt-16">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
@@ -126,7 +124,7 @@ export function PgcDisplay() {
                     </PieChart>
                 </ResponsiveContainer>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-16">
                 {pgcPotAllocations.map(pot => (
                     <div key={pot.name} className="flex items-start gap-4">
                         <div className="h-3 w-3 rounded-full mt-1.5" style={{backgroundColor: pot.color}} />
