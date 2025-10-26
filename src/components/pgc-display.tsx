@@ -104,9 +104,9 @@ export function PgcDisplay() {
             </CardDescription>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-8 items-start">
-            <div className="h-[300px] w-full">
+            <div className="w-full h-[400px] flex items-center justify-center pt-8">
                 <ResponsiveContainer width="100%" height="100%">
-                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <PieChart>
                         <Pie
                             data={pgcPotAllocations}
                             cx="50%"
@@ -122,11 +122,11 @@ export function PgcDisplay() {
                             ))}
                         </Pie>
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend wrapperStyle={{fontSize: "0.8rem"}}/>
+                        <Legend wrapperStyle={{fontSize: "0.8rem", paddingTop: '20px'}}/>
                     </PieChart>
                 </ResponsiveContainer>
             </div>
-            <div className="space-y-4 mt-12">
+            <div className="space-y-4">
                 {pgcPotAllocations.map(pot => (
                     <div key={pot.name} className="flex items-start gap-4">
                         <div className="h-3 w-3 rounded-full mt-1.5" style={{backgroundColor: pot.color}} />
