@@ -99,34 +99,39 @@ function CreatePostCard() {
 }
 
 const PostContent = ({ text }: { text: string }) => {
-  // Regex to find hashtags and coin symbols
   const regex = /(\$[A-Z]+|#\w+)/g;
   const parts = text.split(regex);
 
   return (
     <div className="mb-4 whitespace-pre-wrap text-sm">
       {parts.map((part, index) => {
-        const coinMatch = part.match(/^\$([A-Z]+)$/);
-        if (coinMatch) {
-          const coin = coinMatch[1];
-          if (coin === 'PGC' || coin === 'IGC') {
-            return (
-              <span key={index} className="inline-flex items-center">
-                <Image
-                  src={
-                    coin === 'PGC'
-                      ? "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png"
-                      : "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"
-                  }
-                  alt={`${coin} logo`}
-                  width={16}
-                  height={16}
-                  className="inline-block align-middle mr-1 h-4 w-4"
-                />
-                <span className="font-semibold text-primary">{part}</span>
-              </span>
-            );
-          }
+        if (part === '$PGC') {
+          return (
+            <React.Fragment key={index}>
+              <Image
+                src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png"
+                alt="PGC logo"
+                width={16}
+                height={16}
+                className="inline-block align-middle mr-1 h-4 w-4"
+              />
+              <span className="font-semibold text-primary">{part}</span>
+            </React.Fragment>
+          );
+        }
+        if (part === '$IGC') {
+          return (
+            <React.Fragment key={index}>
+              <Image
+                src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"
+                alt="IGC logo"
+                width={16}
+                height={16}
+                className="inline-block align-middle mr-1 h-4 w-4"
+              />
+              <span className="font-semibold text-primary">{part}</span>
+            </React.Fragment>
+          );
         }
         if (part.startsWith('#')) {
           return (
@@ -135,12 +140,11 @@ const PostContent = ({ text }: { text: string }) => {
             </Link>
           );
         }
-        return <span key={index}>{part}</span>;
+        return <React.Fragment key={index}>{part}</React.Fragment>;
       })}
     </div>
   );
 };
-
 
 function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   const author = users.find((user) => user.id === post.authorId);
