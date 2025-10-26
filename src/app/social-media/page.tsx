@@ -108,7 +108,7 @@ const PostContent = ({ text }: { text: string }) => {
           const coin = part.substring(1).toUpperCase();
           if (coin === 'PGC' || coin === 'IGC') {
             return (
-              <span key={i} className="inline-flex items-center gap-1 font-semibold text-primary">
+              <React.Fragment key={i}>
                 <Image
                   src={
                     coin === 'PGC'
@@ -118,10 +118,10 @@ const PostContent = ({ text }: { text: string }) => {
                   alt={`${coin} logo`}
                   width={16}
                   height={16}
-                  className="inline-block"
+                  className="inline-block align-middle mr-1"
                 />
-                {part}
-              </span>
+                <span className="font-semibold text-primary">{part}</span>
+              </React.Fragment>
             );
           }
         }
