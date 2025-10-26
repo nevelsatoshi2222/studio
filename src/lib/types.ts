@@ -128,6 +128,8 @@ export type SocialPost = {
   timestamp: string;
   likes: number;
   comments: number;
+  mentionsPgc?: boolean;
+  mentionsIgc?: boolean;
 }
 
 export type CoinPackage = {

@@ -99,52 +99,24 @@ function CreatePostCard() {
 }
 
 const PostContent = ({ text }: { text: string }) => {
-  const regex = /(\$[A-Z]+|#\w+)/g;
-  const parts = text.split(regex);
-
-  return (
-    <div className="mb-4 whitespace-pre-wrap text-sm">
-      {parts.map((part, index) => {
-        if (part === '$PGC') {
-          return (
-            <React.Fragment key={index}>
-              <Image
-                src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png"
-                alt="PGC logo"
-                width={16}
-                height={16}
-                className="inline-block align-middle mr-1 h-4 w-4"
-              />
-              <span className="font-semibold text-primary">{part}</span>
-            </React.Fragment>
-          );
-        }
-        if (part === '$IGC') {
-          return (
-            <React.Fragment key={index}>
-              <Image
-                src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"
-                alt="IGC logo"
-                width={16}
-                height={16}
-                className="inline-block align-middle mr-1 h-4 w-4"
-              />
-              <span className="font-semibold text-primary">{part}</span>
-            </React.Fragment>
-          );
-        }
-        if (part.startsWith('#')) {
-          return (
-            <Link href="#" key={index} className="text-primary hover:underline">
-              {part}
-            </Link>
-          );
-        }
-        return <React.Fragment key={index}>{part}</React.Fragment>;
-      })}
-    </div>
-  );
-};
+    const regex = /(#\w+)/g;
+    const parts = text.split(regex);
+  
+    return (
+      <div className="mb-4 whitespace-pre-wrap text-sm text-foreground">
+        {parts.map((part, index) => {
+          if (part.startsWith('#')) {
+            return (
+              <Link href="#" key={index} className="text-primary hover:underline">
+                {part}
+              </Link>
+            );
+          }
+          return <React.Fragment key={index}>{part}</React.Fragment>;
+        })}
+      </div>
+    );
+  };
 
 function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   const author = users.find((user) => user.id === post.authorId);
@@ -154,15 +126,31 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   return (
     <Card>
       <CardHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={author ? getAvatarUrl(author.avatarId) : ''} alt={author?.name} data-ai-hint={author ? getAvatarHint(author.avatarId) : 'user avatar'} />
-            <AvatarFallback>{author?.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-semibold">{author?.name}</p>
-            <p className="text-xs text-muted-foreground">{post.timestamp}</p>
-          </div>
+        <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarImage src={author ? getAvatarUrl(author.avatarId) : ''} alt={author?.name} data-ai-hint={author ? getAvatarHint(author.avatarId) : 'user avatar'} />
+                <AvatarFallback>{author?.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{author?.name}</p>
+                <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+                {post.mentionsPgc && (
+                    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
+                         <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1722971249713_0.png" alt="PGC logo" width={16} height={16} className="h-4 w-4" />
+                         <span className="text-xs font-bold text-primary">PGC</span>
+                    </div>
+                )}
+                {post.mentionsIgc && (
+                    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
+                        <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png" alt="IGC logo" width={16} height={16} className="h-4 w-4" />
+                        <span className="text-xs font-bold text-primary">IGC</span>
+                    </div>
+                )}
+            </div>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
