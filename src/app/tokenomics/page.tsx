@@ -57,6 +57,7 @@ import React, { useState } from 'react';
 import { FundAllocationCard } from '@/components/fund-allocation-card';
 import { PgcDisplay } from '@/components/pgc-display';
 import Image from 'next/image';
+import { FundAllocation } from '@/lib/types';
 
 const coinInfo = [
     { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: () => <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" alt="PGC Coin" width={24} height={24} />, totalSupply: 800_000_000_000, isPgc: true },
@@ -68,6 +69,15 @@ const coinInfo = [
     { id: 'work', name: 'WORK', fullName: 'Work Coin', icon: UserCog, totalSupply: 1_000_000_000 },
     { id: 'quiz', name: 'Quiz', fullName: 'Quiz Coin', icon: Trophy, totalSupply: 1_000_000_000 },
 ];
+
+
+const geographicAllocations: FundAllocation[] = [
+  { name: 'Ward/Society/Street Level', value: 15, color: '#14b8a6', description: 'Funding for hyper-local community projects.' },
+  { name: 'Village/City Level', value: 10, color: '#06b6d4', description: 'Funding for village and city-level initiatives.' },
+  { name: 'State Projects', value: 5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure.' },
+  { name: 'Country Projects', value: 10, color: '#3b82f6', description: 'Development funds for national-level projects.' },
+];
+
 
 export default function TokenomicsPage() {
   const [selectedCoinId, setSelectedCoinId] = useState('pgc');
@@ -205,7 +215,7 @@ export default function TokenomicsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Fund Allocation</CardTitle>
+            <CardTitle>Total Fund Allocation</CardTitle>
             <CardDescription>
               A portion of incoming funds are automatically allocated to various
               development and community pots.
@@ -215,6 +225,19 @@ export default function TokenomicsPage() {
             <FundAllocationCard allocations={adminAllocations.map(a => ({...a, value: a.percentage, color: a.color}))} />
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Geographic Fund Allocation (40% of Total)</CardTitle>
+            <CardDescription>
+              A detailed breakdown of how the geographically-focused funds are distributed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FundAllocationCard allocations={geographicAllocations} />
+          </CardContent>
+        </Card>
+
       </div>
     </AppLayout>
   );
