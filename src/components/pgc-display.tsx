@@ -28,7 +28,7 @@ export function PgcDisplay() {
       return (
         <div className="p-2 border rounded-lg bg-background/80 shadow-lg">
           <p className="font-bold text-primary">{`${payload[0].name}`}</p>
-          <p className="text-sm text-muted-foreground">{`Allocation: ${payload[0].value}%`}</p>
+          <p className="text-sm text-muted-foreground">{`Allocation: ${payload[0].payload.allocation}%`}</p>
            <p className="text-sm text-muted-foreground">{`${payload[0].payload.coinsB.toLocaleString()}B PGC`}</p>
         </div>
       );
@@ -106,7 +106,7 @@ export function PgcDisplay() {
         <CardContent className="grid md:grid-cols-2 gap-8 items-start">
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                         <Pie
                             data={pgcPotAllocations}
                             cx="50%"
@@ -126,7 +126,7 @@ export function PgcDisplay() {
                     </PieChart>
                 </ResponsiveContainer>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 mt-12">
                 {pgcPotAllocations.map(pot => (
                     <div key={pot.name} className="flex items-start gap-4">
                         <div className="h-3 w-3 rounded-full mt-1.5" style={{backgroundColor: pot.color}} />
