@@ -99,16 +99,19 @@ function CreatePostCard() {
 }
 
 const PostContent = ({ text }: { text: string }) => {
-  const parts = text.split(/(\$[A-Z]+|#\w+)/g);
+  // Regex to find hashtags and coin symbols
+  const regex = /(\$[A-Z]+|#\w+)/g;
+  const parts = text.split(regex);
 
   return (
-    <div className="mb-4 whitespace-pre-wrap">
-      {parts.map((part, i) => {
-        if (part.startsWith('$')) {
-          const coin = part.substring(1).toUpperCase();
+    <div className="mb-4 whitespace-pre-wrap text-sm">
+      {parts.map((part, index) => {
+        const coinMatch = part.match(/^\$([A-Z]+)$/);
+        if (coinMatch) {
+          const coin = coinMatch[1];
           if (coin === 'PGC' || coin === 'IGC') {
             return (
-              <React.Fragment key={i}>
+              <span key={index} className="inline-flex items-center">
                 <Image
                   src={
                     coin === 'PGC'
@@ -118,21 +121,21 @@ const PostContent = ({ text }: { text: string }) => {
                   alt={`${coin} logo`}
                   width={16}
                   height={16}
-                  className="inline-block align-middle mr-1"
+                  className="inline-block align-middle mr-1 h-4 w-4"
                 />
                 <span className="font-semibold text-primary">{part}</span>
-              </React.Fragment>
+              </span>
             );
           }
         }
         if (part.startsWith('#')) {
           return (
-            <Link href="#" key={i} className="text-primary hover:underline">
+            <Link href="#" key={index} className="text-primary hover:underline">
               {part}
             </Link>
           );
         }
-        return <React.Fragment key={i}>{part}</React.Fragment>;
+        return <span key={index}>{part}</span>;
       })}
     </div>
   );
