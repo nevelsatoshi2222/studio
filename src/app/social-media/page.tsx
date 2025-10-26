@@ -102,7 +102,7 @@ const PostContent = ({ text }: { text: string }) => {
   const parts = text.split(/(\$[A-Z]+|#\w+)/g);
 
   return (
-    <p className="mb-4 whitespace-pre-wrap">
+    <div className="mb-4 whitespace-pre-wrap">
       {parts.map((part, i) => {
         if (part.startsWith('$')) {
           const coin = part.substring(1).toUpperCase();
@@ -134,7 +134,7 @@ const PostContent = ({ text }: { text: string }) => {
         }
         return <React.Fragment key={i}>{part}</React.Fragment>;
       })}
-    </p>
+    </div>
   );
 };
 

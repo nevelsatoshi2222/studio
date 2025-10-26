@@ -185,6 +185,76 @@
       "description": "A set of gardening tools.",
       "imageUrl": "https://images.unsplash.com/photo-1661712663315-d851d40bcf07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxnYXJkZW5pbmclMjB0b29sc3xlbnwwfHx8fDE3NjE0NjA4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "gardening tools"
+    },
+    {
+      "id": "social-tokenomics",
+      "imageUrl": "https://images.unsplash.com/photo-1543286386-713bdd548da4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGllJTIwY2hhcnR8ZW58MHx8fHwxNzYxNDE1Njk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pie chart"
+    },
+    {
+      "id": "social-rocket",
+      "imageUrl": "https://images.unsplash.com/photo-1457365050282-c53d772ef8b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb2NrZXQlMjBsYXVuY2h8ZW58MHx8fHwxNzYxNDA4MDU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rocket launch"
+    },
+    {
+      "id": "social-chart-up",
+      "imageUrl": "https://images.unsplash.com/photo-1649003515353-c58a239cf662?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdG9jayUyMGNoYXJ0fGVufDB8fHx8MTc2MTQ5NDU2M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stock chart"
+    },
+    {
+      "id": "social-pie-chart",
+      "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkYXRhJTIwY2hhcnR8ZW58MHx8fHwxNzYxNDgzMDA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data chart"
+    },
+    {
+      "id": "social-lightbulb",
+      "imageUrl": "https://images.unsplash.com/photo-1753405982879-0e44343eb2a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpZGVhJTIwbGlnaHRidWxifGVufDB8fHx8MTc2MTQxMDU5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "idea lightbulb"
+    },
+    {
+      "id": "social-constitution",
+      "imageUrl": "https://images.unsplash.com/photo-1758270703343-027c28e4703e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkb2N1bWVudCUyMHNjcm9sbHxlbnwwfHx8fDE3NjE0OTQ1NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "document scroll"
+    },
+    {
+      "id": "social-healthcare",
+      "imageUrl": "https://images.unsplash.com/photo-1758691462370-cef1774278cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtZWRpY2FsJTIwaGVhbHRoY2FyZXxlbnwwfHx8fDE3NjE0NjE2OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "medical healthcare"
+    },
+    {
+      "id": "social-esports",
+      "imageUrl": "https://images.unsplash.com/photo-1759701546662-b79f5d881124?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlc3BvcnRzJTIwZ2FtaW5nfGVufDB8fHx8MTc2MTQ5NDU2M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "esports gaming"
+    },
+    {
+      "id": "social-franchise",
+      "imageUrl": "https://images.unsplash.com/photo-1687422810663-c316494f725a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21hbGwlMjBidXNpbmVzc3xlbnwwfHx8fDE3NjE0MTA2MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "small business"
+    },
+    {
+      "id": "social-food-stall",
+      "imageUrl": "https://images.unsplash.com/photo-1758767055264-bc7e859811d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb29kJTIwc3RhbGx8ZW58MHx8fHwxNzYxNDUyNzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "food stall"
+    },
+    {
+      "id": "social-network",
+      "imageUrl": "https://images.unsplash.com/photo-1664526936810-ec0856d31b92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxuZXR3b3JrJTIwZGlhZ3JhbXxlbnwwfHx8fDE3NjE0OTQ1NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "network diagram"
+    },
+    {
+      "id": "social-influencer",
+      "imageUrl": "https://images.unsplash.com/photo-1676380362680-85260af12dca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMGNyZWF0b3J8ZW58MHx8fHwxNzYxNDk0NTY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "video creator"
+    },
+    {
+      "id": "social-gift",
+      "imageUrl": "https://images.unsplash.com/photo-1647221598272-9aa015392c81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxnaWZ0JTIwYm94fGVufDB8fHx8MTc2MTQ1MDc2N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gift box"
+    },
+    {
+      "id": "social-justice",
+      "imageUrl": "https://images.unsplash.com/photo-1760172593315-33156db48b79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxqdXN0aWNlJTIwc2NhbGV8ZW58MHx8fHwxNzYxNDY2ODY2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "justice scale"
     }
   ]
 }

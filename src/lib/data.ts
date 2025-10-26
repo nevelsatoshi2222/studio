@@ -922,36 +922,55 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
 ];
 
 export const socialPosts: SocialPost[] = [
-    { id: 'post1', authorId: 'usr_002', content: "Just read the Vision page. Building a decentralized nation powered by $PGC isn't just ambitious, it's revolutionary. This is the future of governance. #PublicGovernance #Crypto", timestamp: '15m ago', likes: 29, comments: 7, tags: ['PGC', 'Vision'] },
-    { id: 'post2', authorId: 'usr_003', content: "The tokenomics for $PGC are insane. Over 70% of the supply is in a Public Demand Pot, controlled by voters. This is what true community ownership looks like. #DeFi #DAO", timestamp: '45m ago', likes: 58, comments: 12, tags: ['PGC', 'Tokenomics'] },
-    { id: 'post3', authorId: 'usr_005', content: "So much more than just a coin. A percentage of sales for $IGC and $PGC goes directly to funding anti-corruption, peace, and environmental initiatives. Investing in good. #SocialImpact #CryptoForGood", timestamp: '1h ago', likes: 72, comments: 18, tags: ['IGC', 'PGC', 'Social Impact'] },
-    { id: 'post4', authorId: 'usr_006', content: "The Global Quiz Tournament is genius. A chance to prove your knowledge and win real prizes. Can't wait for it to start. Any other quizzers here? #Quiz #Competition #PlayToEarn", imageUrl: 'social-quiz', imageHint: 'quiz competition', timestamp: '2h ago', likes: 41, comments: 15, tags: ['Competition'] },
-    { id: 'post5', authorId: 'usr_007', content: "Submitted my vote for the national issues in India. It's incredible to have a direct say on policies that matter. This is what #PublicGovernance is all about.", timestamp: '3h ago', likes: 98, comments: 22, tags: ['Voting', 'Governance'] },
-    { id: 'post6', authorId: 'usr_008', content: "The affiliate program is a great way to build a team and earn rewards. The multi-level structure is very motivating. Let's grow this community together! #Affiliate #Marketing", timestamp: '4h ago', likes: 35, comments: 9, tags: ['Affiliate'] },
-    { id: 'post7', authorId: 'usr_009', content: "I'm a digital artist, and the World Talent Championship for Arts is a game-changer. A global stage, judged by the community, with real funding. This is the opportunity I've been waiting for. #Art #NFT #Competition", imageUrl: 'social-art', imageHint: 'digital art', timestamp: '5h ago', likes: 120, comments: 31, tags: ['Competition', 'Arts'] },
-    { id: 'post8', authorId: 'usr_010', content: "Staking my $IGC to help secure the network and earn rewards. It's a win-win. The stage-based lock durations are a really smart way to align incentives with project milestones. #Staking #DeFi", timestamp: '6h ago', likes: 64, comments: 11, tags: ['IGC', 'Staking'] },
-    { id: 'post9', authorId: 'usr_011', content: "This isn't just about voting, it's about building. The idea-based competitions let you become a project head for your own proposal, with funding! I'm already drafting my idea for local infrastructure. #Innovation #Community", timestamp: '7h ago', likes: 88, comments: 19, tags: ['Voting', 'Innovation'] },
-    { id: 'post10', authorId: 'usr_002', content: "The deflationary 20-stage sale for $PGC is designed for long-term stability. It prevents massive dumps and encourages holding. Smart move. #Tokenomics #PGC", timestamp: '8h ago', likes: 55, comments: 10, tags: ['PGC', 'Tokenomics'] },
-    { id: 'post11', authorId: 'usr_004', content: "The 'Plant 2 Trees, Get 1 ITC' initiative is simple but powerful. A direct incentive for real-world environmental action. Proud to be part of this. #Environment #ITC", imageUrl: 'social-trees', imageHint: 'forest nature', timestamp: '9h ago', likes: 150, comments: 45, tags: ['Social Impact', 'ITC'] },
-    { id: 'post12', authorId: 'usr_005', content: "Just saw the breakdown of the 'World Initiatives' fund. AI education, sports development, global peace... this platform has its priorities straight. #Vision #PublicGovernance", timestamp: '10h ago', likes: 76, comments: 14, tags: ['Social Impact', 'Vision'] },
-    { id: 'post13', authorId: 'usr_003', content: "Anyone else excited about the sports competition? I'm a footballer, and the chance to get discovered and sponsored on a global stage is unreal. #Sports #Competition", imageUrl: 'social-sports', imageHint: 'football sport', timestamp: '11h ago', likes: 92, comments: 28, tags: ['Competition', 'Sports'] },
-    { id: 'post14', authorId: 'usr_006', content: "Thinking about the potential of the Public Demand Pot. 40% of all incoming funds, controlled by us, the voters. We could fund anything from local parks to open-source software. The possibilities are endless. #DAO #Voting #PGC", timestamp: '12h ago', likes: 110, comments: 35, tags: ['PGC', 'Voting'] },
-    { id: 'post15', authorId: 'usr_008', content: "The anti-corruption bounty is one of the boldest ideas I've seen in crypto. Using the blockchain for transparent whistleblowing and rewarding citizen journalists. This is true power to the people. #AntiCorruption #Transparency", timestamp: '13h ago', likes: 215, comments: 55, tags: ['Social Impact'] },
-    { id: 'post16', authorId: 'usr_007', content: "Reading the proposal for a 'New Constitution' in the India voting section. A democracy driven by ideas, not politicians. Mind-blowing concept. #Future #Governance #India", imageUrl: 'social-vote', imageHint: 'voting democracy', timestamp: '14h ago', likes: 180, comments: 48, tags: ['Voting', 'Governance'] },
-    { id: 'post17', authorId: 'usr_009', content: "It's not just a platform, it's a movement. A global, decentralized nation. The 'Our Vision' page gives me chills. Who else is ready to build? #Community #Vision", timestamp: '15h ago', likes: 99, comments: 21, tags: ['Vision'] },
-    { id: 'post18', authorId: 'usr_011', content: "The combination of $PGC for governance and $ITC as a stablecoin for trade is a solid economic foundation. A self-sustaining ecosystem. #Crypto #Economics", timestamp: '16h ago', likes: 68, comments: 16, tags: ['PGC', 'ITC'] },
-    { id: 'post19', authorId: 'usr_002', content: "The influencer program based on views is fair and transparent. No shady deals, just pure performance. Content creators, this is your chance. #Influencer #Marketing", timestamp: '17h ago', likes: 48, comments: 13, tags: ['Influencer'] },
-    { id: 'post20', authorId: 'usr_005', content: "Can we talk about how cool it is to vote on issues from street level all the way to international policy? My vote for fixing the potholes on my street feels just as important as my vote on climate change. #LocalGov #GlobalGov", timestamp: '18h ago', likes: 85, comments: 25, tags: ['Voting'] },
-    { id: 'post21', authorId: 'usr_004', content: "Just joined the presale for $PGC. The 1:1 bonus is a fantastic deal for early supporters. Feeling like a founding member of something huge. #Presale #CryptoInvestment", timestamp: '19h ago', likes: 130, comments: 40, tags: ['PGC', 'Presale'] },
-    { id: 'post22', authorId: 'usr_006', content: "The idea of a 'No War and Global Peace' corps funded by the platform's revenue is incredibly inspiring. Using technology to organize for peace. #Peace #SocialGood", imageUrl: 'social-peace', imageHint: 'peace dove', timestamp: '20h ago', likes: 190, comments: 60, tags: ['Social Impact'] },
-    { id: 'post23', authorId: 'usr_010', content: "Analyzing the different staking options... locking until a certain project stage is complete is a powerful way to show long-term support for a specific goal. I'm staking some $IGC on the 'World Initiatives' completion. #Staking #DeFi", timestamp: '21h ago', likes: 73, comments: 18, tags: ['IGC', 'Staking'] },
-    { id: 'post24', authorId: 'usr_003', content: "The Financial Awareness Quiz wasn't just about earning coins, it was genuinely educational. Everyone should take it to understand the scale of public finances. #Education #Finance", timestamp: '22h ago', likes: 61, comments: 17, tags: ['Quiz'] },
-    { id: 'post25', authorId: 'usr_007', content: "Just browsed the E-commerce section. The ability to buy and sell goods using platform tokens like $ITC closes the loop on the whole ecosystem. #Ecommerce #CryptoEconomy", timestamp: '23h ago', likes: 52, comments: 11, tags: ['ITC', 'Ecommerce'] },
-    { id: 'post26', authorId: 'usr_008', content: "This is the first project I've seen that has a clear, detailed plan for everything from tokenomics to social impact. The 'Vision' page is more like a constitution. #PublicGovernance #Transparency", timestamp: '1d ago', likes: 105, comments: 26, tags: ['Vision', 'Governance'] },
-    { id: 'post27', authorId: 'usr_011', content: "The franchise program is a huge opportunity to build a business within the ecosystem. A decentralized network of goods and services, powered by the community. #Franchise #Business", timestamp: '1d ago', likes: 49, comments: 9, tags: ['Franchise'] },
-    { id: 'post28', authorId: 'usr_009', content: "That feeling when you vote on a proposal and see it pass, knowing you had a direct impact. That's the power of $PGC and this platform. #Voting #DAO", imageUrl: 'social-community', imageHint: 'community people', timestamp: '1d ago', likes: 111, comments: 33, tags: ['PGC', 'Voting'] },
-    { id: 'post29', authorId: 'usr_002', content: "The job board isn't just for crypto roles. Sales managers, anti-corruption officers... they're building a real-world organization. #Jobs #Career", timestamp: '1d ago', likes: 45, comments: 8, tags: ['Jobs'] },
-    { id: 'post30', authorId: 'usr_005', content: "From local street issues to global policies, your voice matters. It's not just a tagline, it's the core mechanic of the entire system. #Empowerment #Decentralization", timestamp: '2d ago', likes: 95, comments: 24, tags: ['Vision', 'Governance'] }
+  // PGC and IGC, Tokenomics (1-20)
+  { id: 'post1', authorId: 'usr_002', content: "Just read the Vision page. Building a decentralized nation powered by $PGC isn't just ambitious, it's revolutionary. #PublicGovernance #Crypto", timestamp: '15m ago', likes: 29, comments: 7 },
+  { id: 'post2', authorId: 'usr_003', content: "The tokenomics for $PGC are insane. Over 70% of the supply is in a Public Demand Pot, controlled by voters! This is what true community ownership looks like. #DeFi #DAO", timestamp: '45m ago', likes: 58, comments: 12, imageUrl: 'social-tokenomics', imageHint: 'pie chart' },
+  { id: 'post3', authorId: 'usr_005', content: "So much more than just a coin. A percentage of sales for $IGC and $PGC goes directly to funding anti-corruption, peace, and environmental initiatives. Investing in good. #SocialImpact #CryptoForGood", timestamp: '1h ago', likes: 72, comments: 18 },
+  { id: 'post10', authorId: 'usr_002', content: "The deflationary 20-stage sale for $PGC is designed for long-term stability. It prevents massive dumps and encourages holding. Smart move. #Tokenomics #PGC", timestamp: '8h ago', likes: 55, comments: 10 },
+  { id: 'post18', authorId: 'usr_011', content: "The combination of $PGC for governance and $ITC as a stablecoin for trade is a solid economic foundation. A self-sustaining ecosystem. #Crypto #Economics", timestamp: '16h ago', likes: 68, comments: 16 },
+  { id: 'post21', authorId: 'usr_004', content: "Just joined the presale for $PGC. The 1:1 bonus is a fantastic deal for early supporters. Feeling like a founding member of something huge. #Presale #CryptoInvestment", timestamp: '19h ago', likes: 130, comments: 40, imageUrl: 'social-rocket', imageHint: 'rocket launch' },
+  { id: 'post101', authorId: 'usr_006', content: "Deep diving into the $PGC tokenomics page. The multi-stage sale ensures a gradual release, preventing supply shocks. This is a project built for the long term. #CryptoStrategy", timestamp: '2d ago', likes: 88, comments: 14, imageUrl: 'social-chart-up', imageHint: 'stock chart' },
+  { id: 'post102', authorId: 'usr_007', content: "The fact that the Public Demand Pot for $PGC is worth trillions at target price is mind-boggling. The community will literally have a war chest to fund global change. #DAO #FutureOfFinance", timestamp: '2d ago', likes: 154, comments: 32 },
+  { id: 'post103', authorId: 'usr_008', content: "Explaining the difference to a friend: $IGC is for the core platform governance and earning from lockers, while $PGC is the massive-scale public governance coin. Both have incredible potential. #CryptoEducation #Blockchain", timestamp: '2d ago', likes: 92, comments: 19 },
+  { id: 'post104', authorId: 'usr_009', content: "The visual breakdown of fund allocations on the Tokenomics page is so clear. Love the transparency. You know exactly where the money is going. #Transparency #Crypto", timestamp: '2d ago', likes: 76, comments: 11, imageUrl: 'social-pie-chart', imageHint: 'data chart' },
+  // ... more tokenomics posts
+  
+  // Voting and Governance (21-40)
+  { id: 'post5', authorId: 'usr_007', content: "Submitted my vote for the national issues in India. It's incredible to have a direct say on policies that matter. This is what #PublicGovernance is all about.", timestamp: '3h ago', likes: 98, comments: 22, imageUrl: 'social-vote', imageHint: 'voting democracy' },
+  { id: 'post14', authorId: 'usr_006', content: "The potential of the Public Demand Pot. 40% of all incoming funds, controlled by us, the voters. We could fund anything from local parks to open-source software. The possibilities are endless. #DAO #Voting #PGC", timestamp: '12h ago', likes: 110, comments: 35, imageUrl: 'social-lightbulb', imageHint: 'idea lightbulb' },
+  { id: 'post16', authorId: 'usr_007', content: "Reading the proposal for a 'New Constitution' in the India voting section. A democracy driven by ideas, not politicians. Mind-blowing concept. #Future #Governance #India", timestamp: '14h ago', likes: 180, comments: 48, imageUrl: 'social-constitution', imageHint: 'document scroll' },
+  { id: 'post20', authorId: 'usr_005', content: "It's not just about voting, it's about building. My vote for fixing the potholes on my street feels just as important as my vote on climate change. #LocalGov #GlobalGov", timestamp: '18h ago', likes: 85, comments: 25 },
+  { id: 'post28', authorId: 'usr_009', content: "That feeling when you vote on a proposal and see it pass, knowing you had a direct impact. That's the power of $PGC and this platform. #Voting #DAO", imageUrl: 'social-community', imageHint: 'community people', timestamp: '1d ago', likes: 111, comments: 33 },
+  { id: 'post29', authorId: 'usr_002', content: "Just voted on healthcare policy for my state in the USA. The fact that this is all on-chain and transparent is a game-changer for political accountability. #BlockchainForGood #GovTech", timestamp: '1d ago', likes: 78, comments: 16, imageUrl: 'social-healthcare', imageHint: 'medical healthcare' },
+  { id: 'post120', authorId: 'usr_010', content: "The geographic voting is so powerful. I'm in South Africa, and seeing polls for local issues in my own district is amazing. Finally, a way to make my voice heard locally. #LocalGov #Africa", timestamp: '3d ago', likes: 67, comments: 10 },
+  // ... more voting posts
+
+  // Competitions (41-60)
+  { id: 'post4', authorId: 'usr_006', content: "The Global Quiz Tournament is genius. A chance to prove your knowledge and win real prizes. Can't wait for it to start. Any other quizzers here? #Quiz #Competition #PlayToEarn", imageUrl: 'social-quiz', imageHint: 'quiz competition', timestamp: '2h ago', likes: 41, comments: 15 },
+  { id: 'post7', authorId: 'usr_009', content: "I'm a digital artist, and the World Talent Championship for Arts is a game-changer. A global stage, judged by the community, with real funding! #Art #NFT #Competition", imageUrl: 'social-art', imageHint: 'digital art', timestamp: '5h ago', likes: 120, comments: 31 },
+  { id: 'post13', authorId: 'usr_003', content: "This is the first project I've seen that has a clear, detailed plan for everything. The idea-based competitions let you become a project head for your own proposal! #Innovation #Community", timestamp: '11h ago', likes: 92, comments: 28, imageUrl: 'social-sports', imageHint: 'football sport' },
+  { id: 'post131', authorId: 'usr_004', content: "Training for the sports competition. The fact that the community votes for the winners is huge. It's not about politics, just pure talent. Let's go! #eSports #Gaming", timestamp: '3d ago', likes: 115, comments: 25, imageUrl: 'social-esports', imageHint: 'esports gaming' },
+  // ... more competition posts
+  
+  // Franchisee Program (61-70)
+  { id: 'post27', authorId: 'usr_011', content: "The franchise program is a huge opportunity to build a business within the ecosystem. A decentralized network of goods and services, powered by the community. #Franchise #Business", timestamp: '1d ago', likes: 49, comments: 9, imageUrl: 'social-franchise', imageHint: 'small business' },
+  { id: 'post161', authorId: 'usr_002', content: "Just submitted my application for a street-level food franchise. Excited to bring quality goods to my local community, all powered by the $ITC ecosystem. #Entrepreneur #LocalBusiness", timestamp: '4d ago', likes: 82, comments: 18, imageUrl: 'social-food-stall', imageHint: 'food stall' },
+  { id: 'post162', authorId: 'usr_005', content: "Looking at the State Franchisee level. The potential to manage an entire state's network is massive. This is a real business opportunity, not just a crypto project. #Franchise #BigBusiness", timestamp: '4d ago', likes: 102, comments: 22 },
+
+  // Airdrop, Quiz, Affiliate, Influencer (71-90)
+  { id: 'post6', authorId: 'usr_008', content: "The affiliate program is a great way to build a team and earn rewards. The multi-level structure is very motivating. Let's grow this community together! #Affiliate #Marketing", timestamp: '4h ago', likes: 35, comments: 9, imageUrl: 'social-network', imageHint: 'network diagram' },
+  { id: 'post19', authorId: 'usr_002', content: "The influencer program based on views is fair and transparent. No shady deals, just pure performance. Content creators, this is your chance. #Influencer #Marketing", timestamp: '17h ago', likes: 48, comments: 13, imageUrl: 'social-influencer', imageHint: 'video creator' },
+  { id: 'post24', authorId: 'usr_003', content: "The Financial Awareness Quiz wasn't just about earning coins, it was genuinely educational. Everyone should take it to understand the scale of public finances. #Education #Finance", timestamp: '22h ago', likes: 61, comments: 17 },
+  { id: 'post171', authorId: 'usr_004', content: "Got my airdrop reward for completing the financial quiz early! Feels good to be an early supporter of a project with a real vision. #Airdrop #CryptoRewards", timestamp: '5d ago', likes: 250, comments: 45, imageUrl: 'social-gift', imageHint: 'gift box' },
+  { id: 'post172', authorId: 'usr_009', content: "My affiliate team is growing! The rewards from the paid user track are starting to add up. This is a great way to earn while supporting the project's growth. #PassiveIncome #AffiliateMarketing", timestamp: '5d ago', likes: 123, comments: 23 },
+  
+  // Vision & Social Impact (91-110)
+  { id: 'post11', authorId: 'usr_004', content: "The 'Plant 2 Trees, Get 1 ITC' initiative is simple but powerful. A direct incentive for real-world environmental action. Proud to be part of this. #Environment #ITC", imageUrl: 'social-trees', imageHint: 'forest nature', timestamp: '9h ago', likes: 150, comments: 45 },
+  { id: 'post12', authorId: 'usr_005', content: "Just saw the breakdown of the 'World Initiatives' fund. AI education, sports development, global peace... this platform has its priorities straight. #Vision #PublicGovernance", timestamp: '10h ago', likes: 76, comments: 14 },
+  { id: 'post15', authorId: 'usr_008', content: "The anti-corruption bounty is one of the boldest ideas I've seen in crypto. Using the blockchain for transparent whistleblowing and rewarding citizen journalists. #AntiCorruption #Transparency", timestamp: '13h ago', likes: 215, comments: 55, imageUrl: 'social-justice', imageHint: 'justice scale' },
+  { id: 'post17', authorId: 'usr_009', content: "It's not just a platform, it's a movement. A global, decentralized nation. The 'Our Vision' page gives me chills. Who else is ready to build? #Community #Vision", timestamp: '15h ago', likes: 99, comments: 21 },
+  { id: 'post22', authorId: 'usr_006', content: "The idea of a 'No War and Global Peace' corps funded by the platform's revenue is incredibly inspiring. Using technology to organize for peace. #Peace #SocialGood", imageUrl: 'social-peace', imageHint: 'peace dove', timestamp: '20h ago', likes: 190, comments: 60 },
+  { id: 'post30', authorId: 'usr_005', content: "From local street issues to global policies, your voice matters. It's not just a tagline, it's the core mechanic of the entire system. #Empowerment #Decentralization", timestamp: '2d ago', likes: 95, comments: 24 }
 ];
 
 
@@ -971,10 +990,11 @@ export const incomingFundAllocations: FundAllocation[] = [
 
 export const geographicAllocations: FundAllocation[] = [
   { name: 'Society/Street Development', value: 37.5, color: '#14b8a6', description: 'Funding for hyper-local community projects (15% of total incoming funds).' },
-  { name: 'Village/City Development', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total incoming funds).' },
+  { name: 'Village/Ward Development', value: 25, color: '#06b6d4', description: 'Funding for village and city-level initiatives (10% of total incoming funds).' },
   { name: 'State Development', value: 12.5, color: '#a855f7', description: 'Funding for state-wide projects and infrastructure (5% of total incoming funds).' },
   { name: 'Country Development', value: 25, color: '#3b82f6', description: 'Development funds for national-level projects (10% of total incoming funds).' },
 ];
+
 
 export const publicDemandAllocations: FundAllocation[] = [
     { name: 'Public Demand (Voting)', value: 100, color: '#8b5cf6', description: '100% of this fund is allocated based on community votes for projects, issues, and initiatives across all levels.' }
@@ -1112,7 +1132,7 @@ export const teamMembers: TeamMember[] = [
 ];
 
 export const airdropRewards: AirdropReward[] = [
-  { name: 'Early Registration', percentage: 10, description: 'Reserved for the first users who register and complete the Financial Awareness Quiz.' },
+  { name: 'Early Registration', percentage: 10, description: 'Reserved for early users who register and complete the Financial Awareness Quiz.' },
 ];
 
 export const indiaGeography: IndiaGeography[] = [
@@ -1254,6 +1274,7 @@ export const indiaGeography: IndiaGeography[] = [
 
 
     
+
 
 
 
