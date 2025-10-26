@@ -6,6 +6,8 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -17,6 +19,11 @@ import {
   Image as ImageIcon,
   Link2,
   Video,
+  Youtube,
+  Instagram,
+  Twitter,
+  Facebook,
+  Hash,
 } from 'lucide-react';
 import { socialPosts, users } from '@/lib/data';
 import Image from 'next/image';
@@ -72,7 +79,7 @@ function CreatePostCard() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 border-t">
-        <div className="flex gap-2 text-muted-foreground">
+        <div className="flex gap-1 text-muted-foreground">
           <Button variant="ghost" size="icon" aria-label="Upload Image">
             <ImageIcon className="h-5 w-5" />
           </Button>
@@ -121,7 +128,7 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
         )}
       </CardContent>
       <CardFooter className="p-4 border-t flex justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-1">
             <Button variant="ghost" size="sm">
                 <ThumbsUp className="mr-2 h-4 w-4" /> {post.likes} Likes
             </Button>
@@ -137,22 +144,85 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   );
 }
 
+const socialLinks = [
+  { name: 'YouTube', icon: Youtube, href: '#', handle: 'PublicGov' },
+  { name: 'Instagram', icon: Instagram, href: '#', handle: '@PublicGov' },
+  { name: 'Twitter', icon: Twitter, href: '#', handle: '@PublicGov' },
+  { name: 'Facebook', icon: Facebook, href: '#', handle: 'Public Governance' },
+];
+
+const trendingTopics = [
+    { name: 'NewConstitution', posts: '1.2k' },
+    { name: 'PGCToken', posts: '980' },
+    { name: 'AntiCorruption', posts: '754' },
+    { name: 'Decentralization', posts: '512' },
+    { name: 'GlobalPeace', posts: '349' },
+];
+
+
 export default function SocialMediaPage() {
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8 max-w-3xl mx-auto">
-        <div>
-          <h1 className="font-headline text-3xl font-bold">Social Media Hub</h1>
-          <p className="text-muted-foreground">
-            Connect with the community, share your thoughts, and stay updated.
-          </p>
-        </div>
-        <CreatePostCard />
-        <div className="space-y-6">
-          {socialPosts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
+      <div className="flex flex-col gap-8">
+         <div className="text-center">
+            <h1 className="font-headline text-3xl font-bold">Social Media Hub</h1>
+            <p className="text-muted-foreground">
+                Connect with the community, share your thoughts, and stay updated.
+            </p>
+         </div>
+
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <main className="lg:col-span-2 space-y-6">
+                <CreatePostCard />
+                <div className="space-y-6">
+                {socialPosts.map((post) => (
+                    <PostCard key={post.id} post={post} />
+                ))}
+                </div>
+            </main>
+            <aside className="space-y-6 sticky top-20">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Follow Us</CardTitle>
+                        <CardDescription>Stay connected on your favorite platforms.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {socialLinks.map(link => {
+                            const Icon = link.icon;
+                            return (
+                                <Link href={link.href} key={link.name} target="_blank" rel="noopener noreferrer">
+                                    <div className="flex items-center gap-4 group p-2 rounded-lg hover:bg-muted">
+                                        <Icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors"/>
+                                        <div>
+                                            <p className="font-semibold">{link.name}</p>
+                                            <p className="text-sm text-muted-foreground">{link.handle}</p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Trending Topics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {trendingTopics.map(topic => (
+                             <Link href="#" key={topic.name}>
+                                <div className="flex items-start gap-3 group p-2 rounded-lg hover:bg-muted">
+                                    <Hash className="h-4 w-4 text-muted-foreground mt-1 group-hover:text-primary"/>
+                                    <div>
+                                        <p className="font-semibold group-hover:text-primary">{topic.name}</p>
+                                        <p className="text-xs text-muted-foreground">{topic.posts} posts</p>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </CardContent>
+                </Card>
+            </aside>
+         </div>
       </div>
     </AppLayout>
   );
