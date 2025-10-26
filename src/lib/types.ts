@@ -224,7 +224,7 @@ export type PgcSaleStage = {
   priceRange: string;
   incomingFund: string;
   wgcpReleasePercent: string;
-  wgcpFundReleased: string;
+  publicGoodFundReleased: string;
   status: string;
 };
 

@@ -61,8 +61,8 @@ export function PgcDisplay() {
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Incoming Fund (USD)</TableHead>
-                <TableHead>WGCP Release</TableHead>
-                <TableHead>WGCP Fund Value</TableHead>
+                <TableHead>Public Good Release %</TableHead>
+                <TableHead>Public Good Fund Released</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -79,7 +79,7 @@ export function PgcDisplay() {
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
                   <TableCell>{stage.wgcpReleasePercent}</TableCell>
-                  <TableCell className="font-semibold text-green-500">{stage.wgcpFundReleased}</TableCell>
+                  <TableCell className="font-semibold text-green-500">{stage.publicGoodFundReleased}</TableCell>
                   <TableCell>
                     <Badge variant={stage.status === 'Locked' ? 'destructive' : 'secondary'} className="flex items-center gap-1.5">
                         {stage.status === 'Locked' ? <Lock className="h-3 w-3" /> : <Vote className="h-3 w-3" />}
@@ -130,7 +130,7 @@ export function PgcDisplay() {
                         <div>
                             <h4 className="font-semibold">{pot.name} ({pot.allocation}%)</h4>
                             <p className="text-sm text-muted-foreground">{pot.use}</p>
-                            <p className="text-xs font-mono text-primary/80">{pot.coinsB.toLocaleString()}B PGC = ~${pot.valueT}T at target price</p>
+                            {pot.valueT && <p className="text-xs font-mono text-primary/80">{pot.coinsB.toLocaleString()}B PGC = ~${pot.valueT}T at target price</p>}
                         </div>
                     </div>
                 ))}

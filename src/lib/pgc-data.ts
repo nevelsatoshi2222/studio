@@ -1,29 +1,67 @@
 
 import { PgcSaleStage, PgcPotAllocation } from './types';
 
+const formatCurrency = (value: number) => {
+    if (value >= 1e12) {
+        return `$${(value / 1e12).toFixed(2)}T`;
+    }
+    if (value >= 1e9) {
+        return `$${(value / 1e9).toFixed(2)}B`;
+    }
+    if (value >= 1e6) {
+        return `$${(value / 1e6).toFixed(2)}M`;
+    }
+    return `$${value.toLocaleString()}`;
+};
+
+const calculateStageData = (
+    stage: number,
+    percentOfTs: number,
+    priceLow: number,
+    priceHigh: number,
+    wgcpReleasePercent: number,
+    status: string
+): PgcSaleStage => {
+    const coinsSoldB = 800 * (percentOfTs / 100);
+    const avgPrice = (priceLow + priceHigh) / 2;
+    const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
+    const publicGoodFundValue = incomingFundValue * (wgcpReleasePercent / 100);
+
+    return {
+        stage,
+        percentOfTs: `${percentOfTs}%`,
+        coinsSoldB,
+        priceRange: `$${priceLow}-$${priceHigh}`,
+        incomingFund: formatCurrency(incomingFundValue),
+        wgcpReleasePercent: `${wgcpReleasePercent}%`,
+        publicGoodFundReleased: formatCurrency(publicGoodFundValue),
+        status,
+    };
+};
+
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
-  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
-  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: 'Split' },
-  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
-  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
-  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', wgcpReleasePercent: '-', wgcpFundReleased: '-', status: '' },
+  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: 'Split' },
+  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
+  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', wgcpReleasePercent: '-', publicGoodFundReleased: '-', status: '' },
   // Vote-to-Unlock Stages
-  { stage: 7, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$10-20', incomingFund: '$120B', wgcpReleasePercent: '10%', wgcpFundReleased: '$80B', status: 'Locked' },
-  { stage: 8, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$20-50', incomingFund: '$280B', wgcpReleasePercent: '8%', wgcpFundReleased: '$160B', status: 'Locked' },
-  { stage: 9, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$50-100', incomingFund: '$600B', wgcpReleasePercent: '7%', wgcpFundReleased: '$280B', status: 'Locked' },
-  { stage: 10, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$100-200', incomingFund: '$1.2T', wgcpReleasePercent: '6%', wgcpFundReleased: '$480B', status: 'Locked' },
-  { stage: 11, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$200-500', incomingFund: '$2.8T', wgcpReleasePercent: '5%', wgcpFundReleased: '$1T', status: 'Locked' },
-  { stage: 12, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$500-1k', incomingFund: '$6T', wgcpReleasePercent: '4.5%', wgcpFundReleased: '$1.8T', status: 'Locked' },
-  { stage: 13, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$1k-1.5k', incomingFund: '$10T', wgcpReleasePercent: '4%', wgcpFundReleased: '$2.4T', status: 'Locked' },
-  { stage: 14, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$1.5k-2k', incomingFund: '$14T', wgcpReleasePercent: '3.5%', wgcpFundReleased: '$2.8T', status: 'Locked' },
-  { stage: 15, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$2k-2.5k', incomingFund: '$18T', wgcpReleasePercent: '3%', wgcpFundReleased: '$3T', status: 'Locked' },
-  { stage: 16, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$2.5k-3k', incomingFund: '$22T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$3T', status: 'Locked' },
-  { stage: 17, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$3k-3.5k', incomingFund: '$26T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$3.5T', status: 'Locked' },
-  { stage: 18, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$3.5k-4k', incomingFund: '$30T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$4T', status: 'Locked' },
-  { stage: 19, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$4k-4.5k', incomingFund: '$34T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$4.5T', status: 'Locked' },
-  { stage: 20, percentOfTs: '1%', coinsSoldB: 8.0, priceRange: '$4.5k-5k', incomingFund: '$38T', wgcpReleasePercent: '2.5%', wgcpFundReleased: '$5T', status: 'Locked' },
+  calculateStageData(7, 1, 10, 20, 10, 'Locked'),
+  calculateStageData(8, 1, 20, 50, 8, 'Locked'),
+  calculateStageData(9, 1, 50, 100, 7, 'Locked'),
+  calculateStageData(10, 1, 100, 200, 6, 'Locked'),
+  calculateStageData(11, 1, 200, 500, 5, 'Locked'),
+  calculateStageData(12, 1, 500, 1000, 4.5, 'Locked'),
+  calculateStageData(13, 1, 1000, 1500, 4, 'Locked'),
+  calculateStageData(14, 1, 1500, 2000, 3.5, 'Locked'),
+  calculateStageData(15, 1, 2000, 2500, 3, 'Locked'),
+  calculateStageData(16, 1, 2500, 3000, 2.5, 'Locked'),
+  calculateStageData(17, 1, 3000, 3500, 2.5, 'Locked'),
+  calculateStageData(18, 1, 3500, 4000, 2.5, 'Locked'),
+  calculateStageData(19, 1, 4000, 4500, 2.5, 'Locked'),
+  calculateStageData(20, 1, 4500, 5000, 2.5, 'Locked'),
 ];
 
 
