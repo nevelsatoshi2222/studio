@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { useMemoFirebase } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -49,7 +50,8 @@ export default function ApplicationsPage() {
     const [filter, setFilter] = useState('All');
 
     // Memoize the query to prevent re-renders
-    const usersQuery = useMemo(() => {
+    const usersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
         const usersColRef = collection(firestore, 'users');
         if (filter === 'All') {
             return query(usersColRef, where('role', '!=', ''));
