@@ -61,9 +61,9 @@ export function PgcDisplay() {
                 <TableHead>Coins Sold (Billion)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Bonus Ratio</TableHead>
-                <TableHead>Incoming Fund from Sale (Public Good)</TableHead>
-                <TableHead>PDP Release %</TableHead>
-                <TableHead>Value Released from PDP</TableHead>
+                <TableHead>Incoming Fund from Sale</TableHead>
+                <TableHead>Public Good Release %</TableHead>
+                <TableHead>Public Good Fund Released</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -103,7 +103,7 @@ export function PgcDisplay() {
                 98.88% of the total supply is reserved in isolated smart contract pots, governed by the community and predefined rules.
             </CardDescription>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-2 gap-8 items-center">
+        <CardContent className="grid md:grid-cols-2 gap-8 items-start">
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
