@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
-const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995; // 571,196,000,000 PGC
+const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995;
 
 const calculateStageData = (
     stage: number,
@@ -49,25 +49,27 @@ export const pgcSaleStages: PgcSaleStage[] = [
   { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
-  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: '$1.4B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.75', status: '' },
-  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: '$6B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.5', status: '' },
-  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: '$30B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.25', status: '' },
   
-  // Vote-to-Unlock Stages
-  calculateStageData(7, 1, 10, 20, 7.5, '1:0.1'),
-  calculateStageData(8, 1, 20, 50, 7, '1:0.05'),
-  calculateStageData(9, 1, 50, 100, 6.5, 'N/A'),
-  calculateStageData(10, 1, 100, 200, 6, 'N/A'),
-  calculateStageData(11, 1, 200, 500, 5.5, 'N/A'),
-  calculateStageData(12, 1, 500, 1000, 5, 'N/A'),
-  calculateStageData(13, 1, 1000, 1500, 4, 'N/A'),
-  calculateStageData(14, 1, 1500, 2000, 4, 'N/A'),
-  calculateStageData(15, 1, 2000, 3000, 4, 'N/A'),
-  calculateStageData(16, 1, 3000, 4000, 4, 'N/A'),
-  calculateStageData(17, 1, 4000, 5000, 3, 'N/A'),
-  calculateStageData(18, 1, 5000, 7500, 3, 'N/A'),
-  calculateStageData(19, 1, 7500, 10000, 3, 'N/A'),
-  calculateStageData(20, 1, 10000, 12500, 3, 'N/A'),
+  // Mid-Stages with initial bonus
+  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: formatCurrency(0.8 * 1e9 * 1.75), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.7', status: '' },
+  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: formatCurrency(1.6 * 1e9 * 3.75), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.6', status: '' },
+  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: formatCurrency(4.0 * 1e9 * 7.5), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.5', status: '' },
+  
+  // Vote-to-Unlock Stages with new PDP release schedule and bonuses
+  calculateStageData(7, 1, 10, 20, 7.5, '1:0.45'),
+  calculateStageData(8, 1, 20, 50, 7, '1:0.4'),
+  calculateStageData(9, 1, 50, 100, 6.5, '1:0.35'),
+  calculateStageData(10, 1, 100, 200, 6, '1:0.3'),
+  calculateStageData(11, 1, 200, 500, 5.5, '1:0.25'),
+  calculateStageData(12, 1, 500, 1000, 5, '1:0.25'),
+  calculateStageData(13, 1, 1000, 1500, 4, '1:0.25'),
+  calculateStageData(14, 1, 1500, 2000, 4, '1:0.25'),
+  calculateStageData(15, 1, 2000, 3000, 4, '1:0.25'),
+  calculateStageData(16, 1, 3000, 4000, 4, '1:0.25'),
+  calculateStageData(17, 1, 4000, 5000, 3, '1:0.25'),
+  calculateStageData(18, 1, 5000, 7500, 3, '1:0.25'),
+  calculateStageData(19, 1, 7500, 10000, 3, '1:0.25'),
+  calculateStageData(20, 1, 10000, 12500, 3, '1:0.25'),
 ];
 
 
