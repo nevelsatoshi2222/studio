@@ -175,11 +175,13 @@ export default function FinancialQuizPage() {
   let coinReward = 0;
   if (quizFinished) {
     if (score === 10) {
-      coinReward = 5;
+      coinReward = 10;
     } else if (score > 6) {
-      coinReward = 3;
+      coinReward = 5;
     } else if (score >= 4) {
-      coinReward = 2;
+      coinReward = 2.5;
+    } else {
+      coinReward = 1.25;
     }
   }
 
@@ -204,25 +206,26 @@ export default function FinancialQuizPage() {
                             <li>
                                 <span className="font-semibold text-foreground">Initial Round:</span>
                                 <ul className="list-disc pl-5 space-y-1 mt-1">
-                                    <li>Score 4 to 6 correct answers to earn **2 PGC** (Limited to the first 20,000 winners).</li>
-                                    <li>Score 7 to 9 correct answers to earn **3 PGC** (Limited to the first 5,000 winners).</li>
-                                    <li>Score a perfect 10 to earn **5 PGC** and qualify for the next round! (Limited to the first 2,000 winners).</li>
+                                    <li>Score under 4 correct to earn **1.25 PGC** (Limited to first 8,000 winners).</li>
+                                    <li>Score 4 to 6 correct to earn **2.5 PGC** (Limited to first 4,000 winners).</li>
+                                    <li>Score 7 to 9 correct to earn **5 PGC** (Limited to first 2,000 winners).</li>
+                                    <li>Score a perfect 10 to earn a **10 PGC** bonus and qualify for the next round! (Limited to first 1,000 winners).</li>
                                 </ul>
                             </li>
                              <li>
                                 <span className="font-semibold text-foreground">Qualifying Round:</span>
-                                <p>The top 2,000 scorers compete. The top 200 winners earn **20 PGC** each and advance to the Semi-Finals.</p>
+                                <p>The top 2,000 from the initial round compete. Top 200 winners earn **20 PGC** each and advance.</p>
                             </li>
                             <li>
                                 <span className="font-semibold text-foreground">Semi-Finals:</span>
-                                <p>The top 200 qualifiers compete. The top 20 scorers win **100 PGC** each and advance to the Grand Finale.</p>
+                                <p>The top 200 compete. The top 20 scorers win **100 PGC** each and advance to the Grand Finale.</p>
                             </li>
                             <li>
                                 <span className="font-semibold text-foreground">Grand Finale:</span>
                                  <ul className="list-disc pl-5 space-y-1 mt-1">
-                                    <li>The final 5 competitors battle for the championship.</li>
+                                    <li>The final 20 competitors battle for the championship.</li>
                                     <li>**Grand Prize Winner (1st Place):** 4,000 PGC & the Champion's Trophy.</li>
-                                     <li>**Runners-up (4 winners):** 1,000 PGC each.</li>
+                                     <li>**Runners-up (19 winners):** 1,000 PGC each.</li>
                                 </ul>
                             </li>
                         </ul>
@@ -293,11 +296,11 @@ export default function FinancialQuizPage() {
                 {coinReward > 0 ? (
                     <Alert className="max-w-md mx-auto text-left border-green-500 bg-green-500/10">
                         <Award className="h-4 w-4 text-green-500" />
-                        <AlertTitle className="text-green-600">Congratulations!</AlertTitle>
+                        <AlertTitle className="text-green-600">Congratulations! You won {coinReward} PGC!</AlertTitle>
                         <AlertDescription className="text-green-800">
                             {score === 10 ?
-                                `You've earned ${coinReward} PGC and qualified for the next round!` :
-                                `You've earned ${coinReward} PGC for your excellent score!`
+                                `You've qualified for the next round!` :
+                                `Keep playing to improve your score and win bigger prizes.`
                             } The reward has been sent to your connected wallet.
                         </AlertDescription>
                     </Alert>
