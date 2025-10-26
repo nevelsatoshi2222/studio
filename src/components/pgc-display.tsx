@@ -80,8 +80,8 @@ export function PgcDisplay() {
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell>{stage.bonusRatio}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>
-                  <TableCell>{stage.publicGoodReleasePercent}</TableCell>
-                  <TableCell className="font-semibold text-green-500">{stage.publicGoodFundReleased}</TableCell>
+                  <TableCell>{stage.pdpReleasePercent}</TableCell>
+                  <TableCell className="font-semibold text-green-500">{stage.pdpFundReleased}</TableCell>
                   <TableCell>
                     <Badge variant={stage.status === 'Locked' ? 'destructive' : stage.status === 'Split' ? 'secondary' : 'default'} className="flex items-center gap-1.5">
                         {stage.status === 'Locked' && <Lock className="h-3 w-3" />}

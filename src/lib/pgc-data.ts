@@ -3,7 +3,7 @@ import { PgcSaleStage, PgcPotAllocation } from './types';
 
 const formatCurrency = (value: number) => {
     if (value >= 1e12) {
-        return `$${(value / 1e12).toFixed(2)}T`;
+        return `$${(value / 1e12).toFixed(3)}T`;
     }
     if (value >= 1e9) {
         return `$${(value / 1e9).toFixed(2)}B`;
@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
-const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995;
+const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995; // Approx 571.196 Billion PGC
 
 const calculateStageData = (
     stage: number,
@@ -29,7 +29,7 @@ const calculateStageData = (
     const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
     
     const pdpCoinsReleased = PDP_TOTAL_COINS * (pdpReleasePercent / 100);
-    const pdpFundValue = pdpCoinsReleased * priceHigh;
+    const pdpFundValue = pdpCoinsReleased * priceHigh; // Value at the end price of the stage
 
     return {
         stage,
@@ -51,11 +51,11 @@ export const pgcSaleStages: PgcSaleStage[] = [
   { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   
   // Mid-Stages with initial bonus
-  { stage: 4, percentOfTs: '0.1%', coinsSoldB: 0.8, priceRange: '$1-2.5', incomingFund: formatCurrency(0.8 * 1e9 * 1.75), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.7', status: '' },
-  { stage: 5, percentOfTs: '0.2%', coinsSoldB: 1.6, priceRange: '$2.5-5', incomingFund: formatCurrency(1.6 * 1e9 * 3.75), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.6', status: '' },
-  { stage: 6, percentOfTs: '0.5%', coinsSoldB: 4.0, priceRange: '$5-10', incomingFund: formatCurrency(4.0 * 1e9 * 7.5), pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:0.5', status: '' },
+  calculateStageData(4, 0.1, 1, 2.5, 0, '1:0.7'),
+  calculateStageData(5, 0.2, 2.5, 5, 0, '1:0.6'),
+  calculateStageData(6, 0.5, 5, 10, 0, '1:0.5'),
   
-  // Vote-to-Unlock Stages with new PDP release schedule and bonuses
+  // Vote-to-Unlock Stages with PDP release
   calculateStageData(7, 1, 10, 20, 7.5, '1:0.45'),
   calculateStageData(8, 1, 20, 50, 7, '1:0.4'),
   calculateStageData(9, 1, 50, 100, 6.5, '1:0.35'),

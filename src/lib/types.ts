@@ -224,8 +224,8 @@ export type PgcSaleStage = {
   priceRange: string;
   bonusRatio: string;
   incomingFund: string;
-  publicGoodReleasePercent: string;
-  publicGoodFundReleased: string;
+  pdpReleasePercent: string;
+  pdpFundReleased: string;
   status: string;
 };
 
