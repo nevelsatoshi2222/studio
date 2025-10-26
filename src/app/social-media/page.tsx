@@ -32,6 +32,8 @@ import { useUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
+import React from 'react';
+
 
 const getAvatarUrl = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
@@ -96,6 +98,47 @@ function CreatePostCard() {
   );
 }
 
+const PostContent = ({ text }: { text: string }) => {
+  const parts = text.split(/(\$[A-Z]+|#\w+)/g);
+
+  return (
+    <p className="mb-4 whitespace-pre-wrap">
+      {parts.map((part, i) => {
+        if (part.startsWith('$')) {
+          const coin = part.substring(1).toUpperCase();
+          if (coin === 'PGC' || coin === 'IGC') {
+            return (
+              <span key={i} className="inline-flex items-center gap-1 font-semibold text-primary">
+                <Image
+                  src={
+                    coin === 'PGC'
+                      ? "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png"
+                      : "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"
+                  }
+                  alt={`${coin} logo`}
+                  width={16}
+                  height={16}
+                  className="inline-block"
+                />
+                {part}
+              </span>
+            );
+          }
+        }
+        if (part.startsWith('#')) {
+          return (
+            <Link href="#" key={i} className="text-primary hover:underline">
+              {part}
+            </Link>
+          );
+        }
+        return <React.Fragment key={i}>{part}</React.Fragment>;
+      })}
+    </p>
+  );
+};
+
+
 function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
   const author = users.find((user) => user.id === post.authorId);
   const postImageUrl = post.imageUrl ? placeholderImages.find(p => p.id === post.imageUrl)?.imageUrl : null;
@@ -116,33 +159,7 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="mb-4 whitespace-pre-wrap">
-            {post.content.split(' ').map((word, i) => {
-                if (word.startsWith('#')) {
-                    return <Link href="#" key={i} className="text-primary hover:underline">{word}</Link>
-                }
-                if (word.startsWith('$')) {
-                    const coin = word.substring(1).toUpperCase();
-                    if (coin === 'PGC' || coin === 'IGC') {
-                        return (
-                            <span key={i} className="inline-flex items-center gap-1 font-semibold">
-                                <Image 
-                                    src={coin === 'PGC' 
-                                        ? "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" 
-                                        : "https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721245050854_1.png"}
-                                    alt={`${coin} logo`}
-                                    width={16}
-                                    height={16}
-                                    className="inline-block"
-                                />
-                                {word}
-                            </span>
-                        )
-                    }
-                }
-                return ` ${word} `;
-            })}
-        </p>
+        <PostContent text={post.content} />
         {postImageUrl && (
           <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
             <Image
