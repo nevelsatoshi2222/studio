@@ -56,7 +56,7 @@
           "talukas": [
             { "name": "Nagpur City", "villages": ["Sitabuldi", "Mahal", "Sadar"] },
             { "name": "Hingna", "villages": ["Hingna", "Wadi", "Gumgaon"] },
-            { "name": "Kamptee", "villages": ["Kamptee", "Kanhan", "Tekadi"] },
+            { "name": "Kamptee", "villages": ["Kamptee", "Kanhan", "Tekadi"] }
           ]
         },
         { "name": "Nanded", "talukas": [{ "name": "Nanded", "villages": ["Deglur", "Kinwat"] }] },
@@ -66,7 +66,7 @@
           "talukas": [
             { "name": "Nashik", "villages": ["Nashik City", "Deolali", "Panchavati"] },
             { "name": "Igatpuri", "villages": ["Igatpuri", "Ghoti", "Bhandardara"] },
-            { "name": "Sinnar", "villages": ["Sinnar", "Wavi", "Muslagaon"] },
+            { "name": "Sinnar", "villages": ["Sinnar", "Wavi", "Muslagaon"] }
           ]
         },
         { "name": "Osmanabad", "talukas": [{ "name": "Osmanabad", "villages": ["Tuljapur", "Umarga"] }] },
@@ -78,7 +78,7 @@
             { "name": "Haveli", "villages": ["Kothrud", "Wagholi", "Hinjewadi", "Pimpri-Chinchwad"] },
             { "name": "Maval", "villages": ["Lonavla", "Talegaon Dabhade", "Kamshet"] },
             { "name": "Mulshi", "villages": ["Bhugaon", "Bhukum", "Pirangut"] },
-            { "name": "Shirur", "villages": ["Koregaon Bhima", "Sanaswadi", "Shikrapur"] },
+            { "name": "Shirur", "villages": ["Koregaon Bhima", "Sanaswadi", "Shikrapur"] }
           ]
         },
         { "name": "Raigad", "talukas": [{ "name": "Alibag", "villages": ["Panvel", "Mahad"] }] },
@@ -90,7 +90,7 @@
         { "name": "Thane", "talukas": [{ "name": "Thane", "villages": ["Kalyan", "Ulhasnagar"] }] },
         { "name": "Wardha", "talukas": [{ "name": "Wardha", "villages": ["Hinganghat", "Arvi"] }] },
         { "name": "Washim", "talukas": [{ "name": "Washim", "villages": ["Karanja", "Mangrulpir"] }] },
-        { "name": "Yavatmal", "talukas": [{ "name": "Yavatmal", "villages": ["Pusad", "Wani"] }] },
+        { "name": "Yavatmal", "talukas": [{ "name": "Yavatmal", "villages": ["Pusad", "Wani"] }] }
       ]
     },
     { "name": "Manipur", "districts": [{ "name": "Bishnupur", "talukas": [{ "name": "Bishnupur", "villages": ["Moirang", "Nambol"] }] }, { "name": "Chandel", "talukas": [{ "name": "Chandel", "villages": ["Chakpikarong", "Machi"] }] }, { "name": "Churachandpur", "talukas": [{ "name": "Churachandpur", "villages": ["Singngat", "Tipaimukh"] }] }, { "name": "Imphal East", "talukas": [{ "name": "Porompat", "villages": ["Jiribam", "Keirao Bitra"] }] }, { "name": "Imphal West", "talukas": [{ "name": "Lamphelpat", "villages": ["Wangoi", "Patsoi"] }] }, { "name": "Senapati", "talukas": [{ "name": "Senapati", "villages": ["Mao-Maram", "Paomata"] }] }, { "name": "Tamenglong", "talukas": [{ "name": "Tamenglong", "villages": ["Tamei", "Tousem"] }] }, { "name": "Thoubal", "talukas": [{ "name": "Thoubal", "villages": ["Lilong", "Kakching"] }] }, { "name": "Ukhrul", "talukas": [{ "name": "Ukhrul", "villages": ["Kamjong", "Phungyar"] }] }] },
