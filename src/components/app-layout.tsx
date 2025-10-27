@@ -60,7 +60,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { signOut } from 'firebase/auth';
@@ -75,6 +75,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { WalletButton } from './wallet-button';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
+import { doc } from 'firebase/firestore';
 
 
 const mainNavItems = [
@@ -106,6 +109,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { publicKey } = useWallet();
+
+  const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
+
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
+  const isFirebaseAdmin = !!adminRole;
+  const isAdmin = isWalletAdmin || isFirebaseAdmin;
+
 
   const handleLogout = async () => {
     try {
@@ -232,26 +249,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </CollapsibleContent>
                 </Collapsible>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-                <Collapsible>
-                    <CollapsibleTrigger asChild className="w-full">
-                         <SidebarMenuButton>
-                            <Shield />
-                            <span>Admin Panel</span>
-                             <ChevronDown className="h-4 w-4 ml-auto" />
-                         </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <SidebarMenuSub>
-                            <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                            <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                            <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                            <SidebarMenuSubItem><Link href="/admin/job-seekers"><SidebarMenuSubButton>Job Seekers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                            <SidebarMenuSubItem><Link href="/admin/influencers"><SidebarMenuSubButton>Influencers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                </Collapsible>
-            </SidebarMenuItem>
+            {isAdmin && (
+                <SidebarMenuItem>
+                    <Collapsible>
+                        <CollapsibleTrigger asChild className="w-full">
+                            <SidebarMenuButton>
+                                <Shield />
+                                <span>Admin Panel</span>
+                                <ChevronDown className="h-4 w-4 ml-auto" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/job-seekers"><SidebarMenuSubButton>Job Seekers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/influencers"><SidebarMenuSubButton>Influencers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </Collapsible>
+                </SidebarMenuItem>
+            )}
         </SidebarMenu>
 
         <SidebarSeparator />
