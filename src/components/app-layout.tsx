@@ -227,28 +227,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         
         <SidebarSeparator />
         
+        {(user || isAdmin) && (
         <SidebarMenu>
-             <SidebarMenuItem>
-                <Collapsible>
-                    <CollapsibleTrigger asChild className="w-full">
-                         <SidebarMenuButton>
-                            <Users />
-                            <span>User Panel</span>
-                            <ChevronDown className="h-4 w-4 ml-auto" />
-                         </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <SidebarMenuSub>
-                            <SidebarMenuSubItem>
-                                <Link href="/profile"><SidebarMenuSubButton>Profile</SidebarMenuSubButton></Link>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                               <Link href="/team"><SidebarMenuSubButton>My Team</SidebarMenuSubButton></Link>
-                            </SidebarMenuSubItem>
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                </Collapsible>
-            </SidebarMenuItem>
+             {user && (
+                 <SidebarMenuItem>
+                    <Collapsible>
+                        <CollapsibleTrigger asChild className="w-full">
+                             <SidebarMenuButton>
+                                <Users />
+                                <span>User Panel</span>
+                                <ChevronDown className="h-4 w-4 ml-auto" />
+                             </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                    <Link href="/profile"><SidebarMenuSubButton>Profile</SidebarMenuSubButton></Link>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                   <Link href="/team"><SidebarMenuSubButton>My Team</SidebarMenuSubButton></Link>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </Collapsible>
+                </SidebarMenuItem>
+             )}
             {isAdmin && (
                 <SidebarMenuItem>
                     <Collapsible>
@@ -272,6 +275,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
             )}
         </SidebarMenu>
+        )}
 
         <SidebarSeparator />
 
