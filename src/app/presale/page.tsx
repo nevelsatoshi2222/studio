@@ -12,11 +12,12 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2, Copy } from 'lucide-react';
+import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2, Copy, AlertTriangle } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
 
 const presalePackages = [
   { amountUSD: 10, pgcAmount: 10, bonus: 10 },
@@ -30,33 +31,46 @@ export default function PresalePage() {
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastTransaction, setLastTransaction] = useState<any>(null);
+  const [purchaseInitiated, setPurchaseInitiated] = useState(false);
 
   const handleSelectPackage = (amount: number) => {
     setSelectedPackage(amount);
-    setLastTransaction(null); // Clear previous transaction on new selection
+    setPurchaseInitiated(false); 
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, entity: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copied!",
-      description: "Transaction ID copied to clipboard.",
+      title: 'Copied to Clipboard!',
+      description: `${entity} has been copied.`,
     });
   };
 
-  const handlePurchase = async () => {
+  const handleInitiatePurchase = async () => {
     if (!selectedPackage || !publicKey) return;
 
     setIsProcessing(true);
-    setLastTransaction(null);
+    
+    // This now just reveals the payment instructions
+    // The actual API call happens after the user confirms they've sent the payment
+    setTimeout(() => {
+        setPurchaseInitiated(true);
+        setIsProcessing(false);
+        toast({
+            title: "Action Required",
+            description: "Please follow the instructions to complete your payment.",
+        })
+    }, 500);
 
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedPackage || !publicKey) return;
+    setIsProcessing(true);
     try {
       const response = await fetch('/api/presale', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           packageAmountUSD: selectedPackage,
           buyerWalletAddress: publicKey.toBase58(),
@@ -64,23 +78,20 @@ export default function PresalePage() {
       });
 
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'An unknown error occurred.');
-      }
+      if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
       
-      setLastTransaction(result);
-
       toast({
-        title: 'Purchase Successful!',
-        description: `Your purchase of ${result.totalPgc.toLocaleString()} PGC is confirmed.`,
+        title: 'Purchase Logged!',
+        description: `Your purchase of ${result.totalPgc.toLocaleString()} PGC has been recorded. An admin will verify the transaction and send your tokens shortly.`,
       });
-      
+      setPurchaseInitiated(false);
+      setSelectedPackage(null);
+
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Purchase Failed',
-        description: error.message || 'Could not complete the purchase. Please try again.',
+        title: 'Logging Failed',
+        description: error.message || 'Could not log the purchase. Please try again.',
       });
     } finally {
       setIsProcessing(false);
@@ -116,7 +127,7 @@ export default function PresalePage() {
         <Card>
             <CardHeader>
                 <CardTitle>Select a Presale Package</CardTitle>
-                <CardDescription>Choose one of the exclusive packages below. Payment is in USDT.</CardDescription>
+                <CardDescription>Choose one of the exclusive packages below. Payment is in USDT on the Solana network.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
                 {presalePackages.map((pkg) => (
@@ -150,36 +161,49 @@ export default function PresalePage() {
                         <p className="text-sm text-muted-foreground">The purchase button will appear here once you are connected.</p>
                      </>
                  ) : (
-                    <Button size="lg" onClick={handlePurchase} disabled={!selectedPackage || isProcessing}>
-                        {isProcessing ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processing...
-                            </>
-                        ) : (
-                            `Purchase for $${selectedPackage || '...'} USDT`
-                        )}
+                    <Button size="lg" onClick={handleInitiatePurchase} disabled={!selectedPackage || isProcessing || purchaseInitiated}>
+                        {isProcessing && !purchaseInitiated ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Initiate Purchase for ${selectedPackage || '...'} USDT
                     </Button>
                  )}
             </CardFooter>
         </Card>
 
-        {lastTransaction && (
-          <Alert variant="default" className="border-green-500">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <AlertTitle className="text-green-500">Transaction Confirmed (Simulated)</AlertTitle>
-            <AlertDescription>
-              <p>Your purchase of {lastTransaction.totalPgc.toLocaleString()} PGC is complete.</p>
-              <div className="flex items-center space-x-2 mt-2">
-                <p className="text-sm font-mono text-muted-foreground break-all">
-                  TxID: {lastTransaction.transactionId}
-                </p>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(lastTransaction.transactionId)}>
-                    <Copy className="h-4 w-4" />
+        {purchaseInitiated && selectedPackage && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Your Purchase</CardTitle>
+              <CardDescription>To finalize your purchase of the ${selectedPackage} package, please follow these steps carefully.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Important: Use Solana Network Only</AlertTitle>
+                    <AlertDescription>
+                        You must send **USDT on the Solana (SPL) network**. Sending USDT from other networks like Ethereum (ERC-20), Tron (TRC-20), or Binance Smart Chain (BEP-20) will result in a permanent loss of your funds.
+                    </AlertDescription>
+                </Alert>
+                <div className="space-y-2">
+                    <Label>Step 1: Send Exactly ${selectedPackage} USDT (Solana SPL)</Label>
+                    <p className="text-sm text-muted-foreground">Send the specified amount to the official treasury address below.</p>
+                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
+                        <input type="text" value={CREATOR_TREASURY_WALLET_ADDRESS} readOnly className="flex-1 bg-transparent border-0 text-muted-foreground font-mono text-sm"/>
+                        <Button onClick={() => copyToClipboard(CREATOR_TREASURY_WALLET_ADDRESS, 'Treasury address')} size="icon" variant="ghost">
+                            <Copy className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label>Step 2: Confirm Your Transaction</Label>
+                    <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. An admin will verify the transaction and send the PGC to your wallet ({publicKey?.toBase58().slice(0, 6)}...).</p>
+                </div>
+            </CardContent>
+            <CardFooter>
+                <Button size="lg" onClick={handleConfirmPayment} disabled={isProcessing}>
+                    {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Confirming...</> : 'I Have Sent the USDT'}
                 </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
+            </CardFooter>
+          </Card>
         )}
       </div>
     </AppLayout>
