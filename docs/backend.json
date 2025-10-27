@@ -5,11 +5,11 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a registered user of the platform.",
+      "description": "Represents a registered user of the platform, including their profile, role, and financial information.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user."
+          "description": "Unique identifier for the user (matches Firebase Auth UID)."
         },
         "name": {
           "type": "string",
@@ -20,623 +20,124 @@
           "description": "User's email address.",
           "format": "email"
         },
-        "countryCode": {
+        "role": {
           "type": "string",
-          "description": "User's country code."
+          "description": "The role of the user on the platform.",
+          "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "Admin"]
         },
-        "mobileNumber": {
-          "type": "string",
-          "description": "User's mobile number."
-        },
-        "street": {
-          "type": "string",
-          "description": "User's street address."
-        },
-        "village": {
-          "type": "string",
-          "description": "User's village or ward."
-        },
-        "block": {
-          "type": "string",
-          "description": "User's block or kasba."
-        },
-        "taluka": {
-          "type": "string",
-          "description": "User's taluka."
-        },
-        "district": {
-          "type": "string",
-          "description": "User's district."
-        },
-        "area": {
-          "type": "string",
-          "description": "User's area."
-        },
-        "state": {
-          "type": "string",
-          "description": "User's state or province."
-        },
-        "country": {
-          "type": "string",
-          "description": "User's country."
-        },
-        "balance": {
+        "street": { "type": "string", "description": "User's street address." },
+        "village": { "type": "string", "description": "User's village or ward." },
+        "block": { "type": "string", "description": "User's block or kasba." },
+        "taluka": { "type": "string", "description": "User's taluka." },
+        "district": { "type": "string", "description": "User's district." },
+        "state": { "type": "string", "description": "User's state or province." },
+        "country": { "type": "string", "description": "User's country." },
+        "directIncome": {
           "type": "number",
-          "description": "User's ITC balance."
+          "description": "Income generated directly from the user's own activities or referrals."
         },
-        "bankName": {
+        "totalIncome": {
+          "type": "number",
+          "description": "Total income including earnings from the entire affiliate team tree."
+        },
+        "registeredAt": {
             "type": "string",
-            "description": "User's bank name."
-        },
-        "accountNumber": {
-            "type": "string",
-            "description": "User's bank account number."
-        },
-        "ifscCode": {
-            "type": "string",
-            "description": "User's bank IFSC or SWIFT code."
-        },
-        "accountHolderName": {
-            "type": "string",
-            "description": "Name of the bank account holder."
-        },
-        "nationalIdUrl": {
-            "type": "string",
-            "description": "URL to the uploaded national ID card image.",
-            "format": "uri"
-        },
-        "taxIdUrl": {
-            "type": "string",
-            "description": "URL to the uploaded tax ID card image.",
-            "format": "uri"
+            "format": "date-time",
+            "description": "The timestamp when the user registered."
         }
       },
-      "required": [
-        "id",
-        "name",
-        "email"
-      ]
-    },
-    "Transaction": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Transaction",
-      "type": "object",
-      "description": "Represents a transaction on the blockchain.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the transaction."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Transaction)"
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of the transaction.",
-          "format": "date-time"
-        },
-        "fromAddress": {
-          "type": "string",
-          "description": "Sender's wallet address."
-        },
-        "toAddress": {
-          "type": "string",
-          "description": "Receiver's wallet address."
-        },
-        "amount": {
-          "type": "number",
-          "description": "Amount of ITC transferred."
-        },
-        "currency": {
-          "type": "string",
-          "description": "The currency used for the transaction (e.g., ITC, ICE, USDT)."
-        },
-        "transactionType": {
-          "type": "string",
-          "description": "The type of transaction (e.g., buy, sell, transfer)."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "timestamp",
-        "fromAddress",
-        "toAddress",
-        "amount",
-        "currency"
-      ]
-    },
-    "ForumPost": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ForumPost",
-      "type": "object",
-      "description": "Represents a post in the discussion forums.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the forum post."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N ForumPost)"
-        },
-        "title": {
-          "type": "string",
-          "description": "Title of the forum post."
-        },
-        "content": {
-          "type": "string",
-          "description": "Content of the forum post."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of the forum post.",
-          "format": "date-time"
-        },
-        "topic": {
-          "type": "string",
-          "description": "Topic of the forum post (e.g., economy, politics, environment)."
-        },
-        "geography": {
-          "type": "string",
-          "description": "Geographical level of the forum post (global, country, state, district, taluka, village, street)."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "title",
-        "content",
-        "timestamp",
-        "topic",
-        "geography"
-      ]
-    },
-    "Admin": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin",
-      "type": "object",
-      "description": "Represents an administrator account with full control.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the admin user."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User table. (Relationship: User 1:1 Admin)"
-        }
-      },
-      "required": [
-        "id",
-        "userId"
-      ]
-    },
-    "QuizQuestion": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "QuizQuestion",
-      "type": "object",
-      "description": "Represents a question in the quiz competition.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the quiz question."
-        },
-        "level": {
-          "type": "number",
-          "description": "Difficulty level of the question (1-100)."
-        },
-        "text": {
-          "type": "string",
-          "description": "Text of the quiz question."
-        },
-        "options": {
-          "type": "array",
-          "description": "Array of possible answers to the question.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "correctAnswer": {
-          "type": "string",
-          "description": "The correct answer to the question."
-        },
-        "prize": {
-          "type": "number",
-          "description": "Prize for answering the question correctly."
-        }
-      },
-      "required": [
-        "id",
-        "level",
-        "text",
-        "options",
-        "correctAnswer",
-        "prize"
-      ]
-    },
-    "StakedPosition": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "StakedPosition",
-      "type": "object",
-      "description": "Represents a user's staked coins.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the staked position."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N StakedPosition)"
-        },
-        "coinType": {
-          "type": "string",
-          "description": "The type of coin being staked (ITC, ICE, IGC, JOB, FRN, WORK, Quiz)."
-        },
-        "amount": {
-          "type": "number",
-          "description": "Amount of coins staked."
-        },
-        "lockDuration": {
-          "type": "string",
-          "description": "The duration the coins are locked for."
-        },
-        "startDate": {
-          "type": "string",
-          "description": "Start date of staking.",
-          "format": "date-time"
-        },
-        "endDate": {
-          "type": "string",
-          "description": "End date of staking.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "coinType",
-        "amount",
-        "lockDuration",
-        "startDate",
-        "endDate"
-      ]
-    },
-    "Cause": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Cause",
-      "type": "object",
-      "description": "Represents a global cause that the platform supports.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the cause."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the cause."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the cause."
-        },
-        "fundingPercentage": {
-          "type": "number",
-          "description": "Percentage of platform revenue allocated to the cause."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "fundingPercentage"
-      ]
-    },
-    "EcommProduct": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "EcommProduct",
-      "type": "object",
-      "description": "Represents a product in the e-commerce marketplace.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the product."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the product."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the product."
-        },
-        "priceITC": {
-          "type": "number",
-          "description": "Price of the product in ITC."
-        },
-        "priceUSD": {
-          "type": "number",
-          "description": "Price of the product in USD."
-        },
-        "imageId": {
-          "type": "string",
-          "description": "Reference to the image."
-        },
-        "category": {
-          "type": "string",
-          "description": "The Category of the Product."
-        },
-        "subcategory": {
-          "type": "string",
-          "description": "The Subcategory of the Product."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "priceITC",
-        "priceUSD",
-        "imageId"
-      ]
-    },
-    "SocialPost": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "SocialPost",
-      "type": "object",
-      "description": "Represents a post on the social media hub.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the social post."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N SocialPost)"
-        },
-        "content": {
-          "type": "string",
-          "description": "Content of the social post."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the image attached to the post.",
-          "format": "uri"
-        },
-        "imageHint": {
-          "type": "string",
-          "description": "Used by AI tools."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of the social post.",
-          "format": "date-time"
-        },
-        "likes": {
-          "type": "number",
-          "description": "Number of likes on the social post."
-        },
-        "comments": {
-          "type": "number",
-          "description": "Number of comments on the social post."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "content",
-        "timestamp",
-        "likes",
-        "comments"
-      ]
+      "required": ["id", "name", "email", "role"]
     },
     "Referral": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Referral",
       "type": "object",
-      "description": "Represents a referral link and its associated data.",
+      "description": "Represents a user's affiliate marketing data, including their referral link and team structure.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the referral link."
-        },
         "userId": {
           "type": "string",
-          "description": "Reference to the User who owns the referral link."
+          "description": "The ID of the user who owns this referral data."
         },
         "referralLink": {
           "type": "string",
-          "description": "The referral link itself."
+          "description": "The unique affiliate link for the user.",
+          "format": "uri"
         },
-        "referrals": {
+        "directReferrals": {
           "type": "array",
-          "description": "List of users referred by the user",
-          "items": {
-            "type": "string"
-          }
+          "description": "A list of user IDs directly referred by this user.",
+          "items": { "type": "string" }
+        },
+        "totalTeamSize": {
+            "type": "number",
+            "description": "The total number of users in the affiliate tree under this user."
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "referralLink"
-      ]
+      "required": ["userId", "referralLink"]
+    },
+    "SocialPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SocialPost",
+      "type": "object",
+      "description": "Represents a post made by a user on the social media hub.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the post." },
+        "userId": { "type": "string", "description": "The ID of the user who created the post." },
+        "content": { "type": "string", "description": "The text content of the post." },
+        "imageUrl": { "type": "string", "format": "uri", "description": "URL of an image attached to the post." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the post was created." },
+        "likes": { "type": "number", "description": "Number of likes on the post." }
+      },
+      "required": ["id", "userId", "content", "timestamp"]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator account with elevated privileges.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who is an admin."
+        }
+      },
+      "required": ["userId"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password", "anonymous"]
   },
   "firestore": {
     "structure": [
       {
         "path": "/users/{userId}",
         "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profile data. Includes 'userId' as a parameter for path-based authorization.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user; used for path-based access control."
-            }
-          ]
+          "schema": { "$ref": "#/entities/User" },
+          "description": "Stores the public profile data for each user. The document ID is the user's UID from Firebase Auth."
         }
       },
       {
-        "path": "/users/{userId}/transactions/{transactionId}",
+        "path": "/users/{userId}/referrals/data",
         "definition": {
-          "entityName": "Transaction",
-          "schema": {
-            "$ref": "#/backend/entities/Transaction"
-          },
-          "description": "Stores transaction history for each user. Path includes 'userId' for access control.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user, derived from request.auth.uid; enforces ownership."
-            },
-            {
-              "name": "transactionId",
-              "description": "Unique identifier for the transaction."
-            }
-          ]
+          "schema": { "$ref": "#/entities/Referral" },
+          "description": "A singleton document storing the referral data (link, team) for the parent user. This structure ensures a user can only access their own referral information."
         }
       },
       {
-        "path": "/forums/{forumId}",
+        "path": "/social_posts/{postId}",
         "definition": {
-          "entityName": "ForumPost",
-          "schema": {
-            "$ref": "#/backend/entities/ForumPost"
-          },
-          "description": "Stores forum posts. Publicly readable data.",
-          "params": [
-            {
-              "name": "forumId",
-              "description": "Unique identifier for the forum post."
-            }
-          ]
+          "schema": { "$ref": "#/entities/SocialPost" },
+          "description": "A top-level collection for all social media posts from all users."
         }
       },
       {
         "path": "/roles_admin/{userId}",
         "definition": {
-          "entityName": "Admin",
-          "schema": {
-            "$ref": "#/backend/entities/Admin"
-          },
-          "description": "DBAC: Existence-based global role assignment. If a document exists with a UID, that user is an admin.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The UID of the administrator."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/quiz_questions/{quizQuestionId}",
-        "definition": {
-          "entityName": "QuizQuestion",
-          "schema": {
-            "$ref": "#/backend/entities/QuizQuestion"
-          },
-          "description": "Stores quiz questions. Accessible by admins for creation and modification.",
-          "params": [
-            {
-              "name": "quizQuestionId",
-              "description": "Unique identifier for the quiz question."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/staked_positions/{stakedPositionId}",
-        "definition": {
-          "entityName": "StakedPosition",
-          "schema": {
-            "$ref": "#/backend/entities/StakedPosition"
-          },
-          "description": "Stores information about staked coins.",
-          "params": [
-            {
-              "name": "stakedPositionId",
-              "description": "Unique identifier for the staked position."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/causes/{causeId}",
-        "definition": {
-          "entityName": "Cause",
-          "schema": {
-            "$ref": "#/backend/entities/Cause"
-          },
-          "description": "Stores global causes the platform supports.",
-          "params": [
-            {
-              "name": "causeId",
-              "description": "Unique identifier for the cause."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/ecomm_products/{ecommProductId}",
-        "definition": {
-          "entityName": "EcommProduct",
-          "schema": {
-            "$ref": "#/backend/entities/EcommProduct"
-          },
-          "description": "Stores e-commerce product data.",
-          "params": [
-            {
-              "name": "ecommProductId",
-              "description": "Unique identifier for the e-commerce product."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/social_posts/{socialPostId}",
-        "definition": {
-          "entityName": "SocialPost",
-          "schema": {
-            "$ref": "#/backend/entities/SocialPost"
-          },
-          "description": "Stores social media posts. Includes 'userId' for access control.",
-          "params": [
-            {
-              "name": "socialPostId",
-              "description": "Unique identifier for the social post."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/referrals/{referralId}",
-        "definition": {
-          "entityName": "Referral",
-          "schema": {
-            "$ref": "#/backend/entities/Referral"
-          },
-          "description": "Stores referral link data. Includes 'userId' for access control.",
-          "params": [
-            {
-              "name": "referralId",
-              "description": "Unique identifier for the referral link."
-            }
-          ]
+          "schema": { "$ref": "#/entities/Admin" },
+          "description": "An existence-based check for admin privileges. If a document exists with a user's UID, that user is an admin."
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed for a blockchain platform emphasizing decentralization and transparency. It focuses on supporting key features like user profiles, transactions, forum discussions, and a tiered governance system with its tokens. The design prioritizes authorization independence by denormalizing authorization data to avoid `get()` calls in security rules, supporting atomic operations and easier debugging. It ensures QAPs (Rules are not Filters) by segregating data based on access needs (e.g., user profiles vs. global forum posts) and using membership maps where applicable.&#x20;\n\nKey highlights:\n\n*   Authorization Independence: Denormalization is key. For example, the `userId` is present in all `transactions` documents, and the document path structure also encodes the `userId`, eliminating the need for `get()` calls in security rules.\n*   QAPs: The structure supports efficient and secure list operations. Public data (like forum posts) is in a top-level collection with open read access, while private user data is secured via path-based rules.\n*   Structural Segregation: The design avoids mixing public and private data within the same collections. User-specific data (transactions, wallets) resides in subcollections of the `/users/{userId}` path, while global data (forum posts, causes) is stored in top-level collections."
+    "reasoning": "This structure separates user profile data from their affiliate/referral data. Storing referral information in a subcollection of the user's document (/users/{userId}/referrals/data) allows for security rules that grant a user access only to their own referral tree and income data. Social posts are in a global collection for easy querying for the main feed, with permissions to be handled via rules. The 'roles_admin' collection provides a simple, secure way to manage administrator access."
   }
 }
