@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { indiaGeography, countries } from '@/lib/data';
+import indiaGeography from '@/lib/india-geography.json';
+import { countries } from '@/lib/data';
 
 const votingLevels = [
   {
