@@ -184,7 +184,7 @@ export default function PresalePage() {
                     </AlertDescription>
                 </Alert>
                 <div className="space-y-2">
-                    <Label>Step 1: Send Exactly ${selectedPackage} USDT (Solana SPL)</Label>
+                    <label className="text-sm font-medium">Step 1: Send Exactly ${selectedPackage} USDT (Solana SPL)</label>
                     <p className="text-sm text-muted-foreground">Send the specified amount to the official treasury address below.</p>
                     <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
                         <input type="text" value={CREATOR_TREASURY_WALLET_ADDRESS} readOnly className="flex-1 bg-transparent border-0 text-muted-foreground font-mono text-sm"/>
@@ -194,7 +194,7 @@ export default function PresalePage() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label>Step 2: Confirm Your Transaction</Label>
+                    <label className="text-sm font-medium">Step 2: Confirm Your Transaction</label>
                     <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. An admin will verify the transaction and send the PGC to your wallet ({publicKey?.toBase58().slice(0, 6)}...).</p>
                 </div>
             </CardContent>
