@@ -35,9 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -375,7 +375,7 @@ function RegistrationForm() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Submitting Application...' : 'Register & Apply'}
+              {form.formState.isSubmitting ? 'Registering...' : 'Create Account'}
             </Button>
           </CardFooter>
         </form>
@@ -394,3 +394,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
