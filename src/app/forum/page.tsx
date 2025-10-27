@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowUp, MessageSquare, PlusCircle } from 'lucide-react';
-import { useCollection, useUser, useFirestore } from '@/firebase';
+import { useCollection, useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -232,7 +232,7 @@ function PostSkeleton() {
 export default function ForumPage() {
     const firestore = useFirestore();
 
-    const postsQuery = useMemo(() => {
+    const postsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'forums'), orderBy('createdAt', 'desc'));
     }, [firestore]);
