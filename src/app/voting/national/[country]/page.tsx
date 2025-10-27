@@ -169,33 +169,36 @@ export default function CountryIssuesPage() {
 
   return (
     <AppLayout>
-        {isLoading && (
-            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg border">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-muted-foreground">Generating polls for {country}...</p>
-            </div>
-        )}
-        
-        {error && (
-            <Card className="border-destructive">
-                <CardHeader>
-                    <CardTitle className="text-destructive">Error</CardTitle>
-                    <CardDescription>{error}</CardDescription>
-                </CardHeader>
-            </Card>
-        )}
+        <div className="flex flex-col gap-6">
+            {isLoading && (
+                <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg border">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <h1 className="font-headline text-2xl font-bold">Generating Polls for {country}</h1>
+                    <p className="text-muted-foreground">Please wait while our AI analyzes the top national issues...</p>
+                </div>
+            )}
+            
+            {error && (
+                <Card className="border-destructive">
+                    <CardHeader>
+                        <CardTitle className="text-destructive">Error Generating Polls</CardTitle>
+                        <CardDescription>{error}</CardDescription>
+                    </CardHeader>
+                </Card>
+            )}
 
-        {issues && (
-             <div className="space-y-6">
-                <h1 className="font-headline text-3xl font-bold">Voting Polls for {country}</h1>
-                <p className="text-muted-foreground">
-                    Vote on the top national problems and potential solutions for {country}, including the foundational proposal for a new constitution.
-                </p>
-                {issues.map((issue, index) => (
-                    <PollCard key={index} poll={issue} country={country} />
-                ))}
-            </div>
-        )}
+            {issues && (
+                 <div className="space-y-6">
+                    <h1 className="font-headline text-3xl font-bold">Voting Polls for {country}</h1>
+                    <p className="text-muted-foreground">
+                        Vote on the top national problems and potential solutions for {country}, including the foundational proposal for a new constitution.
+                    </p>
+                    {issues.map((issue, index) => (
+                        <PollCard key={index} poll={issue} country={country} />
+                    ))}
+                </div>
+            )}
+        </div>
     </AppLayout>
   );
 }
