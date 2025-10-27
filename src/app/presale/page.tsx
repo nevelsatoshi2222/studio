@@ -12,10 +12,11 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2 } from 'lucide-react';
+import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2, Copy } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const presalePackages = [
   { amountUSD: 10, pgcAmount: 10, bonus: 10 },
@@ -29,15 +30,26 @@ export default function PresalePage() {
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastTransaction, setLastTransaction] = useState<any>(null);
 
   const handleSelectPackage = (amount: number) => {
     setSelectedPackage(amount);
+    setLastTransaction(null); // Clear previous transaction on new selection
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Transaction ID copied to clipboard.",
+    });
   };
 
   const handlePurchase = async () => {
     if (!selectedPackage || !publicKey) return;
 
     setIsProcessing(true);
+    setLastTransaction(null);
 
     try {
       const response = await fetch('/api/presale', {
@@ -56,10 +68,12 @@ export default function PresalePage() {
       if (!response.ok) {
         throw new Error(result.error || 'An unknown error occurred.');
       }
+      
+      setLastTransaction(result);
 
       toast({
         title: 'Purchase Successful!',
-        description: `Your purchase of ${result.pgcAmount} PGC (+ ${result.bonusPgc} bonus) is confirmed. Transaction: ${result.transactionId.slice(0, 10)}...`,
+        description: `Your purchase of ${result.totalPgc.toLocaleString()} PGC is confirmed.`,
       });
       
     } catch (error: any) {
@@ -149,8 +163,25 @@ export default function PresalePage() {
                  )}
             </CardFooter>
         </Card>
+
+        {lastTransaction && (
+          <Alert variant="default" className="border-green-500">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            <AlertTitle className="text-green-500">Transaction Confirmed (Simulated)</AlertTitle>
+            <AlertDescription>
+              <p>Your purchase of {lastTransaction.totalPgc.toLocaleString()} PGC is complete.</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <p className="text-sm font-mono text-muted-foreground break-all">
+                  TxID: {lastTransaction.transactionId}
+                </p>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(lastTransaction.transactionId)}>
+                    <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </AppLayout>
   );
 }
-

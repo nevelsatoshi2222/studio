@@ -1,15 +1,14 @@
 
 import { NextResponse } from 'next/server';
+import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
 
 // This is a mock API endpoint. In a real-world scenario, this endpoint would:
 // 1. Receive the purchase request.
-// 2. Create a unique transaction ID and associate it with the user's wallet and package.
-// 3. Instruct the user on where to send the USDT payment (e.g., provide a unique deposit address or a payment link).
-// 4. Have a separate backend service that listens for the incoming USDT transaction.
-// 5. Once the payment is confirmed on the blockchain, this backend service would trigger the PGC smart contract to mint and send the PGC tokens (+ bonus) to the buyer's wallet.
-// 6. Update the transaction status in the database.
+// 2. Validate the payment of USDT from the buyer's wallet to the CREATOR_TREASURY_WALLET_ADDRESS.
+// 3. Upon confirmation, trigger a transfer of PGC tokens from the CREATOR_TREASURY_WALLET_ADDRESS to the buyer's wallet.
+// 4. Record the transaction details in a database.
 
-// For this prototype, we will simulate a successful transaction immediately.
+// For this prototype, we will simulate a successful transaction and log the details.
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing package amount or buyer wallet address' }, { status: 400 });
     }
 
-    // Find the corresponding package to determine the PGC amount
     const presalePackages = [
         { amountUSD: 10, pgcAmount: 10, bonus: 10 },
         { amountUSD: 100, pgcAmount: 100, bonus: 100 },
@@ -34,17 +32,33 @@ export async function POST(request: Request) {
          return NextResponse.json({ error: 'Invalid package selected' }, { status: 400 });
     }
 
-    // Simulate creating a transaction ID
-    const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    // Simulate creating a transaction signature
+    const transactionSignature = `sim_txn_${Buffer.from(Date.now().toString() + buyerWalletAddress).toString('hex').slice(0, 64)}`;
+    const totalPgcToSend = selectedPkg.pgcAmount + selectedPkg.bonus;
+
+    // Log the intended transaction for the admin to process manually
+    console.log('--- PRESALE PURCHASE INITIATED ---');
+    console.log(`Buyer: ${buyerWalletAddress}`);
+    console.log(`Package: $${selectedPkg.amountUSD}`);
+    console.log('Action: User pays with USDT.');
+    console.log('------------------------------------');
+    console.log('Action: Send PGC from Treasury to Buyer.');
+    console.log(`   From (Treasury): ${CREATOR_TREASURY_WALLET_ADDRESS}`);
+    console.log(`   To (Buyer): ${buyerWalletAddress}`);
+    console.log(`   Amount: ${totalPgcToSend.toLocaleString()} PGC (${selectedPkg.pgcAmount} + ${selectedPkg.bonus} bonus)`);
+    console.log(`Simulated Signature: ${transactionSignature}`);
+    console.log('--- END OF LOG ---');
+    
 
     // Simulate a successful response
     const response = {
-      message: 'Purchase initiated successfully. Waiting for payment.',
-      transactionId: transactionId,
+      message: 'Purchase successful! Your PGC is being sent.',
+      transactionId: transactionSignature,
       pgcAmount: selectedPkg.pgcAmount,
       bonusPgc: selectedPkg.bonus,
+      totalPgc: totalPgcToSend,
       buyer: buyerWalletAddress,
-      // In a real app, you might return a payment address or link here
+      seller: CREATOR_TREASURY_WALLET_ADDRESS,
     };
 
     // Simulate a delay for processing
