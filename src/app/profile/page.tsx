@@ -12,14 +12,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Copy, UploadCloud, UserCog, Wallet, Landmark } from 'lucide-react';
+import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,6 +32,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import React, { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -73,7 +75,7 @@ function ProfileLoadingSkeleton() {
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { publicKey } = useWallet();
+  const { publicKey, connected } = useWallet();
   const { toast } = useToast();
   
   const [nationalIdFile, setNationalIdFile] = useState<File | null>(null);
@@ -113,6 +115,17 @@ export default function ProfilePage() {
     }
   }, [userProfile, user, form]);
 
+  useEffect(() => {
+    // Automatically link wallet address if user is logged in, wallet is connected, and address isn't already saved
+    if (userDocRef && publicKey && userProfile && !userProfile.solanaWalletAddress) {
+        updateDocumentNonBlocking(userDocRef, { solanaWalletAddress: publicKey.toBase58() });
+        toast({
+            title: 'Wallet Linked',
+            description: 'Your Solana wallet has been linked to your profile.',
+        });
+    }
+  }, [userDocRef, publicKey, userProfile, toast]);
+
   const handleFinancialDetailsSubmit = (data: ProfileFormValues) => {
     if (!userDocRef) return;
     updateDocumentNonBlocking(userDocRef, {
@@ -126,6 +139,44 @@ export default function ProfilePage() {
         description: 'Your financial details have been saved.',
     });
   };
+
+  const handleWithdrawalRequest = () => {
+    if (!firestore || !user || !userProfile || !userProfile.solanaWalletAddress) {
+        toast({
+            variant: 'destructive',
+            title: 'Cannot Request Withdrawal',
+            description: 'Please ensure you are logged in and your wallet is connected and linked.',
+        });
+        return;
+    }
+    const withdrawalAmount = userProfile.pgcBalance || 0;
+    if (withdrawalAmount <= 0) {
+        toast({
+            variant: 'destructive',
+            title: 'No Balance to Withdraw',
+            description: 'You do not have any PGC in your in-app balance.',
+        });
+        return;
+    }
+
+    const requestsCollection = collection(firestore, 'withdrawal_requests');
+    addDocumentNonBlocking(requestsCollection, {
+        userId: user.uid,
+        userName: userProfile.name,
+        amount: withdrawalAmount,
+        solanaAddress: userProfile.solanaWalletAddress,
+        requestedAt: serverTimestamp(),
+        status: 'pending',
+    });
+    // Reset the in-app balance after requesting
+    if (userDocRef) {
+      updateDocumentNonBlocking(userDocRef, { pgcBalance: 0 });
+    }
+    toast({
+        title: 'Withdrawal Requested',
+        description: `Your request to withdraw ${withdrawalAmount.toLocaleString()} PGC has been submitted for admin approval.`,
+    });
+  }
 
   const handleKycSubmit = async () => {
     if (!userDocRef) return;
@@ -152,7 +203,7 @@ export default function ProfilePage() {
     });
   };
 
-  if (isUserLoading || isProfileLoading) {
+  if (isUserLoading || (user && isProfileLoading)) {
     return (
         <AppLayout>
             <ProfileLoadingSkeleton />
@@ -160,14 +211,14 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user && !publicKey) {
+  if (!user) {
     return (
       <AppLayout>
         <Card>
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You must be logged in or connect your wallet to view your profile.
+              You must be logged in to view your profile.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -190,7 +241,7 @@ export default function ProfilePage() {
             <Card>
             <CardHeader className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <Avatar className="h-24 w-24 border-4 border-primary">
-                    <AvatarImage src={user?.photoURL || (publicKey ? `https://api.dicebear.com/7.x/identicon/svg?seed=${publicKey.toBase58()}` : `https://picsum.photos/seed/guest/96/96`)} />
+                    <AvatarImage src={user?.photoURL || (publicKey ? `https://api.dicebear.com/7.x/identicon/svg?seed=${publicKey.toBase58()}` : `https://picsum.photos/seed/${user.uid}/96/96`)} />
                     <AvatarFallback className="text-3xl">{user ? user.email?.charAt(0).toUpperCase() : 'G'}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 w-full">
@@ -207,18 +258,15 @@ export default function ProfilePage() {
                             </FormItem>
                         )}
                         />
-                    <CardDescription className="text-base mt-1">{user?.email || (publicKey ? `Connected: ${publicKey.toBase58().slice(0,6)}...${publicKey.toBase58().slice(-4)}` : '')}</CardDescription>
+                    <CardDescription className="text-base mt-1">{user?.email}</CardDescription>
                 </div>
-                {user && (
                 <Button onClick={form.handleSubmit(handleFinancialDetailsSubmit)}>
                     <UserCog className="mr-2 h-4 w-4" /> Save Profile
                 </Button>
-                )}
             </CardHeader>
             </Card>
             
             {/* Referral Link Card */}
-            {user && (
             <Card>
                 <CardHeader>
                 <CardTitle>Your Affiliate Referral Link</CardTitle>
@@ -235,7 +283,32 @@ export default function ProfilePage() {
                 </div>
                 </CardContent>
             </Card>
-            )}
+
+             {/* PGC Wallet Card */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>PGC Wallet</CardTitle>
+                    <CardDescription>Your in-app PGC balance. Request a withdrawal to move these funds to your linked Solana wallet.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border p-4">
+                        <div>
+                             <p className="text-sm text-muted-foreground">In-App Balance</p>
+                             <div className="flex items-baseline gap-2">
+                                <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1721831777732_0.png" alt="PGC Coin" width={28} height={28} />
+                                <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
+                                <span className="text-xl text-muted-foreground">PGC</span>
+                            </div>
+                        </div>
+                         <Button onClick={handleWithdrawalRequest} disabled={(userProfile?.pgcBalance || 0) === 0}>
+                            <Send className="mr-2 h-4 w-4" /> Request Withdrawal
+                        </Button>
+                    </div>
+                </CardContent>
+                 <CardFooter>
+                     <p className="text-xs text-muted-foreground">Withdrawal requests are processed manually by an administrator. This may take up to 24-48 hours.</p>
+                 </CardFooter>
+            </Card>
 
             {/* Financial Details Card */}
             <Card>
@@ -245,19 +318,22 @@ export default function ProfilePage() {
                         <CardDescription>Manage your wallet and bank information.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        {publicKey && (
                         <div className="space-y-4">
-                            <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet Address</h3>
-                            <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
-                                <Input type="text" value={publicKey.toBase58()} readOnly className="flex-1 bg-transparent border-0 font-mono text-muted-foreground"/>
-                                <Button onClick={() => copyToClipboard(publicKey.toBase58(), 'Your wallet address has been copied.')} size="icon" variant="ghost">
-                                    <Copy className="h-5 w-5" />
-                                </Button>
-                            </div>
+                            <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Linked Solana Wallet</h3>
+                            {userProfile?.solanaWalletAddress ? (
+                                <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
+                                    <Input type="text" value={userProfile.solanaWalletAddress} readOnly className="flex-1 bg-transparent border-0 font-mono text-muted-foreground"/>
+                                    <Button onClick={() => copyToClipboard(userProfile.solanaWalletAddress, 'Your wallet address has been copied.')} size="icon" variant="ghost">
+                                        <Copy className="h-5 w-5" />
+                                    </Button>
+                                </div>
+                            ) : connected ? (
+                                <p className="text-sm text-muted-foreground">Wallet address will be linked automatically.</p>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">Please connect your Solana wallet to link it to your profile.</p>
+                            )}
                         </div>
-                        )}
-                        {user && (
-                        <>
+                        
                         <Separator />
                         <div className="space-y-4">
                             <h3 className="font-medium flex items-center gap-2 text-primary"><Landmark className="h-5 w-5"/> Bank Details</h3>
@@ -312,26 +388,22 @@ export default function ProfilePage() {
                                     />
                             </div>
                         </div>
-                        </>
-                        )}
                     </CardContent>
-                    {user && (
                     <CardFooter>
                         <Button type="submit">Save Financial Details</Button>
                     </CardFooter>
-                    )}
                 </form>
             </Card>
         </Form>
         {/* KYC Card */}
-        {user && (
           <Card>
             <CardHeader>
               <CardTitle>KYC Verification</CardTitle>
               <CardDescription>
                 Upload your documents to get your account fully verified.
-                {userProfile?.kycStatus === 'pending' && <span className="text-yellow-500 font-bold ml-2">(In Review)</span>}
-                {userProfile?.kycStatus === 'verified' && <span className="text-green-500 font-bold ml-2">(Verified)</span>}
+                {userProfile?.kycStatus === 'pending' && <Badge variant="secondary" className="ml-2">In Review</Badge>}
+                {userProfile?.kycStatus === 'verified' && <Badge variant="default" className="ml-2">Verified</Badge>}
+                {userProfile?.kycStatus === 'rejected' && <Badge variant="destructive" className="ml-2">Rejected</Badge>}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -373,13 +445,10 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile}>Submit for Verification</Button>
+              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.kycStatus === 'pending' || userProfile?.kycStatus === 'verified'}>Submit for Verification</Button>
             </CardFooter>
           </Card>
-        )}
       </div>
     </AppLayout>
   );
 }
-
-    

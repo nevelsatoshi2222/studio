@@ -44,6 +44,18 @@
             "type": "string",
             "format": "date-time",
             "description": "The timestamp when the user registered."
+        },
+        "solanaWalletAddress": {
+          "type": "string",
+          "description": "The user's primary Solana wallet address for receiving PGC."
+        },
+        "withdrawalAddress": {
+            "type": "string",
+            "description": "The Solana wallet address specified by the user for a withdrawal."
+        },
+        "pgcBalance": {
+            "type": "number",
+            "description": "The user's in-app balance of PGC, before it is withdrawn to their wallet."
         }
       },
       "required": ["id", "name", "email", "role"]
@@ -102,6 +114,21 @@
         }
       },
       "required": ["userId"]
+    },
+    "WithdrawalRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WithdrawalRequest",
+      "type": "object",
+      "description": "Represents a user's request to withdraw PGC from their in-app balance to their Solana wallet.",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user requesting the withdrawal." },
+        "userName": { "type": "string", "description": "The name of the user." },
+        "amount": { "type": "number", "description": "The amount of PGC requested." },
+        "solanaAddress": { "type": "string", "description": "The destination Solana wallet address." },
+        "requestedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the request." },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"], "description": "The status of the withdrawal request." }
+      },
+      "required": ["userId", "amount", "solanaAddress", "requestedAt", "status"]
     }
   },
   "auth": {
@@ -136,8 +163,15 @@
           "schema": { "$ref": "#/entities/Admin" },
           "description": "An existence-based check for admin privileges. If a document exists with a user's UID, that user is an admin."
         }
+      },
+       {
+        "path": "/withdrawal_requests/{requestId}",
+        "definition": {
+          "schema": { "$ref": "#/entities/WithdrawalRequest" },
+          "description": "Stores all user withdrawal requests for admin processing."
+        }
       }
     ],
-    "reasoning": "This structure separates user profile data from their affiliate/referral data. Storing referral information in a subcollection of the user's document (/users/{userId}/referrals/data) allows for security rules that grant a user access only to their own referral tree and income data. Social posts are in a global collection for easy querying for the main feed, with permissions to be handled via rules. The 'roles_admin' collection provides a simple, secure way to manage administrator access."
+    "reasoning": "This structure separates user profile data from their affiliate/referral data. Storing referral information in a subcollection of the user's document (/users/{userId}/referrals/data) allows for security rules that grant a user access only to their own referral tree and income data. Social posts are in a global collection for easy querying for the main feed. The 'roles_admin' collection provides a simple, secure way to manage administrator access. Withdrawal requests are in a separate top-level collection for easy admin review."
   }
 }

@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   SidebarProvider,
@@ -55,6 +55,7 @@ import {
   Gift,
   HelpCircleIcon,
   ClipboardList,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -269,6 +270,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/job-seekers"><SidebarMenuSubButton>Job Seekers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/influencers"><SidebarMenuSubButton>Influencers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </Collapsible>
@@ -293,7 +295,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-         {!user && (
+         {!user && !isAdmin && (
             <SidebarMenu>
               <SidebarMenuItem>
                 <Link href="/login" passHref>
@@ -338,5 +340,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
