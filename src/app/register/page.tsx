@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { UserPlus } from 'lucide-react';
 import { countries } from '@/lib/data';
 import { useForm } from 'react-hook-form';
@@ -36,12 +36,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
 const registrationSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
@@ -62,6 +63,7 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 function RegistrationForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const referralCode = searchParams.get('ref') || 'ADMIN_REF_CODE';
   const role = searchParams.get('role');
   const jobTitle = searchParams.get('title');
@@ -73,6 +75,7 @@ function RegistrationForm() {
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
+      name: '',
       referralCode,
       role: role || '',
       jobTitle: jobTitle || '',
@@ -91,40 +94,53 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
+    if (!firestore || !auth) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Firebase is not initialized. Please try again later.',
+        });
+        return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
+      // Update Firebase Auth user profile
+      await updateProfile(user, { displayName: data.name });
+
       const userProfile = {
         id: user.uid,
-        name: data.email.split('@')[0], // Basic name generation
+        name: data.name,
         email: data.email,
         phone: data.phone,
         street: data.street,
         village: data.village,
-        block: data.block,
+        block: data.block || '',
         taluka: data.taluka,
         district: data.district,
-        area: data.area,
+        area: data.area || '',
         state: data.state,
         country: data.country,
-        balance: 0, // Initial balance
+        balance: 0,
         referralCode: data.referralCode,
         registeredAt: new Date().toISOString(),
-        status: 'Pending', // Default status for applicants
+        status: role ? 'Pending' : 'Active', // Set status to Pending if applying for a role
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
         role: data.role || 'User',
         jobTitle: data.jobTitle || '',
       };
       
       const userDocRef = doc(firestore, 'users', user.uid);
-      setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+      // Use await here to ensure profile is created before redirecting
+      await setDoc(userDocRef, userProfile);
 
       toast({
         title: 'Registration Successful!',
-        description: `Welcome, ${userProfile.name}! Your application has been submitted.`,
+        description: `Welcome, ${userProfile.name}! Your account has been created.`,
       });
-      form.reset();
+      
+      router.push('/'); // Redirect to dashboard after successful registration
       
     } catch (error: any) {
       console.error('Registration failed:', error);
@@ -168,6 +184,19 @@ function RegistrationForm() {
                 />
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="email"
@@ -181,6 +210,8 @@ function RegistrationForm() {
                       </FormItem>
                     )}
                   />
+              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="password"
@@ -194,20 +225,20 @@ function RegistrationForm() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
               </div>
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               
               <div className="space-y-2">
                   <Label>Address</Label>
