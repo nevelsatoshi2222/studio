@@ -263,7 +263,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <SidebarMenuSub>
+                             <SidebarMenuSub>
                                 <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
@@ -338,3 +338,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

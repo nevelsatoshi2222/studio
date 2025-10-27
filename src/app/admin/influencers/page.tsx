@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useMemoFirebase, useUser, useFirestore, updateDocumentNonBlocking, useDoc, useCollection } from '@/firebase';
@@ -184,3 +185,5 @@ export default function InfluencerApplicationsPage() {
         </AppLayout>
     );
 }
+
+    

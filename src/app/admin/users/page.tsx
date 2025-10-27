@@ -77,7 +77,7 @@ export default function AllUsersPage() {
     }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
 
 
-    const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected') => {
+    const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected' | 'Banned') => {
         if (!firestore) return;
         const userDocRef = doc(firestore, 'users', userId);
         updateDocumentNonBlocking(userDocRef, { status: newStatus });
@@ -187,14 +187,16 @@ export default function AllUsersPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
+                                                         {user.status !== 'Active' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
                                                             <Check className="mr-2 h-4 w-4" /> Approve
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Rejected')}>
+                                                        </DropdownMenuItem>}
+                                                        {user.status !== 'Rejected' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Rejected')}>
                                                             <X className="mr-2 h-4 w-4" /> Reject
-                                                        </DropdownMenuItem>
+                                                        </DropdownMenuItem>}
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                         <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(user.id, 'Banned')}>
+                                                            <ShieldAlert className="mr-2 h-4 w-4" /> Ban User
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -215,3 +217,5 @@ export default function AllUsersPage() {
         </AppLayout>
     );
 }
+
+    
