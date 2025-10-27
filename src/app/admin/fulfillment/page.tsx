@@ -7,14 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, CheckCircle, Copy, Loader2 } from 'lucide-react';
-import { collection, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { ShieldAlert, CheckCircle, Copy, Loader2, ListCollapse, ListChecks } from 'lucide-react';
+import { collection, doc, query, where, serverTimestamp, writeBatch, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 type WithdrawalRequest = {
     id: string;
@@ -43,6 +45,9 @@ export default function FulfillmentPage() {
     const router = useRouter();
     const { publicKey } = useWallet();
     const { toast } = useToast();
+
+    const [isBulkPayoutModalOpen, setIsBulkPayoutModalOpen] = useState(false);
+    const [payoutList, setPayoutList] = useState('');
 
     const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
@@ -89,6 +94,40 @@ export default function FulfillmentPage() {
             description: `${entity} has been copied.`,
         });
     };
+    
+    const generatePayoutList = () => {
+        if (!withdrawalRequests || withdrawalRequests.length === 0) {
+            toast({ variant: 'destructive', title: 'No pending requests to process.' });
+            return;
+        }
+        const csvContent = withdrawalRequests
+            .map(req => `${req.solanaAddress},${req.amount}`)
+            .join('\n');
+        setPayoutList(csvContent);
+        setIsBulkPayoutModalOpen(true);
+    };
+
+    const handleMarkAllComplete = async () => {
+        if (!firestore || !withdrawalRequests || withdrawalRequests.length === 0) return;
+
+        const batch = writeBatch(firestore);
+        withdrawalRequests.forEach(req => {
+            const docRef = doc(firestore, 'withdrawal_requests', req.id);
+            batch.update(docRef, { status: 'completed' });
+        });
+
+        try {
+            await batch.commit();
+            toast({
+                title: 'Bulk Update Successful',
+                description: `${withdrawalRequests.length} requests have been marked as completed.`,
+            });
+        } catch (error) {
+            console.error("Bulk update failed:", error);
+            toast({ variant: 'destructive', title: 'Bulk Update Failed', description: 'Could not update all requests. Please check the logs.' });
+        }
+    };
+
 
     if (!isAdmin && !isUserLoading) {
         return (
@@ -123,8 +162,20 @@ export default function FulfillmentPage() {
                     <TabsContent value="withdrawals" className="mt-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Pending PGC Withdrawal Requests</CardTitle>
-                                <CardDescription>Users have requested to withdraw their in-app PGC to their Solana wallet. Verify and send the tokens, then mark as complete.</CardDescription>
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                    <div>
+                                        <CardTitle>Pending PGC Withdrawal Requests</CardTitle>
+                                        <CardDescription>Users have requested to withdraw their in-app PGC to their Solana wallet. Verify and send the tokens, then mark as complete.</CardDescription>
+                                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <Button variant="outline" onClick={generatePayoutList} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
+                                            <ListCollapse className="mr-2 h-4 w-4"/> Generate Payout List
+                                        </Button>
+                                        <Button variant="secondary" onClick={handleMarkAllComplete} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
+                                            <ListChecks className="mr-2 h-4 w-4"/> Mark All Complete
+                                        </Button>
+                                    </div>
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 <Table>
@@ -210,6 +261,33 @@ export default function FulfillmentPage() {
                     </TabsContent>
                 </Tabs>
             </div>
+             <Dialog open={isBulkPayoutModalOpen} onOpenChange={setIsBulkPayoutModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Bulk Payout List (CSV)</DialogTitle>
+                        <DialogDescription>
+                            Copy this list and use it with a bulk-sending tool to process all withdrawals in one batch. The format is `address,amount`.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                        readOnly
+                        value={payoutList}
+                        className="h-48 font-mono text-xs"
+                    />
+                    <DialogFooter>
+                         <Button onClick={() => copyToClipboard(payoutList, 'Payout list')}>
+                            <Copy className="mr-2 h-4 w-4" /> Copy List
+                        </Button>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Close
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
+
+    
