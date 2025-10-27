@@ -37,6 +37,7 @@ import Image from 'next/image';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  solanaWalletAddress: z.string().optional(),
   bankName: z.string().optional(),
   accountNumber: z.string().optional(),
   ifscCode: z.string().optional(),
@@ -92,6 +93,7 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
+      solanaWalletAddress: '',
       bankName: '',
       accountNumber: '',
       ifscCode: '',
@@ -103,6 +105,7 @@ export default function ProfilePage() {
     if (userProfile) {
       form.reset({
         name: userProfile.name || '',
+        solanaWalletAddress: userProfile.solanaWalletAddress || '',
         bankName: userProfile.bankName || '',
         accountNumber: userProfile.accountNumber || '',
         ifscCode: userProfile.ifscCode || '',
@@ -116,19 +119,16 @@ export default function ProfilePage() {
   }, [userProfile, user, form]);
 
   useEffect(() => {
-    // Automatically link wallet address if user is logged in, wallet is connected, and address isn't already saved
-    if (userDocRef && publicKey && userProfile && !userProfile.solanaWalletAddress) {
-        updateDocumentNonBlocking(userDocRef, { solanaWalletAddress: publicKey.toBase58() });
-        toast({
-            title: 'Wallet Linked',
-            description: 'Your Solana wallet has been linked to your profile.',
-        });
+    // Automatically pre-fill wallet address if connected and not already saved
+    if (publicKey && !form.getValues('solanaWalletAddress')) {
+       form.setValue('solanaWalletAddress', publicKey.toBase58());
     }
-  }, [userDocRef, publicKey, userProfile, toast]);
+  }, [publicKey, form]);
 
   const handleFinancialDetailsSubmit = (data: ProfileFormValues) => {
     if (!userDocRef) return;
     updateDocumentNonBlocking(userDocRef, {
+        solanaWalletAddress: data.solanaWalletAddress,
         bankName: data.bankName,
         accountNumber: data.accountNumber,
         ifscCode: data.ifscCode,
@@ -319,19 +319,21 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-4">
-                            <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Linked Solana Wallet</h3>
-                            {userProfile?.solanaWalletAddress ? (
-                                <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
-                                    <Input type="text" value={userProfile.solanaWalletAddress} readOnly className="flex-1 bg-transparent border-0 font-mono text-muted-foreground"/>
-                                    <Button onClick={() => copyToClipboard(userProfile.solanaWalletAddress, 'Your wallet address has been copied.')} size="icon" variant="ghost">
-                                        <Copy className="h-5 w-5" />
-                                    </Button>
-                                </div>
-                            ) : connected ? (
-                                <p className="text-sm text-muted-foreground">Wallet address will be linked automatically.</p>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">Please connect your Solana wallet to link it to your profile.</p>
-                            )}
+                            <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Solana Wallet</h3>
+                             <FormField
+                                control={form.control}
+                                name="solanaWalletAddress"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Wallet Address for PGC</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your Solana wallet address" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {!connected && <p className="text-sm text-muted-foreground">Connect your wallet to auto-fill this field.</p>}
                         </div>
                         
                         <Separator />
@@ -452,3 +454,5 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
+
+    
