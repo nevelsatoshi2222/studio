@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import {
   Home,
@@ -76,16 +77,16 @@ import {
 import { WalletButton } from './wallet-button';
 
 
-const navItems = [
+const mainNavItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
   { href: '/vision', icon: Rocket, label: 'Our Vision' },
   { href: '/presale', icon: Flame, label: 'Presale' },
   { href: '/social-media', icon: Rss, label: 'Social Media' },
-  { href: '/users', icon: Users, label: 'User Management' },
-  { href: '/transactions', icon: Repeat, label: 'Transactions' },
-  { href: '/forum', icon: MessageSquare, label: 'Forum / Governance' },
   { href: '/exchange', icon: BarChart2, label: 'Crypto Exchange' },
   { href: '/tokenomics', icon: PieChartIcon, label: 'Coins & Tokenomics' },
+];
+
+const programNavItems = [
   { href: '/staking', icon: Lock, label: 'Staking' },
   { href: '/airdrop', icon: Gift, label: 'Airdrop' },
   { href: '/financial-quiz', icon: HelpCircleIcon, label: 'Financial Quiz' },
@@ -96,40 +97,15 @@ const navItems = [
   { href: '/affiliate-marketing', icon: Share2, label: 'Affiliate Marketing'},
   { href: '/influencer', icon: Megaphone, label: 'Influencer'},
   { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
+  { href: '/franchisee', icon: Building2, label: 'Franchisee Program' },
   { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
 ];
 
-const franchiseeSubmenu = [
-    { name: 'Main' },
-    { name: 'Services' },
-    { name: 'Food' },
-    { name: 'Vegetables' },
-    { name: 'Grains' },
-    { name: 'Pulses' },
-    { name: 'Milk' },
-    { name: 'Dairy products' },
-    { name: 'Beverages' },
-    { name: 'Oils' },
-    { name: 'Education' },
-    { name: 'Travel' },
-];
-
-const franchiseeLevels = [
-    { name: 'Street Franchisee' },
-    { name: 'Village/Ward Franchisee' },
-    { name: 'Block/Kasba Franchisee' },
-    { name: 'Taluka franchisee' },
-    { name: 'District franchisee' },
-    { name: 'Area Franchisee' },
-    { name: 'State Franchisee' },
-];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useIsMobile();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const { toast } = useToast();
-  const [openFranchiseSubMenu, setOpenFranchiseSubMenu] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -181,8 +157,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                               </div>
                           </DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
+                           <DropdownMenuItem asChild>
                               <Link href="/profile">Profile</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                              <Link href="/team">My Team</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                               <Link href="/settings">Settings</Link>
@@ -217,7 +196,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navItems.map((item) => (
+          {mainNavItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <Link href={item.href} passHref>
                 <SidebarMenuButton>
@@ -227,8 +206,72 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </SidebarMenuItem>
           ))}
-          {!user && (
-            <>
+        </SidebarMenu>
+        
+        <SidebarSeparator />
+        
+        <SidebarMenu>
+             <SidebarMenuItem>
+                <Collapsible>
+                    <CollapsibleTrigger asChild className="w-full">
+                         <SidebarMenuButton>
+                            <Users />
+                            <span>User Panel</span>
+                            <ChevronDown className="h-4 w-4 ml-auto" />
+                         </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                                <Link href="/profile"><SidebarMenuSubButton>Profile</SidebarMenuSubButton></Link>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                               <Link href="/team"><SidebarMenuSubButton>My Team</SidebarMenuSubButton></Link>
+                            </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+                <Collapsible>
+                    <CollapsibleTrigger asChild className="w-full">
+                         <SidebarMenuButton>
+                            <Shield />
+                            <span>Admin Panel</span>
+                             <ChevronDown className="h-4 w-4 ml-auto" />
+                         </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                            <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                            <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                            <SidebarMenuSubItem><Link href="/admin/job-seekers"><SidebarMenuSubButton>Job Seekers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                            <SidebarMenuSubItem><Link href="/admin/influencers"><SidebarMenuSubButton>Influencers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+            </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarSeparator />
+
+        <SidebarMenu>
+          {programNavItems.map((item) => (
+            <SidebarMenuItem key={item.label}>
+              <Link href={item.href} passHref>
+                <SidebarMenuButton>
+                    <item.icon />
+                    <span>{item.label}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+         {!user && (
+            <SidebarMenu>
               <SidebarMenuItem>
                 <Link href="/login" passHref>
                   <SidebarMenuButton>
@@ -245,124 +288,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
-            </>
+            </SidebarMenu>
           )}
-            <SidebarMenuItem>
-                <Collapsible>
-                    <CollapsibleTrigger asChild className="w-full">
-                         <Link href="/franchisee" passHref>
-                            <SidebarMenuButton>
-                                <Building2 />
-                                <span>Franchisee</span>
-                            </SidebarMenuButton>
-                         </Link>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                         <SidebarMenuSub>
-                            {franchiseeSubmenu.map((item) => (
-                                <SidebarMenuSubItem key={item.name}>
-                                     <Collapsible>
-                                        <CollapsibleTrigger asChild className="w-full">
-                                            <SidebarMenuSubButton>
-                                                <span>{item.name}</span>
-                                                <ChevronDown className={cn("h-4 w-4 ml-auto shrink-0 transition-transform", openFranchiseSubMenu === item.name && "rotate-180")} />
-                                            </SidebarMenuSubButton>
-                                        </CollapsibleTrigger>
-                                        <CollapsibleContent>
-                                            <SidebarMenuSub>
-                                                {franchiseeLevels.map((level) => (
-                                                    <SidebarMenuSubItem key={level.name}>
-                                                        <Link href={`/franchisee?category=${encodeURIComponent(item.name)}&level=${encodeURIComponent(level.name)}`} passHref>
-                                                            <SidebarMenuSubButton>
-                                                                - {level.name}
-                                                            </SidebarMenuSubButton>
-                                                        </Link>
-                                                    </SidebarMenuSubItem>
-                                                ))}
-                                            </SidebarMenuSub>
-                                        </CollapsibleContent>
-                                    </Collapsible>
-                                </SidebarMenuSubItem>
-                            ))}
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                </Collapsible>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <Collapsible>
-                    <CollapsibleTrigger asChild className="w-full">
-                        <Link href="/team" passHref>
-                            <SidebarMenuButton>
-                                <Users2 />
-                                <span>Team</span>
-                            </SidebarMenuButton>
-                         </Link>
-                    </CollapsibleTrigger>
-                     <CollapsibleContent>
-                        <SidebarMenuSub>
-                            <SidebarMenuSubItem>
-                                <Link href="/team#team-members" passHref>
-                                    <SidebarMenuSubButton>
-                                        <Users className="mr-2"/>
-                                        <span>Team Members</span>
-                                    </SidebarMenuSubButton>
-                                </Link>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                                <Link href="/team#direct-members" passHref>
-                                    <SidebarMenuSubButton>
-                                        <UserPlus className="mr-2"/>
-                                        <span>Direct Members</span>
-                                    </SidebarMenuSubButton>
-                                </Link>
-                            </SidebarMenuSubItem>
-                             <SidebarMenuSubItem>
-                                <Link href="/team#earnings" passHref>
-                                    <SidebarMenuSubButton>
-                                        <DollarSign className="mr-2"/>
-                                        <span>Earning</span>
-                                    </SidebarMenuSubButton>
-                                </Link>
-                            </SidebarMenuSubItem>
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                </Collapsible>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-                <Link href="/admin" passHref>
-                  <SidebarMenuButton>
-                      <Shield />
-                      <span>Admin</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuSub>
-                <SidebarMenuSubItem>
-                    <Link href="/admin/applications" passHref>
-                        <SidebarMenuSubButton>
-                            <ClipboardList className="mr-2"/>
-                            <span>Applications</span>
-                        </SidebarMenuSubButton>
-                    </Link>
-                </SidebarMenuSubItem>
-              </SidebarMenuSub>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-            <SidebarMenuItem>
-                <SidebarMenuButton>
-                    <Settings />
-                    <span>Settings</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton>
-                    <HelpCircle />
-                    <span>Support</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-        </SidebarMenu>
       </SidebarFooter>
     </>
   );
@@ -374,7 +301,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
           <div className="flex items-center gap-4">
             <SidebarTrigger className="md:hidden" />
-            <h1 className="text-xl font-semibold hidden md:block">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
              <WalletButton />

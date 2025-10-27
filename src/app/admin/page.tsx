@@ -15,6 +15,16 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Users, Briefcase, Megaphone, Building2 } from 'lucide-react';
+
+const adminNavItems = [
+    { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.' },
+    { href: '/admin/franchisees', icon: Building2, label: 'Franchisee Applications', description: 'Review applications for franchisee roles.' },
+    { href: '/admin/job-seekers', icon: Briefcase, label: 'Job Seekers', description: 'View users who applied for jobs.' },
+    { href: '/admin/influencers', icon: Megaphone, label: 'Influencer Applications', description: 'Manage influencer program applicants.' },
+]
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
@@ -70,18 +80,32 @@ export default function AdminPage() {
           <div>
             <h1 className="font-headline text-3xl font-bold">Admin Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome, Administrator. Manage your platform here.
+              Welcome, Administrator. Select a category below to manage your platform.
             </p>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>System Status</CardTitle>
-              <CardDescription>Overview of platform health.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>All systems operational.</p>
-            </CardContent>
-          </Card>
+          <div className="grid gap-6 md:grid-cols-2">
+            {adminNavItems.map(item => {
+                const Icon = item.icon;
+                return (
+                    <Card key={item.label}>
+                        <CardHeader>
+                            <div className="flex items-center gap-4">
+                                <Icon className="h-8 w-8 text-primary"/>
+                                <div>
+                                    <CardTitle>{item.label}</CardTitle>
+                                    <CardDescription>{item.description}</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Button asChild>
+                                <Link href={item.href}>Go to {item.label}</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )
+            })}
+          </div>
         </div>
       </AppLayout>
     );
