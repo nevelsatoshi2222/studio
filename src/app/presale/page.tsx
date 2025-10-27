@@ -12,9 +12,10 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, Gift, CheckCircle, Wallet, Zap } from 'lucide-react';
+import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2 } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Image from 'next/image';
+import { useToast } from '@/hooks/use-toast';
 
 const presalePackages = [
   { amountUSD: 10, pgcAmount: 10, bonus: 10 },
@@ -25,11 +26,53 @@ const presalePackages = [
 
 export default function PresalePage() {
   const { publicKey, connected } = useWallet();
+  const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSelectPackage = (amount: number) => {
     setSelectedPackage(amount);
   };
+
+  const handlePurchase = async () => {
+    if (!selectedPackage || !publicKey) return;
+
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/presale', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageAmountUSD: selectedPackage,
+          buyerWalletAddress: publicKey.toBase58(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'An unknown error occurred.');
+      }
+
+      toast({
+        title: 'Purchase Successful!',
+        description: `Your purchase of ${result.pgcAmount} PGC (+ ${result.bonusPgc} bonus) is confirmed. Transaction: ${result.transactionId.slice(0, 10)}...`,
+      });
+      
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Purchase Failed',
+        description: error.message || 'Could not complete the purchase. Please try again.',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
 
   return (
     <AppLayout>
@@ -66,7 +109,7 @@ export default function PresalePage() {
                     <button
                         key={pkg.amountUSD}
                         onClick={() => handleSelectPackage(pkg.amountUSD)}
-                        disabled={!connected}
+                        disabled={!connected || isProcessing}
                         className={`p-6 rounded-lg border-2 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedPackage === pkg.amountUSD ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                     >
                         <div className="flex justify-between items-start">
@@ -93,8 +136,15 @@ export default function PresalePage() {
                         <p className="text-sm text-muted-foreground">The purchase button will appear here once you are connected.</p>
                      </>
                  ) : (
-                    <Button size="lg" disabled={!selectedPackage}>
-                        Purchase for ${selectedPackage || '...'} USDT
+                    <Button size="lg" onClick={handlePurchase} disabled={!selectedPackage || isProcessing}>
+                        {isProcessing ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            `Purchase for $${selectedPackage || '...'} USDT`
+                        )}
                     </Button>
                  )}
             </CardFooter>
@@ -103,3 +153,4 @@ export default function PresalePage() {
     </AppLayout>
   );
 }
+
