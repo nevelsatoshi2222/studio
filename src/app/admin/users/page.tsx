@@ -1,10 +1,10 @@
+
 'use client';
 import { useState, useEffect } from 'react';
-import { useMemoFirebase, useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { useMemoFirebase, useUser, useFirestore, updateDocumentNonBlocking, useDoc, useCollection } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection } from '@/firebase';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
