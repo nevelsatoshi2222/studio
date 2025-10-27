@@ -2,11 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useMemoFirebase, useUser, useFirestore, useDoc, updateDocumentNonBlocking } from '@/firebase';
+import { useMemoFirebase, useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCollection } from '@/firebase';
+import { useCollection, useDoc } from '@/firebase';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,21 +68,21 @@ export default function ApplicationsPage() {
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
-    // Memoize the query to prevent re-renders, and only run if admin
     const usersQuery = useMemoFirebase(() => {
-        if (!firestore || !isAdmin) return null; // <-- CRITICAL FIX: Don't query if not admin
+        if (!firestore || !isAdmin) return null;
         
         const usersColRef = collection(firestore, 'users');
         if (filter === 'All') {
-            return query(usersColRef, where('role', '!=', ''));
+            // Fetch all documents in the 'users' collection, effectively showing every registered user.
+            return usersColRef;
         }
+        // Otherwise, filter by the selected role.
         return query(usersColRef, where('role', '==', filter));
     }, [firestore, filter, isAdmin]);
 
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
     
     useEffect(() => {
-        // If not loading and the user is neither a Firebase admin nor a wallet admin, redirect to login
         if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
             router.replace('/admin/login');
         }
@@ -99,7 +99,6 @@ export default function ApplicationsPage() {
         return `https://picsum.photos/seed/${avatarId}/40/40`;
     };
 
-    // Show a loading state while we verify auth and role
     const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
     if (isCheckingAdmin) {
         return (
@@ -143,7 +142,7 @@ export default function ApplicationsPage() {
                     <CardHeader>
                         <CardTitle>All Applicants</CardTitle>
                         <CardDescription>
-                            Filter and manage applications for Franchisee, Influencer, and Job roles.
+                            Filter and manage applications. The 'All Roles' tab shows every user who has registered on the platform.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -225,7 +224,7 @@ export default function ApplicationsPage() {
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center">
-                                            No applicants found for this filter.
+                                            No users found. Try registering a new user to see them appear here.
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -237,5 +236,3 @@ export default function ApplicationsPage() {
         </AppLayout>
     );
 }
-
-    
