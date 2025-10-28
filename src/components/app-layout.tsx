@@ -61,7 +61,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { signOut } from 'firebase/auth';
@@ -76,8 +76,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SafeWalletButton } from './safe-wallet-button';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
+import { doc } from 'firebase/firestore';
 
 
 const mainNavItems = [
@@ -108,14 +107,20 @@ const programNavItems = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
-  const { publicKey } = useWallet();
 
-  const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
-  const isAdmin = isWalletAdmin || !!user;
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
 
+  const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
+  const isFirebaseAdmin = !!adminRole;
+  const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
 
   const handleLogout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
       toast({
@@ -174,6 +179,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           <DropdownMenuItem asChild>
                               <Link href="/settings">Settings</Link>
                           </DropdownMenuItem>
+                          {isFirebaseAdmin && (
+                            <>
+                                <DropdownMenuSeparator />
+                                 <DropdownMenuItem asChild>
+                                    <Link href="/admin">Admin Dashboard</Link>
+                                </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleLogout}>
                               Log out
@@ -218,32 +231,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         
         <SidebarSeparator />
         
-        {isAdmin && (
+        {isFirebaseAdmin && (
             <SidebarMenu>
-                {user && (
-                    <SidebarMenuItem>
-                        <Collapsible>
-                            <CollapsibleTrigger asChild className="w-full">
-                                <SidebarMenuButton>
-                                    <Users />
-                                    <span>User Panel</span>
-                                    <ChevronDown className="h-4 w-4 ml-auto" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem>
-                                        <Link href="/profile"><SidebarMenuSubButton>Profile</SidebarMenuSubButton></Link>
-                                    </SidebarMenuSubItem>
-                                    <SidebarMenuSubItem>
-                                    <Link href="/team"><SidebarMenuSubButton>My Team</SidebarMenuSubButton></Link>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </Collapsible>
-                    </SidebarMenuItem>
-                )}
-                
                 <SidebarMenuItem>
                     <Collapsible>
                         <CollapsibleTrigger asChild className="w-full">
@@ -263,10 +252,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </CollapsibleContent>
                     </Collapsible>
                 </SidebarMenuItem>
+                <SidebarSeparator />
             </SidebarMenu>
         )}
-
-        <SidebarSeparator />
 
         <SidebarMenu>
           {programNavItems.map((item) => (
@@ -282,7 +270,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-         {!user && !isWalletAdmin && (
+         {!user && (
             <SidebarMenu>
               <SidebarMenuItem>
                 <Link href="/login" passHref>

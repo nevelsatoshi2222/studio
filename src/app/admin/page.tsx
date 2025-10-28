@@ -14,11 +14,9 @@ import {
 } from '@/components/ui/card';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, Briefcase, Megaphone, Building2, ClipboardList, CheckCircle } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle } from 'lucide-react';
 
 const adminNavItems = [
     { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.' },
@@ -30,34 +28,31 @@ export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const { publicKey } = useWallet();
-
-  const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
   // Memoize the document reference
   const adminRoleRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
 
   const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
 
   const isFirebaseAdmin = !!adminRole;
+  const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
 
   useEffect(() => {
-    const isCheckingAuth = isUserLoading || (user && isRoleLoading);
-    if (isCheckingAuth) {
+    if (isCheckingAdmin) {
         return; // Wait until authentication and role checks are complete
     }
 
-    // If auth checks are done and the user is neither a Firebase admin nor a wallet admin, redirect
-    if (!isFirebaseAdmin && !isWalletAdmin) {
+    // If auth checks are done and the user is not a Firebase admin, redirect
+    if (!isFirebaseAdmin) {
       router.replace('/admin/login');
     }
-  }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router, user]);
+  }, [isCheckingAdmin, isFirebaseAdmin, router]);
 
   // Show a loading state while we verify auth and role
-  if (isUserLoading || (user && isRoleLoading)) {
+  if (isCheckingAdmin) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -77,8 +72,8 @@ export default function AdminPage() {
     );
   }
 
-  // If user is verified as admin (either way), show the dashboard
-  if (isFirebaseAdmin || isWalletAdmin) {
+  // If user is verified as admin, show the dashboard
+  if (isFirebaseAdmin) {
     return (
       <AppLayout>
         <div className="flex flex-col gap-8">

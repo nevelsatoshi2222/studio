@@ -16,8 +16,6 @@ import { collection, doc, query, where, Query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 
 type User = {
     id: string;
@@ -178,19 +176,16 @@ export default function ApplicationsPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
-    const { publicKey } = useWallet();
     
-    const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
-
     const adminRoleRef = useMemoFirebase(() => {
-        if (!user) return null;
+        if (!user || !firestore) return null;
         return doc(firestore, 'roles_admin', user.uid);
     }, [firestore, user]);
 
     const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
     const isFirebaseAdmin = !!adminRole;
-    const isAdmin = isWalletAdmin || isFirebaseAdmin;
     const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+    const isAdmin = isFirebaseAdmin;
     
     useEffect(() => {
         if (isCheckingAdmin) return;
