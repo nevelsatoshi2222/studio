@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -133,7 +133,17 @@ export default function LoginPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
-  if (isUserLoading) {
+  useEffect(() => {
+    // If the user is loaded and exists, redirect them to the dashboard.
+    if (!isUserLoading && user) {
+      router.push('/');
+    }
+  }, [user, isUserLoading, router]);
+
+
+  // While loading, or if the user is logged in (and about to be redirected),
+  // show a loading state or return null to prevent flashing the login form.
+  if (isUserLoading || user) {
     return (
         <AppLayout>
             <div className="flex justify-center items-center h-full">
@@ -142,12 +152,8 @@ export default function LoginPage() {
         </AppLayout>
     );
   }
-  
-  if (user) {
-    router.push('/');
-    return null;
-  }
 
+  // Only render the login form if the user is not logged in and auth state is loaded.
   return (
     <AppLayout>
       <Suspense fallback={<div>Loading...</div>}>
