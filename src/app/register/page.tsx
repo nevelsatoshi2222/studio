@@ -151,7 +151,8 @@ function RegistrationForm() {
       const userDocRef = doc(firestore, 'users', user.uid);
       
       // Use non-blocking setDoc with error handling
-      setDoc(userDocRef, userProfile).catch(serverError => {
+      setDoc(userDocRef, userProfile)
+        .catch(serverError => {
           const contextualError = new FirestorePermissionError({
               path: userDocRef.path,
               operation: 'create',
