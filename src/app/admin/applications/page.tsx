@@ -51,21 +51,20 @@ const UserRowSkeleton = () => (
 
 function ApplicationsTable() {
     const [filter, setFilter] = useState('All');
-    const [usersQuery, setUsersQuery] = useState<Query | null>(null);
     const firestore = useFirestore();
 
-    const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
-
-    useEffect(() => {
-        const usersColRef = collection(firestore, 'users');
+    const usersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
         let q;
         if (filter === 'All') {
-            q = query(usersColRef, where('status', '==', 'Pending'));
+            q = query(collection(firestore, 'users'), where('status', '==', 'Pending'));
         } else {
-            q = query(usersColRef, where('role', '==', filter), where('status', '==', 'Pending'));
+            q = query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
         }
-        setUsersQuery(q);
+        return q;
     }, [filter, firestore]);
+
+    const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
     const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected') => {
         if (!firestore) return;
@@ -107,7 +106,7 @@ function ApplicationsTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {areUsersLoading && usersQuery ? (
+                        {areUsersLoading ? (
                             <>
                                 <UserRowSkeleton />
                                 <UserRowSkeleton />
@@ -137,7 +136,7 @@ function ApplicationsTable() {
                                     <TableCell>
                                         <Badge variant="outline">{user.role}</Badge>
                                     </TableCell>
-                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : 'N/A'}</TableCell>
+                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -191,17 +190,16 @@ export default function ApplicationsPage() {
     const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
     
     useEffect(() => {
-        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
         if (isCheckingAdmin) return;
 
         if (!isAdmin) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isAdmin, user, router]);
+    }, [isCheckingAdmin, isAdmin, router]);
 
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
 
     return (
         <AppLayout>

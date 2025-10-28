@@ -22,7 +22,7 @@ type User = {
     email: string;
     country: string;
     status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
-    registeredAt: string;
+    registeredAt: any;
     avatarId: string;
     role?: string;
 };
@@ -116,7 +116,7 @@ function UsersTable() {
                                             {user.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : 'N/A'}</TableCell>
+                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -172,17 +172,15 @@ export default function AllUsersPage() {
     const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
 
     useEffect(() => {
-        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
         if (isCheckingAdmin) return;
 
         if (!isAdmin) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isAdmin, user, router]);
-
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+    }, [isCheckingAdmin, isAdmin, router]);
     
     return (
         <AppLayout>

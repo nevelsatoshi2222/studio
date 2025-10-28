@@ -259,17 +259,15 @@ export default function FulfillmentPage() {
     const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
 
     useEffect(() => {
-        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
         if (isCheckingAdmin) return;
 
         if (!isAdmin) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isAdmin, user, router]);
-
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+    }, [isCheckingAdmin, isAdmin, router]);
 
     return (
         <AppLayout>

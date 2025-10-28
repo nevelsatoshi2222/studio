@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -44,11 +45,16 @@ export default function AdminPage() {
   const isFirebaseAdmin = !!adminRole;
 
   useEffect(() => {
-    // If not loading and the user is neither a Firebase admin nor a wallet admin
-    if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
+    const isCheckingAuth = isUserLoading || (user && isRoleLoading);
+    if (isCheckingAuth) {
+        return; // Wait until authentication and role checks are complete
+    }
+
+    // If auth checks are done and the user is neither a Firebase admin nor a wallet admin, redirect
+    if (!isFirebaseAdmin && !isWalletAdmin) {
       router.replace('/admin/login');
     }
-  }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
+  }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router, user]);
 
   // Show a loading state while we verify auth and role
   if (isUserLoading || (user && isRoleLoading)) {
@@ -110,6 +116,6 @@ export default function AdminPage() {
     );
   }
 
-  // This will be shown briefly during the redirect
-  return null;
+  // This will be shown briefly during the redirect for non-admins
+  return <AppLayout><p>Verifying access...</p></AppLayout>;
 }
