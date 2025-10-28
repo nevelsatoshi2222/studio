@@ -35,9 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, collection, query, where, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -103,19 +103,6 @@ function RegistrationForm() {
         return;
     }
     try {
-      // Check if phone number is already used by 2 or more users
-      const usersRef = collection(firestore, 'users');
-      const phoneQuery = query(usersRef, where('phone', '==', data.phone));
-      const phoneQuerySnapshot = await getDocs(phoneQuery);
-
-      if (phoneQuerySnapshot.size >= 2) {
-          toast({
-              variant: 'destructive',
-              title: 'Registration Failed',
-              description: 'This phone number has already been registered the maximum number of times.',
-          });
-          return;
-      }
       
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
@@ -145,10 +132,10 @@ function RegistrationForm() {
         jobTitle: data.jobTitle || '',
       };
       
-      // Use the user's UID as the document ID
+      // Use the user's UID as the document ID in the 'users' collection
       const userDocRef = doc(firestore, 'users', user.uid);
       
-      // Use await here to ensure the document is created before proceeding
+      // Set the document in Firestore
       await setDoc(userDocRef, userProfile);
 
       // Send verification email
