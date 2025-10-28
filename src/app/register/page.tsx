@@ -133,7 +133,11 @@ function RegistrationForm() {
         jobTitle: data.jobTitle || '',
       });
       
-      await sendEmailVerification(user);
+      const actionCodeSettings = {
+        url: `${window.location.origin}/login`,
+        handleCodeInApp: true,
+      };
+      await sendEmailVerification(user, actionCodeSettings);
 
       toast({
         title: 'Registration Successful!',
