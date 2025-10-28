@@ -43,6 +43,13 @@ const votingLevels = [
   },
 ];
 
+const localVotingLevels = [
+    { title: 'District', href: '/voting/district', icon: Map, description: "Vote on district-wide policies and budgets." },
+    { title: 'Taluka / Block', href: '/voting/taluka', icon: MapPin, description: "Address issues at the sub-district level." },
+    { title: 'Village / Ward', href: '/voting/village', icon: Home, description: "Manage community-specific projects." },
+    { title: 'Street', href: '/voting/street', icon: Home, description: "Handle hyper-local maintenance and improvements." },
+]
+
 export default function VotingHubPage() {
   return (
     <AppLayout>
@@ -59,8 +66,8 @@ export default function VotingHubPage() {
             const Icon = level.icon;
             return (
               <Link href={level.href} key={level.title} className="group">
-                <Card className="h-full hover:border-primary transition-colors hover:shadow-lg">
-                  <CardHeader>
+                <Card className="h-full hover:border-primary transition-colors hover:shadow-lg flex flex-col">
+                  <CardHeader className="flex-grow">
                     <div className="flex justify-between items-start">
                         <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                             <Icon className="h-6 w-6" />
@@ -76,9 +83,33 @@ export default function VotingHubPage() {
           })}
         </div>
 
+        <Card>
+            <CardHeader>
+                <CardTitle>Local Voting</CardTitle>
+                <CardDescription>Engage in governance at the district, taluka, village, and street levels. This feature is coming soon.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+                {localVotingLevels.map(level => {
+                    const Icon = level.icon;
+                    return (
+                        <div key={level.title} className="p-4 rounded-lg border bg-muted/50 flex items-start gap-4">
+                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
+                                <Icon className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold">{level.title}</h4>
+                                <p className="text-sm text-muted-foreground">{level.description}</p>
+                            </div>
+                        </div>
+                    )
+                })}
+            </CardContent>
+            <CardFooter>
+                <Button disabled>Go to Local Voting (Coming Soon)</Button>
+            </CardFooter>
+        </Card>
+
       </div>
     </AppLayout>
   );
 }
-
-    
