@@ -35,7 +35,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -149,8 +149,16 @@ function RegistrationForm() {
       };
       
       const userDocRef = doc(firestore, 'users', user.uid);
-      // Use await here to ensure profile is created before redirecting
-      await setDoc(userDocRef, userProfile);
+      
+      // Use non-blocking setDoc with error handling
+      setDoc(userDocRef, userProfile).catch(serverError => {
+          const contextualError = new FirestorePermissionError({
+              path: userDocRef.path,
+              operation: 'create',
+              requestResourceData: userProfile,
+          });
+          errorEmitter.emit('permission-error', contextualError);
+      });
 
       toast({
         title: 'Registration Successful!',
