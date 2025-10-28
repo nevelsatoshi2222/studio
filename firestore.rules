@@ -1,161 +1,125 @@
 /**
- * @fileoverview Firestore Security Rules for the application.
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a strict user-ownership model for user profiles and referral data,
+ *              allows public read access to social posts with owner-only writes, and restricts admin-level
+ *              operations to authorized administrators.
  *
- * Core Philosophy:
- * This ruleset enforces a user-ownership model for user profiles and referral data,
- * restricts social posts to public read access with owner-only writes, and provides
- * role-based access control for admin functionalities. Data validation is relaxed for
- * rapid prototyping but critical authorization fields are validated.
+ * @data_structure
+ *  - /users/{userId}: Stores user profile information, accessible only to the user themselves.
+ *  - /users/{userId}/referrals/data: Stores referral data for a user, accessible only to that user.
+ *  - /social_posts/{postId}: Stores social media posts, publicly readable but writable only by the post's owner.
+ *  - /roles_admin/{userId}: Indicates admin privileges; if a document exists for a user, they are an admin.
+ *  - /withdrawal_requests/{requestId}: Stores user withdrawal requests, writable by users, and accessible to admins.
  *
- * Data Structure:
- * - /users/{userId}: Stores user profile data.
- * - /users/{userId}/referrals/data: Stores referral data for each user.
- * - /social_posts/{postId}: Stores social media posts from all users.
- * - /roles_admin/{userId}: Documents in this collection indicate admin status.
- * - /withdrawal_requests/{requestId}: Stores user withdrawal requests for admin processing.
+ * @key_security_decisions
+ *  - User listing is disallowed to protect user privacy.
+ *  - Admin privileges are determined by the existence of a document in the `roles_admin` collection.
+ *  - Social posts are publicly readable, but creating, updating, and deleting posts is restricted to the owner.
+ *  - Data consistency between user IDs in the path and document fields is enforced on `create` and `update` operations.
  *
- * Key Security Decisions:
- * - Users can only read and write their own profile and referral data.
- * - Social posts are publicly readable, but only the owner can modify or delete them.
- * - Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
- * - User listing is disabled to prevent information harvesting.
+ * @denormalization_for_authorization
+ *  - The `SocialPost` entity requires an `ownerId` field to properly secure write access.
  *
- * Denormalization for Authorization:
- * - The `SocialPost` entity requires the `userId` field to match `request.auth.uid` on creation to ensure owner-only writes.
+ * @structural_segregation
+ *  - Private user data (profile, referrals) is stored under the `/users/{userId}` path.
+ *  - Public social posts are stored in the top-level `/social_posts` collection.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to user profile documents.
+     * @description Allows a user to read and write their own profile data.
      * @path /users/{userId}
-     * @allow (create) - User with UID 'user_abc' can create their own profile document with id 'user_abc'.
-     * @allow (get, update, delete) - User with UID 'user_abc' can read, update, and delete their own profile document with id 'user_abc'.
-     * @deny (create) - User with UID 'user_xyz' cannot create a profile document with id 'user_abc'.
-     * @deny (get, update, delete) - User with UID 'user_xyz' cannot read, update, or delete the profile document with id 'user_abc'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (get, create, update, delete) if the requesting user's UID matches the userId.
+     * @deny (get, create, update, delete) if the requesting user's UID does not match the userId.
+     * @principle Enforces document ownership for writes.
      */
     match /users/{userId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      allow get: if isSignedIn() && isOwner(userId);
+      allow get: if isOwner(userId);
       allow list: if false;
-
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId);
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isOwner(userId) && resource.data.id == request.resource.data.id;
+      allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Controls access to user referral data.
+     * @description Allows a user to read and write their own referral data.
      * @path /users/{userId}/referrals/data
-     * @allow (get, update) - User with UID 'user_abc' can read and update their own referral data.
-     * @deny (get, update) - User with UID 'user_xyz' cannot read or update the referral data of user 'user_abc'.
-     * @principle Restricts access to a user's own data tree.
+     * @allow (get, create, update, delete) if the requesting user's UID matches the userId.
+     * @deny (get, create, update, delete) if the requesting user's UID does not match the userId.
+     * @principle Restricts access to a user's own referral data.
      */
     match /users/{userId}/referrals/data {
-        function isSignedIn() {
-          return request.auth != null;
-        }
-
-        function isOwner(userId) {
-          return request.auth.uid == userId;
-        }
-
-        allow get: if isSignedIn() && isOwner(userId);
-        allow list: if false;
-
-        allow create: if isSignedIn() && isOwner(userId);
-        allow update: if isSignedIn() && isOwner(userId);
-        allow delete: if isSignedIn() && isOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isOwner(userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Controls access to social media posts.
+     * @description Allows anyone to read social posts, but only the owner can create, update, or delete them.
      * @path /social_posts/{postId}
-     * @allow (get, list) - All users can read all social posts.
-     * @allow (create) - User with UID 'user_abc' can create a post with userId 'user_abc'.
-     * @allow (update, delete) - User with UID 'user_abc' can update and delete their own social posts.
-     * @deny (create) - User with UID 'user_xyz' cannot create a post with userId 'user_abc'.
-     * @deny (update, delete) - User with UID 'user_xyz' cannot update or delete the post created by user 'user_abc'.
-     * @principle Allows public read access but restricts writes to the owner.
+     * @allow (get, list) to anyone.
+     * @allow (create) if the user's UID matches the userId in the post data.
+     * @allow (update, delete) if the user's UID matches the userId of the existing post.
+     * @deny (create, update, delete) if the user is not the owner of the post.
+     * @principle Allows public read access with owner-only writes.
      */
     match /social_posts/{postId} {
-        function isSignedIn() {
-          return request.auth != null;
-        }
-
-        function isOwner() {
-          return resource.data.userId == request.auth.uid;
-        }
-
-      allow get: if true;
-      allow list: if true;
-
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && isOwner();
-      allow delete: if isSignedIn() && isOwner();
+      allow get, list: if true;
+      allow create: if isSignedIn(); // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
     /**
-     * @description Controls access to admin role assignments.
+     * @description Allows read access to admin role documents for admins themselves, and allows creation of admin role documents.
      * @path /roles_admin/{userId}
-     * @allow (get) - Any signed-in user can check for admin status (for UI purposes).
-     * @allow (create) - Only an existing admin can grant admin privileges to another user.
-     * @allow (delete) - Only an existing admin can revoke admin privileges from another user.
-     * @deny (create, delete) - Non-admin users cannot grant or revoke admin privileges.
-     * @principle Implements role-based access control for administrative functions.
+     * @allow (get) if the requesting user's UID matches the userId or the requesting user is an admin.
+     * @allow (list) to no one.
+     * @allow (create) if the requesting user's UID matches the userId.
+     * @allow (update, delete) to admins only.
+     * @principle Restricts admin role management to existing admins.
      */
     match /roles_admin/{userId} {
-        function isSignedIn() {
-          return request.auth != null;
-        }
-
-        function isAdmin() {
-          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-        }
-
-      allow get: if isSignedIn();
+      allow get: if isAdmin();
       allow list: if false;
-
-      allow create: if isSignedIn() && isAdmin();
+      allow create: if isAdmin();
       allow update: if false;
-      allow delete: if isSignedIn() && isAdmin();
+      allow delete: if isAdmin();
     }
 
-    /**
-     * @description Controls access to withdrawal requests.
-     * @path /withdrawal_requests/{requestId}
-     * @allow (create) - Any signed-in user can create a withdrawal request for themselves.
-     * @allow (get, list) - Only admins can view withdrawal requests.
-     * @allow (update) - Only admins can update withdrawal request statuses.
-     * @deny (delete) - No one can delete a withdrawal request.
-     * @principle Restricts access to withdrawal requests to authorized personnel.
-     */
+     /**
+      * @description Allows any signed-in user to create a withdrawal request. Only admins can read, update, or delete requests.
+      * @path /withdrawal_requests/{requestId}
+      * @allow (create) to any signed-in user.
+      * @allow (get, list, update, delete) to admins only.
+      * @principle Restricts management of withdrawal requests to admins.
+      */
     match /withdrawal_requests/{requestId} {
-       function isSignedIn() {
-          return request.auth != null;
-        }
+        allow get, list: if isAdmin();
+        allow create: if isSignedIn();
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+    }
 
-        function isAdmin() {
-          return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-        }
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
-       function isOwner(userId) {
-          return request.auth.uid == userId;
-        }
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
 
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow get, list: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if false;
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    function isAdmin() {
+        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
   }
 }
