@@ -46,13 +46,121 @@ const UserRowSkeleton = () => (
     </TableRow>
 )
 
+function UsersTable() {
+    const firestore = useFirestore();
+    const usersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'users'));
+    }, [firestore]);
+
+    const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
+
+    const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected' | 'Banned') => {
+        if (!firestore) return;
+        const userDocRef = doc(firestore, 'users', userId);
+        updateDocumentNonBlocking(userDocRef, { status: newStatus });
+    };
+
+    const getAvatarUrl = (avatarId: string) => {
+        return `https://picsum.photos/seed/${avatarId}/40/40`;
+    };
+    
+    return (
+         <Card>
+            <CardHeader>
+                <CardTitle>All Registered Users</CardTitle>
+                <CardDescription>
+                    This table lists every user in the database.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Country</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Date Registered</TableHead>
+                            <TableHead><span className="sr-only">Actions</span></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {areUsersLoading ? (
+                            <>
+                                <UserRowSkeleton />
+                                <UserRowSkeleton />
+                                <UserRowSkeleton />
+                            </>
+                        ) : users && users.length > 0 ? (
+                            users.map((user) => (
+                                <TableRow key={user.id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar>
+                                                <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} />
+                                                <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-medium">{user.name}</p>
+                                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{user.country}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">{user.role}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Pending' ? 'secondary' : 'destructive'}>
+                                            {user.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : 'N/A'}</TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                 {user.status !== 'Active' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
+                                                    <Check className="mr-2 h-4 w-4" /> Approve
+                                                </DropdownMenuItem>}
+                                                {user.status !== 'Rejected' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Rejected')}>
+                                                    <X className="mr-2 h-4 w-4" /> Reject
+                                                </DropdownMenuItem>}
+                                                <DropdownMenuSeparator />
+                                                 <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(user.id, 'Banned')}>
+                                                    <ShieldAlert className="mr-2 h-4 w-4" /> Ban User
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    No users found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    )
+}
+
 export default function AllUsersPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
     const { publicKey } = useWallet();
-
-    const [usersQuery, setUsersQuery] = useState<Query | null>(null);
 
     const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
@@ -65,58 +173,17 @@ export default function AllUsersPage() {
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
-    const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
-    
     useEffect(() => {
         const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
         if (isCheckingAdmin) return;
 
-        if (isAdmin) {
-            setUsersQuery(query(collection(firestore, 'users')));
-        } else {
+        if (!isAdmin) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isAdmin, user, firestore, router]);
-
-
-    const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected' | 'Banned') => {
-        if (!firestore) return;
-        const userDocRef = doc(firestore, 'users', userId);
-        updateDocumentNonBlocking(userDocRef, { status: newStatus });
-    };
-    
-    const getAvatarUrl = (avatarId: string) => {
-        return `https://picsum.photos/seed/${avatarId}/40/40`;
-    };
+    }, [isUserLoading, isRoleLoading, isAdmin, user, router]);
 
     const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
-    if (isCheckingAdmin) {
-        return (
-             <AppLayout>
-                <div className="flex items-center justify-center h-64">
-                    <p>Verifying admin privileges...</p>
-                </div>
-            </AppLayout>
-        )
-    }
-
-    if (!isAdmin) {
-        // This state is briefly visible before the redirect in useEffect triggers.
-        return (
-            <AppLayout>
-                <Card className="mt-8 border-destructive">
-                    <CardHeader className="text-center">
-                        <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
-                        <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
-                        <CardDescription>
-                            You do not have the necessary permissions to view this page. Redirecting...
-                        </CardDescription>
-                    </CardHeader>
-                </Card>
-            </AppLayout>
-        );
-    }
-
+    
     return (
         <AppLayout>
             <div className="flex flex-col gap-8">
@@ -126,93 +193,23 @@ export default function AllUsersPage() {
                         View and manage all users registered on the platform.
                     </p>
                 </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>All Registered Users</CardTitle>
-                        <CardDescription>
-                            This table lists every user in the database.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Country</TableHead>
-                                    <TableHead>Role</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Date Registered</TableHead>
-                                    <TableHead><span className="sr-only">Actions</span></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {areUsersLoading ? (
-                                    <>
-                                        <UserRowSkeleton />
-                                        <UserRowSkeleton />
-                                        <UserRowSkeleton />
-                                    </>
-                                ) : users && users.length > 0 ? (
-                                    users.map((user) => (
-                                        <TableRow key={user.id}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar>
-                                                        <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} />
-                                                        <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-medium">{user.name}</p>
-                                                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{user.country}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">{user.role}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Pending' ? 'secondary' : 'destructive'}>
-                                                    {user.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : 'N/A'}</TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                            <span className="sr-only">Toggle menu</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                         {user.status !== 'Active' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
-                                                            <Check className="mr-2 h-4 w-4" /> Approve
-                                                        </DropdownMenuItem>}
-                                                        {user.status !== 'Rejected' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Rejected')}>
-                                                            <X className="mr-2 h-4 w-4" /> Reject
-                                                        </DropdownMenuItem>}
-                                                        <DropdownMenuSeparator />
-                                                         <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(user.id, 'Banned')}>
-                                                            <ShieldAlert className="mr-2 h-4 w-4" /> Ban User
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            No users found.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                {isCheckingAdmin && (
+                     <div className="flex items-center justify-center h-64">
+                        <p>Verifying admin privileges...</p>
+                    </div>
+                )}
+                {!isCheckingAdmin && !isAdmin && (
+                     <Card className="mt-8 border-destructive">
+                        <CardHeader className="text-center">
+                            <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+                            <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
+                            <CardDescription>
+                                You do not have the necessary permissions to view this page. Redirecting...
+                            </CardDescription>
+                        </CardHeader>
+                    </Card>
+                )}
+                {isAdmin && <UsersTable />}
             </div>
         </AppLayout>
     );

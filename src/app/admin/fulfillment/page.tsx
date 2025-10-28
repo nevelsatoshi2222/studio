@@ -39,47 +39,24 @@ const RowSkeleton = () => (
     </TableRow>
 )
 
-export default function FulfillmentPage() {
-    const { user, isUserLoading } = useUser();
-    const firestore = useFirestore();
-    const router = useRouter();
-    const { publicKey } = useWallet();
-    const { toast } = useToast();
-
+function FulfillmentContent() {
     const [isBulkPayoutModalOpen, setIsBulkPayoutModalOpen] = useState(false);
     const [payoutList, setPayoutList] = useState('');
-    const [requestsQuery, setRequestsQuery] = useState<Query | null>(null);
+    const firestore = useFirestore();
+    const { toast } = useToast();
 
-    const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
+    const requestsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'withdrawal_requests'), where('status', '==', 'pending'), orderBy('requestedAt', 'desc'));
+    }, [firestore]);
 
-    const adminRoleRef = useMemoFirebase(() => {
-        if (!user) return null;
-        return doc(firestore, 'roles_admin', user.uid);
-    }, [firestore, user]);
-
-    const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-    const isFirebaseAdmin = !!adminRole;
-    const isAdmin = isWalletAdmin || isFirebaseAdmin;
+    const { data: withdrawalRequests, isLoading: areRequestsLoading } = useCollection<WithdrawalRequest>(requestsQuery);
 
     // This is a placeholder for presale purchases. In a real app, this would come from a 'purchases' collection.
     const [presalePurchases, setPresalePurchases] = useState([
         { id: 'ps1', userName: 'Alice Johnson', package: '$100 USDT', pgcAmount: 200, wallet: 'Epa6e5a7pYEj2e4s2w8cZ5fG3xH1vR9jK6bN4mD0uF7' },
         { id: 'ps2', userName: 'Bob Williams', package: '$1,000 USDT', pgcAmount: 2000, wallet: '5tG8hJkLuMvNpoQrStUvXyZ1a2b3c4d5e6f7g8h9i' },
     ]);
-
-    const { data: withdrawalRequests, isLoading: areRequestsLoading } = useCollection<WithdrawalRequest>(requestsQuery);
-    
-    useEffect(() => {
-        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
-        if (isCheckingAdmin) return;
-
-        if (isAdmin) {
-            setRequestsQuery(query(collection(firestore, 'withdrawal_requests'), where('status', '==', 'pending'), orderBy('requestedAt', 'desc')));
-        } else {
-            router.replace('/admin/login');
-        }
-    }, [isUserLoading, isRoleLoading, isAdmin, user, firestore, router]);
-
 
     const handleUpdateRequestStatus = (requestId: string, newStatus: 'completed' | 'failed') => {
         if (!firestore) return;
@@ -129,151 +106,115 @@ export default function FulfillmentPage() {
         }
     };
 
-
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
-    if (isCheckingAdmin) {
-        return (
-             <AppLayout>
-                <div className="flex items-center justify-center h-64">
-                    <p>Verifying admin privileges...</p>
-                </div>
-            </AppLayout>
-        )
-    }
-
-    if (!isAdmin) {
-        return (
-            <AppLayout>
-                <Card className="mt-8 border-destructive">
-                    <CardHeader className="text-center">
-                        <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
-                        <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
-                        <CardDescription>
-                            You do not have permissions to view this page. Redirecting...
-                        </CardDescription>
-                    </CardHeader>
-                </Card>
-            </AppLayout>
-        );
-    }
-
     return (
-        <AppLayout>
-            <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="font-headline text-3xl font-bold">Fulfillment Center</h1>
-                    <p className="text-muted-foreground">
-                        Process presale purchases and user withdrawal requests.
-                    </p>
-                </div>
-                <Tabs defaultValue="withdrawals">
-                    <TabsList>
-                        <TabsTrigger value="withdrawals">Withdrawal Requests</TabsTrigger>
-                        <TabsTrigger value="presale">Presale Purchases</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="withdrawals" className="mt-4">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                                    <div>
-                                        <CardTitle>Pending PGC Withdrawal Requests</CardTitle>
-                                        <CardDescription>Users have requested to withdraw their in-app PGC to their Solana wallet. Verify and send the tokens, then mark as complete.</CardDescription>
-                                    </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        <Button variant="outline" onClick={generatePayoutList} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
-                                            <ListCollapse className="mr-2 h-4 w-4"/> Generate Payout List
-                                        </Button>
-                                        <Button variant="secondary" onClick={handleMarkAllComplete} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
-                                            <ListChecks className="mr-2 h-4 w-4"/> Mark All Complete
-                                        </Button>
-                                    </div>
+        <>
+            <Tabs defaultValue="withdrawals">
+                <TabsList>
+                    <TabsTrigger value="withdrawals">Withdrawal Requests</TabsTrigger>
+                    <TabsTrigger value="presale">Presale Purchases</TabsTrigger>
+                </TabsList>
+                <TabsContent value="withdrawals" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                <div>
+                                    <CardTitle>Pending PGC Withdrawal Requests</CardTitle>
+                                    <CardDescription>Users have requested to withdraw their in-app PGC to their Solana wallet. Verify and send the tokens, then mark as complete.</CardDescription>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>User</TableHead>
-                                            <TableHead>Amount (PGC)</TableHead>
-                                            <TableHead>Destination Wallet</TableHead>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {areRequestsLoading && requestsQuery ? (
-                                            <RowSkeleton />
-                                        ) : withdrawalRequests && withdrawalRequests.length > 0 ? (
-                                            withdrawalRequests.map((req) => (
-                                                <TableRow key={req.id}>
-                                                    <TableCell className="font-medium">{req.userName}</TableCell>
-                                                    <TableCell>{req.amount.toLocaleString()}</TableCell>
-                                                    <TableCell className="font-mono text-xs flex items-center gap-2">
-                                                        {req.solanaAddress}
-                                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(req.solanaAddress, 'Wallet address')}>
-                                                            <Copy className="h-4 w-4" />
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell>{req.requestedAt ? new Date(req.requestedAt.seconds * 1000).toLocaleString() : 'N/A'}</TableCell>
-                                                    <TableCell><Badge variant="secondary">{req.status}</Badge></TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button size="sm" onClick={() => handleUpdateRequestStatus(req.id, 'completed')}>
-                                                            <CheckCircle className="mr-2 h-4 w-4" /> Mark as Complete
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell colSpan={6} className="h-24 text-center">
-                                                    No pending withdrawal requests.
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="presale" className="mt-4">
-                         <Card>
-                            <CardHeader>
-                                <CardTitle>Presale Purchases</CardTitle>
-                                <CardDescription>This is a list of simulated presale purchases. Manually send the PGC amount to the buyer's wallet.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>User</TableHead>
-                                            <TableHead>Package</TableHead>
-                                            <TableHead>Total PGC to Send</TableHead>
-                                            <TableHead>Buyer Wallet</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {presalePurchases.map((purchase) => (
-                                            <TableRow key={purchase.id}>
-                                                <TableCell>{purchase.userName}</TableCell>
-                                                <TableCell>{purchase.package}</TableCell>
-                                                <TableCell className="font-bold">{purchase.pgcAmount.toLocaleString()}</TableCell>
+                                <div className="flex gap-2 flex-shrink-0">
+                                    <Button variant="outline" onClick={generatePayoutList} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
+                                        <ListCollapse className="mr-2 h-4 w-4"/> Generate Payout List
+                                    </Button>
+                                    <Button variant="secondary" onClick={handleMarkAllComplete} disabled={!withdrawalRequests || withdrawalRequests.length === 0}>
+                                        <ListChecks className="mr-2 h-4 w-4"/> Mark All Complete
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Amount (PGC)</TableHead>
+                                        <TableHead>Destination Wallet</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {areRequestsLoading ? (
+                                        <RowSkeleton />
+                                    ) : withdrawalRequests && withdrawalRequests.length > 0 ? (
+                                        withdrawalRequests.map((req) => (
+                                            <TableRow key={req.id}>
+                                                <TableCell className="font-medium">{req.userName}</TableCell>
+                                                <TableCell>{req.amount.toLocaleString()}</TableCell>
                                                 <TableCell className="font-mono text-xs flex items-center gap-2">
-                                                    {purchase.wallet}
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(purchase.wallet, 'Wallet address')}>
+                                                    {req.solanaAddress}
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(req.solanaAddress, 'Wallet address')}>
                                                         <Copy className="h-4 w-4" />
                                                     </Button>
                                                 </TableCell>
+                                                <TableCell>{req.requestedAt ? new Date(req.requestedAt.seconds * 1000).toLocaleString() : 'N/A'}</TableCell>
+                                                <TableCell><Badge variant="secondary">{req.status}</Badge></TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button size="sm" onClick={() => handleUpdateRequestStatus(req.id, 'completed')}>
+                                                        <CheckCircle className="mr-2 h-4 w-4" /> Mark as Complete
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            </div>
-             <Dialog open={isBulkPayoutModalOpen} onOpenChange={setIsBulkPayoutModalOpen}>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="h-24 text-center">
+                                                No pending withdrawal requests.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="presale" className="mt-4">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Presale Purchases</CardTitle>
+                            <CardDescription>This is a list of simulated presale purchases. Manually send the PGC amount to the buyer's wallet.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Package</TableHead>
+                                        <TableHead>Total PGC to Send</TableHead>
+                                        <TableHead>Buyer Wallet</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {presalePurchases.map((purchase) => (
+                                        <TableRow key={purchase.id}>
+                                            <TableCell>{purchase.userName}</TableCell>
+                                            <TableCell>{purchase.package}</TableCell>
+                                            <TableCell className="font-bold">{purchase.pgcAmount.toLocaleString()}</TableCell>
+                                            <TableCell className="font-mono text-xs flex items-center gap-2">
+                                                {purchase.wallet}
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(purchase.wallet, 'Wallet address')}>
+                                                    <Copy className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+            <Dialog open={isBulkPayoutModalOpen} onOpenChange={setIsBulkPayoutModalOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Bulk Payout List (CSV)</DialogTitle>
@@ -298,6 +239,65 @@ export default function FulfillmentPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+        </>
+    )
+}
+
+export default function FulfillmentPage() {
+    const { user, isUserLoading } = useUser();
+    const firestore = useFirestore();
+    const router = useRouter();
+    const { publicKey } = useWallet();
+    
+    const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
+
+    const adminRoleRef = useMemoFirebase(() => {
+        if (!user) return null;
+        return doc(firestore, 'roles_admin', user.uid);
+    }, [firestore, user]);
+
+    const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
+    const isFirebaseAdmin = !!adminRole;
+    const isAdmin = isWalletAdmin || isFirebaseAdmin;
+
+    useEffect(() => {
+        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+        if (isCheckingAdmin) return;
+
+        if (!isAdmin) {
+            router.replace('/admin/login');
+        }
+    }, [isUserLoading, isRoleLoading, isAdmin, user, router]);
+
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+
+    return (
+        <AppLayout>
+            <div className="flex flex-col gap-8">
+                <div>
+                    <h1 className="font-headline text-3xl font-bold">Fulfillment Center</h1>
+                    <p className="text-muted-foreground">
+                        Process presale purchases and user withdrawal requests.
+                    </p>
+                </div>
+                 {isCheckingAdmin && (
+                     <div className="flex items-center justify-center h-64">
+                        <p>Verifying admin privileges...</p>
+                    </div>
+                )}
+                {!isCheckingAdmin && !isAdmin && (
+                     <Card className="mt-8 border-destructive">
+                        <CardHeader className="text-center">
+                            <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+                            <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
+                            <CardDescription>
+                                You do not have the necessary permissions to view this page. Redirecting...
+                            </CardDescription>
+                        </CardHeader>
+                    </Card>
+                )}
+                {isAdmin && <FulfillmentContent />}
+            </div>
         </AppLayout>
     );
 }
