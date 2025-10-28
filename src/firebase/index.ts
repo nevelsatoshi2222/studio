@@ -48,6 +48,3 @@ export * from './non-blocking-updates';
 export * from './non-blocking-login';
 export * from './errors';
 export * from './error-emitter';
-
-// Re-export setDoc from 'firebase/firestore' but with our custom non-blocking logic as default
-export { setDoc as setDocumentNonBlocking } from './non-blocking-updates';
