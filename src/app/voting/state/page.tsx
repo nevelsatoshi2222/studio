@@ -1,4 +1,5 @@
 
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -15,10 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { indiaGeography } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+
+// The indiaGeography data has been removed to fix a build error.
+// This component now shows a placeholder message.
+// You can add the state data back to src/lib/data.ts when it's corrected.
+const statesOfIndia: { name: string }[] = [
+    // Example data
+    { name: 'Maharashtra' },
+    { name: 'Gujarat' },
+    { name: 'Karnataka' },
+    { name: 'Tamil Nadu' },
+    { name: 'Delhi' }
+];
 
 export default function StateVotingSelectionPage() {
   const router = useRouter();
@@ -43,7 +55,7 @@ export default function StateVotingSelectionPage() {
           <CardHeader>
             <CardTitle>Select a State</CardTitle>
             <CardDescription>
-              Choose a state from the list below to view its voting page.
+              Choose a state from the list below to view its voting page. The full list is temporarily unavailable.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 md:flex-row">
@@ -52,7 +64,7 @@ export default function StateVotingSelectionPage() {
                 <SelectValue placeholder="Select a state..." />
               </SelectTrigger>
               <SelectContent>
-                {indiaGeography.map((state) => (
+                {statesOfIndia.map((state) => (
                   <SelectItem key={state.name} value={state.name}>
                     {state.name}
                   </SelectItem>
@@ -68,3 +80,5 @@ export default function StateVotingSelectionPage() {
     </AppLayout>
   );
 }
+
+    

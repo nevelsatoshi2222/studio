@@ -25,7 +25,6 @@ import {
   ArtItem,
   TeamMember,
   AirdropReward,
-  IndiaGeography,
   FundAllocation
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
@@ -1161,9 +1160,4 @@ export const airdropRewards: AirdropReward[] = [
 
     
 
-
-
-
-
-
-
+    

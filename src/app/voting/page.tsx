@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -33,6 +34,12 @@ const votingLevels = [
     description: 'Participate in governance by selecting your country and voting on its top 25 issues.',
     href: '/voting/national',
     icon: Landmark,
+  },
+   {
+    title: 'State Issues',
+    description: 'Engage with proposals and challenges specific to your state.',
+    href: '/voting/state',
+    icon: Building,
   },
 ];
 
@@ -73,3 +80,5 @@ export default function VotingHubPage() {
     </AppLayout>
   );
 }
+
+    
