@@ -75,7 +75,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { WalletButton } from './wallet-button';
+import { SafeWalletButton } from './safe-wallet-button';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 import { doc } from 'firebase/firestore';
@@ -326,7 +326,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger className="md:hidden" />
           </div>
           <div className="flex items-center gap-4">
-             <WalletButton />
+             <SafeWalletButton />
              <UserAccountDropdown />
           </div>
         </header>
