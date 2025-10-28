@@ -64,6 +64,7 @@ export default function AllUsersPage() {
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
     const usersQuery = useMemoFirebase(() => {
+        // IMPORTANT: Only construct the query if the user is confirmed to be an admin.
         if (!firestore || !isAdmin) return null;
         return query(collection(firestore, 'users'));
     }, [firestore, isAdmin]);
@@ -217,5 +218,3 @@ export default function AllUsersPage() {
         </AppLayout>
     );
 }
-
-    
