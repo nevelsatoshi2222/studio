@@ -108,13 +108,9 @@ function RegistrationForm() {
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: data.name });
-
-      const isFirstAdmin = data.email === 'admin@publicgovernance.com';
       
-      const batch = writeBatch(firestore);
-
       const userDocRef = doc(firestore, 'users', user.uid);
-      batch.set(userDocRef, {
+      await setDoc(userDocRef, {
         id: user.uid,
         name: data.name,
         email: data.email,
@@ -128,28 +124,20 @@ function RegistrationForm() {
         state: data.state,
         country: data.country,
         balance: 0,
+        pgcBalance: 0,
         referralCode: data.referralCode,
         registeredAt: serverTimestamp(),
-        status: isFirstAdmin ? 'Active' : (role ? 'Pending' : 'Active'),
+        status: role ? 'Pending' : 'Active',
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
-        role: isFirstAdmin ? 'Admin' : (data.role || 'User'),
+        role: data.role || 'User',
         jobTitle: data.jobTitle || '',
       });
-
-      if (isFirstAdmin) {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        batch.set(adminRoleRef, { userId: user.uid });
-      }
-
-      await batch.commit();
       
       await sendEmailVerification(user);
 
       toast({
         title: 'Registration Successful!',
-        description: isFirstAdmin 
-          ? 'Admin account created! Please check your email for verification before logging in.'
-          : 'Please check your email to verify your account.',
+        description: 'Please check your email to verify your account.',
       });
       
       router.push('/login');
@@ -415,5 +403,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-
-    

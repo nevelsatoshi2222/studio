@@ -29,7 +29,7 @@ import {
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, LogIn } from 'lucide-react';
-import { doc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -41,6 +41,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 function AdminLoginForm() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -50,14 +51,29 @@ function AdminLoginForm() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    if (!auth) return;
+    if (!auth || !firestore) return;
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
-      // Let the main page component handle redirection based on admin role
-      toast({
-        title: 'Login Successful',
-        description: 'Redirecting to admin dashboard...',
-      });
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Explicitly check for admin role right after login
+      const adminRoleRef = doc(firestore, 'roles_admin', userCredential.user.uid);
+      const adminRoleSnap = await getDoc(adminRoleRef);
+
+      if (adminRoleSnap.exists()) {
+        toast({
+          title: 'Admin Login Successful',
+          description: 'Redirecting to admin dashboard...',
+        });
+        router.push('/admin'); // Direct navigation to admin dashboard
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: 'This account does not have admin privileges.',
+        });
+        await auth.signOut(); // Sign out the non-admin user
+      }
+
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -138,7 +154,7 @@ export default function AdminLoginPage() {
     if (isFirebaseAdmin) {
       router.replace('/admin');
     } else if (user && !isFirebaseAdmin) {
-      // If a user is logged in but is not an admin, redirect them away.
+      // If a user is logged in but is not an admin, redirect them away from admin login page.
       router.replace('/');
     }
   }, [user, isFirebaseAdmin, isUserLoading, isRoleLoading, router]);
