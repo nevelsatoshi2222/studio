@@ -74,10 +74,10 @@ export default function ApplicationsPage() {
         const usersColRef = collection(firestore, 'users');
         if (filter === 'All') {
             // Fetch all documents in the 'users' collection, effectively showing every registered user.
-            return usersColRef;
+            return query(usersColRef, where('status', '==', 'Pending'));
         }
         // Otherwise, filter by the selected role.
-        return query(usersColRef, where('role', '==', filter));
+        return query(usersColRef, where('role', '==', filter), where('status', '==', 'Pending'));
     }, [firestore, filter, isAdmin]);
 
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
@@ -135,14 +135,14 @@ export default function ApplicationsPage() {
                 <div>
                     <h1 className="font-headline text-3xl font-bold">Application Management</h1>
                     <p className="text-muted-foreground">
-                        Review and manage all user applications for various roles.
+                        Review and manage all pending user applications for various roles.
                     </p>
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle>All Applicants</CardTitle>
+                        <CardTitle>Pending Applicants</CardTitle>
                         <CardDescription>
-                            Filter and manage applications. The 'All Roles' tab shows every user who has registered on the platform.
+                            Filter and manage new applications. Approving a user will change their status to 'Active'.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -224,7 +224,7 @@ export default function ApplicationsPage() {
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center">
-                                            No users found. Try registering a new user to see them appear here.
+                                            No pending applications found.
                                         </TableCell>
                                     </TableRow>
                                 )}

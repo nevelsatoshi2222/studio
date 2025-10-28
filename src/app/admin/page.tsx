@@ -17,13 +17,12 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { ADMIN_WALLET_ADDRESS } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, Briefcase, Megaphone, Building2 } from 'lucide-react';
+import { Users, Briefcase, Megaphone, Building2, ClipboardList, CheckCircle } from 'lucide-react';
 
 const adminNavItems = [
+    { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.' },
     { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.' },
-    { href: '/admin/franchisees', icon: Building2, label: 'Franchisee Applications', description: 'Review applications for franchisee roles.' },
-    { href: '/admin/job-seekers', icon: Briefcase, label: 'Job Seekers', description: 'View users who applied for jobs.' },
-    { href: '/admin/influencers', icon: Megaphone, label: 'Influencer Applications', description: 'Manage influencer program applicants.' },
+    { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Process withdrawal requests and presale purchases.' },
 ]
 
 export default function AdminPage() {

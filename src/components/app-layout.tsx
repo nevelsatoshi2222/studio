@@ -266,10 +266,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         <CollapsibleContent>
                              <SidebarMenuSub>
                                 <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/franchisees"><SidebarMenuSubButton>Franchisees</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/job-seekers"><SidebarMenuSubButton>Job Seekers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/influencers"><SidebarMenuSubButton>Influencers</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                             </SidebarMenuSub>
                         </CollapsibleContent>
