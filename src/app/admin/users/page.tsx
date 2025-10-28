@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
-import { collection, doc, query, Query } from 'firebase/firestore';
+import { collection, doc, query, Query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 
@@ -20,7 +20,7 @@ type User = {
     email: string;
     country: string;
     status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
-    registeredAt: any;
+    registeredAt: Timestamp;
     avatarId: string;
     role?: string;
 };
@@ -114,7 +114,7 @@ function UsersTable() {
                                             {user.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
+                                    <TableCell>{user.registeredAt ? user.registeredAt.toDate().toLocaleDateString() : 'N/A'}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
