@@ -152,7 +152,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} data-ai-hint={getAvatarHint(user.avatarId)} />
-                              <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                              <AvatarFallback>{user.name?.charAt(0) || ''}</AvatarFallback>
                             </Avatar>
                             <span className="font-medium">{user.name}</span>
                         </div>
@@ -337,3 +337,4 @@ export default function Dashboard() {
     </AppLayout>
   );
 }
+    
