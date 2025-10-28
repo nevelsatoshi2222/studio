@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRightLeft, MessageSquare } from 'lucide-react';
-import { transactions, forumPosts } from '@/lib/data';
+import { transactions } from '@/lib/data';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
@@ -35,7 +35,7 @@ import { IGC_TOKEN_MINT_ADDRESS, PGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 
 // Define the User type for the user list
 type DisplayUser = {
@@ -43,6 +43,7 @@ type DisplayUser = {
   name: string;
   email: string;
   avatarId: string;
+  registeredAt: any;
 };
 
 export default function Dashboard() {
@@ -53,6 +54,13 @@ export default function Dashboard() {
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   
   const firestore = useFirestore();
+
+  const latestUsersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'users'), orderBy('registeredAt', 'desc'), limit(5));
+  }, [firestore]);
+
+  const { data: latestUsers, isLoading: areUsersLoading } = useCollection<DisplayUser>(latestUsersQuery);
 
 
   useEffect(() => {
@@ -244,43 +252,48 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Latest Forum Activity</CardTitle>
-                <CardDescription>Discussions happening right now.</CardDescription>
-              </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/forum">Go to Forums</Link>
-              </Button>
+           <Card>
+            <CardHeader>
+                <CardTitle>Latest Registered Users</CardTitle>
+                <CardDescription>Welcome our newest members.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {forumPosts.slice(0, 3).map(post => {
-                  return (
-                    <div key={post.id} className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={getAvatarUrl(post.authorAvatar)} alt={post.author} data-ai-hint={getAvatarHint(post.authorAvatar)} />
-                            <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                        <div>
-                          <Link href="#" className="font-medium hover:underline">{post.title}</Link>
-                          <div className="text-sm text-muted-foreground">
-                            by {post.author} in <Badge variant="outline">{post.topic}</Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MessageSquare className="h-4 w-4" />
-                        <span className="text-sm font-medium">{post.comments}</span>
-                      </div>
+            <CardContent>
+                {areUsersLoading ? (
+                    <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <div className="space-y-1">
+                                    <Skeleton className="h-4 w-24" />
+                                    <Skeleton className="h-3 w-32" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                  );
-                })}
+                ) : latestUsers && latestUsers.length > 0 ? (
+                    <div className="space-y-4">
+                        {latestUsers.map(user => (
+                            <div key={user.id} className="flex items-center gap-3">
+                                <Avatar>
+                                    <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} data-ai-hint={getAvatarHint(user.avatarId)} />
+                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-medium">{user.name}</p>
+                                    <p className="text-sm text-muted-foreground">Joined on {user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No new users yet.</p>
+                )}
             </CardContent>
-          </Card>
+        </Card>
         </div>
       </div>
     </AppLayout>
   );
 }
+
+    

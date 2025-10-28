@@ -1,9 +1,9 @@
 
 
+
 import {
   Transaction,
   User,
-  ForumPost,
   TradingPair,
   Order,
   Trade,
@@ -23,7 +23,6 @@ import {
   CompetitionPhase,
   SportsItem,
   ArtItem,
-  TeamMember,
   AirdropReward,
   FundAllocation
 } from './types';
@@ -112,39 +111,6 @@ export const transactions: Transaction[] = [
     to: '0x1a2B3c4d5E6f7A8b9C0d1E2f3A4b5C6d7E8f9A0B',
     value: 75,
     age: '12 mins ago',
-  },
-];
-
-export const forumPosts: ForumPost[] = [
-  {
-    id: 1,
-    title: 'Proposal: Increase transaction speed',
-    author: 'Admin',
-    authorAvatar: 'user-avatar-1',
-    topic: 'Technology',
-    geography: 'Global',
-    upvotes: 128,
-    comments: 42,
-  },
-  {
-    id: 2,
-    title: 'Discussion: Environmental impact of blockchain',
-    author: 'Alice Johnson',
-    authorAvatar: 'user-avatar-2',
-    topic: 'Environment',
-    geography: 'National',
-    upvotes: 75,
-    comments: 18,
-  },
-  {
-    id: 3,
-    title: 'Project: Local marketplace integration',
-    author: 'Bob Williams',
-    authorAvatar: 'user-avatar-3',
-    topic: 'Economy',
-    geography: 'Local',
-    upvotes: 210,
-    comments: 65,
   },
 ];
 
@@ -1114,19 +1080,6 @@ export const artsList: ArtItem[] = [
   { id: 25, name: 'Ventriloquism', description: 'The art of "throwing" one\'s voice.' },
 ];
 
-export const teamMembers: TeamMember[] = [
-    { id: 'tm001', name: 'Liam Garcia', avatarId: 'user-avatar-1', level: 1, joinDate: '2024-05-10', earnings: 150.75 },
-    { id: 'tm002', name: 'Olivia Martinez', avatarId: 'user-avatar-2', level: 1, joinDate: '2024-05-12', earnings: 220.50 },
-    { id: 'tm003', name: 'Noah Rodriguez', avatarId: 'user-avatar-3', level: 2, joinDate: '2024-05-15', earnings: 75.20 },
-    { id: 'tm004', name: 'Emma Hernandez', avatarId: 'user-avatar-4', level: 2, joinDate: '2024-05-18', earnings: 95.40 },
-    { id: 'tm005', name: 'Oliver Lopez', avatarId: 'user-avatar-1', level: 3, joinDate: '2024-05-20', earnings: 40.10 },
-    { id: 'tm006', name: 'Ava Gonzalez', avatarId: 'user-avatar-2', level: 4, joinDate: '2024-05-22', earnings: 25.00 },
-    { id: 'tm007', name: 'Elijah Wilson', avatarId: 'user-avatar-3', level: 5, joinDate: '2024-05-25', earnings: 15.50 },
-    { id: 'tm008', name: 'Charlotte Anderson', avatarId: 'user-avatar-4', level: 6, joinDate: '2024-05-28', earnings: 10.00 },
-    { id: 'tm009', name: 'James Thomas', avatarId: 'user-avatar-1', level: 7, joinDate: '2024-06-01', earnings: 5.80 },
-    { id: 'tm010', name: 'Sophia Taylor', avatarId: 'user-avatar-2', level: 8, joinDate: '2024-06-02', earnings: 4.20 },
-];
-
 export const airdropRewards: AirdropReward[] = [
   { name: 'Early Registration', percentage: 10, description: 'Reserved for early users who register and complete the Financial Awareness Quiz.' },
 ];
@@ -1157,6 +1110,8 @@ export const airdropRewards: AirdropReward[] = [
 
 
 
+
+    
 
     
 

@@ -19,26 +19,51 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { teamMembers } from '@/lib/data';
 import { Users, UserPlus, DollarSign } from 'lucide-react';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+type TeamMember = {
+  id: string;
+  name: string;
+  avatarId: string;
+  registeredAt: any;
+  email: string;
+  referralCode?: string;
+};
+
+const UserRowSkeleton = () => (
+    <TableRow>
+        <TableCell>
+            <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                </div>
+            </div>
+        </TableCell>
+        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+    </TableRow>
+);
+
 
 export default function TeamPage() {
-  const directMembers = teamMembers.filter((m) => m.level === 1);
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
 
-  const levelCounts: Record<number, number> = {};
-  for (let i = 1; i <= 15; i++) {
-    levelCounts[i] = 0;
-  }
-  teamMembers.forEach((member) => {
-    if (levelCounts[member.level] !== undefined) {
-      levelCounts[member.level]++;
-    }
-  });
+  const directMembersQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'users'), where('referralCode', '==', user.uid));
+  }, [firestore, user]);
 
-  const totalEarnings = teamMembers.reduce((acc, member) => acc + member.earnings, 0);
+  const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
 
   const getAvatarUrl = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
@@ -101,6 +126,34 @@ export default function TeamPage() {
     );
   };
 
+  if (isUserLoading) {
+    return (
+        <AppLayout>
+            <div className="flex justify-center items-center h-full">
+                <p>Loading your team...</p>
+            </div>
+        </AppLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+        <AppLayout>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Access Your Team</CardTitle>
+                    <CardDescription>Please log in to view your affiliate network.</CardDescription>
+                </CardHeader>
+                <CardFooter>
+                    <Button asChild>
+                        <Link href="/login">Login</Link>
+                    </Button>
+                </CardFooter>
+            </Card>
+        </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
@@ -111,10 +164,10 @@ export default function TeamPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="team-members" className="w-full">
+        <Tabs defaultValue="direct-members" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="team-members">
-              <Users className="mr-2 h-4 w-4" /> Team Members
+            <TabsTrigger value="team-summary">
+              <Users className="mr-2 h-4 w-4" /> Team Summary
             </TabsTrigger>
             <TabsTrigger value="direct-members">
               <UserPlus className="mr-2 h-4 w-4" /> Direct Members
@@ -123,31 +176,21 @@ export default function TeamPage() {
               <DollarSign className="mr-2 h-4 w-4" /> Earning
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="team-members" className="mt-6">
+          <TabsContent value="team-summary" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Team Members by Level</CardTitle>
+                <CardTitle>Team Summary</CardTitle>
                 <CardDescription>
-                  An overview of your network depth and the number of members at each level.
+                  An overview of your network depth. This feature is coming soon and will show member counts at each level.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Level</TableHead>
-                      <TableHead className="text-right">Member Count</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(levelCounts).map(([level, count]) => (
-                      <TableRow key={level}>
-                        <TableCell>Level {level}</TableCell>
-                        <TableCell className="text-right font-medium">{count}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <Alert>
+                  <AlertTitle>Under Development</AlertTitle>
+                  <AlertDescription>
+                    Calculating the full team tree across 15 levels is a complex operation. We are building an efficient backend process to provide this data. Please check back soon!
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </TabsContent>
@@ -165,25 +208,38 @@ export default function TeamPage() {
                     <TableRow>
                       <TableHead>Member</TableHead>
                       <TableHead>Join Date</TableHead>
-                      <TableHead className="text-right">Total Earnings (from them)</TableHead>
+                      <TableHead className="text-right">Email</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {directMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} data-ai-hint={getAvatarHint(member.avatarId)} />
-                              <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{member.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{member.joinDate}</TableCell>
-                        <TableCell className="text-right">${member.earnings.toFixed(2)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {areDirectMembersLoading ? (
+                        <>
+                            <UserRowSkeleton />
+                            <UserRowSkeleton />
+                        </>
+                    ) : directMembers && directMembers.length > 0 ? (
+                        directMembers.map((member) => (
+                          <TableRow key={member.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} data-ai-hint={getAvatarHint(member.avatarId)} />
+                                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">{member.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
+                            <TableCell className="text-right">{member.email}</TableCell>
+                          </TableRow>
+                        ))
+                    ) : (
+                         <TableRow>
+                            <TableCell colSpan={3} className="h-24 text-center">
+                                You haven't referred any members yet. Share your referral link from your profile!
+                            </TableCell>
+                        </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -197,3 +253,5 @@ export default function TeamPage() {
     </AppLayout>
   );
 }
+
+    

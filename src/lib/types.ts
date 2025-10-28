@@ -1,6 +1,7 @@
 
 
 
+
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
@@ -21,17 +22,6 @@ export type User = {
   status: 'Active' | 'Inactive' | 'Banned';
   registeredAt: string;
   avatarId: string;
-};
-
-export type ForumPost = {
-  id: number;
-  title: string;
-  author: string;
-  authorAvatar: string;
-  topic: 'Technology' | 'Economy' | 'Environment' | 'Social';
-  geography: 'Global' | 'National' | 'Local';
-  upvotes: number;
-  comments: number;
 };
 
 export type TradingPair = {
@@ -172,15 +162,6 @@ export type ArtItem = {
   description: string;
 }
 
-export type TeamMember = {
-  id: string;
-  name: string;
-  avatarId: string;
-  level: number;
-  joinDate: string;
-  earnings: number;
-};
-
 export type AirdropReward = {
   name: string;
   percentage: number;
@@ -237,5 +218,7 @@ export type AffiliateRewardTier = {
     limit: string;
     requirement: string;
 };
+
+    
 
     
