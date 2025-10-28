@@ -2,6 +2,7 @@
 
 
 
+
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
@@ -219,6 +220,10 @@ export type AffiliateRewardTier = {
     requirement: string;
 };
 
-    
-
-    
+export type SubmittedContent = {
+  id: string;
+  url: string;
+  submittedAt: Date;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  views?: number;
+};

@@ -1,4 +1,5 @@
 
+
 import {
   Transaction,
   User,
@@ -22,9 +23,11 @@ import {
   SportsItem,
   ArtItem,
   AirdropReward,
-  FundAllocation
+  FundAllocation,
+  AffiliateRewardTier
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
+import { Users as UsersIcon, Star, Award, Gem, Shield, Crown, UserPlus } from 'lucide-react';
 
 
 export const users: User[] = [
@@ -1082,4 +1085,61 @@ export const airdropRewards: AirdropReward[] = [
   { name: 'Early Registration', percentage: 10, description: 'Reserved for early users who register and complete the Financial Awareness Quiz.' },
 ];
 
-    
+export const freeTrackRewards: AffiliateRewardTier[] = [
+    { name: 'Bronze', icon: UsersIcon, reward: '1 Coin', limit: 'First 78,125 Achievers', requirement: '5 people join successfully with your affiliate link.' },
+    { name: 'Silver', icon: Award, reward: '2 Coins', limit: 'First 15,625 Achievers', requirement: '5 people in your direct team achieve Bronze Reward.' },
+    { name: 'Gold', icon: Gem, reward: '4 Coins', limit: 'First 3,125 Achievers', requirement: '5 people in your direct team achieve Silver Reward.' },
+    { name: 'Emerald', icon: Shield, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 people in your direct team achieve Gold Reward.' },
+    { name: 'Platinum', icon: Star, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 people in your direct team achieve Emerald Reward.' },
+    { name: 'Diamond', icon: Shield, reward: '250 Coins', limit: 'First 25 Achievers', requirement: '5 people in your direct team achieve Platinum Reward.' },
+    { name: 'Crown', icon: Crown, reward: '1000 Coins', limit: 'First 5 Achievers', requirement: '5 people in your direct team achieve Diamond Reward.' },
+];
+
+export const paidTrackRewards: AffiliateRewardTier[] = [
+    { name: 'Bronze Star', icon: UserPlus, reward: '2.5 Coins', limit: 'First 15,625 Achievers', requirement: '5 direct members pay for any package or buy staking.' },
+    { name: 'Silver Star', icon: Award, reward: '5 Coins', limit: 'First 3,125 Achievers', requirement: '5 people in your direct team achieve Bronze Star Reward.' },
+    { name: 'Gold Star', icon: Gem, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 people in your direct team achieve Silver Star Reward.' },
+    { name: 'Emerald Star', icon: Shield, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 people in your direct team achieve Gold Star Reward.' },
+    { name: 'Platinum Star', icon: Star, reward: '125 Coins', limit: 'First 25 Achievers', requirement: '5 people in your direct team achieve Emerald Star Reward.' },
+    { name: 'Diamond Star', icon: Shield, reward: '1,250 Coins', limit: 'First 5 Achievers', requirement: '5 people in your direct team achieve Platinum Star Reward.' },
+    { name: 'Crown Star', icon: Crown, reward: '6,250 Coins', limit: 'First 1 Achiever', requirement: '5 people in your direct team achieve Diamond Star Reward.' },
+];
+
+export const influencerTiers = [
+    {
+        icon: UsersIcon,
+        title: "Total Views Basis Reward",
+        description: "A pool of 50,000 PGC is reserved for everyone. After the presale, submit links to your videos (max 25). Our system will calculate a 'per-view' value, and you'll be rewarded based on your total verified views.",
+        criteria: "Minimum 100 views to be eligible for claim."
+    },
+    {
+        icon: Gem,
+        title: "Gold Reward Achiever",
+        description: "Get an extra 4 PGC on top of your view-based reward. Limited to the first 5,000 achievers.",
+        criteria: "1,000 to 9,999 Views"
+    },
+    {
+        icon: Shield,
+        title: "Emerald Reward Achiever",
+        description: "Get an extra 8 PGC. Limited to the first 1,000 achievers.",
+        criteria: "10,000 to 99,999 Views"
+    },
+    {
+        icon: Star,
+        title: "Platinum Reward Achiever",
+        description: "Get an extra 25 PGC. Limited to the first 200 achievers.",
+        criteria: "100,000 to 999,999 Views"
+    },
+    {
+        icon: Award,
+        title: "Diamond Reward Achiever",
+        description: "Get an extra 100 PGC. Limited to the first 40 achievers.",
+        criteria: "1 Million to 9.99 Million Views"
+    },
+    {
+        icon: Crown,
+        title: "Crown Reward Achiever",
+        description: "Get an extra 1,000 PGC plus all lower-tier rewards. Limited to the first 8 achievers.",
+        criteria: "Above 10 Million Views"
+    }
+];

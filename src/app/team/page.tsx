@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award } from 'lucide-react';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,9 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebas
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
+import { AffiliateRewardTier } from '@/lib/types';
+import { Progress } from '@/components/ui/progress';
 
 type TeamMember = {
   id: string;
@@ -54,13 +57,39 @@ const UserRowSkeleton = () => (
 );
 
 
+const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, progress: number, goal: number }) => {
+    const Icon = tier.icon;
+    const isAchieved = progress >= goal;
+
+    return (
+        <div className={`flex items-start gap-4 rounded-lg border p-4 ${isAchieved ? 'bg-green-500/10 border-green-500' : 'bg-muted/30'}`}>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-md mt-1 ${isAchieved ? 'bg-green-500/20 text-green-600' : 'bg-primary/10 text-primary'}`}>
+                <Icon className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+                <div className="flex justify-between items-center">
+                    <h4 className="font-semibold text-lg">{tier.name}</h4>
+                    <div className={`text-lg font-bold ${isAchieved ? 'text-green-600' : 'text-primary'}`}>{tier.reward}</div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{tier.requirement}</p>
+                
+                <div className="mt-2">
+                    <Progress value={(progress / goal) * 100} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
+                </div>
+
+                <div className={`text-xs font-semibold mt-2 ${isAchieved ? 'text-green-700' : 'text-primary/80'}`}>{tier.limit}</div>
+            </div>
+        </div>
+    );
+};
+
 export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    // This query finds all users whose 'referralCode' field matches the current user's UID.
     return query(collection(firestore, 'users'), where('referralCode', '==', user.uid));
   }, [firestore, user]);
 
@@ -126,6 +155,52 @@ export default function TeamPage() {
         </Card>
     );
   };
+  
+  const RewardsDashboard = () => {
+    const directReferralCount = directMembers?.length || 0;
+    
+    // In a real app, you'd fetch how many of the user's referrals have achieved each tier.
+    // We'll simulate this for now.
+    const bronzeAchievers = Math.floor(directReferralCount / 2);
+    const bronzeStarAchievers = Math.floor(directReferralCount / 5);
+
+    return (
+      <div className="grid md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Free User Track</CardTitle>
+            <CardDescription>Rewards for growing your network with free members.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <RewardTierCard tier={freeTrackRewards[0]} progress={directReferralCount} goal={5} />
+            <RewardTierCard tier={freeTrackRewards[1]} progress={bronzeAchievers} goal={5} />
+            <Alert>
+              <AlertTitle>More Tiers Available</AlertTitle>
+              <AlertDescription>
+                As your team achieves new tiers, more reward levels will unlock here.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Paid User (Star) Track</CardTitle>
+            <CardDescription>Higher rewards when your referrals purchase or stake.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <RewardTierCard tier={paidTrackRewards[0]} progress={bronzeStarAchievers} goal={5} />
+            <Alert>
+              <AlertTitle>Feature in Development</AlertTitle>
+              <AlertDescription>
+                Tracking for paid user achievements is being built. This section will update automatically once live.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
 
   if (isUserLoading) {
     return (
@@ -166,15 +241,18 @@ export default function TeamPage() {
         </div>
 
         <Tabs defaultValue="direct-members" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="team-summary">
+          <TabsList className="grid w-full grid-cols-4">
+             <TabsTrigger value="team-summary">
               <Users className="mr-2 h-4 w-4" /> Team Summary
             </TabsTrigger>
             <TabsTrigger value="direct-members">
               <UserPlus className="mr-2 h-4 w-4" /> Direct Members
             </TabsTrigger>
+             <TabsTrigger value="rewards">
+              <Award className="mr-2 h-4 w-4" /> Rewards
+            </TabsTrigger>
             <TabsTrigger value="earnings">
-              <DollarSign className="mr-2 h-4 w-4" /> Earning
+              <DollarSign className="mr-2 h-4 w-4" /> Commission
             </TabsTrigger>
           </TabsList>
           <TabsContent value="team-summary" className="mt-6">
@@ -198,7 +276,7 @@ export default function TeamPage() {
           <TabsContent value="direct-members" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Direct Members</CardTitle>
+                <CardTitle>Direct Members ({directMembers?.length || 0})</CardTitle>
                 <CardDescription>
                   Users you have personally referred to the platform (Level 1).
                 </CardDescription>
@@ -245,6 +323,9 @@ export default function TeamPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+           <TabsContent value="rewards" className="mt-6">
+            <RewardsDashboard />
           </TabsContent>
           <TabsContent value="earnings" className="mt-6">
              <EarningTable />

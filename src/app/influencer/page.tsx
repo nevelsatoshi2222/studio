@@ -1,5 +1,6 @@
 
 'use client';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -10,52 +11,131 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Star, TrendingUp, Users, Award, Gem, Shield, Crown } from 'lucide-react';
+import { Share2, Star, TrendingUp, Users, Award, Gem, Shield, Crown, Link as LinkIcon, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { influencerTiers } from '@/lib/data';
+import { SubmittedContent } from '@/lib/types';
+import { useUser } from '@/firebase';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AffiliateRewardTier } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 
-const tiers = [
-    {
-        icon: Users,
-        title: "Total Views Basis Reward",
-        description: "A pool of 50,000 PGC is reserved for everyone. After the presale, submit links to your videos (max 25). Our system will calculate a 'per-view' value, and you'll be rewarded based on your total verified views.",
-        criteria: "Minimum 100 views to be eligible for claim."
-    },
-    {
-        icon: Gem,
-        title: "Gold Reward Achiever",
-        description: "Get an extra 4 PGC on top of your view-based reward. Limited to the first 5,000 achievers.",
-        criteria: "1,000 to 9,999 Views"
-    },
-    {
-        icon: Shield,
-        title: "Emerald Reward Achiever",
-        description: "Get an extra 8 PGC. Limited to the first 1,000 achievers.",
-        criteria: "10,000 to 99,999 Views"
-    },
-    {
-        icon: Star,
-        title: "Platinum Reward Achiever",
-        description: "Get an extra 25 PGC. Limited to the first 200 achievers.",
-        criteria: "100,000 to 999,999 Views"
-    },
-    {
-        icon: Award,
-        title: "Diamond Reward Achiever",
-        description: "Get an extra 100 PGC. Limited to the first 40 achievers.",
-        criteria: "1 Million to 9.99 Million Views"
-    },
-    {
-        icon: Crown,
-        title: "Crown Reward Achiever",
-        description: "Get an extra 1,000 PGC plus all lower-tier rewards. Limited to the first 8 achievers.",
-        criteria: "Above 10 Million Views"
-    }
-];
+const InfluencerDashboard = () => {
+    const [submittedContent, setSubmittedContent] = useState<SubmittedContent[]>([
+        { id: '1', url: 'https://youtube.com/watch?v=abc', submittedAt: new Date(), status: 'Approved', views: 125000 },
+        { id: '2', url: 'https://instagram.com/p/Cxyz', submittedAt: new Date(), status: 'Pending' },
+    ]);
+    const [newLink, setNewLink] = useState('');
+    const { toast } = useToast();
+
+    const totalViews = submittedContent.reduce((acc, curr) => acc + (curr.views || 0), 0);
+    const airdropEarned = (totalViews / 1000).toFixed(2); // Example calculation
+
+    const handleAddLink = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newLink || !newLink.startsWith('http')) {
+            toast({ variant: 'destructive', title: 'Invalid Link', description: 'Please enter a valid URL.' });
+            return;
+        }
+        const newSubmission: SubmittedContent = {
+            id: String(Date.now()),
+            url: newLink,
+            submittedAt: new Date(),
+            status: 'Pending',
+        };
+        setSubmittedContent([...submittedContent, newSubmission]);
+        setNewLink('');
+        toast({ title: 'Link Submitted!', description: 'Your content is now pending review.' });
+    };
+
+    const getStatusIcon = (status: SubmittedContent['status']) => {
+        switch (status) {
+            case 'Approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
+            case 'Pending': return <Clock className="h-5 w-5 text-yellow-500" />;
+            case 'Rejected': return <AlertCircle className="h-5 w-5 text-red-500" />;
+        }
+    };
+
+    return (
+        <>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Submit Your Content</CardTitle>
+                    <CardDescription>Add links to the content you've created. You can submit up to 25 links for review after the presale ends.</CardDescription>
+                </CardHeader>
+                <form onSubmit={handleAddLink}>
+                    <CardContent>
+                        <div className="flex gap-2">
+                            <Input
+                                type="url"
+                                placeholder="https://youtube.com/watch?v=..."
+                                value={newLink}
+                                onChange={(e) => setNewLink(e.target.value)}
+                            />
+                            <Button type="submit">
+                                <LinkIcon className="mr-2 h-4 w-4" /> Add Link
+                            </Button>
+                        </div>
+                    </CardContent>
+                </form>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>My Content Dashboard</CardTitle>
+                    <CardDescription>Track the status and performance of your submitted content.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 gap-4 mb-6 text-center">
+                        <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm text-muted-foreground">Total Verified Views</p>
+                            <p className="text-2xl font-bold">{totalViews.toLocaleString()}</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm text-muted-foreground">Estimated PGC Earned</p>
+                            <p className="text-2xl font-bold text-primary">{airdropEarned}</p>
+                        </div>
+                    </div>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Content URL</TableHead>
+                                <TableHead>Date Submitted</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Verified Views</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {submittedContent.map(content => (
+                                <TableRow key={content.id}>
+                                    <TableCell>
+                                        <a href={content.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                            {content.url}
+                                        </a>
+                                    </TableCell>
+                                    <TableCell>{content.submittedAt.toLocaleDateString()}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={content.status === 'Approved' ? 'default' : content.status === 'Pending' ? 'secondary' : 'destructive'} className="flex items-center gap-2 w-fit">
+                                            {getStatusIcon(content.status)}
+                                            {content.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right font-medium">{content.views ? content.views.toLocaleString() : 'N/A'}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </>
+    );
+};
+
 
 export default function InfluencerPage() {
+  const { user } = useUser();
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
@@ -67,7 +147,7 @@ export default function InfluencerPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                {tiers.map((tier) => {
+                {influencerTiers.map((tier) => {
                     const Icon = tier.icon;
                     return (
                         <div key={tier.title} className="flex items-start gap-4 rounded-lg border p-4">
@@ -85,13 +165,26 @@ export default function InfluencerPage() {
                     )
                 })}
             </CardContent>
-             <CardFooter className="flex-col gap-4 text-center">
-                <Button asChild size="lg">
-                    <Link href="/register?role=Influencer">Apply to be an Influencer</Link>
-                </Button>
-                <p className="text-xs text-muted-foreground">Content submission form will be available after the presale concludes.</p>
-            </CardFooter>
         </Card>
+        
+        {user ? (
+            <InfluencerDashboard />
+        ) : (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Join the Influencer Program</CardTitle>
+                    <CardDescription>You must be logged in and registered as an influencer to submit content.</CardDescription>
+                </CardHeader>
+                <CardFooter className="gap-4">
+                    <Button asChild>
+                        <Link href="/login">Login</Link>
+                    </Button>
+                    <Button asChild variant="secondary">
+                        <Link href="/register?role=Influencer">Apply to be an Influencer</Link>
+                    </Button>
+                </CardFooter>
+            </Card>
+        )}
       </div>
     </AppLayout>
   );
