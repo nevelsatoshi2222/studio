@@ -35,9 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -150,16 +150,8 @@ function RegistrationForm() {
       
       const userDocRef = doc(firestore, 'users', user.uid);
       
-      // Use non-blocking setDoc with error handling
-      setDoc(userDocRef, userProfile)
-        .catch(serverError => {
-          const contextualError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: userProfile,
-          });
-          errorEmitter.emit('permission-error', contextualError);
-      });
+      // Use the non-blocking version of setDoc with our custom error handler
+      setDocumentNonBlocking(userDocRef, userProfile, { merge: false });
 
       toast({
         title: 'Registration Successful!',
@@ -427,3 +419,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
