@@ -35,9 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -138,7 +138,7 @@ function RegistrationForm() {
         country: data.country,
         balance: 0,
         referralCode: data.referralCode,
-        registeredAt: new Date().toISOString(),
+        registeredAt: serverTimestamp(),
         status: role ? 'Pending' : 'Active', // Set status to Pending if applying for a role
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
         role: data.role || 'User',
@@ -148,7 +148,7 @@ function RegistrationForm() {
       const userDocRef = doc(firestore, 'users', user.uid);
       
       // Use the non-blocking version of setDoc with our custom error handler
-      await addDoc(collection(firestore, 'users'), userProfile);
+      setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
 
       // Send verification email
       await sendEmailVerification(user);
@@ -419,3 +419,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
