@@ -36,30 +36,12 @@ import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 
-// Define the User type for the temporary display
-type DisplayUser = {
-  id: string;
-  name: string;
-  email: string;
-  avatarId: string;
-};
-
 export default function Dashboard() {
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [igcBalance, setIgcBalance] = useState<number | null>(null);
   const [pgcBalance, setPgcBalance] = useState<number | null>(null);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-
-  // --- Temporary code to display users ---
-  const firestore = useFirestore();
-  const usersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'));
-  }, [firestore]);
-  const { data: registeredUsers, isLoading: areUsersLoading } = useCollection<DisplayUser>(usersQuery);
-  // --- End of temporary code ---
-
 
   useEffect(() => {
     if (publicKey && connection) {
@@ -125,53 +107,6 @@ export default function Dashboard() {
             Welcome back! Here's your overview of the Idea Governance platform.
           </p>
         </div>
-
-        {/* --- Temporary User Display Card --- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Registered Users</CardTitle>
-            <CardDescription>A temporary list to verify user registration is working.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {areUsersLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center">Loading users...</TableCell>
-                  </TableRow>
-                ) : registeredUsers && registeredUsers.length > 0 ? (
-                  registeredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} data-ai-hint={getAvatarHint(user.avatarId)} />
-                              <AvatarFallback>{user.name?.charAt(0) || ''}</AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{user.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2} className="h-24 text-center">
-                      No users have been registered yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        {/* --- End of Temporary Card --- */}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
