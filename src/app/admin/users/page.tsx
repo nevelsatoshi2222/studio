@@ -44,12 +44,15 @@ const UserRowSkeleton = () => (
     </TableRow>
 )
 
-function UsersTable() {
+function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
     const firestore = useFirestore();
+    
+    // CRITICAL FIX: The query is only created if `canRunQuery` (i.e., isAdmin) is true.
+    // If the user is not an admin, this query will be null, preventing the permissions error.
     const usersQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        if (!firestore || !canRunQuery) return null;
         return query(collection(firestore, 'users'));
-    }, [firestore]);
+    }, [firestore, canRunQuery]);
 
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
@@ -84,7 +87,7 @@ function UsersTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {areUsersLoading ? (
+                        {(areUsersLoading && canRunQuery) ? (
                             <>
                                 <UserRowSkeleton />
                                 <UserRowSkeleton />
@@ -202,7 +205,7 @@ export default function AllUsersPage() {
                         </CardHeader>
                     </Card>
                 )}
-                {isAdmin && <UsersTable />}
+                {isAdmin && <UsersTable canRunQuery={isAdmin} />}
             </div>
         </AppLayout>
     );
