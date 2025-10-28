@@ -1,25 +1,20 @@
 'use client';
 
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import React from 'react';
+
+// The WalletMultiButton is dynamically imported with SSR (Server-Side Rendering) turned off.
+// This is a crucial step to prevent hydration errors and "stuck connecting" issues
+// by ensuring the wallet button, which relies on browser APIs, only ever renders on the client.
+const WalletMultiButtonDynamic = dynamic(
+  async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
 
 /**
  * A wrapper for the WalletMultiButton that ensures it only renders on the client-side
- * to prevent Next.js hydration errors. It uses a mounted state to delay rendering
- * until after the initial client render.
+ * using Next.js dynamic import with SSR disabled.
  */
 export function WalletButton() {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // On the server or during the initial client render, render nothing or a placeholder.
-  // Once mounted on the client, render the actual button.
-  if (!isMounted) {
-    return null; 
-  }
-
-  return <WalletMultiButton />;
+  return <WalletMultiButtonDynamic />;
 }
