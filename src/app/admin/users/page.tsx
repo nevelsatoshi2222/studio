@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
-import { collection, doc, query } from 'firebase/firestore';
+import { collection, doc, query, Query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -39,9 +39,9 @@ const UserRowSkeleton = () => (
             </div>
         </TableCell>
         <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
         <TableCell><Skeleton className="h-6 w-20" /></TableCell>
         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
         <TableCell><Skeleton className="h-8 w-8" /></TableCell>
     </TableRow>
 )
@@ -51,6 +51,8 @@ export default function AllUsersPage() {
     const firestore = useFirestore();
     const router = useRouter();
     const { publicKey } = useWallet();
+
+    const [usersQuery, setUsersQuery] = useState<Query | null>(null);
 
     const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
@@ -63,19 +65,18 @@ export default function AllUsersPage() {
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
-    const usersQuery = useMemoFirebase(() => {
-        // IMPORTANT: Only construct the query if the user is confirmed to be an admin.
-        if (!firestore || !isAdmin) return null;
-        return query(collection(firestore, 'users'));
-    }, [firestore, isAdmin]);
-
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
     
     useEffect(() => {
-        if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
+        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+        if (isCheckingAdmin) return;
+
+        if (isAdmin) {
+            setUsersQuery(query(collection(firestore, 'users')));
+        } else {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
+    }, [isUserLoading, isRoleLoading, isAdmin, user, firestore, router]);
 
 
     const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected' | 'Banned') => {
@@ -100,6 +101,7 @@ export default function AllUsersPage() {
     }
 
     if (!isAdmin) {
+        // This state is briefly visible before the redirect in useEffect triggers.
         return (
             <AppLayout>
                 <Card className="mt-8 border-destructive">
@@ -107,12 +109,9 @@ export default function AllUsersPage() {
                         <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
                         <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
                         <CardDescription>
-                            You do not have the necessary permissions to view this page.
+                            You do not have the necessary permissions to view this page. Redirecting...
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="text-center">
-                         <Button onClick={() => router.push('/admin/login')}>Go to Admin Login</Button>
-                    </CardContent>
                 </Card>
             </AppLayout>
         );

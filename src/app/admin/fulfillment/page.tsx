@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, CheckCircle, Copy, Loader2, ListCollapse, ListChecks } from 'lucide-react';
-import { collection, doc, query, where, serverTimestamp, writeBatch, orderBy } from 'firebase/firestore';
+import { ShieldAlert, CheckCircle, Copy, ListCollapse, ListChecks } from 'lucide-react';
+import { collection, doc, query, where, writeBatch, orderBy, Query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -48,6 +48,7 @@ export default function FulfillmentPage() {
 
     const [isBulkPayoutModalOpen, setIsBulkPayoutModalOpen] = useState(false);
     const [payoutList, setPayoutList] = useState('');
+    const [requestsQuery, setRequestsQuery] = useState<Query | null>(null);
 
     const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
@@ -60,24 +61,24 @@ export default function FulfillmentPage() {
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
-    const withdrawalRequestsQuery = useMemoFirebase(() => {
-        if (!firestore || !isAdmin) return null;
-        return query(collection(firestore, 'withdrawal_requests'), where('status', '==', 'pending'), orderBy('requestedAt', 'desc'));
-    }, [firestore, isAdmin]);
-
     // This is a placeholder for presale purchases. In a real app, this would come from a 'purchases' collection.
     const [presalePurchases, setPresalePurchases] = useState([
         { id: 'ps1', userName: 'Alice Johnson', package: '$100 USDT', pgcAmount: 200, wallet: 'Epa6e5a7pYEj2e4s2w8cZ5fG3xH1vR9jK6bN4mD0uF7' },
         { id: 'ps2', userName: 'Bob Williams', package: '$1,000 USDT', pgcAmount: 2000, wallet: '5tG8hJkLuMvNpoQrStUvXyZ1a2b3c4d5e6f7g8h9i' },
     ]);
 
-    const { data: withdrawalRequests, isLoading: areRequestsLoading } = useCollection<WithdrawalRequest>(withdrawalRequestsQuery);
+    const { data: withdrawalRequests, isLoading: areRequestsLoading } = useCollection<WithdrawalRequest>(requestsQuery);
     
     useEffect(() => {
-        if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
+        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+        if (isCheckingAdmin) return;
+
+        if (isAdmin) {
+            setRequestsQuery(query(collection(firestore, 'withdrawal_requests'), where('status', '==', 'pending'), orderBy('requestedAt', 'desc')));
+        } else {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
+    }, [isUserLoading, isRoleLoading, isAdmin, user, firestore, router]);
 
 
     const handleUpdateRequestStatus = (requestId: string, newStatus: 'completed' | 'failed') => {
@@ -129,7 +130,18 @@ export default function FulfillmentPage() {
     };
 
 
-    if (!isAdmin && !isUserLoading) {
+    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+    if (isCheckingAdmin) {
+        return (
+             <AppLayout>
+                <div className="flex items-center justify-center h-64">
+                    <p>Verifying admin privileges...</p>
+                </div>
+            </AppLayout>
+        )
+    }
+
+    if (!isAdmin) {
         return (
             <AppLayout>
                 <Card className="mt-8 border-destructive">
@@ -137,7 +149,7 @@ export default function FulfillmentPage() {
                         <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
                         <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
                         <CardDescription>
-                            You do not have permissions to view this page.
+                            You do not have permissions to view this page. Redirecting...
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -190,7 +202,7 @@ export default function FulfillmentPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {areRequestsLoading ? (
+                                        {areRequestsLoading && requestsQuery ? (
                                             <RowSkeleton />
                                         ) : withdrawalRequests && withdrawalRequests.length > 0 ? (
                                             withdrawalRequests.map((req) => (
@@ -289,5 +301,3 @@ export default function FulfillmentPage() {
         </AppLayout>
     );
 }
-
-    

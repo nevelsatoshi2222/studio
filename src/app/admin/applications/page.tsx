@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
-import { collection, doc, query, where } from 'firebase/firestore';
+import { collection, doc, query, where, Query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
@@ -56,6 +56,7 @@ export default function ApplicationsPage() {
     const { publicKey } = useWallet();
     
     const [filter, setFilter] = useState('All');
+    const [usersQuery, setUsersQuery] = useState<Query | null>(null);
 
     const isWalletAdmin = publicKey?.toBase58() === ADMIN_WALLET_ADDRESS;
 
@@ -68,26 +69,25 @@ export default function ApplicationsPage() {
     const isFirebaseAdmin = !!adminRole;
     const isAdmin = isWalletAdmin || isFirebaseAdmin;
 
-    const usersQuery = useMemoFirebase(() => {
-        // IMPORTANT: Only construct the query if the user is confirmed to be an admin.
-        if (!firestore || !isAdmin) return null;
-        
-        const usersColRef = collection(firestore, 'users');
-        if (filter === 'All') {
-            // Fetch all documents in the 'users' collection, effectively showing every registered user.
-            return query(usersColRef, where('status', '==', 'Pending'));
-        }
-        // Otherwise, filter by the selected role.
-        return query(usersColRef, where('role', '==', filter), where('status', '==', 'Pending'));
-    }, [firestore, filter, isAdmin]);
-
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
     
     useEffect(() => {
-        if (!isUserLoading && !isRoleLoading && !isFirebaseAdmin && !isWalletAdmin) {
+        const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+        if (isCheckingAdmin) return;
+
+        if (isAdmin) {
+            const usersColRef = collection(firestore, 'users');
+            let q;
+            if (filter === 'All') {
+                q = query(usersColRef, where('status', '==', 'Pending'));
+            } else {
+                q = query(usersColRef, where('role', '==', filter), where('status', '==', 'Pending'));
+            }
+            setUsersQuery(q);
+        } else {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isRoleLoading, isFirebaseAdmin, isWalletAdmin, router]);
+    }, [isUserLoading, isRoleLoading, isAdmin, user, firestore, router, filter]);
 
 
     const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected') => {
@@ -119,12 +119,9 @@ export default function ApplicationsPage() {
                         <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
                         <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
                         <CardDescription>
-                            You do not have the necessary permissions to view this page.
+                            You do not have the necessary permissions to view this page. Redirecting...
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="text-center">
-                         <Button onClick={() => router.push('/admin/login')}>Go to Admin Login</Button>
-                    </CardContent>
                 </Card>
             </AppLayout>
         );
@@ -168,7 +165,7 @@ export default function ApplicationsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {areUsersLoading ? (
+                                {areUsersLoading && usersQuery ? (
                                     <>
                                         <UserRowSkeleton />
                                         <UserRowSkeleton />
