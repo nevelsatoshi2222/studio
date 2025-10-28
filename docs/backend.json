@@ -133,13 +133,32 @@
         "status": { "type": "string", "enum": ["pending", "completed", "failed"], "description": "The status of the withdrawal request." }
       },
       "required": ["userId", "amount", "solanaAddress", "requestedAt", "status"]
+    },
+    "ForumPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ForumPost",
+      "type": "object",
+      "description": "A post in the governance forum.",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorAvatar": { "type": "string", "format": "uri" },
+        "topic": { "type": "string" },
+        "geography": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "upvotes": { "type": "number" },
+        "comments": { "type": "number" }
+      },
+      "required": ["title", "content", "authorId", "authorName", "topic", "geography", "createdAt"]
     }
   },
   "auth": {
     "providers": ["password", "anonymous"]
   },
   "firestore": {
-    "rules": "rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    match /users/{userId} {\n      // Allow a user to read and write their own document.\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n\n      // Allow authenticated users to query the users collection by referralCode\n      // This is needed for the 'My Team' page to find direct referrals.\n      allow list: if request.auth != null && request.query.where.referralCode == request.auth.uid;\n    }\n\n    // Allow users to read their own admin role document\n    match /roles_admin/{userId} {\n      allow read: if request.auth.uid == userId;\n      allow write: if false; // Nobody should write to this directly from client\n    }\n\n    // Explicitly deny reads/writes to other collections unless specified\n    match /{document=**} {\n      allow read, write: if false;\n    }\n  }\n}",
+    "rules": "rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    // Function to check for admin role\n    function isAdmin() {\n      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));\n    }\n\n    match /users/{userId} {\n      // Admins can read/write any user document\n      allow read, write: if isAdmin();\n      // A user can read and write their own document.\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n\n      // Allow authenticated users to query the users collection by referralCode\n      // This is needed for the 'My Team' page to find direct referrals.\n      allow list: if request.auth != null && request.query.where.referralCode == request.auth.uid;\n    }\n\n    // Allow users to read their own admin role document\n    match /roles_admin/{userId} {\n      allow get: if request.auth.uid == userId;\n      allow read, write: if isAdmin();\n    }\n\n    match /forums/{postId} {\n        // Any authenticated user can read all forum posts\n        allow read: if request.auth != null;\n        // Only authenticated users can create posts\n        allow create: if request.auth != null;\n        // Only the author or an admin can update/delete their own post\n        allow update, delete: if request.auth.uid == resource.data.authorId || isAdmin();\n    }\n    \n    match /withdrawal_requests/{requestId} {\n        // Admins can read/write all requests\n        allow read, write: if isAdmin();\n        // Users can only create requests for themselves\n        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;\n    }\n\n    // Admins have blanket access for other collections as needed.\n    match /{document=**} {\n      allow read, write: if isAdmin();\n    }\n  }\n}",
     "indexes": [
         {
             "collectionGroup": "users",
@@ -151,6 +170,16 @@
                 },
                 {
                     "fieldPath": "registeredAt",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "forums",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "createdAt",
                     "order": "DESCENDING"
                 }
             ]
@@ -190,6 +219,13 @@
         "definition": {
           "schema": { "$ref": "#/entities/WithdrawalRequest" },
           "description": "Stores all user withdrawal requests for admin processing."
+        }
+      },
+       {
+        "path": "/forums/{postId}",
+        "definition": {
+          "schema": { "$ref": "#/entities/ForumPost" },
+          "description": "Stores posts for the governance forum."
         }
       }
     ],

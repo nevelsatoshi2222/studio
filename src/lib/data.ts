@@ -1,7 +1,4 @@
 
-
-
-
 import {
   Transaction,
   User,
@@ -973,7 +970,7 @@ export const worldInitiativeAllocations: FundAllocation[] = [
   { name: 'Influencer Prize Pool', value: 5, color: '#0ea5e9', description: 'Rewards for content creators promoting the platform. (1% of total)' },
   { name: 'Sports & Arts Dev', value: 10, color: '#0284c7', description: 'Sponsoring athletes, artists, and cultural projects. (2% of total)' },
   { name: 'Affiliate Marketing', value: 10, color: '#7c3aed', description: 'Rewards for bringing new users to the platform. (2% of total)' },
-  { name: 'Other Fixed', value: 10.5, color: '#c026d3', description: 'Includes Creator, franchisee, guide, and investor benefits. (2.1% of total)' },
+  { name: 'Other Fixed', value: 10.5, color: '#c026d3', description: 'Includes Creator, franchisee, guide, and initial investor benefits. (2.1% of total)' },
 ];
 
 
@@ -1084,38 +1081,5 @@ export const artsList: ArtItem[] = [
 export const airdropRewards: AirdropReward[] = [
   { name: 'Early Registration', percentage: 10, description: 'Reserved for early users who register and complete the Financial Awareness Quiz.' },
 ];
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    
-
-    
 
     
