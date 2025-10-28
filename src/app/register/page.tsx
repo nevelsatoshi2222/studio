@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -103,6 +103,20 @@ function RegistrationForm() {
         return;
     }
     try {
+      // Check if phone number is already used by 2 or more users
+      const usersRef = collection(firestore, 'users');
+      const phoneQuery = query(usersRef, where('phone', '==', data.phone));
+      const phoneQuerySnapshot = await getDocs(phoneQuery);
+
+      if (phoneQuerySnapshot.size >= 2) {
+          toast({
+              variant: 'destructive',
+              title: 'Registration Failed',
+              description: 'This phone number has already been registered the maximum number of times.',
+          });
+          return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
@@ -144,10 +158,17 @@ function RegistrationForm() {
       
     } catch (error: any) {
       console.error('Registration failed:', error);
+       let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        description = 'This email address is already registered. Please use a different email or log in.';
+      } else if (error.message) {
+        description = error.message;
+      }
+
       toast({
         variant: 'destructive',
         title: 'Registration Failed',
-        description: error.message || 'An unexpected error occurred. Please try again.',
+        description,
       });
     }
   };
@@ -394,5 +415,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-
-    
