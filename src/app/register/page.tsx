@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -107,10 +107,14 @@ function RegistrationForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Update Firebase Auth user profile
       await updateProfile(user, { displayName: data.name });
 
-      const userProfile = {
+      const isFirstAdmin = data.email === 'admin@publicgovernance.com';
+      
+      const batch = writeBatch(firestore);
+
+      const userDocRef = doc(firestore, 'users', user.uid);
+      batch.set(userDocRef, {
         id: user.uid,
         name: data.name,
         email: data.email,
@@ -126,27 +130,29 @@ function RegistrationForm() {
         balance: 0,
         referralCode: data.referralCode,
         registeredAt: serverTimestamp(),
-        status: role ? 'Pending' : 'Active', // Set status to Pending if applying for a role
+        status: isFirstAdmin ? 'Active' : (role ? 'Pending' : 'Active'),
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
-        role: data.role || 'User',
+        role: isFirstAdmin ? 'Admin' : (data.role || 'User'),
         jobTitle: data.jobTitle || '',
-      };
-      
-      // Use the user's UID as the document ID in the 'users' collection
-      const userDocRef = doc(firestore, 'users', user.uid);
-      
-      // Set the document in Firestore
-      await setDoc(userDocRef, userProfile);
+      });
 
-      // Send verification email
+      if (isFirstAdmin) {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        batch.set(adminRoleRef, { userId: user.uid });
+      }
+
+      await batch.commit();
+      
       await sendEmailVerification(user);
 
       toast({
         title: 'Registration Successful!',
-        description: 'Please check your email to verify your account.',
+        description: isFirstAdmin 
+          ? 'Admin account created! Please check your email for verification before logging in.'
+          : 'Please check your email to verify your account.',
       });
       
-      router.push('/login'); // Redirect to login page to prompt user to sign in after verification
+      router.push('/login');
       
     } catch (error: any) {
       console.error('Registration failed:', error);
@@ -409,3 +415,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
