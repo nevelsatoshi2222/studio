@@ -1,129 +1,19 @@
-/**
- * @file Firestore Security Rules
- * @description This ruleset enforces a strict user-ownership model for user profiles and referral data,
- *              allows public read access to social posts with owner-only write access, and restricts admin-level
- *              operations to authorized users.
- *
- * Data Structure:
- * - /users/{userId}: Stores user profile data, with the document ID matching the Firebase Auth UID.
- * - /users/{userId}/referrals/data: A singleton document storing referral data for a user.
- * - /social_posts/{postId}: Stores social media posts, publicly readable but writable only by the post's owner.
- * - /roles_admin/{userId}: Used for admin role assignment; presence of a document indicates admin status.
- * - /withdrawal_requests/{requestId}: Stores withdrawal requests, writeable by the user and readable by admins.
- *
- * Key Security Decisions:
- * - Users can only read and write their own profile and referral data.
- * - Social posts are publicly readable, but only the owner can create, update, or delete them.
- * - Admin privileges are determined by the existence of a document in the `/roles_admin` collection.
- * - Listing of users and admin roles is disallowed for security reasons.
- *
- * Denormalization for Authorization:
- * - SocialPost documents MUST contain a `userId` field to identify the post's owner.
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * @description Secures user profile data, allowing only the owner to read and write.
-     * @path /users/{userId}
-     * @allow (create) - User with UID 'user_abc' can create their profile document at /users/user_abc.
-     * @allow (get, update, delete) - User with UID 'user_abc' can get, update, and delete their profile document at /users/user_abc.
-     * @deny (create) - User with UID 'user_xyz' cannot create a profile document at /users/user_abc.
-     * @deny (get, update, delete) - User with UID 'user_xyz' cannot get, update, or delete the profile document at /users/user_abc.
-     * @principle Enforces document ownership for all operations.
-     */
+    // Default deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Allow anyone to create a user profile
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if false; // Listing users is not permitted.
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
-
-    /**
-     * @description Secures referral data for a user, allowing only the owner to read and write.
-     * @path /users/{userId}/referrals/data
-     * @allow (create, get, update, delete) - User with UID 'user_abc' can manage their referral data at /users/user_abc/referrals/data.
-     * @deny (create, get, update, delete) - User with UID 'user_xyz' cannot manage referral data at /users/user_abc/referrals/data.
-     * @principle Enforces strict ownership for referral data.
-     */
-    match /users/{userId}/referrals/data {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if false; // Listing referrals is not permitted.
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
-
-    /**
-     * @description Secures social media posts, allowing public read access but owner-only write access.
-     * @path /social_posts/{postId}
-     * @allow (get, list) - Any user (or unauthenticated user) can read all social posts.
-     * @allow (create) - User with UID 'user_abc' can create a social post with userId 'user_abc'.
-     * @allow (update, delete) - User with UID 'user_abc' can update/delete their own social post.
-     * @deny (create) - User with UID 'user_xyz' cannot create a social post with userId 'user_abc'.
-     * @deny (update, delete) - User with UID 'user_xyz' cannot update/delete a social post owned by 'user_abc'.
-     * @principle Allows public reads with ownership-based writes.
-     */
-    match /social_posts/{postId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && request.resource.data.userId == resource.data.userId;
-    }
-
-    /**
-     * @description Manages admin roles. Existence of a document grants admin privileges.
-     * @path /roles_admin/{userId}
-     * @allow (create) - An admin can create a new admin role (assuming they can authenticate as an admin).
-     * @allow (get, delete) - An admin can get and delete their own admin role.
-     * @deny (list) - Listing admin roles is not permitted.
-     * @deny (create, get, delete) - Non-admins cannot create, get, or delete admin roles.
-     * @principle Restricts admin role management to existing admins.
-     */
-    match /roles_admin/{userId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
-
-      allow get: if isAdmin();
-      allow list: if false; // Do not allow listing of admin roles.
-      allow create: if isAdmin();
-      allow update: if false; // Admins cannot update their own role.
-      allow delete: if isAdmin();
-    }
-
-    /**
-     * @description Manages withdrawal requests. Users can create requests, and admins can read them.
-     * @path /withdrawal_requests/{requestId}
-     * @allow (create) - Any authenticated user can create a withdrawal request.
-     * @allow (get, list, update) - Only admins can get, list, or update withdrawal requests.
-     * @deny (get, list, update) - Non-admins cannot access withdrawal requests.
-     * @principle Restricts withdrawal request management to admins.
-     */
-    match /withdrawal_requests/{requestId} {
-          function isSignedIn() {
-                return request.auth != null;
-          }
-
-          function isAdmin() {
-                return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-          }
-          allow get, list, update, delete: if isAdmin();
-          allow create: if isSignedIn();
+      allow create;
+      
+      // Allow users to read, update, or delete their own profile
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

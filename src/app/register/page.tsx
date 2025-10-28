@@ -35,9 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -116,15 +116,12 @@ function RegistrationForm() {
           });
           return;
       }
-
+      
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
-
+      
       // Update Firebase Auth user profile
       await updateProfile(user, { displayName: data.name });
-
-      // Send verification email
-      await sendEmailVerification(user);
 
       const userProfile = {
         id: user.uid,
@@ -151,7 +148,10 @@ function RegistrationForm() {
       const userDocRef = doc(firestore, 'users', user.uid);
       
       // Use the non-blocking version of setDoc with our custom error handler
-      setDocumentNonBlocking(userDocRef, userProfile, { merge: false });
+      await addDoc(collection(firestore, 'users'), userProfile);
+
+      // Send verification email
+      await sendEmailVerification(user);
 
       toast({
         title: 'Registration Successful!',
@@ -419,5 +419,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-
-    
