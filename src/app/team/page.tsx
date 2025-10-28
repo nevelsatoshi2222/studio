@@ -60,6 +60,7 @@ export default function TeamPage() {
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
+    // This query finds all users whose 'referralCode' field matches the current user's UID.
     return query(collection(firestore, 'users'), where('referralCode', '==', user.uid));
   }, [firestore, user]);
 
@@ -253,5 +254,3 @@ export default function TeamPage() {
     </AppLayout>
   );
 }
-
-    
