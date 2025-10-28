@@ -29,13 +29,11 @@ export default function MakeAdminPage() {
       setStatus('processing');
       const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
       
-      // Use setDocumentNonBlocking to create the admin role.
-      // This is a "fire-and-forget" operation.
+      // Correctly call the non-blocking function with merge options
       setDocumentNonBlocking(adminRoleRef, { userId: user.uid }, { merge: true });
 
       // We optimistically assume the write will succeed and update the UI.
-      // If it fails due to permissions, the global error handler will catch it.
-      setTimeout(() => setStatus('success'), 1500); // Give it a moment to feel like it's processing
+      setTimeout(() => setStatus('success'), 1500); 
     }
   }, [user, firestore, isUserLoading, status]);
 
@@ -104,4 +102,3 @@ export default function MakeAdminPage() {
     </AppLayout>
   );
 }
-
