@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
@@ -68,8 +69,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
-    if (!auth) { // If no Auth service instance, cannot determine user state
-      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
+    if (!auth || !firestore) { // If no Auth service instance, cannot determine user state
+      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth or Firestore service not provided.") });
       return;
     }
 
@@ -87,8 +88,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
               const userData = userDocSnap.data();
               const enrichedUser: AppUser = {
                 ...firebaseUser,
-                country: userData.country,
-                state: userData.state,
+                // Explicitly cast properties from the document data
+                country: userData.country as string | undefined,
+                state: userData.state as string | undefined,
               };
                setUserAuthState({ user: enrichedUser, isUserLoading: false, userError: null });
             } else {
@@ -198,3 +200,10 @@ export const useUser = (): UserHookResult => {
   const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
   return { user, isUserLoading, userError };
 };
+
+interface FirebaseProviderProps {
+  children: ReactNode;
+  firebaseApp: FirebaseApp;
+  firestore: Firestore;
+  auth: Auth;
+}
