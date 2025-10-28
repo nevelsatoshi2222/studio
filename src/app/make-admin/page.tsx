@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 export default function MakeAdminPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const router = useRouter();
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error' | 'no-user'>('idle');
 
   useEffect(() => {
