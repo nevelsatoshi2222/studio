@@ -2,20 +2,19 @@
 
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
-import { Firestore } from 'firebase/firestore';
+import { Firestore, doc, getDoc } from 'firebase/firestore';
 import { Auth, User, onAuthStateChanged } from 'firebase/auth';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
-interface FirebaseProviderProps {
-  children: ReactNode;
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
-}
+// Enriched User type
+export type AppUser = User & {
+  country?: string;
+  state?: string;
+};
 
 // Internal state for user authentication
 interface UserAuthState {
-  user: User | null;
+  user: AppUser | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
@@ -27,7 +26,7 @@ export interface FirebaseContextState {
   firestore: Firestore | null;
   auth: Auth | null; // The Auth service instance
   // User authentication state
-  user: User | null;
+  user: AppUser | null;
   isUserLoading: boolean; // True during initial auth check
   userError: Error | null; // Error from auth listener
 }
@@ -37,14 +36,14 @@ export interface FirebaseServicesAndUser {
   firebaseApp: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
-  user: User | null;
+  user: AppUser | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
 
 // Return type for useUser() - specific to user auth state
 export interface UserHookResult { 
-  user: User | null;
+  user: AppUser | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
@@ -78,8 +77,33 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => { // Auth state determined
-        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+      async (firebaseUser) => { // Auth state determined
+        if (firebaseUser) {
+          // User is signed in, now fetch their profile from Firestore
+          const userDocRef = doc(firestore, 'users', firebaseUser.uid);
+          try {
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data();
+              const enrichedUser: AppUser = {
+                ...firebaseUser,
+                country: userData.country,
+                state: userData.state,
+              };
+               setUserAuthState({ user: enrichedUser, isUserLoading: false, userError: null });
+            } else {
+              // User doc doesn't exist, use the base user object
+              setUserAuthState({ user: firebaseUser as AppUser, isUserLoading: false, userError: null });
+            }
+          } catch (error) {
+             console.error("FirebaseProvider: Error fetching user document:", error);
+             // Still provide the basic user object even if profile fetch fails
+             setUserAuthState({ user: firebaseUser as AppUser, isUserLoading: false, userError: error as Error });
+          }
+        } else {
+          // User is signed out
+          setUserAuthState({ user: null, isUserLoading: false, userError: null });
+        }
       },
       (error) => { // Auth listener error
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
@@ -87,7 +111,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       }
     );
     return () => unsubscribe(); // Cleanup
-  }, [auth]); // Depends on the auth instance
+  }, [auth, firestore]); // Depends on the auth and firestore instances
 
   // Memoize the context value
   const contextValue = useMemo((): FirebaseContextState => {
