@@ -36,7 +36,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
@@ -123,6 +123,9 @@ function RegistrationForm() {
       // Update Firebase Auth user profile
       await updateProfile(user, { displayName: data.name });
 
+      // Send verification email
+      await sendEmailVerification(user);
+
       const userProfile = {
         id: user.uid,
         name: data.name,
@@ -151,10 +154,10 @@ function RegistrationForm() {
 
       toast({
         title: 'Registration Successful!',
-        description: `Welcome, ${userProfile.name}! Your account has been created.`,
+        description: 'Please check your email to verify your account.',
       });
       
-      router.push('/'); // Redirect to dashboard after successful registration
+      router.push('/login'); // Redirect to login page to prompt user to sign in after verification
       
     } catch (error: any) {
       console.error('Registration failed:', error);
