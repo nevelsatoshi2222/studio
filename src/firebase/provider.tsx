@@ -15,7 +15,7 @@ interface FirebaseProviderProps {
 
 // Internal state for user authentication
 interface UserAuthState {
-  user: (User & { state?: string, country?: string }) | null;
+  user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
@@ -27,7 +27,7 @@ export interface FirebaseContextState {
   firestore: Firestore | null;
   auth: Auth | null; // The Auth service instance
   // User authentication state
-  user: (User & { state?: string, country?: string }) | null;
+  user: User | null;
   isUserLoading: boolean; // True during initial auth check
   userError: Error | null; // Error from auth listener
 }
@@ -37,14 +37,14 @@ export interface FirebaseServicesAndUser {
   firebaseApp: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
-  user: (User & { state?: string, country?: string }) | null;
+  user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
 
 // Return type for useUser() - specific to user auth state
-export interface UserHookResult { // Renamed from UserAuthHookResult for consistency if desired, or keep as UserAuthHookResult
-  user: (User & { state?: string, country?: string }) | null;
+export interface UserHookResult { 
+  user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
 }
@@ -79,18 +79,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const unsubscribe = onAuthStateChanged(
       auth,
       (firebaseUser) => { // Auth state determined
-        if (firebaseUser) {
-          // This is a placeholder. In a real app, you would fetch the user's profile
-          // from Firestore to get additional details like `state` and `country`.
-          const enrichedUser = {
-            ...firebaseUser,
-            state: 'Gujarat', // Hardcoded for demonstration
-            country: 'India' // Hardcoded for demonstration
-          };
-           setUserAuthState({ user: enrichedUser, isUserLoading: false, userError: null });
-        } else {
-          setUserAuthState({ user: null, isUserLoading: false, userError: null });
-        }
+        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
       (error) => { // Auth listener error
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
@@ -181,7 +170,7 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
  * This provides the User object, loading status, and any auth errors.
  * @returns {UserHookResult} Object with user, isUserLoading, userError.
  */
-export const useUser = (): UserHookResult => { // Renamed from useAuthUser
+export const useUser = (): UserHookResult => {
   const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
   return { user, isUserLoading, userError };
 };
