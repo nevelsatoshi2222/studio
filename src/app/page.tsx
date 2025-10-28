@@ -37,14 +37,6 @@ import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 
-// Define the User type for the user list
-type DisplayUser = {
-  id: string;
-  name: string;
-  email: string;
-  avatarId: string;
-  registeredAt: any;
-};
 
 export default function Dashboard() {
   const { publicKey } = useWallet();
@@ -54,13 +46,6 @@ export default function Dashboard() {
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   
   const firestore = useFirestore();
-
-  const latestUsersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'), orderBy('registeredAt', 'desc'), limit(5));
-  }, [firestore]);
-
-  const { data: latestUsers, isLoading: areUsersLoading } = useCollection<DisplayUser>(latestUsersQuery);
 
 
   useEffect(() => {
@@ -214,7 +199,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-1">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -251,49 +236,8 @@ export default function Dashboard() {
               </Table>
             </CardContent>
           </Card>
-
-           <Card>
-            <CardHeader>
-                <CardTitle>Latest Registered Users</CardTitle>
-                <CardDescription>Welcome our newest members.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {areUsersLoading ? (
-                    <div className="space-y-4">
-                        {[...Array(3)].map((_, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                                <Skeleton className="h-10 w-10 rounded-full" />
-                                <div className="space-y-1">
-                                    <Skeleton className="h-4 w-24" />
-                                    <Skeleton className="h-3 w-32" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : latestUsers && latestUsers.length > 0 ? (
-                    <div className="space-y-4">
-                        {latestUsers.map(user => (
-                            <div key={user.id} className="flex items-center gap-3">
-                                <Avatar>
-                                    <AvatarImage src={getAvatarUrl(user.avatarId)} alt={user.name} data-ai-hint={getAvatarHint(user.avatarId)} />
-                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-medium">{user.name}</p>
-                                    <p className="text-sm text-muted-foreground">Joined on {user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No new users yet.</p>
-                )}
-            </CardContent>
-        </Card>
         </div>
       </div>
     </AppLayout>
   );
 }
-
-    
