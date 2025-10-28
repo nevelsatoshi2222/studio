@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -145,10 +145,11 @@ function RegistrationForm() {
         jobTitle: data.jobTitle || '',
       };
       
+      // Use the user's UID as the document ID
       const userDocRef = doc(firestore, 'users', user.uid);
       
-      // Use the non-blocking version of setDoc with our custom error handler
-      setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+      // Use await here to ensure the document is created before proceeding
+      await setDoc(userDocRef, userProfile);
 
       // Send verification email
       await sendEmailVerification(user);
@@ -165,6 +166,8 @@ function RegistrationForm() {
        let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
+      } else if (error.code === 'permission-denied') {
+        description = "You do not have permission to perform this action. This could be due to security rules. Please check the console for more details.";
       } else if (error.message) {
         description = error.message;
       }
