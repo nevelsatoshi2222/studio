@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -52,14 +53,6 @@ export default function Dashboard() {
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   
   const firestore = useFirestore();
-
-  // Fetch all users for temporary display
-  const usersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'));
-  }, [firestore]);
-
-  const { data: users, isLoading: areUsersLoading } = useCollection<DisplayUser>(usersQuery);
 
 
   useEffect(() => {
@@ -126,43 +119,6 @@ export default function Dashboard() {
             Welcome back! Here's your overview of the Idea Governance platform.
           </p>
         </div>
-
-        {/* Temporary User List for Debugging */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Registered Users</CardTitle>
-            <CardDescription>This is a temporary list to verify that registration is working. It will be removed later.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {areUsersLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={2}>Loading users...</TableCell>
-                  </TableRow>
-                ) : users && users.length > 0 ? (
-                  users.map(user => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center">No users have been registered yet.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -328,4 +284,3 @@ export default function Dashboard() {
     </AppLayout>
   );
 }
-    
