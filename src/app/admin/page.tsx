@@ -19,21 +19,21 @@ import { Users, ClipboardList, CheckCircle, Briefcase, Megaphone, HelpCircle, Us
 
 const adminNavItems = [
     { href: '/admin/create-admin', icon: UserPlus, label: 'Create Admin', description: 'Create new admin accounts and assign roles.', requiredRole: 'Super Admin' },
-    { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.', requiredRole: 'Franchisee Management Admin' },
-    { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.', requiredRole: 'User Management Admin' },
+    { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.', requiredRole: ['Super Admin', 'Franchisee Management Admin'] },
+    { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.', requiredRole: ['Super Admin', 'User Management Admin'] },
     { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Process withdrawal requests and presale purchases.', requiredRole: 'Super Admin' },
-    { href: '/admin/jobs', icon: Briefcase, label: 'Job Management', description: 'Create and manage job postings.', requiredRole: 'Job Management Admin' },
-    { href: '/admin/social', icon: Megaphone, label: 'Social Media', description: 'Moderate social media content.', requiredRole: 'Social Media Management Admin' },
-    { href: '/admin/quiz', icon: HelpCircle, label: 'Quiz Management', description: 'Manage quiz questions and tournaments.', requiredRole: 'Quiz Management Admin' },
-]
+    { href: '/admin/jobs', icon: Briefcase, label: 'Job Management', description: 'Create and manage job postings.', requiredRole: ['Super Admin', 'Job Management Admin'] },
+    { href: '/admin/social', icon: Megaphone, label: 'Social Media', description: 'Moderate social media content.', requiredRole: ['Super Admin', 'Social Media Management Admin'] },
+    { href: '/admin/quiz', icon: HelpCircle, label: 'Quiz Management', description: 'Manage quiz questions and tournaments.', requiredRole: ['Super Admin', 'Quiz Management Admin'] },
+];
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
-  const userRoles = user?.role ? [user.role] : [];
-  const isSuperAdmin = userRoles.includes('Super Admin');
-  const hasAdminRole = user?.role && user.role.includes('Admin');
+  const userRole = user?.role;
+  const isSuperAdmin = userRole === 'Super Admin';
+  const hasAdminRole = userRole && userRole.includes('Admin');
 
   useEffect(() => {
     if (isUserLoading) return;
@@ -68,8 +68,12 @@ export default function AdminPage() {
       if (isSuperAdmin) {
           return adminNavItems;
       }
-      // Show cards relevant to the specific admin role
-      return adminNavItems.filter(item => userRoles.includes(item.requiredRole));
+      return adminNavItems.filter(item => {
+        if (Array.isArray(item.requiredRole)) {
+            return item.requiredRole.includes(userRole as string);
+        }
+        return item.requiredRole === userRole;
+      });
   }
   
   const visibleNavItems = getVisibleNavItems();
@@ -83,7 +87,7 @@ export default function AdminPage() {
             Welcome, {user.displayName || user.email}. Role: {user.role}
           </p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {visibleNavItems.length > 0 ? (
               visibleNavItems.map(item => {
               const Icon = item.icon;

@@ -20,12 +20,12 @@ import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 
 const adminRoles = [
-    'User Management Admin',
-    'Job Management Admin',
-    'Franchisee Management Admin',
-    'Social Media Management Admin',
-    'Quiz Management Admin',
-    'Super Admin'
+    { value: 'User Management Admin', label: 'User Management' },
+    { value: 'Job Management Admin', label: 'Job Management' },
+    { value: 'Franchisee Management Admin', label: 'Franchisee Management' },
+    { value: 'Social Media Management Admin', label: 'Social Media Management' },
+    { value: 'Quiz Management Admin', label: 'Quiz Management' },
+    { value: 'Super Admin', label: 'Super Admin (ROOT)' }
 ];
 
 const createAdminSchema = z.object({
@@ -37,7 +37,6 @@ const createAdminSchema = z.object({
 
 type CreateAdminFormValues = z.infer<typeof createAdminSchema>;
 
-// Create a secondary Firebase app instance for admin creation
 function createSecondaryApp(): FirebaseApp {
     const apps = getApps();
     const secondaryAppName = 'secondaryAdminApp';
@@ -111,7 +110,7 @@ function CreateAdminForm() {
                     <UserPlus /> Create New Admin
                 </CardTitle>
                 <CardDescription>
-                    Use this form to create a new administrator account and assign them a specific management role.
+                    Use this form to create a new administrator account and assign them a specific management role. This corresponds to the Manager groups in the documentation.
                 </CardDescription>
             </CardHeader>
             <Form {...form}>
@@ -167,7 +166,7 @@ function CreateAdminForm() {
                                             </FormControl>
                                             <SelectContent>
                                                 {adminRoles.map(role => (
-                                                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                                                    <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>

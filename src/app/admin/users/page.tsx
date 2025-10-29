@@ -26,10 +26,18 @@ type User = {
     role?: string;
 };
 
-const adminRoles = [
+const allRoles = [
     'User',
     'Influencer',
     'Franchisee',
+    'Franchisee Supplier',
+    'Franchisee Wholesaler',
+    'Franchisee Stockist',
+    'Manufacturer / Supplier / Producer',
+    'Service Provider',
+    'Sports',
+    'Arts',
+    'Shipping & Logistics',
     'Job Seeker',
     'User Management Admin',
     'Job Management Admin',
@@ -89,15 +97,12 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
     
     const formatRegistrationDate = (registeredAt: any) => {
         if (!registeredAt) return 'N/A';
-        // Handle Firestore Timestamp object
         if (typeof registeredAt.toDate === 'function') {
             return registeredAt.toDate().toLocaleDateString();
         }
-        // Handle serialized Timestamp (e.g., from server-side rendering or JSON)
         if (registeredAt.seconds) {
             return new Date(registeredAt.seconds * 1000).toLocaleDateString();
         }
-        // Fallback for string or number date
         try {
             return new Date(registeredAt).toLocaleDateString();
         } catch (e) {
@@ -172,8 +177,8 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
                                                         <UserCog className="mr-2 h-4 w-4" />
                                                         Assign Role
                                                     </DropdownMenuSubTrigger>
-                                                    <DropdownMenuSubContent>
-                                                        {adminRoles.map(role => (
+                                                    <DropdownMenuSubContent className="max-h-64 overflow-y-auto">
+                                                        {allRoles.map(role => (
                                                              <DropdownMenuItem key={role} onClick={() => handleChangeRole(user.id, role)}>
                                                                 {role}
                                                              </DropdownMenuItem>

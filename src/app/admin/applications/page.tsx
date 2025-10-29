@@ -16,6 +16,7 @@ import { collection, doc, query, where, Query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 type User = {
     id: string;
@@ -23,7 +24,7 @@ type User = {
     email: string;
     country: string;
     status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
-    registeredAt: string;
+    registeredAt: any;
     avatarId: string;
     role?: string;
 };
@@ -50,6 +51,7 @@ const UserRowSkeleton = () => (
 function ApplicationsTable() {
     const [filter, setFilter] = useState('All');
     const firestore = useFirestore();
+    const { toast } = useToast();
 
     const usersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
@@ -64,10 +66,14 @@ function ApplicationsTable() {
 
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
-    const handleUpdateStatus = (userId: string, newStatus: 'Active' | 'Rejected') => {
+    const handleUpdateStatus = (user: User, newStatus: 'Active' | 'Rejected') => {
         if (!firestore) return;
-        const userDocRef = doc(firestore, 'users', userId);
+        const userDocRef = doc(firestore, 'users', user.id);
         updateDocumentNonBlocking(userDocRef, { status: newStatus });
+        toast({
+            title: `Applicant ${newStatus}`,
+            description: `${user.name} has been ${newStatus.toLowerCase()}.`,
+        });
     };
 
     const getAvatarUrl = (avatarId: string) => {
@@ -127,7 +133,7 @@ function ApplicationsTable() {
                                     </TableCell>
                                     <TableCell>{user.country}</TableCell>
                                     <TableCell>
-                                        <Badge variant={user.status === 'Active' ? 'default' : user.status === 'Pending' ? 'secondary' : 'destructive'}>
+                                        <Badge variant="secondary">
                                             {user.status}
                                         </Badge>
                                     </TableCell>
@@ -145,10 +151,10 @@ function ApplicationsTable() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
+                                                <DropdownMenuItem onClick={() => handleUpdateStatus(user, 'Active')}>
                                                     <Check className="mr-2 h-4 w-4" /> Approve
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Rejected')}>
+                                                <DropdownMenuItem onClick={() => handleUpdateStatus(user, 'Rejected')}>
                                                     <X className="mr-2 h-4 w-4" /> Reject
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
@@ -161,7 +167,7 @@ function ApplicationsTable() {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} className="h-24 text-center">
-                                    No pending applications found.
+                                    No pending applications found for the selected filter.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -176,8 +182,9 @@ export default function ApplicationsPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
 
-    const isSuperAdmin = user?.role === 'Super Admin';
-    const isFranchiseeAdmin = user?.role === 'Franchisee Management Admin';
+    const userRole = user?.role;
+    const isSuperAdmin = userRole === 'Super Admin';
+    const isFranchiseeAdmin = userRole === 'Franchisee Management Admin';
     const canAccessPage = isSuperAdmin || isFranchiseeAdmin;
     
     useEffect(() => {

@@ -109,7 +109,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { toast } = useToast();
 
-  const isFirebaseAdmin = user?.role?.includes('Admin');
+  const userRole = user?.role;
+  const isSuperAdmin = userRole === 'Super Admin';
+  const hasAdminRole = userRole && userRole.includes('Admin');
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -171,7 +173,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           <DropdownMenuItem asChild>
                               <Link href="/settings">Settings</Link>
                           </DropdownMenuItem>
-                          {isFirebaseAdmin && (
+                          {hasAdminRole && (
                             <>
                                 <DropdownMenuSeparator />
                                  <DropdownMenuItem asChild>
@@ -223,7 +225,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         
         <SidebarSeparator />
         
-        {isFirebaseAdmin && (
+        {hasAdminRole && (
             <SidebarMenu>
                 <SidebarMenuItem>
                     <Collapsible>
@@ -237,9 +239,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         <CollapsibleContent>
                             <SidebarMenuSub>
                                 <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                {isSuperAdmin && (
+                                    <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                )}
+                                {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (
+                                    <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                )}
+                                {(isSuperAdmin || userRole === 'User Management Admin') && (
+                                    <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                )}
+                                 {isSuperAdmin && (
+                                    <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                )}
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </Collapsible>
