@@ -160,21 +160,20 @@ export default function FinancialQuizPage() {
   };
 
   const handleNext = () => {
+    setAnswerState('unanswered');
+    setSelectedAnswer(null);
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
-      setAnswerState('unanswered');
     } else {
       setQuizFinished(true);
-      processRewards();
+      processRewards(score + (selectedAnswer === currentQuestion.answer ? 1 : 0) - score); // Calculate final score on finish
     }
   };
-
-  const processRewards = () => {
+  
+  const processRewards = (finalScore: number) => {
     if (!user || !firestore) return;
     
     let reward = 0;
-    const finalScore = score + (selectedAnswer === currentQuestion.answer ? 1 : 0);
     
     if (finalScore === 10) reward = 10;
     else if (finalScore > 6) reward = 5;
@@ -183,7 +182,6 @@ export default function FinancialQuizPage() {
 
     if (reward > 0) {
       const userDocRef = doc(firestore, 'users', user.uid);
-      // Use Firestore's increment function for atomic updates
       updateDocumentNonBlocking(userDocRef, {
         pgcBalance: increment(reward)
       });
@@ -205,13 +203,14 @@ export default function FinancialQuizPage() {
 
   const progressPercentage = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
   
+  const finalScore = score + (answerState === 'correct' ? 1 : 0);
   let coinReward = 0;
   if (quizFinished) {
-    if (score === 10) {
+    if (finalScore === 10) {
       coinReward = 10;
-    } else if (score > 6) {
+    } else if (finalScore > 6) {
       coinReward = 5;
-    } else if (score >= 4) {
+    } else if (finalScore >= 4) {
       coinReward = 2.5;
     } else {
       coinReward = 1.25;
@@ -334,14 +333,14 @@ export default function FinancialQuizPage() {
             <CardContent className="text-center space-y-4">
                 <h2 className="text-2xl font-bold text-primary">Quiz Complete!</h2>
                 <p className="text-lg text-muted-foreground">You scored</p>
-                <p className="text-5xl font-bold">{score} / {quizQuestions.length}</p>
+                <p className="text-5xl font-bold">{finalScore} / {quizQuestions.length}</p>
                 
                 {coinReward > 0 ? (
                     <Alert className="max-w-md mx-auto text-left border-green-500 bg-green-500/10">
                         <Award className="h-4 w-4 text-green-500" />
                         <AlertTitle className="text-green-600">Congratulations! You won {coinReward} PGC!</AlertTitle>
                         <AlertDescription className="text-green-800">
-                            {score === 10 ?
+                            {finalScore === 10 ?
                                 `You've qualified for the next round!` :
                                 `Keep playing to improve your score and win bigger prizes.`
                             } Your reward has been added to your in-app balance, viewable on your{' '}

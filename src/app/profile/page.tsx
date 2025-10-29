@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, serverTimestamp, increment } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -181,7 +181,7 @@ export default function ProfilePage() {
         status: 'pending',
     });
     if (userDocRef) {
-      updateDocumentNonBlocking(userDocRef, { pgcBalance: (userProfile.pgcBalance || 0) - withdrawAmount });
+      updateDocumentNonBlocking(userDocRef, { pgcBalance: increment(-withdrawAmount) });
     }
     toast({
         title: 'Withdrawal Requested',

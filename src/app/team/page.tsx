@@ -20,7 +20,6 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, UserPlus, DollarSign, Award } from 'lucide-react';
-import { placeholderImages } from '@/lib/placeholder-images.json';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
@@ -150,13 +149,7 @@ export default function TeamPage() {
   }, [directMembers, firestore]);
 
   const getAvatarUrl = (avatarId: string) => {
-    const image = placeholderImages.find((img) => img.id === avatarId);
-    return image ? image.imageUrl : `https://picsum.photos/seed/${avatarId}/40/40`;
-  };
-
-  const getAvatarHint = (avatarId: string) => {
-    const image = placeholderImages.find((img) => img.id === avatarId);
-    return image ? image.imageHint : 'user avatar';
+    return `https://picsum.photos/seed/${avatarId}/40/40`;
   };
   
   const EarningTable = () => {
@@ -368,7 +361,7 @@ export default function TeamPage() {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar>
-                                  <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} data-ai-hint={getAvatarHint(member.avatarId)} />
+                                  <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} />
                                   <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <span className="font-medium">{member.name}</span>
@@ -402,4 +395,3 @@ export default function TeamPage() {
   );
 }
 
-    
