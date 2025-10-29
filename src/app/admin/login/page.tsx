@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,7 +27,7 @@ import {
 } from '@/components/ui/form';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, LogIn } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 
 
@@ -55,23 +54,33 @@ function AdminLoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       
-      // Explicitly check for admin role right after login
-      const adminRoleRef = doc(firestore, 'roles_admin', userCredential.user.uid);
-      const adminRoleSnap = await getDoc(adminRoleRef);
+      const userDocRef = doc(firestore, 'users', userCredential.user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-      if (adminRoleSnap.exists()) {
-        toast({
-          title: 'Admin Login Successful',
-          description: 'Redirecting to admin dashboard...',
-        });
-        router.push('/admin'); // Direct navigation to admin dashboard
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        // Check if the user has an admin role
+        if (userData.role && userData.role.includes('Admin')) {
+            toast({
+                title: 'Admin Login Successful',
+                description: 'Redirecting to admin dashboard...',
+            });
+            router.push('/admin');
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Login Failed',
+                description: 'This account does not have admin privileges.',
+            });
+            await auth.signOut();
+        }
       } else {
         toast({
           variant: 'destructive',
           title: 'Login Failed',
-          description: 'This account does not have admin privileges.',
+          description: 'User data not found.',
         });
-        await auth.signOut(); // Sign out the non-admin user
+        await auth.signOut();
       }
 
     } catch (error: any) {
@@ -138,39 +147,35 @@ export default function AdminLoginPage() {
   const firestore = useFirestore();
   const router = useRouter();
 
-  const adminRoleRef = useMemoFirebase(() => {
+  const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return doc(firestore, 'roles_admin', user.uid);
+    return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-  const isFirebaseAdmin = !!adminRole;
+  const { data: userData, isLoading: isUserDocLoading } = useDoc(userDocRef);
 
   useEffect(() => {
-    const isCheckingAuth = isUserLoading || (user && isRoleLoading);
-
+    const isCheckingAuth = isUserLoading || isUserDocLoading;
     if (isCheckingAuth) return;
 
-    if (isFirebaseAdmin) {
-      router.replace('/admin');
-    } else if (user && !isFirebaseAdmin) {
-      // If a user is logged in but is not an admin, redirect them away from admin login page.
-      router.replace('/');
+    if (user && userData) {
+      if (userData.role && userData.role.includes('Admin')) {
+        router.replace('/admin');
+      } else {
+        // If a non-admin user is logged in, keep them on the main site.
+        router.replace('/');
+      }
     }
-  }, [user, isFirebaseAdmin, isUserLoading, isRoleLoading, router]);
+  }, [user, userData, isUserLoading, isUserDocLoading, router]);
 
-  // While checking auth, show loading
-  if (isUserLoading || (user && isRoleLoading)) {
+  if (isUserLoading || isUserDocLoading) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
   
-  // If user is already identified as an admin they'll be redirected.
-  // We return null here to prevent flashing the login form during the redirect.
-  if (isFirebaseAdmin) {
-    return null;
+  if (user && userData && userData.role && userData.role.includes('Admin')) {
+    return null; // Prevent flashing login form during redirect
   }
-
-  // Show login form only if no user is logged in, or if user is not an admin.
+  
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <AdminLoginForm />

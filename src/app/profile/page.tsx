@@ -14,12 +14,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send } from 'lucide-react';
+import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { doc, getDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, serverTimestamp } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,6 +34,16 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -76,11 +86,13 @@ function ProfileLoadingSkeleton() {
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { publicKey, connected } = useWallet();
+  const { publicKey } = useWallet();
   const { toast } = useToast();
   
   const [nationalIdFile, setNationalIdFile] = useState<File | null>(null);
   const [taxIdFile, setTaxIdFile] = useState<File | null>(null);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState(0);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -111,6 +123,7 @@ export default function ProfilePage() {
         ifscCode: userProfile.ifscCode || '',
         accountHolderName: userProfile.accountHolderName || '',
       });
+      setWithdrawAmount(userProfile.pgcBalance || 0);
     } else if (user) {
         form.reset({
             name: user.displayName || user.email?.split('@')[0] || 'User',
@@ -119,15 +132,15 @@ export default function ProfilePage() {
   }, [userProfile, user, form]);
 
   useEffect(() => {
-    // Automatically pre-fill wallet address if connected and not already saved
     if (publicKey && !form.getValues('solanaWalletAddress')) {
        form.setValue('solanaWalletAddress', publicKey.toBase58());
     }
   }, [publicKey, form]);
 
-  const handleFinancialDetailsSubmit = (data: ProfileFormValues) => {
-    if (!userDocRef) return;
+  const handleProfileSubmit = (data: ProfileFormValues) => {
+    if (!userDocRef || !user) return;
     updateDocumentNonBlocking(userDocRef, {
+        name: data.name,
         solanaWalletAddress: data.solanaWalletAddress,
         bankName: data.bankName,
         accountNumber: data.accountNumber,
@@ -136,7 +149,7 @@ export default function ProfilePage() {
     });
     toast({
         title: 'Profile Updated',
-        description: 'Your financial details have been saved.',
+        description: 'Your details have been saved.',
     });
   };
 
@@ -145,17 +158,16 @@ export default function ProfilePage() {
         toast({
             variant: 'destructive',
             title: 'Cannot Request Withdrawal',
-            description: 'Please ensure you are logged in and your wallet is connected and linked.',
+            description: 'Please ensure your wallet address is saved in your profile.',
         });
         return;
     }
-    const withdrawalAmount = userProfile.pgcBalance || 0;
-    if (withdrawalAmount <= 0) {
-        toast({
-            variant: 'destructive',
-            title: 'No Balance to Withdraw',
-            description: 'You do not have any PGC in your in-app balance.',
-        });
+    if (withdrawAmount <= 0) {
+        toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Withdrawal amount must be greater than zero.'});
+        return;
+    }
+    if (withdrawAmount > (userProfile.pgcBalance || 0)) {
+        toast({ variant: 'destructive', title: 'Insufficient Balance', description: 'Withdrawal amount cannot exceed your balance.'});
         return;
     }
 
@@ -163,19 +175,19 @@ export default function ProfilePage() {
     addDocumentNonBlocking(requestsCollection, {
         userId: user.uid,
         userName: userProfile.name,
-        amount: withdrawalAmount,
+        amount: withdrawAmount,
         solanaAddress: userProfile.solanaWalletAddress,
         requestedAt: serverTimestamp(),
         status: 'pending',
     });
-    // Reset the in-app balance after requesting
     if (userDocRef) {
-      updateDocumentNonBlocking(userDocRef, { pgcBalance: 0 });
+      updateDocumentNonBlocking(userDocRef, { pgcBalance: (userProfile.pgcBalance || 0) - withdrawAmount });
     }
     toast({
         title: 'Withdrawal Requested',
-        description: `Your request to withdraw ${withdrawalAmount.toLocaleString()} PGC has been submitted for admin approval.`,
+        description: `Your request to withdraw ${withdrawAmount.toLocaleString()} PGC has been submitted.`,
     });
+    setIsWithdrawModalOpen(false);
   }
 
   const handleKycSubmit = async () => {
@@ -184,9 +196,7 @@ export default function ProfilePage() {
         title: 'KYC Submitted',
         description: 'Your documents are being processed. This is a placeholder as file uploads are not yet implemented.',
     });
-    // In a real app, you would upload files to Firebase Storage here and save the URLs
-    // For now, we'll just update a status
-     updateDocumentNonBlocking(userDocRef, {
+    updateDocumentNonBlocking(userDocRef, {
         kycStatus: 'pending',
         nationalIdUrl: nationalIdFile ? `kyc_uploads/${user?.uid}/${nationalIdFile.name}` : '',
         taxIdUrl: taxIdFile ? `kyc_uploads/${user?.uid}/${taxIdFile.name}` : '',
@@ -198,17 +208,13 @@ export default function ProfilePage() {
   const copyToClipboard = (textToCopy: string, toastMessage: string) => {
     navigator.clipboard.writeText(textToCopy);
     toast({
-      title: 'Copied to Clipboard!',
+      title: 'Copied!',
       description: toastMessage,
     });
   };
 
   if (isUserLoading || (user && isProfileLoading)) {
-    return (
-        <AppLayout>
-            <ProfileLoadingSkeleton />
-        </AppLayout>
-    )
+    return <AppLayout><ProfileLoadingSkeleton /></AppLayout>;
   }
 
   if (!user) {
@@ -217,10 +223,11 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
-            <CardDescription>
-              You must be logged in to view your profile.
-            </CardDescription>
+            <CardDescription>You must be logged in to view your profile.</CardDescription>
           </CardHeader>
+          <CardFooter>
+            <Button asChild><Link href="/login">Login</Link></Button>
+          </CardFooter>
         </Card>
       </AppLayout>
     );
@@ -231,18 +238,17 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <div>
           <h1 className="font-headline text-3xl font-bold">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your account details and settings.
-          </p>
+          <p className="text-muted-foreground">Manage your account details, team, and finances.</p>
         </div>
 
-        {/* User Info Card */}
+        {/* User Info & Profile Form */}
         <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleProfileSubmit)}>
             <Card>
-            <CardHeader className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <CardHeader className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <Avatar className="h-24 w-24 border-4 border-primary">
-                    <AvatarImage src={user?.photoURL || (publicKey ? `https://api.dicebear.com/7.x/identicon/svg?seed=${publicKey.toBase58()}` : `https://picsum.photos/seed/${user.uid}/96/96`)} />
-                    <AvatarFallback className="text-3xl">{user ? user.email?.charAt(0).toUpperCase() : 'G'}</AvatarFallback>
+                    <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user.uid}/96/96`} />
+                    <AvatarFallback className="text-3xl">{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 w-full">
                      <FormField
@@ -260,145 +266,72 @@ export default function ProfilePage() {
                         />
                     <CardDescription className="text-base mt-1">{user?.email}</CardDescription>
                 </div>
-                <Button onClick={form.handleSubmit(handleFinancialDetailsSubmit)}>
-                    <UserCog className="mr-2 h-4 w-4" /> Save Profile
-                </Button>
-            </CardHeader>
+                <Button type="submit"><UserCog className="mr-2 h-4 w-4" /> Save Profile</Button>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                <Separator />
+                <div className="space-y-4">
+                    <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet & Bank Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="solanaWalletAddress" render={({ field }) => (<FormItem><FormLabel>Solana Wallet Address</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="accountHolderName" render={({ field }) => (<FormItem><FormLabel>Account Holder Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={form.control} name="bankName" render={({ field }) => (<FormItem><FormLabel>Bank Name</FormLabel><FormControl><Input placeholder="e.g., Global Trust Bank" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={form.control} name="accountNumber" render={({ field }) => (<FormItem><FormLabel>Account Number</FormLabel><FormControl><Input placeholder="e.g., 1234567890" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={form.control} name="ifscCode" render={({ field }) => (<FormItem><FormLabel>IFSC/SWIFT Code</FormLabel><FormControl><Input placeholder="e.g., GTB0123456" {...field} /></FormControl></FormItem>)} />
+                    </div>
+                </div>
+              </CardContent>
             </Card>
-            
-            {/* Referral Link Card */}
-            <Card>
-                <CardHeader>
-                <CardTitle>Your Affiliate Referral Link</CardTitle>
-                <CardDescription>
-                    Share this link to invite new members and build your team.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
-                    <Input type="text" value={referralLink} readOnly className="flex-1 bg-transparent border-0 text-muted-foreground"/>
-                    <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
-                        <Copy className="h-5 w-5" />
+          </form>
+        </Form>
+        
+        {/* Financial Hub Card */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Financial Hub</CardTitle>
+                <CardDescription>Your financial overview, including balances and actions.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">In-App PGC Balance</p>
+                        <div className="flex items-baseline gap-2">
+                            <Image src="/pgc-logo.png" alt="PGC Coin" width={28} height={28} />
+                            <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
+                            <span className="text-xl text-muted-foreground">PGC</span>
+                        </div>
+                    </div>
+                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Withdraw to Wallet</Button>
+                </div>
+                <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">Team & Staking</p>
+                        <p className="text-lg">View your affiliate team, earnings, and staked assets.</p>
+                    </div>
+                     <Button asChild variant="outline">
+                        <Link href="/team">Go to My Team <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                     <Button asChild variant="outline">
+                        <Link href="/staking">Go to Staking <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
-                </CardContent>
-            </Card>
-
-             {/* PGC Wallet Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>PGC Wallet</CardTitle>
-                    <CardDescription>Your in-app PGC balance. Request a withdrawal to move these funds to your linked Solana wallet.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border p-4">
-                        <div>
-                             <p className="text-sm text-muted-foreground">In-App Balance</p>
-                             <div className="flex items-baseline gap-2">
-                                <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1723055490400_0.png" alt="PGC Coin" width={28} height={28} />
-                                <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
-                                <span className="text-xl text-muted-foreground">PGC</span>
-                            </div>
-                        </div>
-                         <Button onClick={handleWithdrawalRequest} disabled={(userProfile?.pgcBalance || 0) === 0}>
-                            <Send className="mr-2 h-4 w-4" /> Request Withdrawal
+            </CardContent>
+             <CardFooter className="flex-col items-start gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="referral-link">Your Affiliate Link</Label>
+                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
+                        <Input id="referral-link" type="text" value={referralLink} readOnly className="flex-1 bg-transparent border-0 text-muted-foreground"/>
+                        <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
+                            <Copy className="h-5 w-5" />
                         </Button>
                     </div>
-                </CardContent>
-                 <CardFooter>
-                     <p className="text-xs text-muted-foreground">Withdrawal requests are processed manually by an administrator. This may take up to 24-48 hours.</p>
-                 </CardFooter>
-            </Card>
+                </div>
+             </CardFooter>
+        </Card>
 
-            {/* Financial Details Card */}
-            <Card>
-                <form onSubmit={form.handleSubmit(handleFinancialDetailsSubmit)}>
-                    <CardHeader>
-                        <CardTitle>Financial Details</CardTitle>
-                        <CardDescription>Manage your wallet and bank information.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                            <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Solana Wallet</h3>
-                             <FormField
-                                control={form.control}
-                                name="solanaWalletAddress"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Wallet Address for PGC</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Enter your Solana wallet address" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            {!connected && <p className="text-sm text-muted-foreground">Connect your wallet to auto-fill this field.</p>}
-                        </div>
-                        
-                        <Separator />
-                        <div className="space-y-4">
-                            <h3 className="font-medium flex items-center gap-2 text-primary"><Landmark className="h-5 w-5"/> Bank Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="bankName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Bank Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., Global Trust Bank" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                    />
-                                <FormField
-                                    control={form.control}
-                                    name="accountNumber"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Account Number</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., 1234567890" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                    />
-                                <FormField
-                                    control={form.control}
-                                    name="ifscCode"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>IFSC/SWIFT Code</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., GTB0123456" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                    />
-                                <FormField
-                                    control={form.control}
-                                    name="accountHolderName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Account Holder Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., John Doe" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                    />
-                            </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button type="submit">Save Financial Details</Button>
-                    </CardFooter>
-                </form>
-            </Card>
-        </Form>
         {/* KYC Card */}
-          <Card>
+        <Card>
             <CardHeader>
               <CardTitle>KYC Verification</CardTitle>
               <CardDescription>
@@ -413,44 +346,58 @@ export default function ProfilePage() {
                 <Label htmlFor="id-card">National ID Card</Label>
                 <div className="flex items-center gap-4 rounded-md border p-3">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground flex-1">
-                    {nationalIdFile ? nationalIdFile.name : 'Click to upload or drag and drop'}
-                  </span>
-                  <Button variant="outline" size="sm" asChild>
-                    <Label htmlFor="id-card-file" className="cursor-pointer">Browse</Label>
-                  </Button>
-                  <Input 
-                    id="id-card-file" 
-                    type="file" 
-                    className="sr-only" 
-                    onChange={(e) => setNationalIdFile(e.target.files ? e.target.files[0] : null)}
-                  />
+                  <span className="text-sm text-muted-foreground flex-1">{nationalIdFile ? nationalIdFile.name : 'Click to upload or drag and drop'}</span>
+                  <Button variant="outline" size="sm" asChild><Label htmlFor="id-card-file" className="cursor-pointer">Browse</Label></Button>
+                  <Input id="id-card-file" type="file" className="sr-only" onChange={(e) => setNationalIdFile(e.target.files ? e.target.files[0] : null)} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tax-id-card">Income Tax ID Card (e.g., PAN Card)</Label>
                  <div className="flex items-center gap-4 rounded-md border p-3">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground flex-1">
-                    {taxIdFile ? taxIdFile.name : 'Click to upload or drag and drop'}
-                  </span>
-                  <Button variant="outline" size="sm" asChild>
-                    <Label htmlFor="tax-id-file" className="cursor-pointer">Browse</Label>
-                  </Button>
-                  <Input 
-                    id="tax-id-file" 
-                    type="file" 
-                    className="sr-only" 
-                    onChange={(e) => setTaxIdFile(e.target.files ? e.target.files[0] : null)}
-                  />
+                  <span className="text-sm text-muted-foreground flex-1">{taxIdFile ? taxIdFile.name : 'Click to upload or drag and drop'}</span>
+                  <Button variant="outline" size="sm" asChild><Label htmlFor="tax-id-file" className="cursor-pointer">Browse</Label></Button>
+                  <Input id="tax-id-file" type="file" className="sr-only" onChange={(e) => setTaxIdFile(e.target.files ? e.target.files[0] : null)} />
                 </div>
               </div>
             </CardContent>
             <CardFooter>
               <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.kycStatus === 'pending' || userProfile?.kycStatus === 'verified'}>Submit for Verification</Button>
             </CardFooter>
-          </Card>
+        </Card>
       </div>
+
+       {/* Withdrawal Modal */}
+        <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Request PGC Withdrawal</DialogTitle>
+                    <DialogDescription>
+                        Enter the amount of PGC you wish to withdraw to your linked Solana wallet: <strong className="font-mono text-xs">{userProfile?.solanaWalletAddress}</strong>
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="withdraw-amount">Amount to Withdraw</Label>
+                        <div className="relative">
+                            <Input
+                                id="withdraw-amount"
+                                type="number"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(Number(e.target.value))}
+                                max={userProfile?.pgcBalance || 0}
+                            />
+                            <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7" onClick={() => setWithdrawAmount(userProfile?.pgcBalance || 0)}>Max</Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Available Balance: {(userProfile?.pgcBalance || 0).toLocaleString()} PGC</p>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                    <Button onClick={handleWithdrawalRequest}>Submit Request</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
   );
 }

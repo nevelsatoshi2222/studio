@@ -3,7 +3,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -12,47 +12,36 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, ClipboardList, CheckCircle } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, Briefcase, Megaphone, HelpCircle } from 'lucide-react';
 
 const adminNavItems = [
-    { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.' },
-    { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.' },
-    { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Process withdrawal requests and presale purchases.' },
+    { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.', requiredRole: 'Franchisee Management Admin' },
+    { href: '/admin/users', icon: Users, label: 'All Users', description: 'View and manage all registered users.', requiredRole: 'User Management Admin' },
+    { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Process withdrawal requests and presale purchases.', requiredRole: 'Super Admin' },
+    { href: '/admin/jobs', icon: Briefcase, label: 'Job Management', description: 'Create and manage job postings.', requiredRole: 'Job Management Admin' },
+    { href: '/admin/social', icon: Megaphone, label: 'Social Media', description: 'Moderate social media content.', requiredRole: 'Social Media Management Admin' },
+    { href: '/admin/quiz', icon: HelpCircle, label: 'Quiz Management', description: 'Manage quiz questions and tournaments.', requiredRole: 'Quiz Management Admin' },
 ]
 
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
   const router = useRouter();
 
-  // Memoize the document reference
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-
-  const isFirebaseAdmin = !!adminRole;
-  const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+  const userRoles = user?.role ? [user.role] : [];
+  const isSuperAdmin = userRoles.includes('Super Admin');
 
   useEffect(() => {
-    if (isCheckingAdmin) {
-        return; // Wait until authentication and role checks are complete
-    }
+    if (isUserLoading) return;
 
-    // If auth checks are done and the user is not a Firebase admin, redirect
-    if (!isFirebaseAdmin) {
+    if (!user || !user.role || !user.role.includes('Admin')) {
       router.replace('/admin/login');
     }
-  }, [isCheckingAdmin, isFirebaseAdmin, router]);
+  }, [user, isUserLoading, router]);
 
-  // Show a loading state while we verify auth and role
-  if (isCheckingAdmin) {
+  if (isUserLoading) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -72,45 +61,50 @@ export default function AdminPage() {
     );
   }
 
-  // If user is verified as admin, show the dashboard
-  if (isFirebaseAdmin) {
-    return (
-      <AppLayout>
-        <div className="flex flex-col gap-8">
-          <div>
-            <h1 className="font-headline text-3xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome, Administrator. Select a category below to manage your platform.
-            </p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            {adminNavItems.map(item => {
-                const Icon = item.icon;
-                return (
-                    <Card key={item.label}>
-                        <CardHeader>
-                            <div className="flex items-center gap-4">
-                                <Icon className="h-8 w-8 text-primary"/>
-                                <div>
-                                    <CardTitle>{item.label}</CardTitle>
-                                    <CardDescription>{item.description}</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Button asChild>
-                                <Link href={item.href}>Go to {item.label}</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )
-            })}
-          </div>
-        </div>
-      </AppLayout>
-    );
+  if (!user || !user.role || !user.role.includes('Admin')) {
+      return <AppLayout><p>Redirecting to login...</p></AppLayout>;
   }
 
-  // This will be shown briefly during the redirect for non-admins
-  return <AppLayout><p>Verifying access...</p></AppLayout>;
+  const getVisibleNavItems = () => {
+      if (isSuperAdmin) {
+          return adminNavItems;
+      }
+      return adminNavItems.filter(item => userRoles.includes(item.requiredRole));
+  }
+
+  return (
+    <AppLayout>
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="font-headline text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome, {user.displayName || user.email}. Role: {user.role}
+          </p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {getVisibleNavItems().map(item => {
+              const Icon = item.icon;
+              return (
+                  <Card key={item.label}>
+                      <CardHeader>
+                          <div className="flex items-center gap-4">
+                              <Icon className="h-8 w-8 text-primary"/>
+                              <div>
+                                  <CardTitle>{item.label}</CardTitle>
+                                  <CardDescription>{item.description}</CardDescription>
+                              </div>
+                          </div>
+                      </CardHeader>
+                      <CardContent>
+                          <Button asChild>
+                              <Link href={item.href}>Go to {item.label}</Link>
+                          </Button>
+                      </CardContent>
+                  </Card>
+              )
+          })}
+        </div>
+      </div>
+    </AppLayout>
+  );
 }

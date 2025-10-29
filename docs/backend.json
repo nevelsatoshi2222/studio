@@ -23,7 +23,7 @@
         "role": {
           "type": "string",
           "description": "The role of the user on the platform.",
-          "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "Admin"]
+          "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "User Management Admin", "Job Management Admin", "Franchisee Management Admin", "Social Media Management Admin", "Quiz Management Admin", "Super Admin"]
         },
         "street": { "type": "string", "description": "User's street address." },
         "village": { "type": "string", "description": "User's village or ward." },
@@ -111,19 +111,6 @@
       },
       "required": ["authorId", "authorName", "content", "timestamp"]
     },
-    "Admin": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin",
-      "type": "object",
-      "description": "Represents an administrator account with elevated privileges.",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user who is an admin."
-        }
-      },
-      "required": ["userId"]
-    },
     "WithdrawalRequest": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "WithdrawalRequest",
@@ -163,7 +150,7 @@
     "providers": ["password", "anonymous"]
   },
   "firestore": {
-    "rules": "rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    function isAdmin() {\n      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));\n    }\n\n    match /users/{userId} {\n      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());\n      allow list: if isAdmin();\n    }\n\n    match /roles_admin/{userId} {\n      allow get: if request.auth.uid == userId;\n      allow list, write: if isAdmin();\n    }\n\n    match /forums/{postId} {\n        allow read: if request.auth != null;\n        allow create: if request.auth != null;\n        allow update, delete: if request.auth.uid == resource.data.authorId || isAdmin();\n    }\n    \n    match /social_posts/{postId} {\n        allow read: if request.auth != null;\n        allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;\n        allow update, delete: if request.auth != null && (request.auth.uid == resource.data.authorId || isAdmin());\n    }\n\n    match /social_posts/{document=**} {\n        allow list: if request.auth != null;\n    }\n\n    match /withdrawal_requests/{requestId} {\n        allow read, write: if isAdmin();\n        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;\n    }\n\n    match /{document=**} {\n      allow read, write: if isAdmin();\n    }\n  }\n}",
+    "rules": "rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    // --- Helper Functions ---\n    function isAuth() {\n      return request.auth != null;\n    }\n\n    function isOwner(userId) {\n      return isAuth() && request.auth.uid == userId;\n    }\n\n    function getRole(userId) {\n      return get(/databases/$(database)/documents/users/$(userId)).data.role;\n    }\n\n    function isSuperAdmin() {\n      return isAuth() && getRole(request.auth.uid) == 'Super Admin';\n    }\n\n    function hasRole(role) {\n        return isAuth() && getRole(request.auth.uid) == role;\n    }\n\n    // --- User Profiles ---\n    match /users/{userId} {\n      allow read, write: if isOwner(userId) || isSuperAdmin() || hasRole('User Management Admin');\n      allow list: if isSuperAdmin() || hasRole('User Management Admin');\n    }\n\n    // --- Social Posts ---\n    match /social_posts/{postId} {\n        allow read, list: if isAuth();\n        allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;\n        allow update, delete: if isOwner(resource.data.authorId) || isSuperAdmin() || hasRole('Social Media Management Admin');\n    }\n    \n    // --- Forum Posts ---\n    match /forums/{postId} {\n        allow read, list: if isAuth();\n        allow create: if isAuth();\n        allow update, delete: if isOwner(resource.data.authorId) || isSuperAdmin();\n    }\n\n    // --- Withdrawal Requests ---\n    match /withdrawal_requests/{requestId} {\n        allow read, list, write: if isSuperAdmin(); // Only Super Admin can manage financials\n        allow create: if isOwner(request.resource.data.userId);\n    }\n\n    // --- Other Collections (Jobs, Franchisees, Quizzes etc.) ---\n    // These rules will be more granular once the admin roles are fully implemented\n    match /jobs/{jobId} {\n        allow read: if isAuth();\n        allow write: if isSuperAdmin() || hasRole('Job Management Admin');\n    }\n    \n    match /franchisees/{franchiseeId} {\n        allow read: if isAuth();\n        allow write: if isSuperAdmin() || hasRole('Franchisee Management Admin');\n    }\n\n    match /quizzes/{quizId} {\n        allow read: if isAuth();\n        allow write: if isSuperAdmin() || hasRole('Quiz Management Admin');\n    }\n\n    // --- Catch-all for super admin ---\n    match /{document=**} {\n      allow read, write: if isSuperAdmin();\n    }\n  }\n}",
     "indexes": [
         {
             "collectionGroup": "users",
@@ -205,14 +192,7 @@
         "path": "/users/{userId}",
         "definition": {
           "schema": { "$ref": "#/entities/User" },
-          "description": "Stores the public profile data for each user. The document ID is the user's UID from Firebase Auth."
-        }
-      },
-      {
-        "path": "/users/{userId}/referrals/data",
-        "definition": {
-          "schema": { "$ref": "#/entities/Referral" },
-          "description": "A singleton document storing the referral data (link, team) for the parent user. This structure ensures a user can only access their own referral information."
+          "description": "Stores the public profile data and role for each user. The document ID is the user's UID from Firebase Auth."
         }
       },
       {
@@ -220,13 +200,6 @@
         "definition": {
           "schema": { "$ref": "#/entities/SocialPost" },
           "description": "A top-level collection for all social media posts from all users."
-        }
-      },
-      {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "schema": { "$ref": "#/entities/Admin" },
-          "description": "An existence-based check for admin privileges. If a document exists with a user's UID, that user is an admin."
         }
       },
        {
@@ -244,8 +217,6 @@
         }
       }
     ],
-    "reasoning": "This structure separates user profile data from their affiliate/referral data. Storing referral information in a subcollection of the user's document (/users/{userId}/referrals/data) allows for security rules that grant a user access only to their own referral tree and income data. Social posts are in a global collection for easy querying for the main feed. The 'roles_admin' collection provides a simple, secure way to manage administrator access. Withdrawal requests are in a separate top-level collection for easy admin review."
+    "reasoning": "This structure centralizes the user's role within their main document, allowing for more flexible and granular security rules. Specific admins (e.g., 'User Management Admin') can be granted access to collections like '/users', while a 'Super Admin' has overarching permissions. This role-based access control (RBAC) is more scalable and secure than the previous existence-based check."
   }
 }
-
-    

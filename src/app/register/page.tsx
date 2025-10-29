@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -77,7 +77,7 @@ function RegistrationForm() {
     defaultValues: {
       name: '',
       referralCode,
-      role: role || '',
+      role: role || 'User', // Default to 'User' if no role in query param
       jobTitle: jobTitle || '',
       email: '',
       password: '',
@@ -109,10 +109,15 @@ function RegistrationForm() {
       
       await updateProfile(user, { displayName: data.name });
 
-      const batch = writeBatch(firestore);
-
       const userDocRef = doc(firestore, 'users', user.uid);
-      batch.set(userDocRef, {
+      
+      // Determine the user's role
+      let finalRole = data.role || 'User';
+      if (data.email.toLowerCase() === 'admin@publicgovernance.com') {
+        finalRole = 'Super Admin';
+      }
+      
+      await setDoc(userDocRef, {
         id: user.uid,
         name: data.name,
         email: data.email,
@@ -129,19 +134,11 @@ function RegistrationForm() {
         pgcBalance: 0,
         referralCode: data.referralCode,
         registeredAt: serverTimestamp(),
-        status: (role && role !== 'Admin') ? 'Pending' : 'Active',
+        status: finalRole.includes('Admin') || finalRole === 'User' ? 'Active' : 'Pending',
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
-        role: data.email.toLowerCase() === 'admin@publicgovernance.com' ? 'Admin' : (data.role || 'User'),
+        role: finalRole,
         jobTitle: data.jobTitle || '',
       });
-
-      // If the registering user is the admin, create a document in roles_admin
-      if (data.email.toLowerCase() === 'admin@publicgovernance.com') {
-          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-          batch.set(adminRoleRef, { userId: user.uid });
-      }
-
-      await batch.commit();
       
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
@@ -417,6 +414,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-    
-
-    
