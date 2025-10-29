@@ -108,9 +108,11 @@ function RegistrationForm() {
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: data.name });
-      
+
+      const batch = writeBatch(firestore);
+
       const userDocRef = doc(firestore, 'users', user.uid);
-      await setDoc(userDocRef, {
+      batch.set(userDocRef, {
         id: user.uid,
         name: data.name,
         email: data.email,
@@ -127,11 +129,19 @@ function RegistrationForm() {
         pgcBalance: 0,
         referralCode: data.referralCode,
         registeredAt: serverTimestamp(),
-        status: role ? 'Pending' : 'Active',
+        status: (role && role !== 'Admin') ? 'Pending' : 'Active', // Set status for non-admin roles
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
-        role: data.role || 'User',
+        role: data.email.toLowerCase() === 'admin@publicgovernance.com' ? 'Admin' : (data.role || 'User'),
         jobTitle: data.jobTitle || '',
       });
+
+      // If the registering user is the admin, create a document in roles_admin
+      if (data.email.toLowerCase() === 'admin@publicgovernance.com') {
+          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+          batch.set(adminRoleRef, { userId: user.uid });
+      }
+
+      await batch.commit();
       
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
