@@ -193,7 +193,6 @@ export default function AllUsersPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
 
-    // The user role is now available on the user object from our custom provider
     const isSuperAdmin = user?.role === 'Super Admin';
     const isUserAdmin = user?.role === 'User Management Admin';
     const canAccessPage = isSuperAdmin || isUserAdmin;
@@ -229,7 +228,6 @@ export default function AllUsersPage() {
                         </CardHeader>
                     </Card>
                 )}
-                {/* We only render the table if the user is authorized, preventing permission errors. */}
                 {canAccessPage && <UsersTable canRunQuery={canAccessPage} />}
             </div>
         </AppLayout>
