@@ -1,34 +1,16 @@
-/**
- * @file Firebase Security Rules for Firestore.
- * @description This ruleset enforces a role-based access control (RBAC) model, with user-specific data nested under `/users/{userId}` and public social posts in a top-level collection.
- *
- * Data Structure:
- * - `/users/{userId}`: Stores user profiles, roles, and financial information.  The document ID matches the Firebase Auth UID.
- * - `/social_posts/{postId}`: Stores public social media posts.
- * - `/withdrawal_requests/{requestId}`: Stores withdrawal requests for admin processing.
- * - `/forums/{postId}`: Stores posts for the governance forum.
- * - `/presale_purchases/{purchaseId}`: Logs presale purchase requests for admin verification and fulfillment.
- *
- * Key Security Decisions:
- * - Users can only manage their own profile data under `/users/{userId}`.
- * - Social posts are publicly readable but creation is open to signed-in users with owner-only updates/deletes via authorId.
- * - Withdrawal requests are publicly creatable for any signed-in user, but not updatable or deletable by users (only by backend/admins).
- * - Forum posts are publicly readable, and writable by signed-in users with ownership.
- * - Presale Purchases are publicly writable, with no update or delete permissions from users.
- *
- * Denormalization for Authorization:
- * - Social posts contain `authorId` to allow simple owner-only write rules.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Enforces user-specific data access under /users/{userId}.
+     * @description Controls access to user profiles. Users can only read/write their own profile.
      * @path /users/{userId}
-     * @allow (create, update, get, list) - Authenticated user with matching UID can create, update, get and list their own profile.
-     * @deny (create, update, get, list) - Authenticated user trying to access another user's profile.
-     * @principle Enforces document ownership for writes and reads, validating relational integrity.
+     * @allow (create) - If the user's auth UID matches the {userId} and they are creating their own document.
+     * @allow (get, list) - if isSuperAdmin() or isUserManagerAdmin() or isOwner(userId)
+     * @allow (update, delete) - if isSuperAdmin() or isUserManagerAdmin() or isExistingOwner(userId)
+     * @deny (create) - If the user's auth UID does not match the {userId}.
+     * @deny (update, delete) - If the user is not the owner and not an admin.
+     * @principle Enforces document ownership and restricts access to user's own data or via `User Management Admin` or `Super Admin` roles.
      */
     match /users/{userId} {
       function isSignedIn() {
@@ -36,31 +18,36 @@ service cloud.firestore {
       }
 
       function isOwner(userId) {
-        return request.auth.uid == userId;
+        return isSignedIn() && request.auth.uid == userId;
       }
 
       function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
+        return isOwner(userId) && resource.data != null;
+      }
+      
+      function isSuperAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin';
       }
 
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if false;
+      function isUserManagerAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin';
+      }
 
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow get, list: if isSuperAdmin() || isUserManagerAdmin() || isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isSuperAdmin() || isUserManagerAdmin() || isExistingOwner(userId);
+      allow delete: if isSuperAdmin() || isUserManagerAdmin() || isExistingOwner(userId);
     }
 
     /**
-     * @description Allows public read access to social media posts, but restricts creation, updates, and deletion to the author.
+     * @description Controls access to social media posts. Anyone can read, but only owners can write.
      * @path /social_posts/{postId}
      * @allow (get, list) - Any user can read social posts.
-     * @allow (create) - Authenticated user can create a social post with their UID as the authorId.
-     * @allow (update, delete) - Only the original author can update or delete their own post.
-     * @deny (create) - Non-authenticated user cannot create a social post.
-     * @deny (update, delete) - Non-authenticated user cannot update or delete any social post.
-     * @deny (update, delete) - Authenticated user cannot update or delete another user's post.
-     * @principle Allows public read access, but enforces document ownership for writes.
+     * @allow (create) - Only authenticated users can create social posts, and must set authorId to their UID.
+     * @allow (update, delete) - Only the author of the post can update or delete it.
+     * @deny (create) - If the incoming authorId does not match the user's UID.
+     * @deny (update, delete) - If the user is not the author of the post.
+     * @principle Public read access with owner-only writes.
      */
     match /social_posts/{postId} {
       function isSignedIn() {
@@ -71,48 +58,53 @@ service cloud.firestore {
         return isSignedIn() && request.auth.uid == authorId;
       }
 
-        function isExistingOwner(authorId) {
-        return isOwner(authorId) && resource != null;
+      function isExistingOwner(authorId) {
+        return isOwner(authorId) && resource.data != null;
       }
-
-      allow get: if true;
-      allow list: if true;
-
+        
+      allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId);
-      allow delete: if isExistingOwner(resource.data.authorId);
+      allow update: if isSignedIn() && request.auth.uid == resource.data.authorId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
     }
 
     /**
-     * @description Allows any signed-in user to create a withdrawal request, but restricts updates and deletes.
+     * @description Controls access to withdrawal requests. Only admins can read/write withdrawal requests.
      * @path /withdrawal_requests/{requestId}
-     * @allow (create) - Authenticated user can create a withdrawal request.
-     * @deny (update, delete) - No user can update or delete a withdrawal request.
-     * @principle Allows open creation for signed-in users.  Backend or admin-only updates/deletes.
+     * @allow (get, list) - If the user has the role of User Management Admin or Super Admin.
+     * @allow (create, update, delete) - If the user has the role of User Management Admin or Super Admin.
+     * @deny (get, list, create, update, delete) - If the user does not have the required admin role.
+     * @principle Restricts access to sensitive financial data to authorized personnel.
      */
     match /withdrawal_requests/{requestId} {
+
       function isSignedIn() {
         return request.auth != null;
       }
+        
+      function isSuperAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin';
+      }
 
-      allow get: if false;
-      allow list: if false;
+      function isUserManagerAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin';
+      }
 
-      allow create: if isSignedIn();
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if isSuperAdmin() || isUserManagerAdmin();
+      allow create: if isSuperAdmin() || isUserManagerAdmin();
+      allow update: if isSuperAdmin() || isUserManagerAdmin();
+      allow delete: if isSuperAdmin() || isUserManagerAdmin();
     }
 
     /**
-     * @description Allows public read access to forum posts, but restricts creation, updates, and deletion to the author.
+     * @description Controls access to forum posts. Anyone can read, but only authenticated users can create.
      * @path /forums/{postId}
      * @allow (get, list) - Any user can read forum posts.
-     * @allow (create) - Authenticated user can create a forum post with their UID as the authorId.
-     * @allow (update, delete) - Only the original author can update or delete their own post.
-     * @deny (create) - Non-authenticated user cannot create a forum post.
-     * @deny (update, delete) - Non-authenticated user cannot update or delete any forum post.
-     * @deny (update, delete) - Authenticated user cannot update or delete another user's post.
-     * @principle Allows public read access, but enforces document ownership for writes.
+     * @allow (create) - Only authenticated users can create forum posts.
+     * @allow (update, delete) - Only the author of the post can update or delete it.
+     * @deny (create) - If the user is not authenticated.
+     * @deny (update, delete) - If the user is not the author of the post.
+     * @principle Public read access with owner-only writes for modification.
      */
     match /forums/{postId} {
       function isSignedIn() {
@@ -123,35 +115,65 @@ service cloud.firestore {
         return isSignedIn() && request.auth.uid == authorId;
       }
 
-        function isExistingOwner(authorId) {
-        return isOwner(authorId) && resource != null;
+      function isExistingOwner(authorId) {
+        return isOwner(authorId) && resource.data != null;
       }
-
-      allow get: if true;
-      allow list: if true;
-
-      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId);
-      allow delete: if isExistingOwner(resource.data.authorId);
+        
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid == resource.data.authorId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
     }
 
-      /**
-       * @description Logs presale purchase requests for admin verification and fulfillment.
-       * @path /presale_purchases/{purchaseId}
-       * @allow (create) - Any authenticated user can create a presale purchase request
-       * @deny (update, delete, get, list) - Presale Purchases are only writable. Users cannot read, update, or delete.
-       * @principle Allows open creation for signed-in users.  Backend or admin-only updates/deletes.
-       */
-      match /presale_purchases/{purchaseId} {
-          function isSignedIn() {
-              return request.auth != null;
-          }
-
-          allow get: if false;
-          allow list: if false;
-          allow create: if isSignedIn();
-          allow update: if false;
-          allow delete: if false;
+    /**
+     * @description Controls access to presale purchases. Only admins can read/write presale purchases.
+     * @path /presale_purchases/{purchaseId}
+     * @allow (get, list) - If the user has the role of User Management Admin or Super Admin.
+     * @allow (create, update, delete) - If the user has the role of User Management Admin or Super Admin.
+     * @deny (get, list, create, update, delete) - If the user does not have the required admin role.
+     */
+    match /presale_purchases/{purchaseId} {
+      function isSignedIn() {
+        return request.auth != null;
       }
+        
+      function isSuperAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin';
+      }
+
+      function isUserManagerAdmin() {
+        return isSignedIn() && get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin';
+      }
+      allow get, list: if isSuperAdmin() || isUserManagerAdmin();
+      allow create: if isSuperAdmin() || isUserManagerAdmin();
+      allow update: if isSuperAdmin() || isUserManagerAdmin();
+      allow delete: if isSuperAdmin() || isUserManagerAdmin();
+    }
+
+    /**
+     * @description Grants get access to /roles_admin/{userId} for admin users. The document ID is the user's UID from Firebase Auth.
+     * @path /roles_admin/{userId}
+     * @allow (get) - if the user's auth UID matches the {userId}.
+     * @deny (get) - If the user's auth UID does not match the {userId}.
+     * @principle Grants access to roles_admin document for admin.
+     */
+    match /roles_admin/{userId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return isSignedIn() && request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource.data != null;
+      }
+        
+      allow get: if isOwner(userId);
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
   }
 }
