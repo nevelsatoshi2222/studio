@@ -140,7 +140,7 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
             <div className="flex items-center gap-2">
                 {post.mentionsPgc && (
                     <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
-                         <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1722971249713_0.png" alt="PGC logo" width={16} height={16} className="h-4 w-4" />
+                         <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1723055490400_0.png" alt="PGC logo" width={16} height={16} className="h-4 w-4" />
                          <span className="text-xs font-bold text-primary">PGC</span>
                     </div>
                 )}
