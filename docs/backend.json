@@ -247,3 +247,5 @@
     "reasoning": "This structure separates user profile data from their affiliate/referral data. Storing referral information in a subcollection of the user's document (/users/{userId}/referrals/data) allows for security rules that grant a user access only to their own referral tree and income data. Social posts are in a global collection for easy querying for the main feed. The 'roles_admin' collection provides a simple, secure way to manage administrator access. Withdrawal requests are in a separate top-level collection for easy admin review."
   }
 }
+
+    
