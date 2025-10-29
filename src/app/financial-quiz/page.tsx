@@ -16,6 +16,10 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, ChevronRight, RotateCcw, Award } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { doc, increment } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 const quizQuestions = [
     {
@@ -133,6 +137,9 @@ const quizQuestions = [
 type AnswerState = 'unanswered' | 'correct' | 'incorrect';
 
 export default function FinancialQuizPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [answerState, setAnswerState] = useState<AnswerState>('unanswered');
@@ -159,6 +166,32 @@ export default function FinancialQuizPage() {
       setAnswerState('unanswered');
     } else {
       setQuizFinished(true);
+      processRewards();
+    }
+  };
+
+  const processRewards = () => {
+    if (!user || !firestore) return;
+    
+    let reward = 0;
+    const finalScore = score + (selectedAnswer === currentQuestion.answer ? 1 : 0);
+    
+    if (finalScore === 10) reward = 10;
+    else if (finalScore > 6) reward = 5;
+    else if (finalScore >= 4) reward = 2.5;
+    else reward = 1.25;
+
+    if (reward > 0) {
+      const userDocRef = doc(firestore, 'users', user.uid);
+      // Use Firestore's increment function for atomic updates
+      updateDocumentNonBlocking(userDocRef, {
+        pgcBalance: increment(reward)
+      });
+      
+      toast({
+        title: 'Reward Added!',
+        description: `Congratulations! ${reward} PGC has been added to your in-app wallet.`
+      });
     }
   };
 
@@ -195,7 +228,17 @@ export default function FinancialQuizPage() {
             <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards! Connect your wallet to receive rewards.</CardDescription>
           </CardHeader>
           
-          {!quizFinished ? (
+          {!user ? (
+            <CardContent>
+              <Alert>
+                <Award className="h-4 w-4" />
+                <AlertTitle>Please Login to Participate</AlertTitle>
+                <AlertDescription>
+                  You must be logged in to take the quiz and earn rewards.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          ) : !quizFinished ? (
             <>
             <CardContent className="space-y-6">
                 <Alert className="border-primary">
@@ -301,7 +344,8 @@ export default function FinancialQuizPage() {
                             {score === 10 ?
                                 `You've qualified for the next round!` :
                                 `Keep playing to improve your score and win bigger prizes.`
-                            } The reward has been sent to your connected wallet.
+                            } Your reward has been added to your in-app balance, viewable on your{' '}
+                            <Link href="/profile" className="font-bold underline">Profile</Link> page.
                         </AlertDescription>
                     </Alert>
                 ) : (

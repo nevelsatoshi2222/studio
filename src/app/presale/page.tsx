@@ -18,6 +18,9 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 
 const presalePackages = [
   { amountUSD: 10, pgcAmount: 10, bonus: 10 },
@@ -28,6 +31,7 @@ const presalePackages = [
 
 export default function PresalePage() {
   const { publicKey, connected } = useWallet();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -51,8 +55,6 @@ export default function PresalePage() {
 
     setIsProcessing(true);
     
-    // This now just reveals the payment instructions
-    // The actual API call happens after the user confirms they've sent the payment
     setTimeout(() => {
         setPurchaseInitiated(true);
         setIsProcessing(false);
@@ -65,24 +67,31 @@ export default function PresalePage() {
   };
 
   const handleConfirmPayment = async () => {
-    if (!selectedPackage || !publicKey) return;
+    if (!selectedPackage || !publicKey || !firestore) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Connection error. Please try again.'});
+        return;
+    };
+
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/presale', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          packageAmountUSD: selectedPackage,
-          buyerWalletAddress: publicKey.toBase58(),
-        }),
-      });
+      const presaleCollection = collection(firestore, 'presale_purchases');
+      const selectedPkg = presalePackages.find(p => p.amountUSD === selectedPackage);
+      
+      if (!selectedPkg) throw new Error("Invalid package selected.");
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
+      await addDoc(presaleCollection, {
+        buyerWalletAddress: publicKey.toBase58(),
+        packageAmountUSD: selectedPackage,
+        pgcAmount: selectedPkg.pgcAmount,
+        bonusPgc: selectedPkg.bonus,
+        totalPgc: selectedPkg.pgcAmount + selectedPkg.bonus,
+        purchaseDate: serverTimestamp(),
+        status: 'pending_verification',
+      });
       
       toast({
         title: 'Purchase Logged!',
-        description: `Your purchase of ${result.totalPgc.toLocaleString()} PGC has been recorded. An admin will verify the transaction and send your tokens shortly.`,
+        description: `Your purchase of ${(selectedPkg.pgcAmount + selectedPkg.bonus).toLocaleString()} PGC has been recorded. An admin will verify the transaction and send your tokens shortly.`,
       });
       setPurchaseInitiated(false);
       setSelectedPackage(null);

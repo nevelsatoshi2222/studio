@@ -23,10 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 
 
 const InfluencerDashboard = () => {
-    const [submittedContent, setSubmittedContent] = useState<SubmittedContent[]>([
-        { id: '1', url: 'https://youtube.com/watch?v=abc', submittedAt: new Date(), status: 'Approved', views: 125000 },
-        { id: '2', url: 'https://instagram.com/p/Cxyz', submittedAt: new Date(), status: 'Pending' },
-    ]);
+    const [submittedContent, setSubmittedContent] = useState<SubmittedContent[]>([]);
     const [newLink, setNewLink] = useState('');
     const { toast } = useToast();
 
@@ -45,7 +42,7 @@ const InfluencerDashboard = () => {
             submittedAt: new Date(),
             status: 'Pending',
         };
-        setSubmittedContent([...submittedContent, newSubmission]);
+        setSubmittedContent(prevContent => [newSubmission, ...prevContent]);
         setNewLink('');
         toast({ title: 'Link Submitted!', description: 'Your content is now pending review.' });
     };
@@ -107,10 +104,10 @@ const InfluencerDashboard = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {submittedContent.map(content => (
+                            {submittedContent.length > 0 ? submittedContent.map(content => (
                                 <TableRow key={content.id}>
                                     <TableCell>
-                                        <a href={content.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                        <a href={content.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate block max-w-xs">
                                             {content.url}
                                         </a>
                                     </TableCell>
@@ -123,7 +120,13 @@ const InfluencerDashboard = () => {
                                     </TableCell>
                                     <TableCell className="text-right font-medium">{content.views ? content.views.toLocaleString() : 'N/A'}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                                        You haven't submitted any content yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
