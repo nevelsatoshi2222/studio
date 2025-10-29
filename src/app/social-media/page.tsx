@@ -24,29 +24,46 @@ import {
   Twitter,
   Facebook,
   Hash,
+  Loader2,
 } from 'lucide-react';
-import { socialPosts, users } from '@/lib/data';
+import { users } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState } from 'react';
+import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-const getAvatarUrl = (avatarId: string) => {
-    const image = placeholderImages.find((img) => img.id === avatarId);
-    return image ? image.imageUrl : `https://picsum.photos/seed/${avatarId}/40/40`;
-}
-
-const getAvatarHint = (avatarId: string) => {
-    const image = placeholderImages.find((img) => img.id === avatarId);
-    return image ? image.imageHint : 'user avatar';
-}
+type SocialPost = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  content: string;
+  imageUrl?: string;
+  timestamp: {
+    seconds: number;
+    nanoseconds: number;
+  } | null;
+  likes: number;
+  comments: number;
+  mentionsPgc?: boolean;
+  mentionsIgc?: boolean;
+};
 
 function CreatePostCard() {
     const { user } = useUser();
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const [postContent, setPostContent] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [showImageInput, setShowImageInput] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!user) {
         return (
@@ -66,9 +83,46 @@ function CreatePostCard() {
         )
     }
 
+    const handlePost = async () => {
+        if (!firestore || !user) {
+            toast({ variant: 'destructive', title: 'You must be logged in to post.'});
+            return;
+        }
+        if (!postContent.trim()) {
+            toast({ variant: 'destructive', title: 'Post content cannot be empty.'});
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await addDoc(collection(firestore, 'social_posts'), {
+                authorId: user.uid,
+                authorName: user.displayName || user.email,
+                authorAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
+                content: postContent,
+                imageUrl: imageUrl,
+                mentionsPgc: postContent.includes('$PGC'),
+                mentionsIgc: postContent.includes('$IGC'),
+                likes: 0,
+                comments: 0,
+                timestamp: serverTimestamp(),
+            });
+
+            setPostContent('');
+            setImageUrl('');
+            setShowImageInput(false);
+            toast({ title: 'Post created successfully!'});
+        } catch (error) {
+            console.error("Error creating post:", error);
+            toast({ variant: 'destructive', title: 'Failed to create post.'});
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
   return (
     <Card>
-      <CardContent className="p-4">
+      <CardContent className="p-4 space-y-4">
         <div className="flex items-start gap-4">
           <Avatar>
             <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`} />
@@ -77,35 +131,50 @@ function CreatePostCard() {
           <Textarea
             placeholder="What's on your mind? #PublicGovernance"
             className="flex-1 resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none p-0"
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
           />
         </div>
+        {showImageInput && (
+            <div className="flex items-center gap-2 pl-14">
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                <Input 
+                    placeholder="Paste image URL here..."
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                />
+            </div>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 border-t">
         <div className="flex gap-1 text-muted-foreground">
-          <Button variant="ghost" size="icon" aria-label="Upload Image">
-            <ImageIcon className="h-5 w-5" />
+          <Button variant="ghost" size="icon" aria-label="Upload Image" onClick={() => setShowImageInput(!showImageInput)}>
+            <ImageIcon className={cn("h-5 w-5", showImageInput && "text-primary")} />
           </Button>
-           <Button variant="ghost" size="icon" aria-label="Upload Video">
+           <Button variant="ghost" size="icon" aria-label="Upload Video" disabled>
             <Video className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Add Link">
+          <Button variant="ghost" size="icon" aria-label="Add Link" disabled>
             <Link2 className="h-5 w-5" />
           </Button>
         </div>
-        <Button>Post</Button>
+        <Button onClick={handlePost} disabled={isSubmitting || !postContent.trim()}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Post
+        </Button>
       </CardFooter>
     </Card>
   );
 }
 
 const PostContent = ({ text }: { text: string }) => {
-    const regex = /(#\w+)/g;
+    const regex = /(#\w+|\$\w+)/g;
     const parts = text.split(regex);
   
     return (
       <div className="mb-4 whitespace-pre-wrap text-sm text-foreground">
         {parts.map((part, index) => {
-          if (part.startsWith('#')) {
+          if (part.startsWith('#') || part.startsWith('$')) {
             return (
               <Link href="#" key={index} className="text-primary hover:underline">
                 {part}
@@ -118,10 +187,7 @@ const PostContent = ({ text }: { text: string }) => {
     );
   };
 
-function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
-  const author = users.find((user) => user.id === post.authorId);
-  const postImageUrl = post.imageUrl ? placeholderImages.find(p => p.id === post.imageUrl)?.imageUrl : null;
-  const postImageHint = post.imageUrl ? placeholderImages.find(p => p.id === post.imageUrl)?.imageHint : null;
+function PostCard({ post }: { post: SocialPost }) {
 
   return (
     <Card>
@@ -129,12 +195,14 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
         <div className="flex justify-between items-start">
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={author ? getAvatarUrl(author.avatarId) : ''} alt={author?.name} data-ai-hint={author ? getAvatarHint(author.avatarId) : 'user avatar'} />
-                <AvatarFallback>{author?.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+                <AvatarFallback>{post.authorName?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold">{author?.name}</p>
-                <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+                <p className="font-semibold">{post.authorName}</p>
+                <p className="text-xs text-muted-foreground">
+                    {post.timestamp ? new Date(post.timestamp.seconds * 1000).toLocaleString() : 'Just now'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -155,14 +223,13 @@ function PostCard({ post }: { post: (typeof socialPosts)[0] }) {
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <PostContent text={post.content} />
-        {postImageUrl && (
+        {post.imageUrl && (
           <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
             <Image
-              src={postImageUrl}
+              src={post.imageUrl}
               alt="Post image"
               fill
               style={{ objectFit: 'cover' }}
-              data-ai-hint={postImageHint || 'social media image'}
             />
           </div>
         )}
@@ -199,8 +266,42 @@ const trendingTopics = [
     { name: 'SocialImpact', posts: '5.9k' },
 ];
 
+function PostSkeleton() {
+    return (
+        <Card>
+            <CardHeader className="p-4">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="aspect-video w-full rounded-lg" />
+            </CardContent>
+            <CardFooter className="p-4 border-t flex justify-between">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+            </CardFooter>
+        </Card>
+    );
+}
 
 export default function SocialMediaPage() {
+    const firestore = useFirestore();
+
+    const postsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'social_posts'), orderBy('timestamp', 'desc'));
+    }, [firestore]);
+
+    const { data: socialPosts, isLoading } = useCollection<SocialPost>(postsQuery);
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
@@ -215,9 +316,23 @@ export default function SocialMediaPage() {
             <main className="lg:col-span-2 space-y-6">
                 <CreatePostCard />
                 <div className="space-y-6">
-                {socialPosts.map((post) => (
-                    <PostCard key={post.id} post={post} />
-                ))}
+                    {isLoading && (
+                        <>
+                            <PostSkeleton />
+                            <PostSkeleton />
+                        </>
+                    )}
+                    {socialPosts && socialPosts.length > 0 ? (
+                        socialPosts.map((post) => (
+                            <PostCard key={post.id} post={post} />
+                        ))
+                    ) : !isLoading && (
+                        <Card>
+                            <CardContent className="p-10 text-center">
+                                <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </main>
             <aside className="space-y-6 sticky top-20">
