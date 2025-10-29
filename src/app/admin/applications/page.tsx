@@ -174,26 +174,17 @@ function ApplicationsTable() {
 
 export default function ApplicationsPage() {
     const { user, isUserLoading } = useUser();
-    const firestore = useFirestore();
     const router = useRouter();
-    
-    const adminRoleRef = useMemoFirebase(() => {
-        if (!user || !firestore) return null;
-        return doc(firestore, 'roles_admin', user.uid);
-    }, [firestore, user]);
 
-    const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-    const isFirebaseAdmin = !!adminRole;
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
-    const isAdmin = isFirebaseAdmin;
+    const isSuperAdmin = user?.role === 'Super Admin';
+    const isFranchiseeAdmin = user?.role === 'Franchisee Management Admin';
+    const canAccessPage = isSuperAdmin || isFranchiseeAdmin;
     
     useEffect(() => {
-        if (isCheckingAdmin) return;
-
-        if (!isAdmin) {
+        if (!isUserLoading && !canAccessPage) {
             router.replace('/admin/login');
         }
-    }, [isCheckingAdmin, isAdmin, router]);
+    }, [isUserLoading, canAccessPage, router]);
 
 
     return (
@@ -205,13 +196,13 @@ export default function ApplicationsPage() {
                         Review and manage all pending user applications for various roles.
                     </p>
                 </div>
-                {isCheckingAdmin && (
+                {isUserLoading && (
                      <div className="flex items-center justify-center h-64">
                         <p>Verifying admin privileges...</p>
                     </div>
                 )}
 
-                {!isCheckingAdmin && !isAdmin && (
+                {!isUserLoading && !canAccessPage && (
                     <Card className="mt-8 border-destructive">
                         <CardHeader className="text-center">
                             <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
@@ -223,7 +214,7 @@ export default function ApplicationsPage() {
                     </Card>
                 )}
 
-                {isAdmin && <ApplicationsTable />}
+                {canAccessPage && <ApplicationsTable />}
             </div>
         </AppLayout>
     );

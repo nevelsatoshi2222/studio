@@ -59,13 +59,13 @@ function AdminLoginForm() {
 
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
-        // Check if the user has an admin role
         if (userData.role && userData.role.includes('Admin')) {
             toast({
                 title: 'Admin Login Successful',
                 description: 'Redirecting to admin dashboard...',
             });
-            router.push('/admin');
+            // Force a reload to ensure the new auth state is picked up everywhere
+            router.push('/admin'); 
         } else {
              toast({
                 variant: 'destructive',
@@ -144,36 +144,20 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
   const router = useRouter();
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-
-  const { data: userData, isLoading: isUserDocLoading } = useDoc(userDocRef);
+  const hasAdminRole = user?.role?.includes('Admin');
 
   useEffect(() => {
-    const isCheckingAuth = isUserLoading || isUserDocLoading;
-    if (isCheckingAuth) return;
+    if (isUserLoading) return;
 
-    if (user && userData) {
-      if (userData.role && userData.role.includes('Admin')) {
-        router.replace('/admin');
-      } else {
-        // If a non-admin user is logged in, keep them on the main site.
-        router.replace('/');
-      }
+    if (user && hasAdminRole) {
+      router.replace('/admin');
     }
-  }, [user, userData, isUserLoading, isUserDocLoading, router]);
+  }, [user, isUserLoading, hasAdminRole, router]);
 
-  if (isUserLoading || isUserDocLoading) {
+  if (isUserLoading || (user && hasAdminRole)) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
-  }
-  
-  if (user && userData && userData.role && userData.role.includes('Admin')) {
-    return null; // Prevent flashing login form during redirect
   }
   
   return (

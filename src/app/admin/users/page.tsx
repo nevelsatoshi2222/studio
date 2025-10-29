@@ -8,11 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Check, X, ShieldAlert, UserCog } from 'lucide-react';
 import { collection, doc, query, Query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 type User = {
     id: string;
@@ -24,6 +25,16 @@ type User = {
     avatarId: string;
     role?: string;
 };
+
+const adminRoles = [
+    'User',
+    'User Management Admin',
+    'Job Management Admin',
+    'Franchisee Management Admin',
+    'Social Media Management Admin',
+    'Quiz Management Admin',
+    'Super Admin'
+];
 
 const UserRowSkeleton = () => (
     <TableRow>
@@ -46,9 +57,8 @@ const UserRowSkeleton = () => (
 
 function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
     const firestore = useFirestore();
+    const { toast } = useToast();
     
-    // CRITICAL FIX: The query is only created if `canRunQuery` (i.e., isAdmin) is true.
-    // If the user is not an admin, this query will be null, preventing the permissions error.
     const usersQuery = useMemoFirebase(() => {
         if (!firestore || !canRunQuery) return null;
         return query(collection(firestore, 'users'));
@@ -60,7 +70,15 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
         if (!firestore) return;
         const userDocRef = doc(firestore, 'users', userId);
         updateDocumentNonBlocking(userDocRef, { status: newStatus });
+        toast({ title: 'Status Updated', description: `User status changed to ${newStatus}.` });
     };
+    
+    const handleChangeRole = (userId: string, newRole: string) => {
+        if (!firestore) return;
+        const userDocRef = doc(firestore, 'users', userId);
+        updateDocumentNonBlocking(userDocRef, { role: newRole });
+        toast({ title: 'Role Assigned', description: `User has been assigned the role: ${newRole}.` });
+    }
 
     const getAvatarUrl = (avatarId: string) => {
         return `https://picsum.photos/seed/${avatarId}/40/40`;
@@ -71,7 +89,7 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
             <CardHeader>
                 <CardTitle>All Registered Users</CardTitle>
                 <CardDescription>
-                    This table lists every user in the database.
+                    This table lists every user in the database. Use the action menu to manage roles and status.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -128,6 +146,20 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSub>
+                                                    <DropdownMenuSubTrigger>
+                                                        <UserCog className="mr-2 h-4 w-4" />
+                                                        Assign Role
+                                                    </DropdownMenuSubTrigger>
+                                                    <DropdownMenuSubContent>
+                                                        {adminRoles.map(role => (
+                                                             <DropdownMenuItem key={role} onClick={() => handleChangeRole(user.id, role)}>
+                                                                {role}
+                                                             </DropdownMenuItem>
+                                                        ))}
+                                                    </DropdownMenuSubContent>
+                                                </DropdownMenuSub>
+                                                <DropdownMenuSeparator />
                                                  {user.status !== 'Active' && <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, 'Active')}>
                                                     <Check className="mr-2 h-4 w-4" /> Approve
                                                 </DropdownMenuItem>}
@@ -159,26 +191,18 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
 
 export default function AllUsersPage() {
     const { user, isUserLoading } = useUser();
-    const firestore = useFirestore();
     const router = useRouter();
 
-    const adminRoleRef = useMemoFirebase(() => {
-        if (!user || !firestore) return null;
-        return doc(firestore, 'roles_admin', user.uid);
-    }, [firestore, user]);
-
-    const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-    const isFirebaseAdmin = !!adminRole;
-    const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
-    const isAdmin = isFirebaseAdmin;
+    // The user role is now available on the user object from our custom provider
+    const isSuperAdmin = user?.role === 'Super Admin';
+    const isUserAdmin = user?.role === 'User Management Admin';
+    const canAccessPage = isSuperAdmin || isUserAdmin;
 
     useEffect(() => {
-        if (isCheckingAdmin) return;
-
-        if (!isAdmin) {
+        if (!isUserLoading && !canAccessPage) {
             router.replace('/admin/login');
         }
-    }, [isCheckingAdmin, isAdmin, router]);
+    }, [isUserLoading, canAccessPage, router]);
     
     return (
         <AppLayout>
@@ -189,12 +213,12 @@ export default function AllUsersPage() {
                         View and manage all users registered on the platform.
                     </p>
                 </div>
-                {isCheckingAdmin && (
+                {isUserLoading && (
                      <div className="flex items-center justify-center h-64">
                         <p>Verifying admin privileges...</p>
                     </div>
                 )}
-                {!isCheckingAdmin && !isAdmin && (
+                {!isUserLoading && !canAccessPage && (
                      <Card className="mt-8 border-destructive">
                         <CardHeader className="text-center">
                             <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
@@ -205,7 +229,8 @@ export default function AllUsersPage() {
                         </CardHeader>
                     </Card>
                 )}
-                {isAdmin && <UsersTable canRunQuery={isAdmin} />}
+                {/* We only render the table if the user is authorized, preventing permission errors. */}
+                {canAccessPage && <UsersTable canRunQuery={canAccessPage} />}
             </div>
         </AppLayout>
     );

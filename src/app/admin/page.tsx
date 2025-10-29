@@ -32,16 +32,17 @@ export default function AdminPage() {
 
   const userRoles = user?.role ? [user.role] : [];
   const isSuperAdmin = userRoles.includes('Super Admin');
+  const hasAdminRole = user?.role && user.role.includes('Admin');
 
   useEffect(() => {
     if (isUserLoading) return;
 
-    if (!user || !user.role || !user.role.includes('Admin')) {
+    if (!user || !hasAdminRole) {
       router.replace('/admin/login');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, hasAdminRole]);
 
-  if (isUserLoading) {
+  if (isUserLoading || !user || !hasAdminRole) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -56,21 +57,21 @@ export default function AdminPage() {
               <Skeleton className="h-10 w-full" />
             </CardContent>
           </Card>
+           <p className="text-center text-muted-foreground">Verifying credentials and loading dashboard...</p>
         </div>
       </AppLayout>
     );
-  }
-
-  if (!user || !user.role || !user.role.includes('Admin')) {
-      return <AppLayout><p>Redirecting to login...</p></AppLayout>;
   }
 
   const getVisibleNavItems = () => {
       if (isSuperAdmin) {
           return adminNavItems;
       }
+      // Show cards relevant to the specific admin role
       return adminNavItems.filter(item => userRoles.includes(item.requiredRole));
   }
+  
+  const visibleNavItems = getVisibleNavItems();
 
   return (
     <AppLayout>
@@ -82,7 +83,8 @@ export default function AdminPage() {
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
-          {getVisibleNavItems().map(item => {
+          {visibleNavItems.length > 0 ? (
+              visibleNavItems.map(item => {
               const Icon = item.icon;
               return (
                   <Card key={item.label}>
@@ -102,7 +104,17 @@ export default function AdminPage() {
                       </CardContent>
                   </Card>
               )
-          })}
+          })
+          ) : (
+             <Card className="md:col-span-2">
+                <CardHeader>
+                    <CardTitle>No Modules Assigned</CardTitle>
+                    <CardDescription>
+                        Your admin role does not currently have any management modules assigned to it. Please contact the Super Admin.
+                    </CardDescription>
+                </CardHeader>
+             </Card>
+          )}
         </div>
       </div>
     </AppLayout>
