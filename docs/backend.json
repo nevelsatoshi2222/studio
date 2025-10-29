@@ -220,3 +220,5 @@
     "reasoning": "This structure centralizes the user's role within their main document, allowing for more flexible and granular security rules. Specific admins (e.g., 'User Management Admin') can be granted access to collections like '/users', while a 'Super Admin' has overarching permissions. This role-based access control (RBAC) is more scalable and secure than the previous existence-based check."
   }
 }
+
+    
