@@ -107,17 +107,9 @@ const programNavItems = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminRole, isLoading: isRoleLoading } = useDoc(adminRoleRef);
-  const isFirebaseAdmin = !!adminRole;
-  const isCheckingAdmin = isUserLoading || (user && isRoleLoading);
+  const isFirebaseAdmin = user?.role?.includes('Admin');
 
   const handleLogout = async () => {
     if (!auth) return;
