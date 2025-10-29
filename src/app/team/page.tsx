@@ -24,12 +24,13 @@ import { placeholderImages } from '@/lib/placeholder-images.json';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
 import { AffiliateRewardTier } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
+import { useEffect, useState } from 'react';
 
 type TeamMember = {
   id: string;
@@ -60,6 +61,7 @@ const UserRowSkeleton = () => (
 const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, progress: number, goal: number }) => {
     const Icon = tier.icon;
     const isAchieved = progress >= goal;
+    const progressPercent = Math.min((progress / goal) * 100, 100);
 
     return (
         <div className={`flex items-start gap-4 rounded-lg border p-4 ${isAchieved ? 'bg-green-500/10 border-green-500' : 'bg-muted/30'}`}>
@@ -74,7 +76,7 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, p
                 <p className="text-sm text-muted-foreground mt-1">{tier.requirement}</p>
                 
                 <div className="mt-2">
-                    <Progress value={(progress / goal) * 100} className="h-2" />
+                    <Progress value={progressPercent} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
                 </div>
 
@@ -94,6 +96,41 @@ export default function TeamPage() {
   }, [firestore, user]);
 
   const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
+  
+  const [level2Count, setLevel2Count] = useState(0);
+  const [bronzeAchievers, setBronzeAchievers] = useState(0);
+  const [isTeamDataLoading, setIsTeamDataLoading] = useState(false);
+
+  useEffect(() => {
+    if (directMembers && firestore) {
+      const fetchTeamDetails = async () => {
+        setIsTeamDataLoading(true);
+        let l2Count = 0;
+        let bronzeCount = 0;
+
+        // Create a batch of promises to fetch data for all direct members
+        const promises = directMembers.map(async (member) => {
+          // Query for level 2 members (referrals of our direct referrals)
+          const level2Query = query(collection(firestore, 'users'), where('referralCode', '==', member.id));
+          const level2Snapshot = await getDocs(level2Query);
+          l2Count += level2Snapshot.size;
+
+          // Check if this direct member has achieved Bronze (has >= 5 referrals)
+          if (level2Snapshot.size >= 5) {
+            bronzeCount++;
+          }
+        });
+
+        await Promise.all(promises);
+
+        setLevel2Count(l2Count);
+        setBronzeAchievers(bronzeCount);
+        setIsTeamDataLoading(false);
+      };
+
+      fetchTeamDetails();
+    }
+  }, [directMembers, firestore]);
 
   const getAvatarUrl = (avatarId: string) => {
     const image = placeholderImages.find((img) => img.id === avatarId);
@@ -159,11 +196,6 @@ export default function TeamPage() {
   const RewardsDashboard = () => {
     const directReferralCount = directMembers?.length || 0;
     
-    // In a real app, you'd fetch how many of the user's referrals have achieved each tier.
-    // We'll simulate this for now.
-    const bronzeAchievers = Math.floor(directReferralCount / 2);
-    const bronzeStarAchievers = Math.floor(directReferralCount / 5);
-
     return (
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
@@ -173,7 +205,7 @@ export default function TeamPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <RewardTierCard tier={freeTrackRewards[0]} progress={directReferralCount} goal={5} />
-            <RewardTierCard tier={freeTrackRewards[1]} progress={bronzeAchievers} goal={5} />
+            {isTeamDataLoading ? <Skeleton className="h-24 w-full" /> : <RewardTierCard tier={freeTrackRewards[1]} progress={bronzeAchievers} goal={5} />}
             <Alert>
               <AlertTitle>More Tiers Available</AlertTitle>
               <AlertDescription>
@@ -188,7 +220,7 @@ export default function TeamPage() {
             <CardDescription>Higher rewards when your referrals purchase or stake.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             <RewardTierCard tier={paidTrackRewards[0]} progress={bronzeStarAchievers} goal={5} />
+             <RewardTierCard tier={paidTrackRewards[0]} progress={0} goal={5} />
             <Alert>
               <AlertTitle>Feature in Development</AlertTitle>
               <AlertDescription>
@@ -260,16 +292,27 @@ export default function TeamPage() {
               <CardHeader>
                 <CardTitle>Team Summary</CardTitle>
                 <CardDescription>
-                  An overview of your network depth. This feature is coming soon and will show member counts at each level.
+                  An overview of your network depth.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Alert>
-                  <AlertTitle>Under Development</AlertTitle>
-                  <AlertDescription>
-                    Calculating the full team tree across 15 levels is a complex operation. We are building an efficient backend process to provide this data. Please check back soon!
-                  </AlertDescription>
-                </Alert>
+              <CardContent className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Direct Referrals (Level 1)</p>
+                    <p className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</p>
+                </div>
+                 <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Team Members (Level 2)</p>
+                    <p className="text-3xl font-bold">{isTeamDataLoading ? <Skeleton className="h-8 w-16" /> : level2Count}</p>
+                </div>
+                 <div className="p-4 rounded-lg bg-muted md:col-span-2">
+                    <p className="text-sm text-muted-foreground">Full Team Tree (Levels 3-15)</p>
+                    <Alert className="mt-2">
+                      <AlertTitle>Under Development</AlertTitle>
+                      <AlertDescription>
+                        Calculating the full team tree across 15 levels is a complex operation. We are building an efficient backend process to provide this data. Please check back soon!
+                      </AlertDescription>
+                    </Alert>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
