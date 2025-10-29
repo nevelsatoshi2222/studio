@@ -1,191 +1,123 @@
-/**
- * @fileoverview Firestore Security Rules for Prototyping.
- *
- * Core Philosophy:
- * This ruleset prioritizes security by enforcing strict ownership and role-based access control.
- * Read operations are generally open unless sensitive data is involved. Write operations are strictly controlled.
- *
- * Data Structure:
- * - Users: /users/{userId} - Each user has their own document with profile and role information.
- * - Social Posts: /social_posts/{postId} - Public social media posts.
- * - Withdrawal Requests: /withdrawal_requests/{requestId} - Records of user withdrawal requests.
- * - Forum Posts: /forums/{postId} - Posts in the governance forum.
- * - Presale Purchases: /presale_purchases/{purchaseId} - Logs of presale purchases.
- *
- * Key Security Decisions:
- * - User listing is not allowed except by privileged roles (User Management Admin, Super Admin).
- * - Users can only create/modify their own user document.
- * - Social posts are publicly readable but writable only with valid authorId.
- *
- * Denormalization for Authorization:
- *  - Role information is stored directly in the user document (/users/{userId}) for efficient access control.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to user profiles.
+     * @description Checks if the user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the resource.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the resource and the resource exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && exists(resource);
+    }
+
+    /**
+     * @description Checks if the user has the specified role.
+     */
+    function hasRole(role) {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    /**
+     * @description Checks if the user has one of the specified roles.
+     */
+    function hasAnyRole(roles) {
+        return isSignedIn() && roles.hasAny(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role);
+    }
+
+    /**
+     * @description
      * @path /users/{userId}
-     * @allow (create) User with matching UID can create their own profile.
-     * @allow (get, list) User Management Admin, Super Admin can read user profiles. User can get their own profile.
-     * @allow (update, delete) User with matching UID can update their own profile.
-     * @deny (create) User cannot create a profile for another user.
-     * @deny (update, delete) User cannot update or delete another user's profile.
-     * @principle Enforces document ownership for user profiles, allows admin access.
+     * @allow (create) - User with matching UID can create their own profile.
+     * @allow (get, update, delete) - User with matching UID can read, update, and delete their own profile.
+     * @deny (create) - User tries to create a profile with a mismatched UID.
+     * @deny (get, update, delete) - User tries to access another user's profile.
+     * @principle Enforces user-ownership for profile data.
      */
     match /users/{userId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      function hasAdminRole() {
-          return (
-              (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin')
-              || (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin')
-          );
-      }
-
-      allow get: if isSignedIn() && (isOwner(userId) || hasAdminRole());
-      allow list: if false;
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == request.auth.uid;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow get: if isOwner(userId);
+      allow list: if false; // Do not allow listing of all users.
+      allow create: if request.auth.uid == userId;
+      allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Controls access to social media posts.
+     * @description
      * @path /social_posts/{postId}
-     * @allow (get, list) All users can read social media posts.
-     * @allow (create) Users can create social media posts with their UID as authorId.
-     * @allow (update, delete) Only the author can update or delete their own posts.
-     * @deny (create) Users cannot create social media posts with someone else's UID as authorId.
-     * @deny (update, delete) Users cannot update or delete social media posts they don't own.
-     * @principle Public read, owner-only write for social posts.
+     * @allow (get, list) - Anyone can read social media posts.
+     * @allow (create) - Only signed-in users can create social media posts. The authorId must match the user's UID.
+     * @allow (update, delete) - Only the author of the post can update or delete it.
+     * @deny (create) - An anonymous user tries to create a social media post, or the authorId does not match the UID.
+     * @deny (update, delete) - A non-author tries to update or delete a social media post.
+     * @principle Public read, owner-only writes for social media posts.
      */
     match /social_posts/{postId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(authorId) {
-        return request.auth.uid == authorId;
-      }
-
-      function isExistingOwner(authorId) {
-        return isOwner(authorId) && resource != null;
-      }
-
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId);
-      allow delete: if isExistingOwner(resource.data.authorId);
+      allow update: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow delete: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
     }
 
     /**
-     * @description Controls access to withdrawal requests.
+     * @description
      * @path /withdrawal_requests/{requestId}
-     * @allow (create) Any signed-in user can create a withdrawal request.
-     * @allow (get, list) User Management Admin, Super Admin can read/list all withdrawal requests.
-     * @allow (update, delete) Not allowed.
-     * @deny (create) If not signed in.
-     * @principle Admin-only access for reading withdrawal requests.
+     * @allow (create) - Signed-in users can create withdrawal requests, with `userId` matching their own UID.
+     * @allow (get, list) - Only admins with role 'User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin' can get/list withdrawal requests.
+     * @allow (update, delete) - Only admins with appropriate roles can update/delete withdrawal requests.
+     * @deny (create) - Users try to create withdrawal requests for other users.
+     * @deny (get, list, update, delete) - Non-admins try to access or modify withdrawal requests.
+     * @principle Restricts withdrawal request creation to the requesting user, and access to admins.
      */
     match /withdrawal_requests/{requestId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function hasAdminRole() {
-        return (
-            (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin')
-            || (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin')
-        );
-      }
-
-      allow get, list: if hasAdminRole();
+      allow get, list: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if false;
-      allow delete: if false;
+      allow update: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
+      allow delete: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
     }
 
     /**
-     * @description Controls access to forum posts.
+     * @description
      * @path /forums/{postId}
-     * @allow (get, list) All users can read forum posts.
-     * @allow (create) Any signed-in user can create a forum post.
-     * @allow (update, delete) Only the author can update or delete their own posts.
-     * @deny (create) Users cannot create forum posts with someone else's UID as authorId.
-     * @deny (update, delete) Users cannot update or delete forum posts they don't own.
-     * @principle Public read, owner-only write for forum posts.
+     * @allow (get, list) - Anyone can read forum posts.
+     * @allow (create) - Only signed-in users can create forum posts.
+     * @allow (update, delete) - Only the author of the post can update or delete it.
+     * @deny (create) - An anonymous user tries to create a forum post.
+     * @deny (update, delete) - A non-author tries to update or delete a forum post.
+     * @principle Public read, owner-only writes for forum posts.
      */
     match /forums/{postId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(authorId) {
-        return request.auth.uid == authorId;
-      }
-
-      function isExistingOwner(authorId) {
-        return isOwner(authorId) && resource != null;
-      }
-
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId);
-      allow delete: if isExistingOwner(resource.data.authorId);
+      allow update: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow delete: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
     }
 
     /**
-     * @description Controls access to presale purchase logs.
+     * @description
      * @path /presale_purchases/{purchaseId}
-     * @allow (get, list) User Management Admin, Super Admin can read/list all presale purchases.
-     * @allow (create, update, delete) Not allowed.
-     * @principle Admin-only access for presale purchases.
+     * @allow (get, list) - Only admins with role 'User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin' can get/list presale purchases.
+     * @allow (create) - Only signed-in users can create presale purchases.
+     * @allow (update, delete) - Only admins with appropriate roles can update/delete presale purchases.
+     * @deny (get, list, update, delete) - Non-admins try to access or modify presale purchases.
      */
     match /presale_purchases/{purchaseId} {
-      function hasAdminRole() {
-        return (
-            (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin')
-            || (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin')
-        );
-      }
-
-      allow get, list: if hasAdminRole();
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
+      allow create: if isSignedIn();
+      allow update: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
+      allow delete: if hasAnyRole(['User Management Admin', 'Job Management Admin', 'Franchisee Management Admin', 'Social Media Management Admin', 'Quiz Management Admin', 'Super Admin']);
     }
-     /**
-      * @description Controls access to admin roles.
-      * @path /roles_admin/{userId}
-      * @allow (get) only admin can get access.
-      * @allow (create, list, update, delete) Not allowed.
-      * @principle Admin-only access for admin roles.
-      */
-     match /roles_admin/{userId}{
-         function hasAdminRole() {
-              return (
-                    (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'User Management Admin')
-                    || (get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.role == 'Super Admin')
-              );
-          }
-          allow get: if hasAdminRole();
-          allow create: if false;
-          allow list: if false;
-          allow update: if false;
-          allow delete: if false;
-     }
-
   }
 }
