@@ -144,6 +144,22 @@
         "comments": { "type": "number" }
       },
       "required": ["title", "content", "authorId", "authorName", "topic", "geography", "createdAt"]
+    },
+    "PresalePurchase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PresalePurchase",
+      "type": "object",
+      "description": "Represents a logged purchase during the PGC presale event.",
+      "properties": {
+        "buyerWalletAddress": { "type": "string", "description": "The Solana wallet address of the buyer." },
+        "packageAmountUSD": { "type": "number", "description": "The amount in USD of the purchased package." },
+        "pgcAmount": { "type": "number", "description": "The base amount of PGC purchased." },
+        "bonusPgc": { "type": "number", "description": "The bonus PGC received." },
+        "totalPgc": { "type": "number", "description": "The total PGC to be fulfilled (base + bonus)." },
+        "purchaseDate": { "type": "string", "format": "date-time", "description": "The timestamp of when the purchase was logged." },
+        "status": { "type": "string", "description": "The fulfillment status of the purchase.", "enum": ["pending_verification", "completed"] }
+      },
+      "required": ["buyerWalletAddress", "packageAmountUSD", "totalPgc", "purchaseDate", "status"]
     }
   },
   "auth": {
@@ -184,6 +200,22 @@
                     "order": "DESCENDING"
                 }
             ]
+        },
+        {
+            "collectionGroup": "withdrawal_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "status", "order": "ASCENDING" },
+                { "fieldPath": "requestedAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "presale_purchases",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "status", "order": "ASCENDING" },
+                { "fieldPath": "purchaseDate", "order": "DESCENDING" }
+            ]
         }
     ],
     "structure": [
@@ -214,8 +246,17 @@
           "schema": { "$ref": "#/entities/ForumPost" },
           "description": "Stores posts for the governance forum."
         }
+      },
+      {
+        "path": "/presale_purchases/{purchaseId}",
+        "definition": {
+            "schema": { "$ref": "#/entities/PresalePurchase" },
+            "description": "Logs presale purchase requests for admin verification and fulfillment."
+        }
       }
     ],
     "reasoning": "This structure centralizes the user's role within their main document, allowing for more flexible and granular security rules. Specific admins (e.g., 'User Management Admin') can be granted access to collections like '/users', while a 'Super Admin' has overarching permissions. This role-based access control (RBAC) is more scalable and secure than the previous existence-based check."
   }
 }
+
+    

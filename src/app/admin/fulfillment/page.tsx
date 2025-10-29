@@ -26,6 +26,15 @@ type WithdrawalRequest = {
     status: 'pending' | 'completed' | 'failed';
 };
 
+type PresalePurchase = {
+    id: string;
+    buyerWalletAddress: string;
+    packageAmountUSD: number;
+    totalPgc: number;
+    purchaseDate: any;
+    status: 'pending_verification' | 'completed';
+};
+
 const RowSkeleton = () => (
     <TableRow>
         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
@@ -47,14 +56,15 @@ function FulfillmentContent() {
         if (!firestore) return null;
         return query(collection(firestore, 'withdrawal_requests'), where('status', '==', 'pending'), orderBy('requestedAt', 'desc'));
     }, [firestore]);
+    
+    const presaleQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'presale_purchases'), where('status', '==', 'pending_verification'), orderBy('purchaseDate', 'desc'));
+    }, [firestore]);
 
     const { data: withdrawalRequests, isLoading: areRequestsLoading } = useCollection<WithdrawalRequest>(requestsQuery);
+    const { data: presalePurchases, isLoading: arePresalesLoading } = useCollection<PresalePurchase>(presaleQuery);
 
-    // This is a placeholder for presale purchases. In a real app, this would come from a 'purchases' collection.
-    const [presalePurchases, setPresalePurchases] = useState([
-        { id: 'ps1', userName: 'Alice Johnson', package: '$100 USDT', pgcAmount: 200, wallet: 'Epa6e5a7pYEj2e4s2w8cZ5fG3xH1vR9jK6bN4mD0uF7' },
-        { id: 'ps2', userName: 'Bob Williams', package: '$1,000 USDT', pgcAmount: 2000, wallet: '5tG8hJkLuMvNpoQrStUvXyZ1a2b3c4d5e6f7g8h9i' },
-    ]);
 
     const handleUpdateRequestStatus = (requestId: string, newStatus: 'completed' | 'failed') => {
         if (!firestore) return;
@@ -102,6 +112,13 @@ function FulfillmentContent() {
             console.error("Bulk update failed:", error);
             toast({ variant: 'destructive', title: 'Bulk Update Failed', description: 'Could not update all requests. Please check the logs.' });
         }
+    };
+    
+    const handleMarkPurchaseComplete = (purchaseId: string) => {
+        if (!firestore) return;
+        const purchaseDocRef = doc(firestore, 'presale_purchases', purchaseId);
+        updateDocumentNonBlocking(purchaseDocRef, { status: 'completed' });
+        toast({ title: `Purchase marked as completed` });
     };
 
     return (
@@ -180,32 +197,48 @@ function FulfillmentContent() {
                      <Card>
                         <CardHeader>
                             <CardTitle>Presale Purchases</CardTitle>
-                            <CardDescription>This is a list of simulated presale purchases. Manually send the PGC amount to the buyer's wallet.</CardDescription>
+                            <CardDescription>A list of presale purchases awaiting USDT payment verification and PGC fulfillment.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Table>
+                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>User</TableHead>
+                                        <TableHead>Buyer Wallet</TableHead>
                                         <TableHead>Package</TableHead>
                                         <TableHead>Total PGC to Send</TableHead>
-                                        <TableHead>Buyer Wallet</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {presalePurchases.map((purchase) => (
-                                        <TableRow key={purchase.id}>
-                                            <TableCell>{purchase.userName}</TableCell>
-                                            <TableCell>{purchase.package}</TableCell>
-                                            <TableCell className="font-bold">{purchase.pgcAmount.toLocaleString()}</TableCell>
-                                            <TableCell className="font-mono text-xs flex items-center gap-2">
-                                                {purchase.wallet}
-                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(purchase.wallet, 'Wallet address')}>
-                                                    <Copy className="h-4 w-4" />
-                                                </Button>
+                                    {arePresalesLoading ? (
+                                        <RowSkeleton />
+                                    ) : presalePurchases && presalePurchases.length > 0 ? (
+                                        presalePurchases.map((purchase) => (
+                                            <TableRow key={purchase.id}>
+                                                <TableCell className="font-mono text-xs flex items-center gap-2">
+                                                    {purchase.buyerWalletAddress}
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(purchase.buyerWalletAddress, 'Wallet address')}>
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                                <TableCell>${purchase.packageAmountUSD}</TableCell>
+                                                <TableCell className="font-bold">{purchase.totalPgc.toLocaleString()}</TableCell>
+                                                <TableCell>{purchase.purchaseDate ? new Date(purchase.purchaseDate.seconds * 1000).toLocaleString() : 'N/A'}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button size="sm" onClick={() => handleMarkPurchaseComplete(purchase.id)}>
+                                                        <CheckCircle className="mr-2 h-4 w-4" /> Fulfill & Mark Complete
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="h-24 text-center">
+                                                No pending presale purchases.
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>
@@ -283,3 +316,5 @@ export default function FulfillmentPage() {
         </AppLayout>
     );
 }
+
+    
