@@ -28,7 +28,7 @@ import {
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Shield } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 
 const loginSchema = z.object({
@@ -57,30 +57,43 @@ function AdminLoginForm() {
       const userDocRef = doc(firestore, 'users', userCredential.user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
+      let hasAdminRole = false;
+      let userData: any = {};
+
       if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
+        userData = userDocSnap.data();
         if (userData.role && userData.role.includes('Admin')) {
+            hasAdminRole = true;
+        }
+      }
+      
+      // THIS IS THE CRITICAL FIX:
+      // If the user is the special admin email but doesn't have the Super Admin role in the DB,
+      // forcefully assign it now.
+      if (data.email.toLowerCase() === 'admin@publicgovernance.com' && userData.role !== 'Super Admin') {
+        await setDoc(userDocRef, { role: 'Super Admin' }, { merge: true });
+        hasAdminRole = true;
+        toast({
+            title: 'Admin Role Corrected',
+            description: 'Your Super Admin privileges have been assigned.',
+        });
+      }
+
+      if (hasAdminRole) {
             toast({
                 title: 'Admin Login Successful',
                 description: 'Redirecting to admin dashboard...',
             });
             // Force a reload to ensure the new auth state is picked up everywhere
-            router.push('/admin'); 
-        } else {
+            router.push('/admin');
+            router.refresh();
+      } else {
              toast({
                 variant: 'destructive',
                 title: 'Login Failed',
                 description: 'This account does not have admin privileges.',
             });
             await auth.signOut();
-        }
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: 'User data not found.',
-        });
-        await auth.signOut();
       }
 
     } catch (error: any) {
