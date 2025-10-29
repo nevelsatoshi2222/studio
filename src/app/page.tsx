@@ -93,16 +93,6 @@ export default function Dashboard() {
     }
   }, [publicKey, connection]);
 
-  const getAvatarUrl = (avatarId: string) => {
-    const image = placeholderImages.find((img) => img.id === avatarId);
-    return image ? image.imageUrl : `https://picsum.photos/seed/${avatarId}/40/40`;
-  }
-  
-  const getAvatarHint = (avatarId: string) => {
-      const image = placeholderImages.find((img) => img.id === avatarId);
-      return image ? image.imageHint : 'user avatar';
-  }
-
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
