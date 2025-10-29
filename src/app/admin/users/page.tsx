@@ -21,7 +21,7 @@ type User = {
     email: string;
     country: string;
     status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
-    registeredAt: Timestamp;
+    registeredAt: Timestamp | { seconds: number, nanoseconds: number } | Date;
     avatarId: string;
     role?: string;
 };
@@ -84,6 +84,21 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
         return `https://picsum.photos/seed/${avatarId}/40/40`;
     };
     
+    const formatRegistrationDate = (registeredAt: any) => {
+        if (!registeredAt) return 'N/A';
+        if (typeof registeredAt.toDate === 'function') {
+            return registeredAt.toDate().toLocaleDateString();
+        }
+        if (registeredAt.seconds) {
+            return new Date(registeredAt.seconds * 1000).toLocaleDateString();
+        }
+        try {
+            return new Date(registeredAt).toLocaleDateString();
+        } catch (e) {
+            return 'Invalid Date';
+        }
+    }
+    
     return (
          <Card>
             <CardHeader>
@@ -135,7 +150,7 @@ function UsersTable({ canRunQuery }: { canRunQuery: boolean }) {
                                             {user.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{user.registeredAt ? user.registeredAt.toDate().toLocaleDateString() : 'N/A'}</TableCell>
+                                    <TableCell>{formatRegistrationDate(user.registeredAt)}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
