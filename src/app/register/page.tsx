@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -155,8 +155,22 @@ function RegistrationForm() {
       
     } catch (error: any) {
       console.error('Registration failed:', error);
-       let description = 'An unexpected error occurred. Please try again.';
+      
+      let description = 'An unexpected error occurred. Please try again.';
+      
       if (error.code === 'auth/email-already-in-use') {
+        // Special handling for the admin user
+        if (data.email.toLowerCase() === 'admin@publicgovernance.com' && auth.currentUser) {
+            const userDocRef = doc(firestore, 'users', auth.currentUser.uid);
+            await setDoc(userDocRef, { role: 'Super Admin' }, { merge: true });
+            description = "This admin account already exists. Role confirmed. Please proceed to the admin login page.";
+            toast({
+                title: 'Admin Account Ready',
+                description,
+            });
+            router.push('/admin/login');
+            return;
+        }
         description = 'This email address is already registered. Please use a different email or log in.';
       } else if (error.code === 'permission-denied') {
         description = "You do not have permission to perform this action. This could be due to security rules. Please check the console for more details.";
