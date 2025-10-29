@@ -288,7 +288,7 @@ export default function TeamPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="direct-members" className="w-full">
+        <Tabs defaultValue="team-summary" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
              <TabsTrigger value="team-summary">
               <Users className="mr-2 h-4 w-4" /> Team Summary
@@ -394,5 +394,3 @@ export default function TeamPage() {
     </AppLayout>
   );
 }
-
-    
