@@ -129,7 +129,7 @@ function RegistrationForm() {
         pgcBalance: 0,
         referralCode: data.referralCode,
         registeredAt: serverTimestamp(),
-        status: (role && role !== 'Admin') ? 'Pending' : 'Active', // Set status for non-admin roles
+        status: (role && role !== 'Admin') ? 'Pending' : 'Active',
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
         role: data.email.toLowerCase() === 'admin@publicgovernance.com' ? 'Admin' : (data.role || 'User'),
         jobTitle: data.jobTitle || '',
@@ -417,5 +417,6 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+    
 
     
