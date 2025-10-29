@@ -189,5 +189,3 @@ interface FirebaseProviderProps {
   firestore: Firestore;
   auth: Auth;
 }
-
-    

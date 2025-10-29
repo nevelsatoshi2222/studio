@@ -1,176 +1,157 @@
 /**
- * @fileoverview Firestore Security Rules for the application.
- *
- * Core Philosophy:
- * This ruleset enforces a role-based access control (RBAC) model.
- * Users can only read and write their own user document.
- * Social posts are publicly readable, but only the author can modify or delete them.
- * Withdrawal requests and presale purchases are open for create, but protected for update and delete.
+ * @file Firebase Security Rules for Firestore.
+ * @description This ruleset enforces a role-based access control (RBAC) model, with user-specific data nested under `/users/{userId}` and public social posts in a top-level collection.
  *
  * Data Structure:
- * - /users/{userId}: Stores user profile data, with the document ID matching the Firebase Auth UID.
- * - /social_posts/{postId}: Stores social media posts.
- * - /withdrawal_requests/{requestId}: Stores user withdrawal requests.
- * - /forums/{postId}: Stores posts for the governance forum.
- * - /presale_purchases/{purchaseId}: Logs presale purchase requests.
+ * - `/users/{userId}`: Stores user profiles, roles, and financial information.  The document ID matches the Firebase Auth UID.
+ * - `/social_posts/{postId}`: Stores public social media posts.
+ * - `/withdrawal_requests/{requestId}`: Stores withdrawal requests for admin processing.
+ * - `/forums/{postId}`: Stores posts for the governance forum.
+ * - `/presale_purchases/{purchaseId}`: Logs presale purchase requests for admin verification and fulfillment.
  *
  * Key Security Decisions:
- * - Users can only manage their own profiles.
- * - Social posts are publicly readable.
- * - Role-based access control is used for elevated permissions (e.g., admin roles).
- * - Data validation is limited to authorization-critical fields.
+ * - Users can only manage their own profile data under `/users/{userId}`.
+ * - Social posts are publicly readable but creation is open to signed-in users with owner-only updates/deletes via authorId.
+ * - Withdrawal requests are publicly creatable for any signed-in user, but not updatable or deletable by users (only by backend/admins).
+ * - Forum posts are publicly readable, and writable by signed-in users with ownership.
+ * - Presale Purchases are publicly writable, with no update or delete permissions from users.
  *
  * Denormalization for Authorization:
- * - User roles are stored directly in the /users/{userId} document to avoid extra reads during authorization checks.
+ * - Social posts contain `authorId` to allow simple owner-only write rules.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Grants access to user documents based on ownership.
+     * @description Enforces user-specific data access under /users/{userId}.
      * @path /users/{userId}
-     * @allow (get, list) User with matching UID can read their own profile.
-     * @allow (create) User with matching UID can create their own profile.
-     * @allow (update) User with matching UID can update their own profile.
-     * @allow (delete) User with matching UID can delete their own profile.
-     * @deny (get, list) User cannot read other user profiles.
-     * @deny (create) User cannot create profiles with mismatched UID.
-     * @deny (update) User cannot update other user profiles.
-     * @deny (delete) User cannot delete other user profiles.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create, update, get, list) - Authenticated user with matching UID can create, update, get and list their own profile.
+     * @deny (create, update, get, list) - Authenticated user trying to access another user's profile.
+     * @principle Enforces document ownership for writes and reads, validating relational integrity.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
+      function isSignedIn() {
+        return request.auth != null;
       }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
       function isExistingOwner(userId) {
         return isOwner(userId) && resource != null;
       }
-      allow get: if isOwner(userId);
+
+      allow get: if isSignedIn() && isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
+
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Allows public read access to social media posts, with owner-only writes.
+     * @description Allows public read access to social media posts, but restricts creation, updates, and deletion to the author.
      * @path /social_posts/{postId}
-     * @allow (get, list) Any user can read social posts.
-     * @allow (create) Any authenticated user can create a post with their authorId matching their UID.
-     * @allow (update) Only the author can update a post.
-     * @allow (delete) Only the author can delete a post.
-     * @deny (create) Unauthenticated users cannot create posts.
-     * @deny (update) Users cannot update posts they don't own.
-     * @deny (delete) Users cannot delete posts they don't own.
-     * @principle Allows public reads, enforces ownership for writes, and validates relational integrity.
+     * @allow (get, list) - Any user can read social posts.
+     * @allow (create) - Authenticated user can create a social post with their UID as the authorId.
+     * @allow (update, delete) - Only the original author can update or delete their own post.
+     * @deny (create) - Non-authenticated user cannot create a social post.
+     * @deny (update, delete) - Non-authenticated user cannot update or delete any social post.
+     * @deny (update, delete) - Authenticated user cannot update or delete another user's post.
+     * @principle Allows public read access, but enforces document ownership for writes.
      */
     match /social_posts/{postId} {
       function isSignedIn() {
         return request.auth != null;
       }
+
       function isOwner(authorId) {
-          return isSignedIn() && request.auth.uid == authorId;
+        return isSignedIn() && request.auth.uid == authorId;
       }
-      function isExistingOwner(authorId) {
+
+        function isExistingOwner(authorId) {
         return isOwner(authorId) && resource != null;
       }
+
       allow get: if true;
       allow list: if true;
+
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
       allow update: if isExistingOwner(resource.data.authorId);
       allow delete: if isExistingOwner(resource.data.authorId);
     }
 
     /**
-     * @description Allows any authenticated user to create a withdrawal request, but restricts modification and deletion.
+     * @description Allows any signed-in user to create a withdrawal request, but restricts updates and deletes.
      * @path /withdrawal_requests/{requestId}
-     * @allow (get, list) No access.
-     * @allow (create) Any authenticated user can create a withdrawal request.
-     * @allow (update) No updates allowed.
-     * @allow (delete) No deletes allowed.
-     * @deny (create) Unauthenticated users cannot create withdrawal requests.
-     * @principle Restricts modification and deletion of withdrawal requests to prevent abuse.
+     * @allow (create) - Authenticated user can create a withdrawal request.
+     * @deny (update, delete) - No user can update or delete a withdrawal request.
+     * @principle Allows open creation for signed-in users.  Backend or admin-only updates/deletes.
      */
     match /withdrawal_requests/{requestId} {
       function isSignedIn() {
         return request.auth != null;
       }
+
       allow get: if false;
       allow list: if false;
+
       allow create: if isSignedIn();
       allow update: if false;
       allow delete: if false;
     }
 
     /**
-     * @description Allows public read access to forum posts, with owner-only writes.
+     * @description Allows public read access to forum posts, but restricts creation, updates, and deletion to the author.
      * @path /forums/{postId}
-     * @allow (get, list) Any user can read forum posts.
-     * @allow (create) Any authenticated user can create a post with their authorId matching their UID.
-     * @allow (update) Only the author can update a post.
-     * @allow (delete) Only the author can delete a post.
-     * @deny (create) Unauthenticated users cannot create posts.
-     * @deny (update) Users cannot update posts they don't own.
-     * @deny (delete) Users cannot delete posts they don't own.
-     * @principle Allows public reads, enforces ownership for writes, and validates relational integrity.
+     * @allow (get, list) - Any user can read forum posts.
+     * @allow (create) - Authenticated user can create a forum post with their UID as the authorId.
+     * @allow (update, delete) - Only the original author can update or delete their own post.
+     * @deny (create) - Non-authenticated user cannot create a forum post.
+     * @deny (update, delete) - Non-authenticated user cannot update or delete any forum post.
+     * @deny (update, delete) - Authenticated user cannot update or delete another user's post.
+     * @principle Allows public read access, but enforces document ownership for writes.
      */
     match /forums/{postId} {
       function isSignedIn() {
         return request.auth != null;
       }
+
       function isOwner(authorId) {
-          return isSignedIn() && request.auth.uid == authorId;
+        return isSignedIn() && request.auth.uid == authorId;
       }
-      function isExistingOwner(authorId) {
+
+        function isExistingOwner(authorId) {
         return isOwner(authorId) && resource != null;
       }
+
       allow get: if true;
       allow list: if true;
+
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
       allow update: if isExistingOwner(resource.data.authorId);
       allow delete: if isExistingOwner(resource.data.authorId);
     }
 
-    /**
-     * @description Allows any authenticated user to create a presale purchase, but restricts modification and deletion.
-     * @path /presale_purchases/{purchaseId}
-     * @allow (get, list) No access.
-     * @allow (create) Any authenticated user can create a presale purchase.
-     * @allow (update) No updates allowed.
-     * @allow (delete) No deletes allowed.
-     * @deny (create) Unauthenticated users cannot create presale purchases.
-     * @principle Restricts modification and deletion of presale purchases to prevent abuse.
-     */
-    match /presale_purchases/{purchaseId} {
-      function isSignedIn() {
-        return request.auth != null;
+      /**
+       * @description Logs presale purchase requests for admin verification and fulfillment.
+       * @path /presale_purchases/{purchaseId}
+       * @allow (create) - Any authenticated user can create a presale purchase request
+       * @deny (update, delete, get, list) - Presale Purchases are only writable. Users cannot read, update, or delete.
+       * @principle Allows open creation for signed-in users.  Backend or admin-only updates/deletes.
+       */
+      match /presale_purchases/{purchaseId} {
+          function isSignedIn() {
+              return request.auth != null;
+          }
+
+          allow get: if false;
+          allow list: if false;
+          allow create: if isSignedIn();
+          allow update: if false;
+          allow delete: if false;
       }
-      allow get: if false;
-      allow list: if false;
-      allow create: if isSignedIn();
-      allow update: if false;
-      allow delete: if false;
-    }
-    
-    /**
-     * @description This rule is intended to deny access to admin role document.
-     * @path /roles_admin/{userId}
-     * @allow (get) No access
-     * @allow (list) No access
-     * @allow (create) No access
-     * @allow (update) No access
-     * @allow (delete) No access
-     * @deny (get, list, create, update, delete) to everyone
-     * @principle Always deny access to admin role
-     */
-    match /roles_admin/{userId} {
-        allow get: if false;
-        allow list: if false;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
-    }
   }
 }
