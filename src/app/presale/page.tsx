@@ -24,6 +24,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const presalePackages = [
   { amountUSD: 10, pgcAmount: 10, bonus: 10 },
+  { amountUSD: 50, pgcAmount: 50, bonus: 50 },
   { amountUSD: 100, pgcAmount: 100, bonus: 100 },
   { amountUSD: 1000, pgcAmount: 1000, bonus: 1000 },
   { amountUSD: 10000, pgcAmount: 10000, bonus: 10000 },
@@ -138,7 +139,7 @@ export default function PresalePage() {
                 <CardTitle>Select a Presale Package</CardTitle>
                 <CardDescription>Choose one of the exclusive packages below. Payment is in USDT on the Solana network.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+            <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {presalePackages.map((pkg) => (
                     <button
                         key={pkg.amountUSD}

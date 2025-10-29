@@ -21,6 +21,7 @@ export async function POST(request: Request) {
 
     const presalePackages = [
         { amountUSD: 10, pgcAmount: 10, bonus: 10 },
+        { amountUSD: 50, pgcAmount: 50, bonus: 50 },
         { amountUSD: 100, pgcAmount: 100, bonus: 100 },
         { amountUSD: 1000, pgcAmount: 1000, bonus: 1000 },
         { amountUSD: 10000, pgcAmount: 10000, bonus: 10000 },
