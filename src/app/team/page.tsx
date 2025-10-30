@@ -29,7 +29,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
 import { AffiliateRewardTier } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
-import { useEffect, useState } from 'react';
 
 type TeamMember = {
   id: string;
@@ -89,6 +88,7 @@ export default function TeamPage() {
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
+    // Secure query: Only fetch users where the referrerId matches the current user's UID.
     return query(collection(firestore, 'users'), where('referrerId', '==', user.uid));
   }, [firestore, user]);
 
