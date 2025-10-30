@@ -117,19 +117,23 @@ function RegistrationForm() {
     try {
       // 1. Get referrer's data to build the ancestor path
       let ancestors: string[] = [];
-      if (data.referrerId && data.referrerId !== 'ADMIN_ROOT_USER') {
-        const referrerDocRef = doc(firestore, 'users', data.referrerId);
+      let finalReferrerId = data.referrerId.trim();
+
+      if (!finalReferrerId) {
+        finalReferrerId = 'ADMIN_ROOT_USER';
+      }
+
+      if (finalReferrerId && finalReferrerId !== 'ADMIN_ROOT_USER') {
+        const referrerDocRef = doc(firestore, 'users', finalReferrerId);
         const referrerSnap = await getDoc(referrerDocRef);
         if (referrerSnap.exists()) {
           const referrerData = referrerSnap.data() as AppUser;
           // New ancestor list is the referrer's own ancestors, plus the referrer themselves.
-          ancestors = [...(referrerData.ancestors || []), data.referrerId].slice(-15); // Keep max 15 levels
+          ancestors = [...(referrerData.ancestors || []), finalReferrerId].slice(-15); // Keep max 15 levels
         } else {
           // If referrer doesn't exist, treat them as a root user for safety.
-          data.referrerId = 'ADMIN_ROOT_USER';
+          finalReferrerId = 'ADMIN_ROOT_USER';
         }
-      } else if (!data.referrerId) {
-          data.referrerId = 'ADMIN_ROOT_USER';
       }
 
       // 2. Create the new user in Firebase Auth
@@ -146,7 +150,7 @@ function RegistrationForm() {
         finalRole = 'Super Admin';
       }
       
-      await setDoc(userDocRef, {
+      const userDocumentData = {
         id: user.uid,
         name: data.name,
         email: data.email,
@@ -160,7 +164,7 @@ function RegistrationForm() {
         state: data.state,
         country: data.country,
         pgcBalance: 0,
-        referrerId: data.referrerId,
+        referrerId: finalReferrerId,
         referralCode: generateReferralCode(), // Generate a unique code for this new user
         ancestors: ancestors, // The new materialized path
         freeAchievers: { bronze: 0, silver: 0, gold: 0 },
@@ -172,7 +176,9 @@ function RegistrationForm() {
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
         role: finalRole,
         jobTitle: data.jobTitle || '',
-      });
+      };
+
+      await setDoc(userDocRef, userDocumentData);
       
       // 4. Create user wallet document
       await setDoc(doc(firestore, 'user_wallets', user.uid), {
@@ -204,7 +210,11 @@ function RegistrationForm() {
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
       } else if (error.message) {
-        description = error.message;
+          if (error.message.includes('INVALID_ARGUMENT') || error.message.includes('paths must not contain //')) {
+              description = "There was a problem with the data provided. Please ensure all fields are filled correctly.";
+          } else {
+             description = error.message;
+          }
       }
 
       toast({
@@ -458,5 +468,6 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+    
 
     
