@@ -115,10 +115,6 @@ function RegistrationForm() {
         return;
     }
     try {
-      // **FIX:** The logic for calculating ancestors on the client-side has been removed.
-      // This was causing the permission-denied error. We will now only store the direct referrer.
-      // A backend function would be required to securely and efficiently build the ancestor chain.
-      
       let finalReferrerId = data.referrerId ? data.referrerId.trim() : 'ADMIN_ROOT_USER';
       if (!finalReferrerId) {
           finalReferrerId = 'ADMIN_ROOT_USER';
@@ -154,6 +150,7 @@ function RegistrationForm() {
         referrerId: finalReferrerId,
         referralCode: generateReferralCode(),
         // **FIX:** The 'ancestors' field is removed from client-side creation.
+        // A backend process is required to build this securely.
         ancestors: [], 
         freeAchievers: { bronze: 0, silver: 0, gold: 0 },
         paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
@@ -198,7 +195,7 @@ function RegistrationForm() {
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
       } else if (error.code === 'permission-denied') {
-          description = 'A security rule prevented the registration. Please check your inputs and try again.'
+          description = 'A security rule prevented the registration. This is likely due to an invalid referrer ID. Please check the ID and try again.'
       } else if (error.message) {
           description = error.message;
       }
@@ -454,6 +451,8 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+    
+
     
 
     
