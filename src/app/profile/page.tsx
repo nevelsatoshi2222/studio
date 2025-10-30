@@ -47,7 +47,7 @@ import {
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  solanaWalletAddress: z.string().optional(),
+  walletPublicKey: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -99,7 +99,7 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
-      solanaWalletAddress: '',
+      walletPublicKey: '',
     },
   });
 
@@ -107,20 +107,20 @@ export default function ProfilePage() {
     if (userProfile) {
       form.reset({
         name: userProfile.name || '',
-        solanaWalletAddress: userProfile.solanaWalletAddress || '',
+        walletPublicKey: userProfile.walletPublicKey || '',
       });
       setWithdrawAmount(userProfile.pgcBalance || 0);
     } else if (user) {
         form.reset({
             name: user.displayName || user.email?.split('@')[0] || 'User',
-            solanaWalletAddress: '' // Ensure wallet address is controlled
+            walletPublicKey: ''
         })
     }
   }, [userProfile, user, form]);
 
   useEffect(() => {
-    if (publicKey && !form.getValues('solanaWalletAddress')) {
-       form.setValue('solanaWalletAddress', publicKey.toBase58());
+    if (publicKey && !form.getValues('walletPublicKey')) {
+       form.setValue('walletPublicKey', publicKey.toBase58());
     }
   }, [publicKey, form]);
 
@@ -128,7 +128,7 @@ export default function ProfilePage() {
     if (!userDocRef || !user) return;
     updateDocumentNonBlocking(userDocRef, {
         name: data.name,
-        solanaWalletAddress: data.solanaWalletAddress,
+        walletPublicKey: data.walletPublicKey,
     });
     toast({
         title: 'Profile Updated',
@@ -137,7 +137,7 @@ export default function ProfilePage() {
   };
 
   const handleWithdrawalRequest = () => {
-    if (!firestore || !user || !userProfile || !userProfile.solanaWalletAddress) {
+    if (!firestore || !user || !userProfile || !userProfile.walletPublicKey) {
         toast({
             variant: 'destructive',
             title: 'Cannot Request Withdrawal',
@@ -154,12 +154,12 @@ export default function ProfilePage() {
         return;
     }
 
-    const requestsCollection = collection(firestore, 'withdrawal_requests');
+    const requestsCollection = collection(firestore, 'withdrawalRequests');
     addDocumentNonBlocking(requestsCollection, {
         userId: user.uid,
         userName: userProfile.name,
         amount: withdrawAmount,
-        solanaAddress: userProfile.solanaWalletAddress,
+        walletAddress: userProfile.walletPublicKey,
         requestedAt: serverTimestamp(),
         status: 'pending',
     });
@@ -257,7 +257,7 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                     <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="solanaWalletAddress" render={({ field }) => (<FormItem><FormLabel>Solana Wallet Address</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="walletPublicKey" render={({ field }) => (<FormItem><FormLabel>Solana Wallet Address</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     </div>
                 </div>
               </CardContent>
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
                     </div>
-                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Withdraw to Wallet</Button>
+                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Request Withdrawal</Button>
                 </div>
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
                     <div>
@@ -332,9 +332,8 @@ export default function ProfilePage() {
               <CardTitle>KYC Verification</CardTitle>
               <CardDescription>
                 Upload your documents to get your account fully verified.
+                {userProfile?.isVerified && <Badge variant="default" className="ml-2">Verified</Badge>}
                 {userProfile?.kycStatus === 'pending' && <Badge variant="secondary" className="ml-2">In Review</Badge>}
-                {userProfile?.kycStatus === 'verified' && <Badge variant="default" className="ml-2">Verified</Badge>}
-                {userProfile?.kycStatus === 'rejected' && <Badge variant="destructive" className="ml-2">Rejected</Badge>}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -358,7 +357,7 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.kycStatus === 'pending' || userProfile?.kycStatus === 'verified'}>Submit for Verification</Button>
+              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.isVerified || userProfile?.kycStatus === 'pending'}>Submit for Verification</Button>
             </CardFooter>
         </Card>
       </div>
@@ -369,7 +368,7 @@ export default function ProfilePage() {
                 <DialogHeader>
                     <DialogTitle>Request PGC Withdrawal</DialogTitle>
                     <DialogDescription>
-                        Enter the amount of PGC you wish to withdraw to your linked Solana wallet: <strong className="font-mono text-xs">{userProfile?.solanaWalletAddress}</strong>
+                        Enter the amount of PGC you wish to withdraw to your linked Solana wallet: <strong className="font-mono text-xs">{userProfile?.walletPublicKey}</strong>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -397,5 +396,3 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
-
-    

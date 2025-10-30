@@ -18,8 +18,8 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
-import { useFirestore, useUser, updateDocumentNonBlocking } from '@/firebase';
-import { collection, addDoc, serverTimestamp, doc, increment } from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 const presalePackages = [
@@ -76,32 +76,24 @@ export default function PresalePage() {
 
     setIsProcessing(true);
     try {
-      const presaleCollection = collection(firestore, 'presale_purchases');
+      const presaleCollection = collection(firestore, 'presales');
       const selectedPkg = presalePackages.find(p => p.amountUSD === selectedPackage);
       
       if (!selectedPkg) throw new Error("Invalid package selected.");
       
       const totalPgc = selectedPkg.pgcAmount + selectedPkg.bonus;
 
-      // 1. Log the purchase for admin verification
       await addDoc(presaleCollection, {
-        buyerWalletAddress: publicKey.toBase58(),
         userId: user.uid,
-        packageAmountUSD: selectedPackage,
-        pgcAmount: selectedPkg.pgcAmount,
-        bonusPgc: selectedPkg.bonus,
-        totalPgc: totalPgc,
+        amountUSDT: selectedPackage,
+        pgcCredited: totalPgc,
+        status: 'PENDING_VERIFICATION',
         purchaseDate: serverTimestamp(),
-        status: 'pending_verification', // Admin still needs to verify USDT
       });
       
-      // 2. Immediately credit the user's in-app PGC balance
-      const userDocRef = doc(firestore, 'users', user.uid);
-      updateDocumentNonBlocking(userDocRef, { pgcBalance: increment(totalPgc) });
-      
       toast({
-        title: 'Purchase Successful!',
-        description: `Your balance has been credited with ${totalPgc.toLocaleString()} PGC. You can now view it on your profile.`,
+        title: 'Verification Submitted!',
+        description: `Your purchase of ${totalPgc.toLocaleString()} PGC is pending verification. An admin will approve it shortly.`,
       });
       
       setPurchaseInitiated(false);
@@ -110,7 +102,7 @@ export default function PresalePage() {
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Logging Failed',
+        title: 'Submission Failed',
         description: error.message || 'Could not log the purchase. Please try again.',
       });
     } finally {
@@ -218,8 +210,8 @@ export default function PresalePage() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Step 2: Confirm Your Transaction & Credit Your Account</label>
-                    <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. Your in-app PGC balance will be credited instantly. An admin will later verify the transaction and send the real PGC tokens for withdrawal requests.</p>
+                    <label className="text-sm font-medium">Step 2: Confirm Your Transaction</label>
+                    <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. This will log your purchase for an admin to verify. Once verified, your commissions will be distributed and your balance updated.</p>
                 </div>
             </CardContent>
             <CardFooter>

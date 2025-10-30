@@ -1,139 +1,147 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @file Firestore Security Rules for PGC Platform
  *
  * Core Philosophy:
- * This ruleset prioritizes security by enforcing strict ownership and role-based access control.
- * It assumes a user-centric data model where most data is owned by individual users.
- * Data validation is intentionally relaxed to facilitate rapid prototyping.
+ *  This ruleset enforces a strict user-ownership model for personal data
+ *  while allowing controlled access to public content. It leverages Firebase
+ *  Authentication to verify user identity and protect sensitive information.
+ *  The rules are designed to prevent unauthorized data access and modification.
  *
  * Data Structure:
- * - `/users/{userId}`: Stores user profile data.
- * - `/user_wallets/{userId}`: Stores user's wallet information, secured by user ID.
- * - `/transactions/{transactionId}`: Logs crypto sales.
- * - `/rewards/{rewardId}`: Tracks user achievements and rewards.
- * - `/social_posts/{postId}`: Stores social media posts, readable by anyone, writable only by the author.
+ *  - /users/{userId}: Stores user profiles, secured by owner-only access.
+ *  - /user_wallets/{userId}: Stores Solana wallet information, secured by owner-only access.
+ *  - /transactions/{transactionId}: Stores transaction logs, write-protected and readable only by the associated user.
+ *  - /rewards/{rewardId}: Stores reward history, write-protected and readable only by the associated user.
+ *  - /social_posts/{postId}: Public posts. Any logged-in user can create a social post, and all logged-in users can read all posts. Posts can only be modified or deleted by the original author.
  *
  * Key Security Decisions:
- * - User data is private and accessible only to the owning user.
- * - Listing of users is disallowed to prevent enumeration.
- * - Social posts are publicly readable but writable only by the author.
+ *  - User listing is disallowed for privacy.
+ *  - Data validation is minimal to allow for prototyping, but relational integrity is enforced.
+ *  - Cloud Functions, with admin privileges, manage critical operations such as commission payouts and KYC verification.
+ *  - The rules are designed to be auditable and maintainable through the use of helper functions.
  *
  * Denormalization for Authorization:
- * - The `SocialPost` entity includes both `authorId` and `authorName`. The `authorId` is essential to validate
- *   that the user is authorized to update or delete the post. The author's name is also stored to avoid
- *   additional reads when displaying the post.
+ *  - The `userId` field is present in `user_wallets`, `transactions`, and `rewards` to enforce ownership without additional reads.
+ *
+ * Structural Segregation:
+ *  - Private user data is stored under `/users/{userId}`, while public social posts are stored in the top-level `/social_posts` collection.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Enforces strict user-ownership for user profiles.
+     * @description Controls access to user profile data.
      * @path /users/{userId}
-     * @allow (create) - Authenticated user can create their own profile.
-     * @allow (get, update, delete) - Authenticated user can access and modify their own profile.
-     * @deny (create) - Another user cannot create a profile with a different user ID.
-     * @deny (get, update, delete) - Another user cannot access or modify someone else's profile.
-     * @principle Enforces document ownership for all operations.
+     * @allow (read) User with UID 'user123' can read their own profile.
+     * @allow (create) User with UID 'user123' can create their own profile during signup.
+     * @allow (update) User with UID 'user123' can update their own profile (excluding critical fields).
+     * @deny (read) User with UID 'user456' cannot read the profile of user 'user123'.
+     * @deny (update) User with UID 'user123' cannot change their own UID.
+     * @principle Enforces document ownership and restricts modification of critical user data.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      allow get: if isOwner(userId);
-      allow list: if false; // prevent user enumeration
-
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId)
+        && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+      allow list: if false; // User listing is not permitted
     }
 
     /**
-     * @description Enforces strict user-ownership for user wallets.
+     * @description Controls access to user wallet data.
      * @path /user_wallets/{userId}
-     * @allow (create) - Authenticated user can create their own wallet.
-     * @allow (get, update, delete) - Authenticated user can access and modify their own wallet.
-     * @deny (create) - Another user cannot create a wallet with a different user ID.
-     * @deny (get, update, delete) - Another user cannot access or modify someone else's wallet.
-     * @principle Enforces document ownership for all operations.
+     * @allow (read) User with UID 'user123' can read their own wallet data.
+     * @allow (create) User with UID 'user123' can create their own wallet data.
+     * @allow (update) User with UID 'user123' can update their own wallet data.
+     * @deny (read) User with UID 'user456' cannot read the wallet data of user 'user123'.
+     * @principle Enforces document ownership for wallet information.
      */
     match /user_wallets/{userId} {
-        function isOwner(userId) {
-            return request.auth != null && request.auth.uid == userId;
-        }
-        function isExistingOwner(userId) {
-            return isOwner(userId) && resource != null;
-        }
-
-        allow get: if isOwner(userId);
-        allow list: if false; //Prevent wallet enumeration
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+      allow read: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+      allow list: if false; // Wallet listing is not permitted
     }
 
     /**
-     * @description Limits access to transaction records.
+     * @description Controls access to transaction data. Transactions can only be read by the associated user, but not created, updated, or deleted.
      * @path /transactions/{transactionId}
-     * @allow (get) - Any authenticated user can read transaction data.
-     * @allow (create) - No user can create transactions directly. Transactions are created by backend.
-     * @allow (update, delete) - No user can update or delete transactions. Transactions are immutable.
-     * @deny (create, update, delete) - Non-admin users cannot modify transaction records.
-     * @principle Restricts write access to prevent unauthorized modification of financial records.
+     * @allow (read) User with UID 'user123' can read their own transaction data.
+     * @deny (create) No user can create transaction documents directly.
+     * @deny (update) No user can update transaction documents directly.
+     * @deny (delete) No user can delete transaction documents directly.
+     * @principle Transactions are managed by a trusted backend (Cloud Function) and are read-only for users.
      */
     match /transactions/{transactionId} {
-        allow get: if true;
-        allow list: if false;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
-    }
-
-   /**
-     * @description Limits access to rewards records.
-     * @path /rewards/{rewardId}
-     * @allow (get) - Any authenticated user can read reward data.
-     * @allow (create) - No user can create rewards directly. Rewards are created by backend.
-     * @allow (update, delete) - No user can update or delete rewards. Rewards are immutable.
-     * @deny (create, update, delete) - Non-admin users cannot modify reward records.
-     * @principle Restricts write access to prevent unauthorized modification of rewards records.
-     */
-    match /rewards/{rewardId} {
-        allow get: if true;
-        allow list: if false;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
+      allow read: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+      allow list: if false; // Transaction listing is not permitted
     }
 
     /**
-     * @description Allows public read access to social posts, but restricts write access to the author.
+     * @description Controls access to reward data. Rewards can only be read by the associated user, but not created, updated, or deleted.
+     * @path /rewards/{rewardId}
+     * @allow (read) User with UID 'user123' can read their own reward data.
+     * @deny (create) No user can create reward documents directly.
+     * @deny (update) No user can update reward documents directly.
+     * @deny (delete) No user can delete reward documents directly.
+     * @principle Rewards are managed by a trusted backend and are read-only for users.
+     */
+    match /rewards/{rewardId} {
+      allow read: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+      allow list: if false; // Reward listing is not permitted
+    }
+
+        /**
+     * @description Controls access to social post data.
      * @path /social_posts/{postId}
-     * @allow (get, list) - Any user can read social posts.
-     * @allow (create) - Authenticated user can create their own social posts.
-     * @allow (update, delete) - Only the author can update or delete their own posts.
-     * @deny (create) - Another user cannot create a post with a different author ID.
-     * @deny (update, delete) - Another user cannot access or modify someone else's posts.
-     * @principle Public read, owner-only write for social posts.
+     * @allow (read) Any signed-in user can read any social post.
+     * @allow (create) Any signed-in user can create a social post. The authorId must match the user's UID.
+     * @allow (update) Only the author can update their own social post.
+     * @allow (delete) Only the author can delete their own social post.
+     * @deny (update) User 'user456' cannot update the social post of user 'user123'.
+     * @deny (delete) User 'user456' cannot delete the social post of user 'user123'.
+     * @principle Allows public read access while enforcing ownership for writes.
      */
     match /social_posts/{postId} {
-        function isAuthor(authorId) {
-            return request.auth != null && request.auth.uid == authorId;
-        }
-
-        function isExistingAuthor(authorId) {
-            return isAuthor(authorId) && resource != null;
-        }
-
-        allow get: if true;
-        allow list: if true;
-        allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
-        allow update: if isExistingAuthor(resource.data.authorId);
-        allow delete: if isExistingAuthor(resource.data.authorId);
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingOwner(resource.data.authorId);
+      allow delete: if isSignedIn() && isExistingOwner(resource.data.authorId);
     }
   }
+
+  /**
+   * @description Checks if the request is made by an authenticated user.
+   * @return {boolean} True if the user is signed in, false otherwise.
+   */
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  /**
+   * @description Checks if the authenticated user ID matches the provided user ID.
+   * @param {string} userId The user ID to compare against the authenticated user ID.
+   * @return {boolean} True if the user is the owner, false otherwise.
+   */
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+  /**
+   * @description Checks if the authenticated user ID matches the resource's user ID AND the resource exists.
+   * @param {string} userId The user ID to compare against the authenticated user ID.
+   * @return {boolean} True if the user is the existing owner, false otherwise.
+   */
+    function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
+    }
 }

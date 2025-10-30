@@ -1,29 +1,42 @@
 
-
-
-
-
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
-  hash: string;
-  block: number;
-  from: string;
-  to: string;
-  value: number;
-  age: string;
+  userId: string;
+  type: "PURCHASE" | "COMMISSION" | "WITHDRAWAL" | "RANK_REWARD";
+  amount: number;
+  purchaseRef?: any; // DocumentReference
+  level?: number;
+  timestamp: any; // Timestamp
 };
 
 export type User = {
-  id: string;
+  uid: string;
+  referredBy?: string;
+  walletPublicKey?: string;
+  pgcBalance: number;
+  isVerified: boolean;
   name: string;
   email: string;
+  role: string;
+  street: string;
+  village: string;
+  block?: string;
+  taluka: string;
+  district: string;
+  state: string;
   country: string;
-  balance: number;
-  status: 'Active' | 'Inactive' | 'Banned';
-  registeredAt: string;
+  registeredAt: any; // Timestamp
   avatarId: string;
 };
+
+export type Presale = {
+    id: string;
+    userId: string;
+    amountUSDT: number;
+    pgcCredited: number;
+    status: 'COMPLETED' | 'PENDING_VERIFICATION';
+}
 
 export type TradingPair = {
   from: string;

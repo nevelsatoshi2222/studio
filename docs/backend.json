@@ -5,12 +5,16 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a registered user of the platform, including their profile, role, and MLM network information.",
+      "description": "Represents a registered user of the platform.",
       "properties": {
-        "id": { "type": "string", "description": "Unique identifier for the user (matches Firebase Auth UID)." },
+        "uid": { "type": "string", "description": "Firebase Auth UID (The Doc ID)" },
+        "referredBy": { "type": "string", "description": "The uid of the referrer (Level 1 Upline)" },
+        "walletPublicKey": { "type": "string", "description": "The connected Solana Public Key" },
+        "pgcBalance": { "type": "number", "description": "Current token balance (The single source of truth)" },
+        "isVerified": { "type": "boolean", "description": "KYC/KYL status" },
         "name": { "type": "string", "description": "User's full name." },
         "email": { "type": "string", "description": "User's email address.", "format": "email" },
-        "role": { "type": "string", "description": "The role of the user on the platform.", "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "User Management Admin", "Job Management Admin", "Franchisee Management Admin", "Social Media Management Admin", "Quiz Management Admin", "Super Admin"] },
+        "role": { "type": "string", "description": "The role of the user on the platform." },
         "street": { "type": "string", "description": "User's street address." },
         "village": { "type": "string", "description": "User's village or ward." },
         "block": { "type": "string", "description": "User's block or kasba." },
@@ -18,60 +22,34 @@
         "district": { "type": "string", "description": "User's district." },
         "state": { "type": "string", "description": "User's state or province." },
         "country": { "type": "string", "description": "User's country." },
-        "registeredAt": { "type": "string", "format": "date-time", "description": "The timestamp when the user registered." },
-        "pgcBalance": { "type": "number", "description": "The user's in-app balance of PGC, before it is withdrawn to their wallet." },
-        "referrerId": { "type": "string", "description": "The UID of the user who referred this user (their direct sponsor)." },
-        "referralCode": { "type": "string", "description": "This user's own unique referral code for others to use."},
-        "ancestors": { "type": "array", "description": "An ordered list of referrer UIDs, from the direct sponsor (level 1) up to 15 levels deep.", "items": { "type": "string" } },
-        "freeAchievers": { "type": "object", "description": "Tracks counts of direct referrals who have achieved free track ranks.", "properties": { "bronze": { "type": "number" }, "silver": { "type": "number" }, "gold": { "type": "number" } } },
-        "paidAchievers": { "type": "object", "description": "Tracks counts of direct referrals who have achieved paid track ranks.", "properties": { "bronzeStar": { "type": "number" }, "silverStar": { "type": "number" }, "goldStar": { "type": "number" } } },
-        "currentFreeRank": { "type": "string", "description": "The user's current rank in the free affiliate track." },
-        "currentPaidRank": { "type": "string", "description": "The user's current rank in the paid affiliate track." }
+        "registeredAt": { "type": "string", "format": "date-time", "description": "The timestamp when the user registered." }
       },
-      "required": ["id", "name", "email", "role", "referrerId", "ancestors"]
-    },
-    "UserWallet": {
-        "title": "UserWallet",
-        "type": "object",
-        "description": "Stores a user's Solana wallet information for payouts.",
-        "properties": {
-            "userId": { "type": "string" },
-            "solanaWalletAddress": { "type": "string" }
-        },
-        "required": ["userId", "solanaWalletAddress"]
+      "required": ["uid", "name", "email", "pgcBalance", "isVerified"]
     },
     "Transaction": {
         "title": "Transaction",
         "type": "object",
-        "description": "Logs every crypto sale for auditing and commission processing.",
+        "description": "Logs every crypto financial event for auditing.",
         "properties": {
-            "userId": { "type": "string" },
-            "packageAmountUSD": { "type": "number" },
-            "pgcAmount": { "type": "number" },
-            "solanaTxId": { "type": "string" },
-            "status": { "type": "string", "enum": ["pending", "processed", "failed"] },
-            "createdAt": { "type": "string", "format": "date-time" }
+            "userId": { "type": "string", "description": "User who is receiving the funds." },
+            "type": { "type": "string", "enum": ["PURCHASE", "COMMISSION", "WITHDRAWAL", "RANK_REWARD"], "description": "The type of transaction." },
+            "amount": { "type": "number", "description": "Amount of PGC tokens." },
+            "purchaseRef": { "type": "string", "description": "Link to the original presales document (if type is COMMISSION)." },
+            "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
         },
-        "required": ["userId", "packageAmountUSD", "status", "createdAt"]
+        "required": ["userId", "type", "amount", "timestamp"]
     },
-    "Reward": {
-        "title": "Reward",
+    "Presale": {
+        "title": "Presale",
         "type": "object",
-        "description": "Tracks when a user achieves a specific MLM rank.",
+        "description": "Represents a presale purchase awaiting admin verification.",
         "properties": {
-            "userId": { "type": "string" },
-            "rank": { "type": "string" },
-            "track": { "type": "string", "enum": ["free", "paid"] },
-            "dateAchieved": { "type": "string", "format": "date-time" }
+            "userId": { "type": "string", "description": "User who made the Presale purchase." },
+            "amountUSDT": { "type": "number", "description": "Purchase amount in USDT." },
+            "pgcCredited": { "type": "number", "description": "Total PGC to be issued to the buyer (incl. bonus)." },
+            "status": { "type": "string", "enum": ["COMPLETED", "PENDING_VERIFICATION"], "description": "Status of the purchase verification." }
         },
-        "required": ["userId", "rank", "track", "dateAchieved"]
-    },
-    "SocialPost": {
-      "title": "SocialPost",
-      "type": "object",
-      "description": "Represents a post made by a user on the social media hub.",
-      "properties": { "id": { "type": "string" }, "authorId": { "type": "string" }, "authorName": { "type": "string" }, "content": { "type": "string" }, "timestamp": { "type": "string", "format": "date-time" } },
-      "required": ["authorId", "authorName", "content", "timestamp"]
+        "required": ["userId", "amountUSDT", "pgcCredited", "status"]
     }
   },
   "auth": {
@@ -80,10 +58,8 @@
   "firestore": {
     "structure": [
       { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
-      { "path": "/user_wallets/{userId}", "definition": { "schema": { "$ref": "#/entities/UserWallet" } } },
       { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
-      { "path": "/rewards/{rewardId}", "definition": { "schema": { "$ref": "#/entities/Reward" } } },
-      { "path": "/social_posts/{postId}", "definition": { "schema": { "$ref": "#/entities/SocialPost" } } }
+      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } }
     ]
   }
 }

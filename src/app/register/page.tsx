@@ -37,10 +37,8 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc, getDoc, collection } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { AppUser } from '@/firebase/provider';
-
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -55,28 +53,17 @@ const registrationSchema = z.object({
   area: z.string().optional(),
   state: z.string().min(1, { message: 'State is required.' }),
   country: z.string().min(1, { message: 'Country is required.' }),
-  referrerId: z.string(),
+  referredBy: z.string(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-// Helper function to generate a unique referral code
-function generateReferralCode(length = 8) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referrerId = searchParams.get('ref') || '';
+  const referredByCode = searchParams.get('ref') || '';
   const role = searchParams.get('role');
   const jobTitle = searchParams.get('title');
 
@@ -88,8 +75,8 @@ function RegistrationForm() {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: '',
-      referrerId: referrerId,
-      role: role || 'User', // Default to 'User' if no role in query param
+      referredBy: referredByCode,
+      role: role || 'User',
       jobTitle: jobTitle || '',
       email: '',
       password: '',
@@ -115,12 +102,8 @@ function RegistrationForm() {
         return;
     }
     try {
-      let finalReferrerId = data.referrerId ? data.referrerId.trim() : 'ADMIN_ROOT_USER';
-      if (!finalReferrerId) {
-          finalReferrerId = 'ADMIN_ROOT_USER';
-      }
+      let finalReferrerId = data.referredBy ? data.referredBy.trim() : 'ADMIN_ROOT_USER';
 
-      // Create the new user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
@@ -134,7 +117,7 @@ function RegistrationForm() {
       }
       
       const userDocumentData = {
-        id: user.uid,
+        uid: user.uid,
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -147,38 +130,22 @@ function RegistrationForm() {
         state: data.state || '',
         country: data.country || '',
         pgcBalance: 0,
-        referrerId: finalReferrerId,
-        referralCode: generateReferralCode(),
-        // **FIX:** The 'ancestors' field is removed from client-side creation.
-        // A backend process is required to build this securely.
-        ancestors: [], 
-        freeAchievers: { bronze: 0, silver: 0, gold: 0 },
-        paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
-        currentFreeRank: 'None',
-        currentPaidRank: 'None',
+        referredBy: finalReferrerId,
+        walletPublicKey: null,
+        isVerified: false,
         registeredAt: serverTimestamp(),
-        status: finalRole.includes('Admin') || finalRole === 'User' ? 'Active' : 'Pending',
-        avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
         role: finalRole,
         jobTitle: data.jobTitle || '',
       };
 
       await setDoc(userDocRef, userDocumentData);
       
-      // Create user wallet document
-      await setDoc(doc(firestore, 'user_wallets', user.uid), {
-          userId: user.uid,
-          solanaWalletAddress: '' // To be filled in by user on their profile
-      });
-
-      // Send verification email
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
-      // Sign the user out to force email verification
       await signOut(auth);
 
       toast({
@@ -417,14 +384,14 @@ function RegistrationForm() {
 
               <FormField
                 control={form.control}
-                name="referrerId"
+                name="referredBy"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Referrer ID</FormLabel>
+                    <FormLabel>Referrer Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter referrer ID or use a referral link" {...field} />
+                      <Input placeholder="Enter referrer code or use a referral link" {...field} />
                     </FormControl>
-                    <FormDescription>This is the ID of the user who referred you.</FormDescription>
+                    <FormDescription>This is the code of the user who referred you.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -441,7 +408,6 @@ function RegistrationForm() {
   );
 }
 
-
 export default function RegisterPage() {
   return (
     <AppLayout>
@@ -451,8 +417,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-    
-
-    
-
-    
