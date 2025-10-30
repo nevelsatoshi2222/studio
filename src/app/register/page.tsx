@@ -109,6 +109,9 @@ function RegistrationForm() {
       
       await updateProfile(user, { displayName: data.name });
 
+      // Generate a unique referral code
+      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+
       const userDocRef = doc(firestore, 'users', user.uid);
       
       let finalRole = data.role || 'User';
@@ -131,11 +134,14 @@ function RegistrationForm() {
         country: data.country || '',
         pgcBalance: 0,
         referredBy: finalReferrerId,
+        referralCode: referralCode, // <-- ADDED THIS FIELD
         walletPublicKey: null,
         isVerified: false,
+        status: 'Active', // Or 'Pending' if you have a verification flow
         registeredAt: serverTimestamp(),
         role: finalRole,
         jobTitle: data.jobTitle || '',
+        avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
       };
 
       await setDoc(userDocRef, userDocumentData);

@@ -13,6 +13,7 @@ export type Transaction = {
 export type User = {
   uid: string;
   referredBy?: string;
+  referralCode?: string;
   walletPublicKey?: string;
   pgcBalance: number;
   isVerified: boolean;
@@ -28,6 +29,8 @@ export type User = {
   country: string;
   registeredAt: any; // Timestamp
   avatarId: string;
+  status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
+  jobTitle?: string;
 };
 
 export type Presale = {
