@@ -1,5 +1,6 @@
 
 
+
 import {
   Transaction,
   User,
@@ -40,44 +41,7 @@ export const users: User[] = [
     status: 'Active',
     registeredAt: '2023-01-15',
     avatarId: 'user-avatar-1',
-  },
-  {
-    id: 'usr_002',
-    name: 'Alice Johnson',
-    email: 'alice@example.com',
-    country: 'Canada',
-    balance: 10,
-    status: 'Active',
-    registeredAt: '2023-02-20',
-    avatarId: 'user-avatar-2',
-  },
-  {
-    id: 'usr_003',
-    name: 'Bob Williams',
-    email: 'bob@example.com',
-    country: 'United Kingdom',
-    balance: 10,
-    status: 'Active',
-    registeredAt: '2023-03-10',
-    avatarId: 'user-avatar-3',
-  },
-  {
-    id: 'usr_004',
-    name: 'Charlie Brown',
-    email: 'charlie@example.com',
-    country: 'Australia',
-    balance: 10,
-    status: 'Inactive',
-    registeredAt: '2023-04-05',
-    avatarId: 'user-avatar-4',
-  },
-    { id: 'usr_005', name: 'Diana Prince', email: 'diana@example.com', country: 'Brazil', balance: 10, status: 'Active', registeredAt: '2023-05-11', avatarId: 'user-avatar-1' },
-    { id: 'usr_006', name: 'Ethan Hunt', email: 'ethan@example.com', country: 'Germany', balance: 10, status: 'Active', registeredAt: '2023-06-22', avatarId: 'user-avatar-2' },
-    { id: 'usr_007', name: 'Fiona Glenanne', email: 'fiona@example.com', country: 'India', balance: 10, status: 'Banned', registeredAt: '2023-07-30', avatarId: 'user-avatar-3' },
-    { id: 'usr_008', name: 'George Costanza', email: 'george@example.com', country: 'USA', balance: 10, status: 'Active', registeredAt: '2023-08-18', avatarId: 'user-avatar-4' },
-    { id: 'usr_009', name: 'Hannah Montana', email: 'hannah@example.com', country: 'USA', balance: 10, status: 'Active', registeredAt: '2023-09-01', avatarId: 'user-avatar-1' },
-    { id: 'usr_010', name: 'Iris West', email: 'iris@example.com', country: 'South Africa', balance: 10, status: 'Inactive', registeredAt: '2023-10-14', avatarId: 'user-avatar-2' },
-    { id: 'usr_011', name: 'Jack Sparrow', email: 'jack@example.com', country: 'United Kingdom', balance: 10, status: 'Active', registeredAt: '2023-11-25', avatarId: 'user-avatar-3' }
+  }
 ];
 
 export const transactions: Transaction[] = [
@@ -802,7 +766,7 @@ export const indiaIssuesPolls: IndiaIssuePoll[] = [
         solutions: [
             { id: 'sol-17-1', text: 'Expand solar, wind, and hydro capacity.', results: [] },
             { id: 'sol-17-2', text: 'Encourage EV adoption with battery recycling.', results: [] },
-            { id: 'sol-17-3', 'text': 'Promote energy efficiency in industries and homes.', results: [] },
+            { id: 'sol-17-3', text: 'Promote energy efficiency in industries and homes.', results: [] },
         ],
     },
     {
