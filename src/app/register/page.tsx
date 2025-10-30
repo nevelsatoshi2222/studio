@@ -1,4 +1,3 @@
-
 'use client';
 import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -53,7 +52,7 @@ const registrationSchema = z.object({
   area: z.string().optional(),
   state: z.string().min(1, { message: 'State is required.' }),
   country: z.string().min(1, { message: 'Country is required.' }),
-  referredBy: z.string(),
+  referredBy: z.string().optional(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
 });
@@ -102,14 +101,15 @@ function RegistrationForm() {
         return;
     }
     try {
-      let finalReferrerId = data.referredBy ? data.referredBy.trim() : 'ADMIN_ROOT_USER';
-
+      // Use the provided referrer code, or default to the root if empty
+      const finalReferrerId = data.referredBy?.trim() || 'ADMIN_ROOT_USER';
+      
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: data.name });
 
-      // Generate a unique referral code
+      // Generate a unique referral code for the new user
       const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
 
       const userDocRef = doc(firestore, 'users', user.uid);
@@ -124,26 +124,27 @@ function RegistrationForm() {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        street: data.street || '',
-        village: data.village || '',
+        street: data.street,
+        village: data.village,
         block: data.block || '',
-        taluka: data.taluka || '',
-        district: data.district || '',
+        taluka: data.taluka,
+        district: data.district,
         area: data.area || '',
-        state: data.state || '',
-        country: data.country || '',
+        state: data.state,
+        country: data.country,
         pgcBalance: 0,
         referredBy: finalReferrerId,
-        referralCode: referralCode, // <-- ADDED THIS FIELD
+        referralCode: referralCode, // <-- Save the new code
         walletPublicKey: null,
         isVerified: false,
-        status: 'Active', // Or 'Pending' if you have a verification flow
+        status: 'Active',
         registeredAt: serverTimestamp(),
         role: finalRole,
         jobTitle: data.jobTitle || '',
         avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
       };
-
+      
+      // Securely create the user document. This operation is allowed by the security rules.
       await setDoc(userDocRef, userDocumentData);
       
       const actionCodeSettings = {

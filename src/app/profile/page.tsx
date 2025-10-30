@@ -1,4 +1,3 @@
-
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -186,9 +185,10 @@ export default function ProfilePage() {
     });
   };
 
-  const referralLink = user && userProfile?.referralCode ? `${window.location.origin}/register?ref=${userProfile.referralCode}` : '';
+  const referralLink = user && userProfile?.referralCode ? `${window.location.origin}/register?ref=${userProfile.referralCode}` : null;
 
-  const copyToClipboard = (textToCopy: string, toastMessage: string) => {
+  const copyToClipboard = (textToCopy: string | null, toastMessage: string) => {
+    if (!textToCopy) return;
     navigator.clipboard.writeText(textToCopy);
     toast({
       title: 'Copied!',
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                          <Link href={referralLink || '#'} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
                             {referralLink || 'Your link will appear here once your code is generated.'}
                         </Link>
-                        <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
+                        <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost" disabled={!referralLink}>
                             <Copy className="h-5 w-5" />
                         </Button>
                     </div>
@@ -318,6 +318,7 @@ export default function ProfilePage() {
                         />
                         <Button
                             onClick={() => copyToClipboard(userProfile?.referralCode, 'Your referral code has been copied.')}
+                            disabled={!userProfile?.referralCode}
                         >
                             <Copy className="mr-2 h-4 w-4"/> Copy Code
                         </Button>
