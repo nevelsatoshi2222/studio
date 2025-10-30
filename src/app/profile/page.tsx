@@ -148,7 +148,7 @@ export default function ProfilePage() {
         toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Withdrawal amount must be greater than zero.'});
         return;
     }
-    if (withdrawAmount > (userProfile.pgcBalance || 0)) {
+    if (withdrawAmount > (userProfile?.pgcBalance || 0)) {
         toast({ variant: 'destructive', title: 'Insufficient Balance', description: 'Withdrawal amount cannot exceed your balance.'});
         return;
     }
@@ -295,23 +295,30 @@ export default function ProfilePage() {
                     </Button>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                    <Label>Your Unique Referral Code</Label>
-                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
-                         <Key className="h-5 w-5 text-primary" />
-                         <span className="flex-1 font-mono text-lg text-primary">{userProfile?.referralCode || 'Generating...'}</span>
-                        <Button onClick={() => copyToClipboard(userProfile?.referralCode, 'Your referral code has been copied.')} size="icon" variant="ghost">
-                            <Copy className="h-5 w-5" />
-                        </Button>
-                    </div>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="referral-link">Your Full Affiliate Link</Label>
+                    <Label htmlFor="referral-link">Your Affiliate Link</Label>
+                    <p className="text-xs text-muted-foreground">Share this link to have new users join your network. You can also give them just the code.</p>
                     <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
                          <Link href={referralLink || '#'} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
                             {referralLink || 'Your link will appear here once your code is generated.'}
                         </Link>
                         <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
                             <Copy className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="referral-code-display">Your Unique Referral Code</Label>
+                     <div className="flex items-center space-x-2">
+                        <Input
+                            id="referral-code-display"
+                            readOnly
+                            value={userProfile?.referralCode || 'Generating...'}
+                            className="font-mono text-lg text-primary flex-1"
+                        />
+                        <Button
+                            onClick={() => copyToClipboard(userProfile?.referralCode, 'Your referral code has been copied.')}
+                        >
+                            <Copy className="mr-2 h-4 w-4"/> Copy Code
                         </Button>
                     </div>
                 </div>
@@ -389,5 +396,3 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
-
-    
