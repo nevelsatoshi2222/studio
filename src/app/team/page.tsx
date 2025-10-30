@@ -19,11 +19,11 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign, Award } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award, Info } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
@@ -37,8 +37,6 @@ type TeamMember = {
   avatarId: string;
   registeredAt: any;
   email: string;
-  referralCode?: string;
-  level2Referrals?: number;
 };
 
 const UserRowSkeleton = () => (
@@ -96,58 +94,6 @@ export default function TeamPage() {
 
   const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
   
-  const [teamDetails, setTeamDetails] = useState({
-    level2Count: 0,
-    bronzeAchievers: 0,
-    silverAchievers: 0,
-    goldAchievers: 0,
-    emeraldAchievers: 0,
-    platinumAchievers: 0,
-    diamondAchievers: 0,
-  });
-  const [isTeamDataLoading, setIsTeamDataLoading] = useState(false);
-
-  useEffect(() => {
-    if (directMembers && firestore) {
-      const fetchTeamDetails = async () => {
-        setIsTeamDataLoading(true);
-        let l2Count = 0;
-        
-        const memberPromises = directMembers.map(async (member) => {
-          const level2Query = query(collection(firestore, 'users'), where('referrerId', '==', member.id));
-          const level2Snapshot = await getDocs(level2Query);
-          l2Count += level2Snapshot.size;
-          return { ...member, level2Referrals: level2Snapshot.size };
-        });
-
-        const membersWithL2Refs = await Promise.all(memberPromises);
-
-        // Calculate achievers for each tier
-        const bronzeAchievers = membersWithL2Refs.filter(m => (m.level2Referrals || 0) >= 5).length;
-        
-        // This is a simulation. A real implementation would need a more complex recursive check or backend process.
-        const silverAchievers = Math.floor(bronzeAchievers / 5);
-        const goldAchievers = Math.floor(silverAchievers / 5);
-        const emeraldAchievers = Math.floor(goldAchievers / 5);
-        const platinumAchievers = Math.floor(emeraldAchievers / 5);
-        const diamondAchievers = Math.floor(platinumAchievers / 5);
-
-        setTeamDetails({
-            level2Count: l2Count,
-            bronzeAchievers,
-            silverAchievers,
-            goldAchievers,
-            emeraldAchievers,
-            platinumAchievers,
-            diamondAchievers,
-        });
-        setIsTeamDataLoading(false);
-      };
-
-      fetchTeamDetails();
-    }
-  }, [directMembers, firestore]);
-
   const getAvatarUrl = (avatarId: string) => {
     return `https://picsum.photos/seed/${avatarId}/40/40`;
   };
@@ -201,16 +147,6 @@ export default function TeamPage() {
   const RewardsDashboard = () => {
     const directReferralCount = directMembers?.length || 0;
     
-    const rewardTiers = [
-      { tier: freeTrackRewards[0], progress: directReferralCount, goal: 5 },
-      { tier: freeTrackRewards[1], progress: teamDetails.bronzeAchievers, goal: 5 },
-      { tier: freeTrackRewards[2], progress: teamDetails.silverAchievers, goal: 5 },
-      { tier: freeTrackRewards[3], progress: teamDetails.goldAchievers, goal: 5 },
-      { tier: freeTrackRewards[4], progress: teamDetails.emeraldAchievers, goal: 5 },
-      { tier: freeTrackRewards[5], progress: teamDetails.platinumAchievers, goal: 5 },
-      { tier: freeTrackRewards[6], progress: teamDetails.diamondAchievers, goal: 5 },
-    ];
-    
     return (
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
@@ -219,13 +155,14 @@ export default function TeamPage() {
             <CardDescription>Rewards for growing your network with free members.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {isTeamDataLoading ? (
-              <Skeleton className="h-64 w-full" />
-            ) : (
-              rewardTiers.map(rt => (
-                <RewardTierCard key={rt.tier.name} tier={rt.tier} progress={rt.progress} goal={rt.goal} />
-              ))
-            )}
+              <RewardTierCard tier={freeTrackRewards[0]} progress={directReferralCount} goal={5} />
+               <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Deeper Rank Progress Coming Soon</AlertTitle>
+                <AlertDescription>
+                    Calculating ranks beyond Bronze requires deep analysis of your network, which is being developed as a secure backend process for accuracy and performance. This section will update automatically when live.
+                </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
         <Card>
@@ -234,10 +171,8 @@ export default function TeamPage() {
             <CardDescription>Higher rewards when your referrals purchase or stake.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             {paidTrackRewards.map(tier => (
-                <RewardTierCard key={tier.name} tier={tier} progress={0} goal={5} />
-             ))}
             <Alert>
+              <Info className="h-4 w-4" />
               <AlertTitle>Feature in Development</AlertTitle>
               <AlertDescription>
                 Tracking for paid user achievements is being built. This section will update automatically once live.
@@ -316,16 +251,13 @@ export default function TeamPage() {
                     <p className="text-sm text-muted-foreground">Direct Referrals (Level 1)</p>
                     <div className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</div>
                 </div>
-                 <div className="p-4 rounded-lg bg-muted">
-                    <p className="text-sm text-muted-foreground">Team Members (Level 2)</p>
-                    <div className="text-3xl font-bold">{isTeamDataLoading ? <Skeleton className="h-8 w-16" /> : teamDetails.level2Count}</div>
-                </div>
                  <div className="p-4 rounded-lg bg-muted md:col-span-2">
-                    <p className="text-sm text-muted-foreground">Full Team Tree (Levels 3-15)</p>
+                    <p className="text-sm text-muted-foreground">Full Team Tree (Levels 2-15)</p>
                     <Alert className="mt-2">
+                      <Info className="h-4 w-4" />
                       <AlertTitle>Under Development</AlertTitle>
                       <AlertDescription>
-                        Calculating the full team tree across 15 levels is a complex operation. We are building an efficient backend process to provide this data. Please check back soon!
+                        Calculating the full team tree across 15 levels is a complex operation. We are building an efficient and secure backend process to provide this data. Please check back soon!
                       </AlertDescription>
                     </Alert>
                 </div>
