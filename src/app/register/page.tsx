@@ -117,7 +117,7 @@ function RegistrationForm() {
     try {
       // 1. Get referrer's data to build the ancestor path
       let ancestors: string[] = [];
-      let finalReferrerId = data.referrerId.trim();
+      let finalReferrerId = data.referrerId ? data.referrerId.trim() : 'ADMIN_ROOT_USER';
 
       if (!finalReferrerId) {
         finalReferrerId = 'ADMIN_ROOT_USER';
@@ -130,6 +130,7 @@ function RegistrationForm() {
           const referrerData = referrerSnap.data() as AppUser;
           ancestors = [...(referrerData.ancestors || []), finalReferrerId].slice(-15);
         } else {
+          // If referrer doesn't exist, default to root.
           finalReferrerId = 'ADMIN_ROOT_USER';
           ancestors = [];
         }
@@ -156,14 +157,14 @@ function RegistrationForm() {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        street: data.street,
-        village: data.village,
+        street: data.street || '',
+        village: data.village || '',
         block: data.block || '',
-        taluka: data.taluka,
-        district: data.district,
+        taluka: data.taluka || '',
+        district: data.district || '',
         area: data.area || '',
-        state: data.state,
-        country: data.country,
+        state: data.state || '',
+        country: data.country || '',
         pgcBalance: 0,
         referrerId: finalReferrerId,
         referralCode: generateReferralCode(),
@@ -465,4 +466,6 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+    
+
     
