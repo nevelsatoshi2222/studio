@@ -113,6 +113,7 @@ export default function ProfilePage() {
     } else if (user) {
         form.reset({
             name: user.displayName || user.email?.split('@')[0] || 'User',
+            solanaWalletAddress: '' // Ensure wallet address is controlled
         })
     }
   }, [userProfile, user, form]);
@@ -396,3 +397,5 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
+
+    
