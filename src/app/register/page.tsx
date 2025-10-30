@@ -210,11 +210,7 @@ function RegistrationForm() {
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
       } else if (error.message) {
-          if (error.message.includes('INVALID_ARGUMENT') || error.message.includes('paths must not contain //')) {
-              description = "There was a problem with the data provided. Please ensure all fields are filled correctly.";
-          } else {
-             description = error.message;
-          }
+          description = error.message;
       }
 
       toast({
