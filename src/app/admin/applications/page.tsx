@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useMemoFirebase, useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { useMemoFirebase, useUser, useFirestore } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Check, X, ShieldAlert } from 'lucide-react';
-import { collection, doc, query, where, Query } from 'firebase/firestore';
+import { collection, doc, query, where, Query, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
@@ -48,13 +48,15 @@ const UserRowSkeleton = () => (
     </TableRow>
 )
 
-function ApplicationsTable() {
+function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
     const [filter, setFilter] = useState('All');
     const firestore = useFirestore();
     const { toast } = useToast();
 
+    // CRITICAL FIX: Only construct the query if the user has access rights.
+    // This prevents unauthorized users from triggering a query that violates security rules.
     const usersQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        if (!firestore || !canAccessPage) return null; // Do not query if user cannot access
         let q;
         if (filter === 'All') {
             q = query(collection(firestore, 'users'), where('status', '==', 'Pending'));
@@ -62,14 +64,14 @@ function ApplicationsTable() {
             q = query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
         }
         return q;
-    }, [filter, firestore]);
+    }, [filter, firestore, canAccessPage]);
 
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
     const handleUpdateStatus = (user: User, newStatus: 'Active' | 'Rejected') => {
         if (!firestore) return;
         const userDocRef = doc(firestore, 'users', user.id);
-        updateDocumentNonBlocking(userDocRef, { status: newStatus });
+        updateDoc(userDocRef, { status: newStatus });
         toast({
             title: `Applicant ${newStatus}`,
             description: `${user.name} has been ${newStatus.toLowerCase()}.`,
@@ -185,13 +187,13 @@ export default function ApplicationsPage() {
     const userRole = user?.role;
     const isSuperAdmin = userRole === 'Super Admin';
     const isFranchiseeAdmin = userRole === 'Franchisee Management Admin';
-    const canAccessPage = isSuperAdmin || isFranchiseeAdmin;
+    const canAccessPage = !isUserLoading && (isSuperAdmin || isFranchiseeAdmin);
     
     useEffect(() => {
-        if (!isUserLoading && !canAccessPage) {
+        if (!isUserLoading && !(isSuperAdmin || isFranchiseeAdmin)) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, canAccessPage, router]);
+    }, [isUserLoading, isSuperAdmin, isFranchiseeAdmin, router]);
 
 
     return (
@@ -221,7 +223,7 @@ export default function ApplicationsPage() {
                     </Card>
                 )}
 
-                {canAccessPage && <ApplicationsTable />}
+                {canAccessPage && <ApplicationsTable canAccessPage={canAccessPage} />}
             </div>
         </AppLayout>
     );
