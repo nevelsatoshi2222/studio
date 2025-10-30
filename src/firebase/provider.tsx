@@ -79,11 +79,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       async (firebaseUser) => {
         if (firebaseUser) {
+          // THIS IS THE CRITICAL FIX:
+          // Securely fetch ONLY the document for the currently logged-in user.
+          // This is a 'get' operation, which is allowed by rules like `allow read: if request.auth.uid == userId;`
           const userDocRef = doc(firestore, 'users', firebaseUser.uid);
           try {
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
               const userData = userDocSnap.data();
+              // Enrich the user object with custom data from their own document.
               const enrichedUser: AppUser = {
                 ...firebaseUser,
                 role: userData.role as string | undefined,
@@ -92,13 +96,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
               };
                setUserAuthState({ user: enrichedUser, isUserLoading: false, userError: null });
             } else {
+              // User is authenticated in Firebase Auth, but has no document in Firestore yet.
+              // This can happen during registration before the doc is created.
               setUserAuthState({ user: firebaseUser as AppUser, isUserLoading: false, userError: null });
             }
           } catch (error) {
              console.error("FirebaseProvider: Error fetching user document:", error);
+             // Still provide the base user object even if the doc fetch fails
              setUserAuthState({ user: firebaseUser as AppUser, isUserLoading: false, userError: error as Error });
           }
         } else {
+          // User is signed out.
           setUserAuthState({ user: null, isUserLoading: false, userError: null });
         }
       },
@@ -196,5 +204,3 @@ interface FirebaseProviderProps {
   firestore: Firestore;
   auth: Auth;
 }
-
-    
