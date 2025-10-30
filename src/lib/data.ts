@@ -33,16 +33,6 @@ import { Users as UsersIcon, Star, Award, Gem, Shield, Crown, UserPlus } from 'l
 
 
 export const users: User[] = [
-  {
-    id: 'usr_admin',
-    name: 'Admin',
-    email: 'admin@ibc.com',
-    country: 'United States',
-    balance: 1_000_000_000,
-    status: 'Active',
-    registeredAt: '2023-01-15',
-    avatarId: 'user-avatar-1',
-  }
 ];
 
 export const transactions: Transaction[] = [
