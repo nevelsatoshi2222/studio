@@ -36,6 +36,8 @@ type TeamMember = {
   avatarId: string;
   registeredAt: any;
   email: string;
+  currentFreeRank?: string;
+  currentPaidRank?: string;
 };
 
 const UserRowSkeleton = () => (
@@ -88,7 +90,6 @@ export default function TeamPage() {
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    // Secure query: Only fetch users where the referrerId matches the current user's UID.
     return query(collection(firestore, 'users'), where('referrerId', '==', user.uid));
   }, [firestore, user]);
 
@@ -146,7 +147,7 @@ export default function TeamPage() {
   
   const RewardsDashboard = () => {
     const directReferralCount = directMembers?.length || 0;
-    
+
     return (
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
