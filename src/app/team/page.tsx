@@ -88,9 +88,6 @@ export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // **CRITICAL FIX:** This query is now secure and scoped.
-  // It only fetches users where 'referrerId' matches the current user's ID.
-  // This aligns with secure Firestore rules and prevents the "list" permission error.
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'users'), where('referrerId', '==', user.uid));
