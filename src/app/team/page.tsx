@@ -91,7 +91,7 @@ export default function TeamPage() {
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return query(collection(firestore, 'users'), where('referralCode', '==', user.uid));
+    return query(collection(firestore, 'users'), where('referrerId', '==', user.uid));
   }, [firestore, user]);
 
   const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
@@ -114,7 +114,7 @@ export default function TeamPage() {
         let l2Count = 0;
         
         const memberPromises = directMembers.map(async (member) => {
-          const level2Query = query(collection(firestore, 'users'), where('referralCode', '==', member.id));
+          const level2Query = query(collection(firestore, 'users'), where('referrerId', '==', member.id));
           const level2Snapshot = await getDocs(level2Query);
           l2Count += level2Snapshot.size;
           return { ...member, level2Referrals: level2Snapshot.size };
