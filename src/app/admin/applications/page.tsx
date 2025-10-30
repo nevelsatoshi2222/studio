@@ -53,18 +53,18 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    // **CRITICAL FIX:** Only construct the query if the user has access rights.
-    // This prevents unauthorized users from triggering a query that violates security rules.
+    // **CRITICAL FIX:** The query is now only constructed if the user is authorized.
+    // If canAccessPage is false, usersQuery will be null, and useCollection will not execute a query.
     const usersQuery = useMemoFirebase(() => {
-        if (!firestore || !canAccessPage) return null; // Do not query if user cannot access
+        if (!firestore || !canAccessPage) return null;
+
         if (filter === 'All') {
             return query(collection(firestore, 'users'), where('status', '==', 'Pending'));
         }
         return query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
     }, [filter, firestore, canAccessPage]);
 
-    // The useCollection hook will now safely receive `null` if the user doesn't have access,
-    // preventing any database operation and the subsequent permission error.
+    // useCollection hook now safely receives `null` for unauthorized users, preventing any database operation.
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
     const handleUpdateStatus = (user: User, newStatus: 'Active' | 'Rejected') => {
@@ -111,7 +111,7 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {areUsersLoading ? (
+                        {areUsersLoading && canAccessPage ? (
                             <>
                                 <UserRowSkeleton />
                                 <UserRowSkeleton />
@@ -186,6 +186,8 @@ export default function ApplicationsPage() {
     const userRole = user?.role;
     const isSuperAdmin = userRole === 'Super Admin';
     const isFranchiseeAdmin = userRole === 'Franchisee Management Admin';
+    // This derived state is crucial. It ensures that we don't even attempt to render
+    // the table with a query unless the user is fully loaded and authorized.
     const canAccessPage = !isUserLoading && (isSuperAdmin || isFranchiseeAdmin);
     
     useEffect(() => {
@@ -221,8 +223,9 @@ export default function ApplicationsPage() {
                         </CardHeader>
                     </Card>
                 )}
-
-                {canAccessPage && <ApplicationsTable canAccessPage={canAccessPage} />}
+                
+                {/* The ApplicationsTable is only rendered, but its internal query is still protected by canAccessPage prop */}
+                {(isSuperAdmin || isFranchiseeAdmin) && <ApplicationsTable canAccessPage={canAccessPage} />}
             </div>
         </AppLayout>
     );
