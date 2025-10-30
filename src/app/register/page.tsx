@@ -117,7 +117,7 @@ function RegistrationForm() {
     try {
       // 1. Get referrer's data to build the ancestor path
       let ancestors: string[] = [];
-      if (data.referrerId !== 'ADMIN_ROOT_USER') {
+      if (data.referrerId && data.referrerId !== 'ADMIN_ROOT_USER') {
         const referrerDocRef = doc(firestore, 'users', data.referrerId);
         const referrerSnap = await getDoc(referrerDocRef);
         if (referrerSnap.exists()) {
@@ -128,6 +128,8 @@ function RegistrationForm() {
           // If referrer doesn't exist, treat them as a root user for safety.
           data.referrerId = 'ADMIN_ROOT_USER';
         }
+      } else if (!data.referrerId) {
+          data.referrerId = 'ADMIN_ROOT_USER';
       }
 
       // 2. Create the new user in Firebase Auth
