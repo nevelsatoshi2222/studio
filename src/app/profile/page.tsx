@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight } from 'lucide-react';
+import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -318,10 +318,12 @@ export default function ProfilePage() {
                 </div>
             </CardContent>
              <CardFooter className="flex-col items-start gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                     <Label htmlFor="referral-link">Your Affiliate Link</Label>
-                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-2">
-                        <Input id="referral-link" type="text" value={referralLink} readOnly className="flex-1 bg-transparent border-0 text-muted-foreground"/>
+                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
+                         <Link href={referralLink} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
+                            {referralLink}
+                        </Link>
                         <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
                             <Copy className="h-5 w-5" />
                         </Button>
