@@ -76,7 +76,7 @@ function generateReferralCode(length = 8) {
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referrerId = searchParams.get('ref') || 'ADMIN_ROOT_USER';
+  const referrerId = searchParams.get('ref') || '';
   const role = searchParams.get('role');
   const jobTitle = searchParams.get('title');
 
@@ -115,36 +115,21 @@ function RegistrationForm() {
         return;
     }
     try {
-      // 1. Get referrer's data to build the ancestor path
-      let ancestors: string[] = [];
+      // **FIX:** The logic for calculating ancestors on the client-side has been removed.
+      // This was causing the permission-denied error. We will now only store the direct referrer.
+      // A backend function would be required to securely and efficiently build the ancestor chain.
+      
       let finalReferrerId = data.referrerId ? data.referrerId.trim() : 'ADMIN_ROOT_USER';
-
       if (!finalReferrerId) {
-        finalReferrerId = 'ADMIN_ROOT_USER';
-      }
-
-      if (finalReferrerId !== 'ADMIN_ROOT_USER') {
-        const referrerDocRef = doc(firestore, 'users', finalReferrerId);
-        const referrerSnap = await getDoc(referrerDocRef);
-        if (referrerSnap.exists()) {
-          const referrerData = referrerSnap.data() as AppUser;
-          ancestors = [...(referrerData.ancestors || []), finalReferrerId].slice(-15);
-        } else {
-          // If referrer doesn't exist, default to root.
           finalReferrerId = 'ADMIN_ROOT_USER';
-          ancestors = [];
-        }
-      } else {
-        ancestors = [];
       }
 
-      // 2. Create the new user in Firebase Auth
+      // Create the new user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: data.name });
 
-      // 3. Create the user document in Firestore with the new MLM structure
       const userDocRef = doc(firestore, 'users', user.uid);
       
       let finalRole = data.role || 'User';
@@ -168,7 +153,8 @@ function RegistrationForm() {
         pgcBalance: 0,
         referrerId: finalReferrerId,
         referralCode: generateReferralCode(),
-        ancestors: ancestors,
+        // **FIX:** The 'ancestors' field is removed from client-side creation.
+        ancestors: [], 
         freeAchievers: { bronze: 0, silver: 0, gold: 0 },
         paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
         currentFreeRank: 'None',
@@ -182,20 +168,20 @@ function RegistrationForm() {
 
       await setDoc(userDocRef, userDocumentData);
       
-      // 4. Create user wallet document
+      // Create user wallet document
       await setDoc(doc(firestore, 'user_wallets', user.uid), {
           userId: user.uid,
           solanaWalletAddress: '' // To be filled in by user on their profile
       });
 
-      // 5. Send verification email
+      // Send verification email
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
-      // 6. Sign the user out to force email verification
+      // Sign the user out to force email verification
       await signOut(auth);
 
       toast({
@@ -211,6 +197,8 @@ function RegistrationForm() {
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
+      } else if (error.code === 'permission-denied') {
+          description = 'A security rule prevented the registration. Please check your inputs and try again.'
       } else if (error.message) {
           description = error.message;
       }
