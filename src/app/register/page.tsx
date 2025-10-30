@@ -137,7 +137,7 @@ function RegistrationForm() {
         referralCode: referralCode, // <-- Save the new code
         walletPublicKey: null,
         isVerified: false,
-        status: 'Active',
+        status: finalRole === 'User' ? 'Active' : 'Pending', // Set to 'Pending' for special roles
         registeredAt: serverTimestamp(),
         role: finalRole,
         jobTitle: data.jobTitle || '',
@@ -424,3 +424,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
