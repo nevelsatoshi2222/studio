@@ -90,6 +90,7 @@ export default function TeamPage() {
 
   const directMembersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
+    // SECURE QUERY: Only fetch users where the referrerId matches the current user's ID.
     return query(collection(firestore, 'users'), where('referrerId', '==', user.uid));
   }, [firestore, user]);
 
@@ -249,7 +250,7 @@ export default function TeamPage() {
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
-                    <p className="text-sm text-muted-foreground">Direct Referrals (Level 1)</p>
+                    <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
                     <div className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted md:col-span-2">
