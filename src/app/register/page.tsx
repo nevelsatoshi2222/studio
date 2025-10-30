@@ -119,11 +119,12 @@ function RegistrationForm() {
       let ancestors: string[] = [];
       let finalReferrerId = data.referrerId.trim();
 
+      // **THE FIX**: Ensure finalReferrerId is never an empty string before being used.
       if (!finalReferrerId) {
         finalReferrerId = 'ADMIN_ROOT_USER';
       }
 
-      if (finalReferrerId && finalReferrerId !== 'ADMIN_ROOT_USER') {
+      if (finalReferrerId !== 'ADMIN_ROOT_USER') {
         const referrerDocRef = doc(firestore, 'users', finalReferrerId);
         const referrerSnap = await getDoc(referrerDocRef);
         if (referrerSnap.exists()) {
@@ -464,6 +465,4 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-    
-
     
