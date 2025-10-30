@@ -56,6 +56,7 @@ import {
   HelpCircleIcon,
   ClipboardList,
   CheckCircle,
+  RefreshCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -240,16 +241,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             <SidebarMenuSub>
                                 <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 {isSuperAdmin && (
-                                    <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                    <>
+                                        <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                        <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                        <SidebarMenuSubItem><Link href="/admin/regenerate-codes"><SidebarMenuSubButton>Regenerate Codes</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                    </>
                                 )}
                                 {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (
                                     <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 )}
                                 {(isSuperAdmin || userRole === 'User Management Admin') && (
                                     <SidebarMenuSubItem><Link href="/admin/users"><SidebarMenuSubButton>All Users</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                )}
-                                 {isSuperAdmin && (
-                                    <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 )}
                             </SidebarMenuSub>
                         </CollapsibleContent>
