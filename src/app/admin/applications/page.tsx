@@ -53,6 +53,9 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
+    // THIS IS THE CRITICAL FIX:
+    // This query is now guaranteed to be null if canAccessPage is false,
+    // which prevents the useCollection hook from making an unauthorized read.
     const usersQuery = useMemoFirebase(() => {
         if (!firestore || !canAccessPage) return null;
 
@@ -181,16 +184,13 @@ export default function ApplicationsPage() {
     const router = useRouter();
 
     const userRole = user?.role;
-    const isSuperAdmin = userRole === 'Super Admin';
-    const isFranchiseeAdmin = userRole === 'Franchisee Management Admin';
-
-    // This is the CRITICAL FIX:
+    
     // This state is calculated once and reliably determines if the user is authorized.
-    // It is used to ensure the query is `null` for unauthorized users.
-    const canAccessPage = !isUserLoading && (isSuperAdmin || isFranchiseeAdmin);
+    // It correctly handles the loading state to prevent premature checks.
+    const canAccessPage = !isUserLoading && user && (userRole === 'Super Admin' || userRole === 'Franchisee Management Admin');
     
     useEffect(() => {
-        // Redirect non-logged-in users.
+        // Redirect non-logged-in users once loading is complete.
         if (!isUserLoading && !user) {
             router.replace('/admin/login');
         }
@@ -239,5 +239,3 @@ export default function ApplicationsPage() {
         </AppLayout>
     );
 }
-
-    
