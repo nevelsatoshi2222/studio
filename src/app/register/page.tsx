@@ -1,3 +1,4 @@
+
 'use client';
 import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -34,9 +35,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 const registrationSchema = z.object({
@@ -67,7 +67,6 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -92,67 +91,33 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!firestore || !auth) {
+    if (!auth) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Firebase is not initialized. Please try again later.',
+            description: 'Authentication service is not available. Please try again later.',
         });
         return;
     }
     try {
-      // Use the provided referrer code, or default to the root if empty
-      const finalReferrerId = data.referredBy?.trim() || 'ADMIN_ROOT_USER';
-      
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
+      // Update profile display name immediately
       await updateProfile(user, { displayName: data.name });
 
-      // Generate a unique referral code for the new user
-      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+      // IMPORTANT: The user document is now created by the `onUserCreate` Cloud Function.
+      // We no longer write to Firestore from the client during registration.
+      // The Cloud Function will handle creating the user document with all necessary fields,
+      // including the generated referralCode.
 
-      const userDocRef = doc(firestore, 'users', user.uid);
-      
-      let finalRole = data.role || 'User';
-      if (data.email.toLowerCase() === 'admin@publicgovernance.com') {
-        finalRole = 'Super Admin';
-      }
-      
-      const userDocumentData = {
-        uid: user.uid,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        street: data.street,
-        village: data.village,
-        block: data.block || '',
-        taluka: data.taluka,
-        district: data.district,
-        area: data.area || '',
-        state: data.state,
-        country: data.country,
-        pgcBalance: 0,
-        referredBy: finalReferrerId,
-        referralCode: referralCode, // <-- Save the new code
-        walletPublicKey: null,
-        isVerified: false,
-        status: finalRole === 'User' ? 'Active' : 'Pending', // Set to 'Pending' for special roles
-        registeredAt: serverTimestamp(),
-        role: finalRole,
-        jobTitle: data.jobTitle || '',
-        avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
-      };
-      
-      // Securely create the user document. This operation is allowed by the security rules.
-      await setDoc(userDocRef, userDocumentData);
-      
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
+      // Sign the user out to force them to verify their email before logging in.
       await signOut(auth);
 
       toast({
@@ -168,8 +133,6 @@ function RegistrationForm() {
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         description = 'This email address is already registered. Please use a different email or log in.';
-      } else if (error.code === 'permission-denied') {
-          description = 'A security rule prevented the registration. This is likely due to an invalid referrer ID. Please check the ID and try again.'
       } else if (error.message) {
           description = error.message;
       }
@@ -398,7 +361,7 @@ function RegistrationForm() {
                     <FormControl>
                       <Input placeholder="Enter referrer code or use a referral link" {...field} />
                     </FormControl>
-                    <FormDescription>This is the code of the user who referred you.</FormDescription>
+                    <FormDescription>This is the code of the user who referred you. Leave blank if you don't have one.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -424,5 +387,3 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-
-    

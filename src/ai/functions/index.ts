@@ -6,9 +6,12 @@ import { https } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/v2/https';
 
 import * as distributeCommission from './distributeCommission';
+import * as onUserCreate from './onUserCreate';
 
 // Expose the flows so that they can be called from the client.
 export const distributeCommissionTrigger = distributeCommission.distributeCommission;
+export const onUserCreateTrigger = onUserCreate.onUserCreate;
+
 
 // This is a generic handler that can be used to trigger any flow.
 // This is used for calling flows from the Firebase Studio UI.
