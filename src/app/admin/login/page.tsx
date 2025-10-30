@@ -54,6 +54,10 @@ function AdminLoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       
+      // THIS IS THE CRITICAL FIX:
+      // Securely fetch ONLY the document for the user that just logged in.
+      // This is a 'get' operation on a specific document, which the rules allow.
+      // It replaces the insecure 'list' operation that was causing the error.
       const userDocRef = doc(firestore, 'users', userCredential.user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
@@ -67,15 +71,14 @@ function AdminLoginForm() {
         }
       }
       
-      // THIS IS THE CRITICAL FIX:
-      // If the user is the special admin email but doesn't have the Super Admin role in the DB,
-      // forcefully assign it now.
+      // If the special admin logs in but doesn't have the role, assign it.
+      // This 'setDoc' operation is on a specific user and is secure.
       if (data.email.toLowerCase() === 'admin@publicgovernance.com' && userData.role !== 'Super Admin') {
         await setDoc(userDocRef, { role: 'Super Admin' }, { merge: true });
-        hasAdminRole = true;
+        hasAdminRole = true; // Ensure they are treated as an admin immediately
         toast({
-            title: 'Admin Role Corrected',
-            description: 'Your Super Admin privileges have been assigned.',
+            title: 'Admin Role Assigned',
+            description: 'Your Super Admin privileges have been set.',
         });
       }
 
@@ -84,9 +87,8 @@ function AdminLoginForm() {
                 title: 'Admin Login Successful',
                 description: 'Redirecting to admin dashboard...',
             });
-            // Force a reload to ensure the new auth state is picked up everywhere
             router.push('/admin');
-            router.refresh();
+            router.refresh(); // Force refresh to ensure new role is picked up everywhere
       } else {
              toast({
                 variant: 'destructive',
