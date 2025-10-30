@@ -427,7 +427,7 @@ function RegistrationForm() {
                   <FormItem>
                     <FormLabel>Referrer ID</FormLabel>
                     <FormControl>
-                      <Input {...field} readOnly className="bg-muted" />
+                      <Input placeholder="Enter referrer ID or use a referral link" {...field} />
                     </FormControl>
                     <FormDescription>This is the ID of the user who referred you.</FormDescription>
                     <FormMessage />
