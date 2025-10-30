@@ -314,11 +314,11 @@ export default function TeamPage() {
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
                     <p className="text-sm text-muted-foreground">Direct Referrals (Level 1)</p>
-                    <p className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</p>
+                    <div className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted">
                     <p className="text-sm text-muted-foreground">Team Members (Level 2)</p>
-                    <p className="text-3xl font-bold">{isTeamDataLoading ? <Skeleton className="h-8 w-16" /> : teamDetails.level2Count}</p>
+                    <div className="text-3xl font-bold">{isTeamDataLoading ? <Skeleton className="h-8 w-16" /> : teamDetails.level2Count}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted md:col-span-2">
                     <p className="text-sm text-muted-foreground">Full Team Tree (Levels 3-15)</p>
