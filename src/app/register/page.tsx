@@ -119,7 +119,6 @@ function RegistrationForm() {
       let ancestors: string[] = [];
       let finalReferrerId = data.referrerId.trim();
 
-      // **THE FIX**: Ensure finalReferrerId is never an empty string before being used.
       if (!finalReferrerId) {
         finalReferrerId = 'ADMIN_ROOT_USER';
       }
@@ -129,12 +128,13 @@ function RegistrationForm() {
         const referrerSnap = await getDoc(referrerDocRef);
         if (referrerSnap.exists()) {
           const referrerData = referrerSnap.data() as AppUser;
-          // New ancestor list is the referrer's own ancestors, plus the referrer themselves.
-          ancestors = [...(referrerData.ancestors || []), finalReferrerId].slice(-15); // Keep max 15 levels
+          ancestors = [...(referrerData.ancestors || []), finalReferrerId].slice(-15);
         } else {
-          // If referrer doesn't exist, treat them as a root user for safety.
           finalReferrerId = 'ADMIN_ROOT_USER';
+          ancestors = [];
         }
+      } else {
+        ancestors = [];
       }
 
       // 2. Create the new user in Firebase Auth
@@ -166,8 +166,8 @@ function RegistrationForm() {
         country: data.country,
         pgcBalance: 0,
         referrerId: finalReferrerId,
-        referralCode: generateReferralCode(), // Generate a unique code for this new user
-        ancestors: ancestors, // The new materialized path
+        referralCode: generateReferralCode(),
+        ancestors: ancestors,
         freeAchievers: { bronze: 0, silver: 0, gold: 0 },
         paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
         currentFreeRank: 'None',
