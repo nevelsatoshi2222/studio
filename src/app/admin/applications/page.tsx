@@ -53,19 +53,18 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    // CRITICAL FIX: Only construct the query if the user has access rights.
+    // **CRITICAL FIX:** Only construct the query if the user has access rights.
     // This prevents unauthorized users from triggering a query that violates security rules.
     const usersQuery = useMemoFirebase(() => {
         if (!firestore || !canAccessPage) return null; // Do not query if user cannot access
-        let q;
         if (filter === 'All') {
-            q = query(collection(firestore, 'users'), where('status', '==', 'Pending'));
-        } else {
-            q = query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
+            return query(collection(firestore, 'users'), where('status', '==', 'Pending'));
         }
-        return q;
+        return query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
     }, [filter, firestore, canAccessPage]);
 
+    // The useCollection hook will now safely receive `null` if the user doesn't have access,
+    // preventing any database operation and the subsequent permission error.
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
     const handleUpdateStatus = (user: User, newStatus: 'Active' | 'Rejected') => {
@@ -190,10 +189,10 @@ export default function ApplicationsPage() {
     const canAccessPage = !isUserLoading && (isSuperAdmin || isFranchiseeAdmin);
     
     useEffect(() => {
-        if (!isUserLoading && !(isSuperAdmin || isFranchiseeAdmin)) {
+        if (!isUserLoading && !user) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, isSuperAdmin, isFranchiseeAdmin, router]);
+    }, [isUserLoading, user, router]);
 
 
     return (
