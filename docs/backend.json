@@ -5,26 +5,12 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a registered user of the platform, including their profile, role, and financial information.",
+      "description": "Represents a registered user of the platform, including their profile, role, and MLM network information.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the user (matches Firebase Auth UID)."
-        },
-        "name": {
-          "type": "string",
-          "description": "User's full name."
-        },
-        "email": {
-          "type": "string",
-          "description": "User's email address.",
-          "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "description": "The role of the user on the platform.",
-          "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "User Management Admin", "Job Management Admin", "Franchisee Management Admin", "Social Media Management Admin", "Quiz Management Admin", "Super Admin"]
-        },
+        "id": { "type": "string", "description": "Unique identifier for the user (matches Firebase Auth UID)." },
+        "name": { "type": "string", "description": "User's full name." },
+        "email": { "type": "string", "description": "User's email address.", "format": "email" },
+        "role": { "type": "string", "description": "The role of the user on the platform.", "enum": ["User", "Influencer", "Franchisee", "Job Seeker", "User Management Admin", "Job Management Admin", "Franchisee Management Admin", "Social Media Management Admin", "Quiz Management Admin", "Super Admin"] },
         "street": { "type": "string", "description": "User's street address." },
         "village": { "type": "string", "description": "User's village or ward." },
         "block": { "type": "string", "description": "User's block or kasba." },
@@ -32,230 +18,72 @@
         "district": { "type": "string", "description": "User's district." },
         "state": { "type": "string", "description": "User's state or province." },
         "country": { "type": "string", "description": "User's country." },
-        "directIncome": {
-          "type": "number",
-          "description": "Income generated directly from the user's own activities or referrals."
-        },
-        "totalIncome": {
-          "type": "number",
-          "description": "Total income including earnings from the entire affiliate team tree."
-        },
-        "registeredAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The timestamp when the user registered."
-        },
-        "solanaWalletAddress": {
-          "type": "string",
-          "description": "The user's primary Solana wallet address for receiving PGC."
-        },
-        "withdrawalAddress": {
-            "type": "string",
-            "description": "The Solana wallet address specified by the user for a withdrawal."
-        },
-        "pgcBalance": {
-            "type": "number",
-            "description": "The user's in-app balance of PGC, before it is withdrawn to their wallet."
-        },
-        "referralCode": {
-            "type": "string",
-            "description": "The UID of the user who referred this user."
-        }
+        "registeredAt": { "type": "string", "format": "date-time", "description": "The timestamp when the user registered." },
+        "pgcBalance": { "type": "number", "description": "The user's in-app balance of PGC, before it is withdrawn to their wallet." },
+        "referrerId": { "type": "string", "description": "The UID of the user who referred this user (their direct sponsor)." },
+        "referralCode": { "type": "string", "description": "This user's own unique referral code for others to use."},
+        "ancestors": { "type": "array", "description": "An ordered list of referrer UIDs, from the direct sponsor (level 1) up to 15 levels deep.", "items": { "type": "string" } },
+        "freeAchievers": { "type": "object", "description": "Tracks counts of direct referrals who have achieved free track ranks.", "properties": { "bronze": { "type": "number" }, "silver": { "type": "number" }, "gold": { "type": "number" } } },
+        "paidAchievers": { "type": "object", "description": "Tracks counts of direct referrals who have achieved paid track ranks.", "properties": { "bronzeStar": { "type": "number" }, "silverStar": { "type": "number" }, "goldStar": { "type": "number" } } },
+        "currentFreeRank": { "type": "string", "description": "The user's current rank in the free affiliate track." },
+        "currentPaidRank": { "type": "string", "description": "The user's current rank in the paid affiliate track." }
       },
-      "required": ["id", "name", "email", "role"]
+      "required": ["id", "name", "email", "role", "referrerId", "ancestors"]
     },
-    "Referral": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Referral",
-      "type": "object",
-      "description": "Represents a user's affiliate marketing data, including their referral link and team structure.",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The ID of the user who owns this referral data."
+    "UserWallet": {
+        "title": "UserWallet",
+        "type": "object",
+        "description": "Stores a user's Solana wallet information for payouts.",
+        "properties": {
+            "userId": { "type": "string" },
+            "solanaWalletAddress": { "type": "string" }
         },
-        "referralLink": {
-          "type": "string",
-          "description": "The unique affiliate link for the user.",
-          "format": "uri"
+        "required": ["userId", "solanaWalletAddress"]
+    },
+    "Transaction": {
+        "title": "Transaction",
+        "type": "object",
+        "description": "Logs every crypto sale for auditing and commission processing.",
+        "properties": {
+            "userId": { "type": "string" },
+            "packageAmountUSD": { "type": "number" },
+            "pgcAmount": { "type": "number" },
+            "solanaTxId": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "processed", "failed"] },
+            "createdAt": { "type": "string", "format": "date-time" }
         },
-        "directReferrals": {
-          "type": "array",
-          "description": "A list of user IDs directly referred by this user.",
-          "items": { "type": "string" }
+        "required": ["userId", "packageAmountUSD", "status", "createdAt"]
+    },
+    "Reward": {
+        "title": "Reward",
+        "type": "object",
+        "description": "Tracks when a user achieves a specific MLM rank.",
+        "properties": {
+            "userId": { "type": "string" },
+            "rank": { "type": "string" },
+            "track": { "type": "string", "enum": ["free", "paid"] },
+            "dateAchieved": { "type": "string", "format": "date-time" }
         },
-        "totalTeamSize": {
-            "type": "number",
-            "description": "The total number of users in the affiliate tree under this user."
-        }
-      },
-      "required": ["userId", "referralLink"]
+        "required": ["userId", "rank", "track", "dateAchieved"]
     },
     "SocialPost": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "SocialPost",
       "type": "object",
       "description": "Represents a post made by a user on the social media hub.",
-      "properties": {
-        "id": { "type": "string", "description": "Unique identifier for the post." },
-        "authorId": { "type": "string", "description": "The ID of the user who created the post." },
-        "authorName": { "type": "string", "description": "The display name of the user who created the post." },
-        "authorAvatar": { "type": "string", "description": "URL of the author's avatar image.", "format": "uri" },
-        "content": { "type": "string", "description": "The text content of the post." },
-        "imageUrl": { "type": "string", "description": "URL of an image attached to the post.", "format": "uri" },
-        "timestamp": { "type": "string", "description": "When the post was created.", "format": "date-time" },
-        "likes": { "type": "number", "description": "Number of likes on the post." },
-        "comments": { "type": "number", "description": "Number of comments on the post." },
-        "mentionsPgc": { "type": "boolean", "description": "True if the post mentions $PGC." },
-        "mentionsIgc": { "type": "boolean", "description": "True if the post mentions $IGC." }
-      },
+      "properties": { "id": { "type": "string" }, "authorId": { "type": "string" }, "authorName": { "type": "string" }, "content": { "type": "string" }, "timestamp": { "type": "string", "format": "date-time" } },
       "required": ["authorId", "authorName", "content", "timestamp"]
-    },
-    "WithdrawalRequest": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "WithdrawalRequest",
-      "type": "object",
-      "description": "Represents a user's request to withdraw PGC from their in-app balance to their Solana wallet.",
-      "properties": {
-        "userId": { "type": "string", "description": "The ID of the user requesting the withdrawal." },
-        "userName": { "type": "string", "description": "The name of the user." },
-        "amount": { "type": "number", "description": "The amount of PGC requested." },
-        "solanaAddress": { "type": "string", "description": "The destination Solana wallet address." },
-        "requestedAt": { "type": "string", "description": "Timestamp of the request.", "format": "date-time" },
-        "status": { "type": "string", "description": "The status of the withdrawal request.", "enum": ["pending", "completed", "failed"] }
-      },
-      "required": ["userId", "amount", "solanaAddress", "requestedAt", "status"]
-    },
-    "ForumPost": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ForumPost",
-      "type": "object",
-      "description": "A post in the governance forum.",
-      "properties": {
-        "title": { "type": "string" },
-        "content": { "type": "string" },
-        "authorId": { "type": "string" },
-        "authorName": { "type": "string" },
-        "authorAvatar": { "type": "string", "format": "uri" },
-        "topic": { "type": "string" },
-        "geography": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "upvotes": { "type": "number" },
-        "comments": { "type": "number" }
-      },
-      "required": ["title", "content", "authorId", "authorName", "topic", "geography", "createdAt"]
-    },
-    "PresalePurchase": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "PresalePurchase",
-      "type": "object",
-      "description": "Represents a logged purchase during the PGC presale event.",
-      "properties": {
-        "buyerWalletAddress": { "type": "string", "description": "The Solana wallet address of the buyer." },
-        "userId": { "type": "string", "description": "The ID of the user who made the purchase." },
-        "packageAmountUSD": { "type": "number", "description": "The amount in USD of the purchased package." },
-        "pgcAmount": { "type": "number", "description": "The base amount of PGC purchased." },
-        "bonusPgc": { "type": "number", "description": "The bonus PGC received." },
-        "totalPgc": { "type": "number", "description": "The total PGC credited to the user's in-app balance." },
-        "purchaseDate": { "type": "string", "format": "date-time", "description": "The timestamp of when the purchase was logged." },
-        "status": { "type": "string", "description": "The verification status of the USDT payment.", "enum": ["pending_verification", "completed"] }
-      },
-      "required": ["buyerWalletAddress", "userId", "packageAmountUSD", "totalPgc", "purchaseDate", "status"]
     }
   },
   "auth": {
     "providers": ["password", "anonymous"]
   },
   "firestore": {
-    "indexes": [
-        {
-            "collectionGroup": "users",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "referralCode",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "registeredAt",
-                    "order": "DESCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "forums",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "createdAt",
-                    "order": "DESCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "social_posts",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "timestamp",
-                    "order": "DESCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "withdrawal_requests",
-            "queryScope": "COLLECTION",
-            "fields": [
-                { "fieldPath": "status", "order": "ASCENDING" },
-                { "fieldPath": "requestedAt", "order": "DESCENDING" }
-            ]
-        },
-        {
-            "collectionGroup": "presale_purchases",
-            "queryScope": "COLLECTION",
-            "fields": [
-                { "fieldPath": "status", "order": "ASCENDING" },
-                { "fieldPath": "purchaseDate", "order": "DESCENDING" }
-            ]
-        }
-    ],
     "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "schema": { "$ref": "#/entities/User" },
-          "description": "Stores the public profile data and role for each user. The document ID is the user's UID from Firebase Auth."
-        }
-      },
-      {
-        "path": "/social_posts/{postId}",
-        "definition": {
-          "schema": { "$ref": "#/entities/SocialPost" },
-          "description": "A top-level collection for all social media posts from all users."
-        }
-      },
-       {
-        "path": "/withdrawal_requests/{requestId}",
-        "definition": {
-          "schema": { "$ref": "#/entities/WithdrawalRequest" },
-          "description": "Stores all user withdrawal requests for admin processing."
-        }
-      },
-       {
-        "path": "/forums/{postId}",
-        "definition": {
-          "schema": { "$ref": "#/entities/ForumPost" },
-          "description": "Stores posts for the governance forum."
-        }
-      },
-      {
-        "path": "/presale_purchases/{purchaseId}",
-        "definition": {
-            "schema": { "$ref": "#/entities/PresalePurchase" },
-            "description": "Logs presale purchase requests for admin verification and fulfillment."
-        }
-      }
-    ],
-    "reasoning": "This structure centralizes the user's role within their main document, allowing for more flexible and granular security rules. Specific admins (e.g., 'User Management Admin') can be granted access to collections like '/users', while a 'Super Admin' has overarching permissions. This role-based access control (RBAC) is more scalable and secure than the previous existence-based check."
+      { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
+      { "path": "/user_wallets/{userId}", "definition": { "schema": { "$ref": "#/entities/UserWallet" } } },
+      { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
+      { "path": "/rewards/{rewardId}", "definition": { "schema": { "$ref": "#/entities/Reward" } } },
+      { "path": "/social_posts/{postId}", "definition": { "schema": { "$ref": "#/entities/SocialPost" } } }
+    ]
   }
 }

@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -37,8 +37,9 @@ import {
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc, getDoc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { AppUser } from '@/firebase/provider';
 
 
 const registrationSchema = z.object({
@@ -54,17 +55,28 @@ const registrationSchema = z.object({
   area: z.string().optional(),
   state: z.string().min(1, { message: 'State is required.' }),
   country: z.string().min(1, { message: 'Country is required.' }),
-  referralCode: z.string(),
+  referrerId: z.string(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
+// Helper function to generate a unique referral code
+function generateReferralCode(length = 8) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referralCode = searchParams.get('ref') || 'ADMIN_REF_CODE';
+  const referrerId = searchParams.get('ref') || 'ADMIN_ROOT_USER';
   const role = searchParams.get('role');
   const jobTitle = searchParams.get('title');
 
@@ -76,7 +88,7 @@ function RegistrationForm() {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: '',
-      referralCode,
+      referrerId: referrerId,
       role: role || 'User', // Default to 'User' if no role in query param
       jobTitle: jobTitle || '',
       email: '',
@@ -103,15 +115,30 @@ function RegistrationForm() {
         return;
     }
     try {
-      
+      // 1. Get referrer's data to build the ancestor path
+      let ancestors: string[] = [];
+      if (data.referrerId !== 'ADMIN_ROOT_USER') {
+        const referrerDocRef = doc(firestore, 'users', data.referrerId);
+        const referrerSnap = await getDoc(referrerDocRef);
+        if (referrerSnap.exists()) {
+          const referrerData = referrerSnap.data() as AppUser;
+          // New ancestor list is the referrer's own ancestors, plus the referrer themselves.
+          ancestors = [...(referrerData.ancestors || []), data.referrerId].slice(-15); // Keep max 15 levels
+        } else {
+          // If referrer doesn't exist, treat them as a root user for safety.
+          data.referrerId = 'ADMIN_ROOT_USER';
+        }
+      }
+
+      // 2. Create the new user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: data.name });
 
+      // 3. Create the user document in Firestore with the new MLM structure
       const userDocRef = doc(firestore, 'users', user.uid);
       
-      // Determine the user's role
       let finalRole = data.role || 'User';
       if (data.email.toLowerCase() === 'admin@publicgovernance.com') {
         finalRole = 'Super Admin';
@@ -130,9 +157,14 @@ function RegistrationForm() {
         area: data.area || '',
         state: data.state,
         country: data.country,
-        balance: 0,
         pgcBalance: 0,
-        referralCode: data.referralCode,
+        referrerId: data.referrerId,
+        referralCode: generateReferralCode(), // Generate a unique code for this new user
+        ancestors: ancestors, // The new materialized path
+        freeAchievers: { bronze: 0, silver: 0, gold: 0 },
+        paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
+        currentFreeRank: 'None',
+        currentPaidRank: 'None',
         registeredAt: serverTimestamp(),
         status: finalRole.includes('Admin') || finalRole === 'User' ? 'Active' : 'Pending',
         avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
@@ -140,6 +172,13 @@ function RegistrationForm() {
         jobTitle: data.jobTitle || '',
       });
       
+      // 4. Create user wallet document
+      await setDoc(doc(firestore, 'user_wallets', user.uid), {
+          userId: user.uid,
+          solanaWalletAddress: '' // To be filled in by user on their profile
+      });
+
+      // 5. Send verification email
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
@@ -157,23 +196,8 @@ function RegistrationForm() {
       console.error('Registration failed:', error);
       
       let description = 'An unexpected error occurred. Please try again.';
-      
       if (error.code === 'auth/email-already-in-use') {
-        // Special handling for the admin user
-        if (data.email.toLowerCase() === 'admin@publicgovernance.com' && auth.currentUser) {
-            const userDocRef = doc(firestore, 'users', auth.currentUser.uid);
-            await setDoc(userDocRef, { role: 'Super Admin' }, { merge: true });
-            description = "This admin account already exists. Role confirmed. Please proceed to the admin login page.";
-            toast({
-                title: 'Admin Account Ready',
-                description,
-            });
-            router.push('/admin/login');
-            return;
-        }
         description = 'This email address is already registered. Please use a different email or log in.';
-      } else if (error.code === 'permission-denied') {
-        description = "You do not have permission to perform this action. This could be due to security rules. Please check the console for more details.";
       } else if (error.message) {
         description = error.message;
       }
@@ -395,13 +419,14 @@ function RegistrationForm() {
 
               <FormField
                 control={form.control}
-                name="referralCode"
+                name="referrerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Referral Code</FormLabel>
+                    <FormLabel>Referrer ID</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} readOnly className="bg-muted" />
                     </FormControl>
+                    <FormDescription>This is the ID of the user who referred you.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
