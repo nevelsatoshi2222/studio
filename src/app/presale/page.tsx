@@ -18,8 +18,8 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useUser, updateDocumentNonBlocking } from '@/firebase';
+import { collection, addDoc, serverTimestamp, doc, increment } from 'firebase/firestore';
 
 
 const presalePackages = [
@@ -31,6 +31,7 @@ const presalePackages = [
 ];
 
 export default function PresalePage() {
+  const { user } = useUser();
   const { publicKey, connected } = useWallet();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -68,8 +69,8 @@ export default function PresalePage() {
   };
 
   const handleConfirmPayment = async () => {
-    if (!selectedPackage || !publicKey || !firestore) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Connection error. Please try again.'});
+    if (!selectedPackage || !publicKey || !firestore || !user) {
+        toast({ variant: 'destructive', title: 'Error', description: 'User not logged in or connection error. Please try again.'});
         return;
     };
 
@@ -79,21 +80,30 @@ export default function PresalePage() {
       const selectedPkg = presalePackages.find(p => p.amountUSD === selectedPackage);
       
       if (!selectedPkg) throw new Error("Invalid package selected.");
+      
+      const totalPgc = selectedPkg.pgcAmount + selectedPkg.bonus;
 
+      // 1. Log the purchase for admin verification
       await addDoc(presaleCollection, {
         buyerWalletAddress: publicKey.toBase58(),
+        userId: user.uid,
         packageAmountUSD: selectedPackage,
         pgcAmount: selectedPkg.pgcAmount,
         bonusPgc: selectedPkg.bonus,
-        totalPgc: selectedPkg.pgcAmount + selectedPkg.bonus,
+        totalPgc: totalPgc,
         purchaseDate: serverTimestamp(),
-        status: 'pending_verification',
+        status: 'pending_verification', // Admin still needs to verify USDT
       });
       
+      // 2. Immediately credit the user's in-app PGC balance
+      const userDocRef = doc(firestore, 'users', user.uid);
+      updateDocumentNonBlocking(userDocRef, { pgcBalance: increment(totalPgc) });
+      
       toast({
-        title: 'Purchase Logged!',
-        description: `Your purchase of ${(selectedPkg.pgcAmount + selectedPkg.bonus).toLocaleString()} PGC has been recorded. An admin will verify the transaction and send your tokens shortly.`,
+        title: 'Purchase Successful!',
+        description: `Your balance has been credited with ${totalPgc.toLocaleString()} PGC. You can now view it on your profile.`,
       });
+      
       setPurchaseInitiated(false);
       setSelectedPackage(null);
 
@@ -129,7 +139,7 @@ export default function PresalePage() {
                 <Badge variant="secondary" className="text-base">No Staking Required</Badge>
              </div>
              <p className="text-muted-foreground max-w-2xl mx-auto">
-                For a limited time, purchase PGC with USDT and receive an instant 1:1 bonus—buy one, get one free. These bonus coins are liquid immediately. This event is to reward our founding members before the first public sale stage begins.
+                For a limited time, purchase PGC with USDT and receive an instant 1:1 bonus—buy one, get one free. These bonus coins are credited to your in-app balance immediately. This event is to reward our founding members before the first public sale stage begins.
              </p>
           </CardContent>
         </Card>
@@ -144,7 +154,7 @@ export default function PresalePage() {
                     <button
                         key={pkg.amountUSD}
                         onClick={() => handleSelectPackage(pkg.amountUSD)}
-                        disabled={!connected || isProcessing}
+                        disabled={!connected || !user || isProcessing}
                         className={`p-6 rounded-lg border-2 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedPackage === pkg.amountUSD ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                     >
                         <div className="flex justify-between items-start">
@@ -165,7 +175,11 @@ export default function PresalePage() {
                 ))}
             </CardContent>
             <CardFooter className="flex flex-col items-center gap-4">
-                 {!connected ? (
+                 {!user ? (
+                     <>
+                        <p className="text-lg font-semibold flex items-center gap-2"><Wallet className="h-5 w-5 text-primary" />Please log in to purchase.</p>
+                     </>
+                 ) : !connected ? (
                      <>
                         <p className="text-lg font-semibold flex items-center gap-2"><Wallet className="h-5 w-5 text-primary" />Please connect your wallet to purchase.</p>
                         <p className="text-sm text-muted-foreground">The purchase button will appear here once you are connected.</p>
@@ -204,8 +218,8 @@ export default function PresalePage() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Step 2: Confirm Your Transaction</label>
-                    <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. An admin will verify the transaction and send the PGC to your wallet ({publicKey?.toBase58().slice(0, 6)}...).</p>
+                    <label className="text-sm font-medium">Step 2: Confirm Your Transaction & Credit Your Account</label>
+                    <p className="text-sm text-muted-foreground">After you have sent the USDT, click the button below. Your in-app PGC balance will be credited instantly. An admin will later verify the transaction and send the real PGC tokens for withdrawal requests.</p>
                 </div>
             </CardContent>
             <CardFooter>
@@ -219,5 +233,3 @@ export default function PresalePage() {
     </AppLayout>
   );
 }
-
-    

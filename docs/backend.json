@@ -152,14 +152,15 @@
       "description": "Represents a logged purchase during the PGC presale event.",
       "properties": {
         "buyerWalletAddress": { "type": "string", "description": "The Solana wallet address of the buyer." },
+        "userId": { "type": "string", "description": "The ID of the user who made the purchase." },
         "packageAmountUSD": { "type": "number", "description": "The amount in USD of the purchased package." },
         "pgcAmount": { "type": "number", "description": "The base amount of PGC purchased." },
         "bonusPgc": { "type": "number", "description": "The bonus PGC received." },
-        "totalPgc": { "type": "number", "description": "The total PGC to be fulfilled (base + bonus)." },
+        "totalPgc": { "type": "number", "description": "The total PGC credited to the user's in-app balance." },
         "purchaseDate": { "type": "string", "format": "date-time", "description": "The timestamp of when the purchase was logged." },
-        "status": { "type": "string", "description": "The fulfillment status of the purchase.", "enum": ["pending_verification", "completed"] }
+        "status": { "type": "string", "description": "The verification status of the USDT payment.", "enum": ["pending_verification", "completed"] }
       },
-      "required": ["buyerWalletAddress", "packageAmountUSD", "totalPgc", "purchaseDate", "status"]
+      "required": ["buyerWalletAddress", "userId", "packageAmountUSD", "totalPgc", "purchaseDate", "status"]
     }
   },
   "auth": {
@@ -258,5 +259,3 @@
     "reasoning": "This structure centralizes the user's role within their main document, allowing for more flexible and granular security rules. Specific admins (e.g., 'User Management Admin') can be granted access to collections like '/users', while a 'Super Admin' has overarching permissions. This role-based access control (RBAC) is more scalable and secure than the previous existence-based check."
   }
 }
-
-    
