@@ -53,8 +53,6 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    // **CRITICAL FIX:** The query is now only constructed if the user is authorized.
-    // If canAccessPage is false, usersQuery will be null, and useCollection will not execute a query.
     const usersQuery = useMemoFirebase(() => {
         if (!firestore || !canAccessPage) return null;
 
@@ -64,7 +62,6 @@ function ApplicationsTable({ canAccessPage }: { canAccessPage: boolean }) {
         return query(collection(firestore, 'users'), where('role', '==', filter), where('status', '==', 'Pending'));
     }, [filter, firestore, canAccessPage]);
 
-    // useCollection hook now safely receives `null` for unauthorized users, preventing any database operation.
     const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
     const handleUpdateStatus = (user: User, newStatus: 'Active' | 'Rejected') => {
@@ -186,15 +183,22 @@ export default function ApplicationsPage() {
     const userRole = user?.role;
     const isSuperAdmin = userRole === 'Super Admin';
     const isFranchiseeAdmin = userRole === 'Franchisee Management Admin';
-    // This derived state is crucial. It ensures that we don't even attempt to render
-    // the table with a query unless the user is fully loaded and authorized.
+
+    // This is the CRITICAL FIX:
+    // This state is calculated once and reliably determines if the user is authorized.
+    // It is used to ensure the query is `null` for unauthorized users.
     const canAccessPage = !isUserLoading && (isSuperAdmin || isFranchiseeAdmin);
     
     useEffect(() => {
+        // Redirect non-logged-in users.
         if (!isUserLoading && !user) {
             router.replace('/admin/login');
         }
-    }, [isUserLoading, user, router]);
+        // Redirect logged-in but unauthorized users after a short delay to show them the message.
+        if (!isUserLoading && user && !canAccessPage) {
+            setTimeout(() => router.replace('/admin'), 3000);
+        }
+    }, [isUserLoading, user, canAccessPage, router]);
 
 
     return (
@@ -212,7 +216,8 @@ export default function ApplicationsPage() {
                     </div>
                 )}
 
-                {!isUserLoading && !canAccessPage && (
+                {/* This block shows the access denied message for non-admin users. */}
+                {!isUserLoading && user && !canAccessPage && (
                     <Card className="mt-8 border-destructive">
                         <CardHeader className="text-center">
                             <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
@@ -224,9 +229,15 @@ export default function ApplicationsPage() {
                     </Card>
                 )}
                 
-                {/* The ApplicationsTable is only rendered, but its internal query is still protected by canAccessPage prop */}
-                {(isSuperAdmin || isFranchiseeAdmin) && <ApplicationsTable canAccessPage={canAccessPage} />}
+                {/* 
+                  This block conditionally renders the table.
+                  Crucially, the `canAccessPage` prop is passed down. If false, the internal
+                  query in `ApplicationsTable` will be null, preventing any Firestore read.
+                */}
+                {canAccessPage && <ApplicationsTable canAccessPage={canAccessPage} />}
             </div>
         </AppLayout>
     );
 }
+
+    
