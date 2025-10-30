@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight, ExternalLink } from 'lucide-react';
+import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight, ExternalLink, Key } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -48,12 +48,6 @@ import {
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   solanaWalletAddress: z.string().optional(),
-  bankName: z.string().optional(),
-  accountNumber: z.string().optional(),
-  ifscCode: z.string().optional(),
-  accountHolderName: z.string().optional(),
-  nationalId: z.any().optional(),
-  taxId: z.any().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -106,10 +100,6 @@ export default function ProfilePage() {
     defaultValues: {
       name: '',
       solanaWalletAddress: '',
-      bankName: '',
-      accountNumber: '',
-      ifscCode: '',
-      accountHolderName: '',
     },
   });
 
@@ -118,10 +108,6 @@ export default function ProfilePage() {
       form.reset({
         name: userProfile.name || '',
         solanaWalletAddress: userProfile.solanaWalletAddress || '',
-        bankName: userProfile.bankName || '',
-        accountNumber: userProfile.accountNumber || '',
-        ifscCode: userProfile.ifscCode || '',
-        accountHolderName: userProfile.accountHolderName || '',
       });
       setWithdrawAmount(userProfile.pgcBalance || 0);
     } else if (user) {
@@ -142,10 +128,6 @@ export default function ProfilePage() {
     updateDocumentNonBlocking(userDocRef, {
         name: data.name,
         solanaWalletAddress: data.solanaWalletAddress,
-        bankName: data.bankName,
-        accountNumber: data.accountNumber,
-        ifscCode: data.ifscCode,
-        accountHolderName: data.accountHolderName,
     });
     toast({
         title: 'Profile Updated',
@@ -203,7 +185,7 @@ export default function ProfilePage() {
     });
   };
 
-  const referralLink = user ? `${window.location.origin}/register?ref=${user.uid}` : '';
+  const referralLink = user && userProfile?.referralCode ? `${window.location.origin}/register?ref=${userProfile.referralCode}` : '';
 
   const copyToClipboard = (textToCopy: string, toastMessage: string) => {
     navigator.clipboard.writeText(textToCopy);
@@ -272,13 +254,9 @@ export default function ProfilePage() {
               <CardContent className="space-y-6">
                 <Separator />
                 <div className="space-y-4">
-                    <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet & Bank Details</h3>
+                    <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={form.control} name="solanaWalletAddress" render={({ field }) => (<FormItem><FormLabel>Solana Wallet Address</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="accountHolderName" render={({ field }) => (<FormItem><FormLabel>Account Holder Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={form.control} name="bankName" render={({ field }) => (<FormItem><FormLabel>Bank Name</FormLabel><FormControl><Input placeholder="e.g., Global Trust Bank" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={form.control} name="accountNumber" render={({ field }) => (<FormItem><FormLabel>Account Number</FormLabel><FormControl><Input placeholder="e.g., 1234567890" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={form.control} name="ifscCode" render={({ field }) => (<FormItem><FormLabel>IFSC/SWIFT Code</FormLabel><FormControl><Input placeholder="e.g., GTB0123456" {...field} /></FormControl></FormItem>)} />
                     </div>
                 </div>
               </CardContent>
@@ -289,8 +267,8 @@ export default function ProfilePage() {
         {/* Financial Hub Card */}
         <Card>
             <CardHeader>
-                <CardTitle>Financial Hub</CardTitle>
-                <CardDescription>Your financial overview, including balances and actions.</CardDescription>
+                <CardTitle>Financial & Referral Hub</CardTitle>
+                <CardDescription>Your financial overview, referral tools, and actions.</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-6">
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
@@ -316,20 +294,28 @@ export default function ProfilePage() {
                         <Link href="/staking">Go to Staking <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
-            </CardContent>
-             <CardFooter className="flex-col items-start gap-4">
-                <div className="space-y-2 w-full">
-                    <Label htmlFor="referral-link">Your Affiliate Link</Label>
+                <div className="space-y-2 md:col-span-2">
+                    <Label>Your Unique Referral Code</Label>
                     <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
-                         <Link href={referralLink} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
-                            {referralLink}
+                         <Key className="h-5 w-5 text-primary" />
+                         <span className="flex-1 font-mono text-lg text-primary">{userProfile?.referralCode || 'Generating...'}</span>
+                        <Button onClick={() => copyToClipboard(userProfile?.referralCode, 'Your referral code has been copied.')} size="icon" variant="ghost">
+                            <Copy className="h-5 w-5" />
+                        </Button>
+                    </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="referral-link">Your Full Affiliate Link</Label>
+                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
+                         <Link href={referralLink || '#'} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
+                            {referralLink || 'Your link will appear here once your code is generated.'}
                         </Link>
                         <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost">
                             <Copy className="h-5 w-5" />
                         </Button>
                     </div>
                 </div>
-             </CardFooter>
+            </CardContent>
         </Card>
 
         {/* KYC Card */}
@@ -403,3 +389,5 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
+
+    
