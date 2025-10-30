@@ -36,7 +36,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth, useFirestore } from '@/firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc, getDoc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { AppUser } from '@/firebase/provider';
@@ -185,9 +185,12 @@ function RegistrationForm() {
       };
       await sendEmailVerification(user, actionCodeSettings);
 
+      // 6. Sign the user out to force email verification
+      await signOut(auth);
+
       toast({
         title: 'Registration Successful!',
-        description: 'Please check your email to verify your account.',
+        description: 'Please check your email to verify your account before logging in.',
       });
       
       router.push('/login');
