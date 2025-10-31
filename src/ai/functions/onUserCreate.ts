@@ -57,7 +57,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             status: finalRole === 'User' ? 'Active' : 'Pending', // Set to 'Pending' for special roles
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
             role: finalRole,
-            jobTitle: '',
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
         };
 
