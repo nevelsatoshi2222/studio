@@ -11,17 +11,23 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, ChevronRight, RotateCcw, Award } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Award } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
 import { doc, increment } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
-const quizQuestions = [
+const quizPolls = [
     {
       question: "What is India's approximate Union budget for the fiscal year 2024-2025?",
       options: [
@@ -30,7 +36,6 @@ const quizQuestions = [
         "₹20 Lakh Crore",
         "₹50 Crore"
       ],
-      answer: "₹50 Lakh Crore",
       explanation: "India's interim budget for 2024-25 estimates total expenditure at ₹47.66 lakh crore, making ₹50 Lakh Crore the closest approximation."
     },
     {
@@ -41,7 +46,6 @@ const quizQuestions = [
         "₹25,000",
         "₹35,000"
       ],
-      answer: "₹35,000",
       explanation: "Calculation: ₹47.66 lakh crore / 140 crore people ≈ ₹34,042 per person. ₹35,000 is the nearest option."
     },
     {
@@ -52,7 +56,6 @@ const quizQuestions = [
         "₹140,000",
         "₹175,000 or above"
       ],
-      answer: "₹140,000",
       explanation: "Calculation: Approximately ₹35,000 per person * 4 people = ₹140,000."
     },
     {
@@ -63,7 +66,6 @@ const quizQuestions = [
         "₹10 Lakh Crore",
         "₹12 Lakh Crore or above"
       ],
-      answer: "₹10 Lakh Crore",
       explanation: "The combined revenue from taxes on petroleum products for the Centre and States has been consistently around ₹9-10 lakh crore in recent years."
     },
     {
@@ -74,7 +76,6 @@ const quizQuestions = [
             "₹5,000 Crore",
             "₹25 Lakh Crore",
         ],
-        answer: "₹70,000 Crore",
         explanation: "Official receipts from 'Mines and Minerals' are in the range of ₹70,000-₹80,000 crore, a figure far lower than the potential market value."
     },
     {
@@ -85,7 +86,6 @@ const quizQuestions = [
             "₹15 Lakh Crore",
             "₹20 Lakh Crore or more"
         ],
-        answer: "₹20 Lakh Crore or more",
         explanation: "GST collections have been robust, with the monthly average crossing ₹1.6 lakh crore, leading to an annual figure well over ₹20 lakh crore."
     },
     {
@@ -96,7 +96,6 @@ const quizQuestions = [
             "₹10 Lakh Crore",
             "₹20 Lakh Crore or more"
         ],
-        answer: "₹10 Lakh Crore",
         explanation: "Corporation tax is a major source of revenue, with collections estimated to be around ₹10 lakh crore for the fiscal year."
     },
     {
@@ -107,7 +106,6 @@ const quizQuestions = [
             "₹5,00,000 Crore",
             "₹25 Lakh Crore and above"
         ],
-        answer: "₹25 Lakh Crore and above",
         explanation: "This is a conceptual question. Experts suggest the actual market value of extracted minerals is orders of magnitude higher than the royalty collected, potentially running into tens of lakhs of crores."
     },
     {
@@ -118,7 +116,6 @@ const quizQuestions = [
             "₹1 Lakh Crore, used by Govt",
             "₹1.5 Lakh Crore, mostly used by private operators"
         ],
-        answer: "₹1.5 Lakh Crore, mostly used by private operators",
         explanation: "While the government gets a share, a majority of India's highways are operated by private companies under Build-Operate-Transfer (BOT) models, who are the primary collectors of toll revenue."
     },
     {
@@ -129,245 +126,135 @@ const quizQuestions = [
             "Yes, but it should be more than 50%",
             "Yes, it should be more than 50%"
         ],
-        answer: "Yes, of course.",
         explanation: "This is a core question of public governance. It asks whether you believe in direct benefit transfers as a primary model for wealth distribution."
     }
-  ];
+];
 
-type AnswerState = 'unanswered' | 'correct' | 'incorrect';
+type Poll = typeof quizPolls[0];
+
+const agreementLevels = ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
+
+function PollCard({ poll }: { poll: Poll }) {
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+
+  const handleCheckboxChange = (optionText: string, checked: boolean | 'indeterminate') => {
+    setSelectedOptions(prev => {
+      const newSelected = { ...prev };
+      if (checked) {
+        newSelected[optionText] = '100%'; // Default to 100% agreement
+      } else {
+        delete newSelected[optionText];
+      }
+      return newSelected;
+    });
+  };
+
+  const handleAgreementChange = (optionText: string, agreement: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [optionText]: agreement,
+    }));
+  };
+  
+  const isAnyOptionSelected = Object.keys(selectedOptions).length > 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="mt-2">{poll.question}</CardTitle>
+        <CardDescription>{poll.explanation}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        <div>
+          <h4 className="font-semibold mb-4">Select options and your level of agreement:</h4>
+          <div className="space-y-6">
+            {poll.options.map((option, index) => (
+              <div key={`${poll.question}-opt-${index}`} className="p-4 border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-4">
+                  <Checkbox 
+                    id={`${poll.question}-opt-${index}`}
+                    onCheckedChange={(checked) => handleCheckboxChange(option, checked)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 space-y-4">
+                    <Label htmlFor={`${poll.question}-opt-${index}`} className="font-normal text-base leading-snug">
+                      {option}
+                    </Label>
+                    {selectedOptions[option] && (
+                        <div className="w-full sm:w-1/2">
+                          <Select 
+                            value={selectedOptions[option]} 
+                            onValueChange={(value) => handleAgreementChange(option, value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Set agreement level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {agreementLevels.map(level => (
+                                <SelectItem key={level} value={level}>{level} Agreement</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button disabled={!isAnyOptionSelected}>
+          Submit Votes
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
 
 export default function FinancialQuizPage() {
   const { user } = useUser();
-  const firestore = useFirestore();
-  const { toast } = useToast();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [answerState, setAnswerState] = useState<AnswerState>('unanswered');
-  const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
-
-  const currentQuestion = quizQuestions[currentQuestionIndex];
-
-  const handleSubmit = () => {
-    if (!selectedAnswer) return;
-
-    if (selectedAnswer === currentQuestion.answer) {
-      setAnswerState('correct');
-      setScore(score + 1);
-    } else {
-      setAnswerState('incorrect');
-    }
-  };
-
-  const handleNext = () => {
-    setAnswerState('unanswered');
-    setSelectedAnswer(null);
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      setQuizFinished(true);
-      processRewards(score + (selectedAnswer === currentQuestion.answer ? 1 : 0) - score); // Calculate final score on finish
-    }
-  };
-  
-  const processRewards = (finalScore: number) => {
-    if (!user || !firestore) return;
-    
-    let reward = 0;
-    
-    if (finalScore === 10) reward = 10;
-    else if (finalScore > 6) reward = 5;
-    else if (finalScore >= 4) reward = 2.5;
-    else reward = 1.25;
-
-    if (reward > 0) {
-      const userDocRef = doc(firestore, 'users', user.uid);
-      updateDocumentNonBlocking(userDocRef, {
-        pgcBalance: increment(reward)
-      });
-      
-      toast({
-        title: 'Reward Added!',
-        description: `Congratulations! ${reward} PGC has been added to your in-app wallet.`
-      });
-    }
-  };
-
-  const handleRestart = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setAnswerState('unanswered');
-    setScore(0);
-    setQuizFinished(false);
-  };
-
-  const progressPercentage = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
-  
-  const finalScore = score + (answerState === 'correct' ? 1 : 0);
-  let coinReward = 0;
-  if (quizFinished) {
-    if (finalScore === 10) {
-      coinReward = 10;
-    } else if (finalScore > 6) {
-      coinReward = 5;
-    } else if (finalScore >= 4) {
-      coinReward = 2.5;
-    } else {
-      coinReward = 1.25;
-    }
-  }
-
 
   return (
     <AppLayout>
       <div className="flex flex-col gap-8 max-w-3xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl font-headline">Financial Awareness Quiz Tournament</CardTitle>
-            <CardDescription>Test your knowledge, become an informed citizen, and earn PGC rewards! Connect your wallet to receive rewards.</CardDescription>
+            <CardTitle className="text-3xl font-headline">Financial Awareness Poll</CardTitle>
+            <CardDescription>Test your knowledge, become an informed citizen, and share your opinion on key financial topics.</CardDescription>
           </CardHeader>
-          
           {!user ? (
             <CardContent>
               <Alert>
                 <Award className="h-4 w-4" />
                 <AlertTitle>Please Login to Participate</AlertTitle>
                 <AlertDescription>
-                  You must be logged in to take the quiz and earn rewards.
+                  You must be logged in to participate in the poll.
                 </AlertDescription>
               </Alert>
             </CardContent>
-          ) : !quizFinished ? (
-            <>
-            <CardContent className="space-y-6">
-                <Alert className="border-primary">
-                    <Award className="h-4 w-4 text-primary" />
-                    <AlertTitle className="font-bold text-primary">Quiz Tournament Rules & Rewards</AlertTitle>
-                    <AlertDescription>
-                        <ul className="list-decimal space-y-3 pl-5 text-muted-foreground">
-                            <li>
-                                <span className="font-semibold text-foreground">Initial Round:</span>
-                                <ul className="list-disc pl-5 space-y-1 mt-1">
-                                    <li>Score under 4 correct to earn **1.25 PGC** (Limited to first 20,000 winners).</li>
-                                    <li>Score 4 to 6 correct to earn **2.5 PGC** (Limited to first 5,000 winners).</li>
-                                    <li>Score 7 to 9 correct to earn **5 PGC** (Limited to first 2,000 winners).</li>
-                                    <li>Score a perfect 10 to earn a **10 PGC** bonus and qualify for the next round! (Limited to first 1,000 winners).</li>
-                                </ul>
-                            </li>
-                             <li>
-                                <span className="font-semibold text-foreground">Qualifying Round:</span>
-                                <p>The top 2,000 from the initial round compete. Top 200 winners earn **20 PGC** each and advance.</p>
-                            </li>
-                            <li>
-                                <span className="font-semibold text-foreground">Semi-Finals:</span>
-                                <p>The top 200 compete. The top 20 scorers win **100 PGC** each and advance to the Grand Finale.</p>
-                            </li>
-                            <li>
-                                <span className="font-semibold text-foreground">Grand Finale:</span>
-                                 <ul className="list-disc pl-5 space-y-1 mt-1">
-                                    <li>The final 20 competitors battle for the championship.</li>
-                                    <li>**Grand Prize Winner (1st Place):** 4,000 PGC & the Champion's Trophy.</li>
-                                     <li>**Runners-up (19 winners):** 1,000 PGC each.</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </AlertDescription>
-                </Alert>
-                <Progress value={progressPercentage} className="w-full" />
-                <p className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {quizQuestions.length}</p>
-                <h2 className="text-xl font-semibold">{currentQuestion.question}</h2>
-                <RadioGroup
-                    value={selectedAnswer || ''}
-                    onValueChange={setSelectedAnswer}
-                    disabled={answerState !== 'unanswered'}
-                >
-                    {currentQuestion.options.map((option, index) => {
-                        const isSelected = selectedAnswer === option;
-                        const isCorrect = currentQuestion.answer === option;
-                        
-                        let stateIndicator = null;
-                        if(answerState !== 'unanswered' && isSelected) {
-                            stateIndicator = isCorrect ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />;
-                        } else if(answerState !== 'unanswered' && isCorrect) {
-                             stateIndicator = <CheckCircle className="h-5 w-5 text-green-500" />;
-                        }
-
-                        return (
-                        <Label
-                            key={index}
-                            className={`flex items-center gap-4 p-4 rounded-lg border transition-colors cursor-pointer ${
-                                answerState !== 'unanswered' && isCorrect ? 'border-green-500 bg-green-500/10' : ''
-                            } ${
-                                answerState === 'incorrect' && isSelected ? 'border-red-500 bg-red-500/10' : ''
-                            } ${
-                                answerState === 'unanswered' && isSelected ? 'border-primary' : ''
-                            }`}
-                        >
-                            <RadioGroupItem value={option} id={`option-${index}`} />
-                            <span className="flex-1">{option}</span>
-                            {stateIndicator}
-                        </Label>
-                        );
-                    })}
-                </RadioGroup>
-
-                {answerState !== 'unanswered' && (
-                    <div className="p-4 rounded-lg bg-muted">
-                        <h3 className="font-semibold text-primary">Explanation</h3>
-                        <p className="text-muted-foreground">{currentQuestion.explanation}</p>
-                    </div>
-                )}
-            </CardContent>
-            <CardFooter>
-            {answerState === 'unanswered' ? (
-              <Button onClick={handleSubmit} disabled={!selectedAnswer}>Submit Answer</Button>
-            ) : (
-              <Button onClick={handleNext}>
-                {currentQuestionIndex === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'} <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </CardFooter>
-            </>
           ) : (
-            <>
-            <CardContent className="text-center space-y-4">
-                <h2 className="text-2xl font-bold text-primary">Quiz Complete!</h2>
-                <p className="text-lg text-muted-foreground">You scored</p>
-                <p className="text-5xl font-bold">{finalScore} / {quizQuestions.length}</p>
-                
-                {coinReward > 0 ? (
-                    <Alert className="max-w-md mx-auto text-left border-green-500 bg-green-500/10">
-                        <Award className="h-4 w-4 text-green-500" />
-                        <AlertTitle className="text-green-600">Congratulations! You won {coinReward} PGC!</AlertTitle>
-                        <AlertDescription className="text-green-800">
-                            {finalScore === 10 ?
-                                `You've qualified for the next round!` :
-                                `Keep playing to improve your score and win bigger prizes.`
-                            } Your reward has been added to your in-app balance, viewable on your{' '}
-                            <Link href="/profile" className="font-bold underline">Profile</Link> page.
-                        </AlertDescription>
-                    </Alert>
-                ) : (
-                     <Alert className="max-w-md mx-auto text-left">
-                        <Award className="h-4 w-4" />
-                        <AlertTitle>Keep Learning!</AlertTitle>
-                        <AlertDescription>
-                            You didn't score high enough for a reward this time, but you've taken the first step to becoming an informed citizen. Try again!
-                        </AlertDescription>
-                    </Alert>
-                )}
-
-                <p className="max-w-md mx-auto text-muted-foreground">
-                    This quiz is a crucial first step in understanding the power of public governance. Your participation is valuable.
-                </p>
+            <CardContent>
+              <Alert className="border-primary">
+                  <Award className="h-4 w-4 text-primary" />
+                  <AlertTitle className="font-bold text-primary">Poll Instructions</AlertTitle>
+                  <AlertDescription>
+                      Review each question and its potential answers. Select the answers you agree with and specify your level of agreement. Your participation helps gauge community understanding and opinion.
+                  </AlertDescription>
+              </Alert>
             </CardContent>
-            <CardFooter className="justify-center">
-                <Button onClick={handleRestart}><RotateCcw className="mr-2 h-4 w-4"/> Restart Quiz</Button>
-            </CardFooter>
-            </>
           )}
-
         </Card>
+        
+        {user && (
+            <div className="space-y-6">
+                {quizPolls.map((poll, index) => (
+                    <PollCard key={index} poll={poll} />
+                ))}
+            </div>
+        )}
       </div>
     </AppLayout>
   );
