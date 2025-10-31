@@ -25,9 +25,11 @@ service cloud.firestore {
         && request.resource.data.pgcBalance == resource.data.pgcBalance
         && request.resource.data.isVerified == resource.data.isVerified;
 
-      // No one can delete a user document or list all users from the client
+      // No one can delete a user document
       allow delete: if false;
-      allow list: if false;
+      
+      // Allow ONLY Super Admins to list all users
+      allow list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
     }
     
     // --- TRANSACTION COLLECTION RULES ---
