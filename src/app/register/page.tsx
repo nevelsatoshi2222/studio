@@ -35,8 +35,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 const registrationSchema = z.object({
@@ -67,6 +68,7 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -91,7 +93,7 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth) {
+    if (!auth || !firestore) {
         toast({
             variant: 'destructive',
             title: 'Error',
@@ -100,29 +102,56 @@ function RegistrationForm() {
         return;
     }
     try {
-      // The onUserCreate Cloud Function will handle creating the Firestore document.
-      // We pass the referral code and other details via custom claims.
-      // Note: Firebase has deprecated setting claims directly on the client.
-      // The `onUserCreate` function will need to be updated if this data passing is critical,
-      // for now, we pass the referrer code via the user document itself.
+      // Step 1: Create the user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Update profile display name immediately
+      // Step 2: Update the user's display name in Auth
       await updateProfile(user, { displayName: data.name });
 
-      // IMPORTANT: The user document is now created by the `onUserCreate` Cloud Function.
-      // We no longer write to Firestore from the client during registration.
-      // The Cloud Function will handle creating the user document with all necessary fields,
-      // including the generated referralCode.
+      // Step 3: THIS IS THE CRITICAL FIX. Create the user document in Firestore.
+      // This runs on the client, but is secured by Firestore Rules.
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+      
+      let finalRole = data.role || 'User';
+      if (data.email && data.email.toLowerCase() === 'admin@publicgovernance.com') {
+          finalRole = 'Super Admin';
+      }
 
+      await setDoc(userDocRef, {
+          uid: user.uid,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          street: data.street,
+          village: data.village,
+          block: data.block,
+          taluka: data.taluka,
+          district: data.district,
+          area: data.area,
+          state: data.state,
+          country: data.country,
+          pgcBalance: 0,
+          referredBy: data.referredBy || 'ADMIN_ROOT_USER', // Use provided code or default
+          referralCode: referralCode, // THE REFERRAL CODE IS GENERATED HERE
+          walletPublicKey: null,
+          isVerified: false,
+          status: finalRole === 'User' ? 'Active' : (role ? 'Pending' : 'Active'), // Set applicants to 'Pending'
+          role: finalRole,
+          jobTitle: data.jobTitle,
+          avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
+          registeredAt: serverTimestamp(),
+      });
+
+      // Step 4: Send verification email
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
-      // Sign the user out to force them to verify their email before logging in.
+      // Step 5: Sign the user out to force them to verify their email.
       await signOut(auth);
 
       toast({
