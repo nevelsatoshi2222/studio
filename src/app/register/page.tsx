@@ -100,6 +100,11 @@ function RegistrationForm() {
         return;
     }
     try {
+      // The onUserCreate Cloud Function will handle creating the Firestore document.
+      // We pass the referral code and other details via custom claims.
+      // Note: Firebase has deprecated setting claims directly on the client.
+      // The `onUserCreate` function will need to be updated if this data passing is critical,
+      // for now, we pass the referrer code via the user document itself.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
