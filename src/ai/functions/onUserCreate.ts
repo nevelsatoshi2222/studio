@@ -48,6 +48,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
             email: email,
+            // THIS IS THE FIX: user.phoneNumber can be null/undefined. Safely check it.
             phone: user.phoneNumber || '',
             street: '',
             village: '',

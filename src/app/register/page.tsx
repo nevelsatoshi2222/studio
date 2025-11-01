@@ -43,15 +43,15 @@ const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
-  phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
-  street: z.string().min(1, { message: 'Street is required.' }),
-  village: z.string().min(1, { message: 'Village/Town is required.' }),
+  phone: z.string().min(10, { message: 'Please enter a valid phone number.' }).optional(),
+  street: z.string().optional(),
+  village: z.string().optional(),
   block: z.string().optional(),
-  taluka: z.string().min(1, { message: 'Taluka is required.' }),
-  district: z.string().min(1, { message: 'District is required.' }),
+  taluka: z.string().optional(),
+  district: z.string().optional(),
   area: z.string().optional(),
-  state: z.string().min(1, { message: 'State is required.' }),
-  country: z.string().min(1, { message: 'Country is required.' }),
+  state: z.string().optional(),
+  country: z.string().optional(),
   referredBy: z.string().optional(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
@@ -232,7 +232,7 @@ function RegistrationForm() {
               </div>
               
               <div className="space-y-2">
-                  <Label>Address</Label>
+                  <Label>Address (Optional)</Label>
                    <FormField
                     control={form.control}
                     name="street"
