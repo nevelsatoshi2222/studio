@@ -46,7 +46,7 @@ const calculateStageData = (
 
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.01%', coinsSoldB: 0.08, priceRange: '$1-2', incomingFund: '$120M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 1, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   
@@ -150,3 +150,4 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#84cc16', // lime-500
     }
   ];
+
