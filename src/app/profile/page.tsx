@@ -102,6 +102,24 @@ export default function ProfilePage() {
     },
   });
 
+  // **THIS IS THE FIX YOU REQUESTED**
+  // This useEffect will run when the user profile data is loaded.
+  // It checks if a referral code is missing and generates one if needed.
+  useEffect(() => {
+    if (userDocRef && userProfile && !userProfile.referralCode) {
+      console.log(`User ${user?.email} is missing a referral code. Generating one now.`);
+      const newReferralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+      updateDocumentNonBlocking(userDocRef, {
+        referralCode: newReferralCode
+      });
+      toast({
+          title: "Referral Code Generated!",
+          description: "Your unique referral code has been created. You can now see it on your profile."
+      })
+    }
+  }, [userDocRef, userProfile, user?.email, user?.uid, toast]);
+
+
   useEffect(() => {
     if (userProfile) {
       form.reset({
@@ -181,7 +199,7 @@ export default function ProfilePage() {
     updateDocumentNonBlocking(userDocRef, {
         kycStatus: 'pending',
         nationalIdUrl: nationalIdFile ? `kyc_uploads/${user?.uid}/${nationalIdFile.name}` : '',
-        taxIdUrl: taxIdFile ? `kyc_uploads/${user?.uid}/${taxIdFile.name}` : '',
+        taxIdUrl: taxIdFile ? `ky-uploads/${user?.uid}/${taxIdFile.name}` : '',
     });
   };
 
