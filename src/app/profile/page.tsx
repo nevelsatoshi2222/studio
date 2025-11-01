@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -101,24 +102,6 @@ export default function ProfilePage() {
       walletPublicKey: '',
     },
   });
-
-  // **THIS IS THE FIX YOU REQUESTED**
-  // This useEffect will run when the user profile data is loaded.
-  // It checks if a referral code is missing and generates one if needed.
-  useEffect(() => {
-    if (userDocRef && userProfile && !userProfile.referralCode) {
-      console.log(`User ${user?.email} is missing a referral code. Generating one now.`);
-      const newReferralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
-      updateDocumentNonBlocking(userDocRef, {
-        referralCode: newReferralCode
-      });
-      toast({
-          title: "Referral Code Generated!",
-          description: "Your unique referral code has been created. You can now see it on your profile."
-      })
-    }
-  }, [userDocRef, userProfile, user?.email, user?.uid, toast]);
-
 
   useEffect(() => {
     if (userProfile) {
