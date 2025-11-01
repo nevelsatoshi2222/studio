@@ -1,0 +1,60 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // A user can read their own document.
+    // They can update their own document, but CANNOT change their role, balance, or verified status.
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId
+                          && !(request.resource.data.role in diff(resource.data, request.resource.data))
+                          && !(request.resource.data.pgcBalance in diff(resource.data, request.resource.data))
+                          && !(request.resource.data.isVerified in diff(resource.data, request.resource.data));
+
+      // A user can create their own document upon registration.
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Allow a Super Admin to list all users (for debugging/admin panels).
+      allow list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+
+    // Authenticated users can create posts.
+    match /forums/{postId} {
+      allow read, list: if true;
+      allow create: if request.auth != null;
+      // Allow update only for upvotes/comments, not content, and only by authenticated users.
+      allow update: if request.auth != null
+                    && !(request.resource.data.title in diff(resource.data, request.resource.data))
+                    && !(request.resource.data.content in diff(resource.data, request.resource.data));
+    }
+    
+    // Authenticated users can create social posts
+    match /social_posts/{postId} {
+        allow read, list: if true;
+        allow create: if request.auth != null;
+        // Allow updates only for likes/comments
+        allow update: if request.auth != null 
+                    && !(request.resource.data.content in diff(resource.data, request.resource.data));
+    }
+
+    // Presale documents can be created by authenticated users.
+    // Only admins can update the status to 'completed'.
+    match /presales/{presaleId} {
+      allow read, create: if request.auth != null;
+      allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+
+    // Withdrawal requests can be created by the user themselves.
+    // Only admins can update the status.
+    match /withdrawal_requests/{requestId} {
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        allow read: if request.auth != null && (request.resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin');
+        allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+        allow list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+
+    // Transaction logs are append-only and can only be created by server-side functions (no client access).
+    match /transactions/{transactionId} {
+        allow read, write: if false;
+    }
+  }
+}

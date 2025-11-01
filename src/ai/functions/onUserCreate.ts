@@ -2,12 +2,10 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-// This Cloud Function is no longer the primary method for creating user documents,
-// as that logic has been moved to the client-side registration form for reliability.
-// It is kept here as a fallback or for potential future server-side user creation events.
-// It will NOT fire on a standard email/password registration from the client anymore,
-// as the client now creates the document first, preventing this `onCreate` from triggering
-// due to the document already existing.
+// This Cloud Function is the primary and ONLY method for creating a user document.
+// It is a secure, server-side trigger that runs after a user is created in Firebase Auth.
+// It is designed to be robust and prevent the race conditions and permission errors
+// that occurred with client-side document creation attempts.
 
 // Ensure admin is initialized only once
 if (!admin.apps.length) {
@@ -16,35 +14,36 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 /**
- * [FALLBACK] Cloud Function to create a user document in Firestore if one doesn't exist
- * when a new user is created in Firebase Auth. This is a safety net.
+ * [PRIMARY] Cloud Function to create a user document in Firestore when a new
+ * user is created in Firebase Auth. This is the single source of truth for user doc creation.
  */
 export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
 
+    // The user document reference
     const userDocRef = db.collection('users').doc(uid);
 
     return db.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userDocRef);
-        // Only run if the document does NOT exist. This prevents overwriting the client-created doc.
+        // This check is a safety net. In a normal flow, the document should never exist yet.
         if (userDoc.exists) {
             functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
             return;
         }
 
-        functions.logger.log(`User document for ${uid} not found. Creating fallback document.`);
+        functions.logger.log(`Creating new user document for ${uid}.`);
 
         // Generate a unique referral code for the new user
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
 
-        // Prepare the user document data
-        const referredBy = 'ADMIN_ROOT_USER'; // Default referrer for fallback
-        
+        // Default role is 'User'. Special roles can be assigned.
         let finalRole = 'User';
         if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
             finalRole = 'Super Admin';
         }
 
+        // Prepare the complete user document data.
+        // The client no longer provides this; the server sets defaults.
         const userDocumentData = {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
@@ -59,17 +58,22 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             state: '',
             country: '',
             pgcBalance: 0,
-            referredBy: referredBy,
-            referralCode: referralCode,
+            // The client-side registration should pass the referrer code via custom claims in a real-world, highly-scalable app.
+            // For this project's scope, we will default it, and it can be updated via the user's profile later.
+            referredBy: 'ADMIN_ROOT_USER',
+            referralCode: referralCode, // The generated code
             walletPublicKey: null,
             isVerified: false,
+            // If a user registers for a specific role (e.g., Influencer), they start as 'Pending'.
+            // The client-side logic will need to be updated to pass this role if we want that functionality back.
+            // For now, we default to 'Active' for simplicity and reliability.
             status: finalRole === 'User' ? 'Active' : 'Pending',
-            registeredAt: admin.firestore.FieldValue.serverTimestamp(),
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
+            registeredAt: admin.firestore.FieldValue.serverTimestamp(),
         };
 
         transaction.set(userDocRef, userDocumentData);
-        functions.logger.log(`Successfully created FALLBACK user document for ${uid}`);
+        functions.logger.log(`Successfully created user document for ${uid} with referral code ${referralCode}.`);
     });
 });
