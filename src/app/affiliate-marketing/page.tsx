@@ -14,26 +14,8 @@ import { Share2, Users, Star, Award, Gem, Shield, Crown, UserPlus } from 'lucide
 import Link from 'next/link';
 import { AffiliateRewardTier } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
+import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
 
-const freeTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze', icon: Users, reward: '1 Coin', limit: 'First 78,125 Achievers', requirement: '5 people join successfully with your affiliate link.' },
-    { name: 'Silver', icon: Award, reward: '2 Coins', limit: 'First 15,625 Achievers', requirement: '5 people in your direct team achieve Bronze Reward.' },
-    { name: 'Gold', icon: Gem, reward: '4 Coins', limit: 'First 3,125 Achievers', requirement: '5 people in your direct team achieve Silver Reward.' },
-    { name: 'Emerald', icon: Shield, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 people in your direct team achieve Gold Reward.' },
-    { name: 'Platinum', icon: Star, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 people in your direct team achieve Emerald Reward.' },
-    { name: 'Diamond', icon: Shield, reward: '250 Coins', limit: 'First 25 Achievers', requirement: '5 people in your direct team achieve Platinum Reward.' },
-    { name: 'Crown', icon: Crown, reward: '1000 Coins', limit: 'First 5 Achievers', requirement: '5 people in your direct team achieve Diamond Reward.' },
-];
-
-const paidTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze Star', icon: UserPlus, reward: '2.5 Coins', limit: 'First 15,625 Achievers', requirement: '5 direct members pay for any package or buy staking.' },
-    { name: 'Silver Star', icon: Award, reward: '5 Coins', limit: 'First 3,125 Achievers', requirement: '5 people in your direct team achieve Bronze Star Reward.' },
-    { name: 'Gold Star', icon: Gem, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 people in your direct team achieve Silver Star Reward.' },
-    { name: 'Emerald Star', icon: Shield, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 people in your direct team achieve Gold Star Reward.' },
-    { name: 'Platinum Star', icon: Star, reward: '125 Coins', limit: 'First 25 Achievers', requirement: '5 people in your direct team achieve Emerald Star Reward.' },
-    { name: 'Diamond Star', icon: Shield, reward: '1,250 Coins', limit: 'First 5 Achievers', requirement: '5 people in your direct team achieve Platinum Star Reward.' },
-    { name: 'Crown Star', icon: Crown, reward: '6,250 Coins', limit: 'First 1 Achiever', requirement: '5 people in your direct team achieve Diamond Star Reward.' },
-];
 
 const RewardCard = ({ tiers, title, description, badgeText }: { tiers: AffiliateRewardTier[], title: string, description: string, badgeText: string }) => (
     <Card>
