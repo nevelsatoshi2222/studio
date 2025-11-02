@@ -38,6 +38,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 
         // Default role is 'User'. Special roles can be assigned.
         let finalRole = 'User';
+        // This check for a specific email is just an example for seeding a Super Admin.
         if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
             finalRole = 'Super Admin';
         }
@@ -48,8 +49,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
             email: email,
-            // THIS IS THE FIX: user.phoneNumber can be null/undefined. Safely check it.
-            phone: user.phoneNumber || '',
+            phone: user.phoneNumber || '', // Safely handle potentially null phone number
             street: '',
             village: '',
             block: '',
@@ -61,12 +61,13 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             pgcBalance: 0,
             // The client-side registration should pass the referrer code via custom claims in a real-world, highly-scalable app.
             // For this project's scope, we will default it, and it can be updated via the user's profile later.
-            referredBy: 'ADMIN_ROOT_USER',
+            referredBy: 'ADMIN_ROOT_USER', 
             referralCode: referralCode, // The generated code
             walletPublicKey: null,
             isVerified: false,
-            // If a user registers for a specific role (e.g., Influencer), they start as 'Active'.
-            // The logic for 'Pending' status will be handled by admin application review, not at creation.
+            // THIS IS THE FIX: All regular users start as 'Active'.
+            // The logic for 'Pending' status is now handled separately in the admin 'Applications' page,
+            // not at the point of user creation. This ensures all users can log in and use the app immediately.
             status: 'Active',
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
@@ -74,6 +75,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         };
 
         transaction.set(userDocRef, userDocumentData);
-        functions.logger.log(`Successfully created user document for ${uid} with referral code ${referralCode}.`);
+        functions.logger.log(`Successfully created user document for ${uid} with status 'Active'.`);
     });
 });
