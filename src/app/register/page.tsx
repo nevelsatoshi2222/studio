@@ -1,5 +1,6 @@
-
 'use client';
+import { useFirestore } from '@/firebase'; // Combined import
+import { doc, setDoc } from 'firebase/firestore';
 import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -67,6 +68,7 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -91,9 +93,9 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth) {
+    if (!auth || !firestore) {
         toast({
-            variant: 'destructive',
+           variant: 'destructive',
             title: 'Error',
             description: 'Authentication service is not available. Please try again later.',
         });
@@ -107,6 +109,38 @@ function RegistrationForm() {
       // Step 2: Update the user's display name. This is what the onUserCreate Cloud Function will see.
       await updateProfile(user, { displayName: data.name });
 
+      // The onUserCreate Cloud Function will now handle creating the Firestore document.
+      // We will create the user document client-side as a fallback and for immediate data availability.
+      // The Cloud Function remains the source of truth for referral code generation.
+      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+
+      const userDocRef = doc(firestore, 'users', user.uid);
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        name: data.name,
+        email: data.email,
+        phone: data.phone || '',
+        street: data.street || '',
+        village: data.village || '',
+        block: data.block || '',
+        taluka: data.taluka || '',
+        district: data.district || '',
+        area: data.area || '',
+        state: data.state || '',
+        country: data.country || '',
+        pgcBalance: 0,
+        referredBy: data.referredBy || 'ADMIN_ROOT_USER',
+        referralCode: referralCode,
+        walletPublicKey: null,
+        isVerified: false,
+        status: (data.role && data.role !== 'User') ? 'Pending' : 'Active',
+        role: data.role || 'User',
+        jobTitle: data.jobTitle || '',
+        avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
+        registeredAt: new Date(),
+      });
+
+
       // Step 3: Send verification email.
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
@@ -115,7 +149,6 @@ function RegistrationForm() {
       await sendEmailVerification(user, actionCodeSettings);
 
       // Step 4: Sign the user out to force them to verify their email.
-      // The onUserCreate Cloud Function will handle creating the Firestore document securely on the backend.
       await signOut(auth);
 
       toast({
