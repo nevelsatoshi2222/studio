@@ -1,6 +1,4 @@
 'use client';
-import { useFirestore } from '@/firebase'; // Combined import
-import { doc, setDoc } from 'firebase/firestore';
 import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -36,8 +34,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 const registrationSchema = z.object({
@@ -102,53 +101,20 @@ function RegistrationForm() {
         return;
     }
     try {
-      // Step 1: Create the user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Step 2: Update the user's display name. This is what the onUserCreate Cloud Function will see.
       await updateProfile(user, { displayName: data.name });
 
-      // The onUserCreate Cloud Function will now handle creating the Firestore document.
-      // We will create the user document client-side as a fallback and for immediate data availability.
-      // The Cloud Function remains the source of truth for referral code generation.
-      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
+      // Cloud Function will create user document - we don't save here
+      // This prevents duplicate creation and permission errors
 
-      const userDocRef = doc(firestore, 'users', user.uid);
-      await setDoc(userDocRef, {
-        uid: user.uid,
-        name: data.name,
-        email: data.email,
-        phone: data.phone || '',
-        street: data.street || '',
-        village: data.village || '',
-        block: data.block || '',
-        taluka: data.taluka || '',
-        district: data.district || '',
-        area: data.area || '',
-        state: data.state || '',
-        country: data.country || '',
-        pgcBalance: 0,
-        referredBy: data.referredBy || 'ADMIN_ROOT_USER',
-        referralCode: referralCode,
-        walletPublicKey: null,
-        isVerified: false,
-        status: 'Active',
-        role: data.role || 'User',
-        jobTitle: data.jobTitle || '',
-        avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
-        registeredAt: new Date(),
-      });
-
-
-      // Step 3: Send verification email.
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
-      // Step 4: Sign the user out to force them to verify their email.
       await signOut(auth);
 
       toast({
