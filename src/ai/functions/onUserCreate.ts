@@ -1,4 +1,4 @@
-
+'use server';
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
@@ -10,72 +10,99 @@ import * as admin from 'firebase-admin';
 // Ensure admin is initialized only once
 if (!admin.apps.length) {
   admin.initializeApp();
-  }
-  const db = admin.firestore();
+}
+const db = admin.firestore();
 
-  /**
-   * [PRIMARY] Cloud Function to create a user document in Firestore when a new
-    * user is created in Firebase Auth. This is the single source of truth for user doc creation.
-     */
-     export const onUserCreate = functions.auth.user().onCreate(async (user) => {
-         const { uid, email, displayName } = user;
+/**
+ * Finds a user ID by their referral code.
+ * @param {string} referralCode The referral code to look for.
+ * @returns {Promise<string|null>} The UID of the user with the given code, or null if not found.
+ */
+async function findUserByReferralCode(referralCode: string): Promise<string | null> {
+    if (!referralCode) {
+        return null;
+    }
+    const usersRef = db.collection('users');
+    // We query for the referral code. An index must exist on the 'referralCode' field in Firestore.
+    const snapshot = await usersRef.where('referralCode', '==', referralCode).limit(1).get();
 
-             // The user document reference
-                 const userDocRef = db.collection('users').doc(uid);
+    if (snapshot.empty) {
+        functions.logger.warn(`Referral code ${referralCode} not found.`);
+        return null;
+    }
 
-                     return db.runTransaction(async (transaction) => {
-                             const userDoc = await transaction.get(userDocRef);
-                                     // This check is a safety net. In a normal flow, the document should never exist yet.
-                                             if (userDoc.exists) {
-                                                         functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
-                                                                     return;
-                                                                             }
+    // Return the UID of the found user.
+    return snapshot.docs[0].id;
+}
 
-                                                                                     functions.logger.log(`Creating new user document for ${uid}.`);
 
-                                                                                             // Generate a unique referral code for the new user
-                                                                                                     const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
+/**
+ * [PRIMARY] Cloud Function to create a user document in Firestore when a new
+ * user is created in Firebase Auth. This is the single source of truth for user doc creation.
+ */
+export const onUserCreate = functions.auth.user().onCreate(async (user) => {
+    const { uid, email, displayName } = user;
+    
+    // The client may pass custom claims during registration, including a referrer code.
+    const referredByCode = user.customClaims?.referredBy as string | undefined;
 
-                                                                                                             // Default role is 'User'. Special roles can be assigned.
-                                                                                                                     let finalRole = 'User';
-                                                                                                                             // This check for a specific email is just an example for seeding a Super Admin.
-                                                                                                                                     if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
-                                                                                                                                                 finalRole = 'Super Admin';
-                                                                                                                                                         }
+    // The user document reference
+    const userDocRef = db.collection('users').doc(uid);
 
-                                                                                                                                                                 // Prepare the complete user document data.
-                                                                                                                                                                         // The client no longer provides this; the server sets defaults.
-                                                                                                                                                                                 const userDocumentData = {
-                                                                                                                                                                                             uid: uid,
-                                                                                                                                                                                                         name: displayName || email?.split('@')[0] || 'New User',
-                                                                                                                                                                                                                     email: email,
-                                                                                                                                                                                                                                 phone: user.phoneNumber || '', // Safely handle potentially null phone number
-                                                                                                                                                                                                                                             street: '',
-                                                                                                                                                                                                                                                         village: '',
-                                                                                                                                                                                                                                                                     block: '',
-                                                                                                                                                                                                                                                                                 taluka: '',
-                                                                                                                                                                                                                                                                                             district: '',
-                                                                                                                                                                                                                                                                                                         area: '',
-                                                                                                                                                                                                                                                                                                                     state: '',
-                                                                                                                                                                                                                                                                                                                                 country: '',
-                                                                                                                                                                                                                                                                                                                                             pgcBalance: 0,
-                                                                                                                                                                                                                                                                                                                                                         // The client-side registration should pass the referrer code via custom claims in a real-world, highly-scalable app.
-                                                                                                                                                                                                                                                                                                                                                                     // For this project's scope, we will default it, and it can be updated via the user's profile later.
-                                                                                                                                                                                                                                                                                                                                                                                 referredBy: 'ADMIN_ROOT_USER', 
-                                                                                                                                                                                                                                                                                                                                                                                             referralCode: referralCode, // The generated code
-                                                                                                                                                                                                                                                                                                                                                                                                         walletPublicKey: null,
-                                                                                                                                                                                                                                                                                                                                                                                                                     isVerified: false,
-                                                                                                                                                                                                                                                                                                                                                                                                                                 // THIS IS THE FIX: All regular users start as 'Active'.
-                                                                                                                                                                                                                                                                                                                                                                                                                                             // The logic for 'Pending' status is now handled separately in the admin 'Applications' page,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                         // not at the point of user creation. This ensures all users can log in and use the app immediately.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                     status: 'Active',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 role: finalRole,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         registeredAt: admin.firestore.FieldValue.serverTimestamp(),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 };
+    return db.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userDocRef);
+        // This check is a safety net. In a normal flow, the document should never exist yet.
+        if (userDoc.exists) {
+            functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
+            return;
+        }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         transaction.set(userDocRef, userDocumentData);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 functions.logger.log(`Successfully created user document for ${uid} with status 'Active'.`);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        functions.logger.log(`Creating new user document for ${uid}.`);
+
+        // --- THIS IS THE FIX ---
+        // 1. Asynchronously find the referrer's UID using their referral code.
+        let referrerUid: string | null = null;
+        if (referredByCode) {
+            referrerUid = await findUserByReferralCode(referredByCode);
+        }
+
+        // 2. Generate a unique referral code for the new user.
+        const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
+
+        // 3. Default role is 'User'. Special roles can be assigned.
+        let finalRole = user.customClaims?.role as string || 'User';
+        if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
+            finalRole = 'Super Admin';
+        }
+        
+        // 4. Prepare the complete user document data.
+        const userDocumentData = {
+            uid: uid,
+            name: displayName || email?.split('@')[0] || 'New User',
+            email: email,
+            phone: user.phoneNumber || '',
+            street: '',
+            village: '',
+            block: '',
+            taluka: '',
+            district: '',
+            area: '',
+            state: '',
+            country: user.customClaims?.country || '',
+            pgcBalance: 0,
+            // 5. Save the referrer's UID. If not found, default to a root admin.
+            referredBy: referrerUid || 'ADMIN_ROOT_USER', 
+            referralCode: referralCode,
+            walletPublicKey: null,
+            isVerified: false,
+            // THIS IS THE FIX: All regular users start as 'Active'.
+            status: 'Active',
+            role: finalRole,
+            avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
+            registeredAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        transaction.set(userDocRef, userDocumentData);
+        functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
+    });
+});

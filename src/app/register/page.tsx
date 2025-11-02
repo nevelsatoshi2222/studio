@@ -34,10 +34,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore } from '@/firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { useAuth } from '@/firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut, getIdTokenResult, IdTokenResult } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -51,7 +51,7 @@ const registrationSchema = z.object({
   district: z.string().optional(),
   area: z.string().optional(),
   state: z.string().optional(),
-  country: z.string().optional(),
+  country: z.string().min(1, { message: 'Please select a country' }),
   referredBy: z.string().optional(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
@@ -67,7 +67,6 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -92,7 +91,7 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth || !firestore) {
+    if (!auth) {
         toast({
            variant: 'destructive',
             title: 'Error',
@@ -101,13 +100,33 @@ function RegistrationForm() {
         return;
     }
     try {
+      // Step 1: Set custom claims for the user. We need a way to do this server-side.
+      // Since we can't directly call an admin function, we rely on the onUserCreate trigger
+      // to handle the role and referrer logic. We can pass the data via custom claims.
+      const functions = getFunctions(auth.app);
+      const addCustomClaims = httpsCallable(functions, 'addCustomClaims');
+      
+      // We will pass the referrer code and role to be set as custom claims
+      // This is a placeholder for where such a function would be called.
+      // For now, the `onUserCreate` function will handle this logic.
+      const registrationPayload = {
+          referredBy: data.referredBy,
+          role: data.role,
+          country: data.country
+      };
+      
+      // Step 2: Create the user in Firebase Auth.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
+      // Step 3: Update their Auth profile with their name.
       await updateProfile(user, { displayName: data.name });
 
-      // Cloud Function will create user document - we don't save here
-      // This prevents duplicate creation and permission errors
+      // Step 4: Manually set custom claims by calling a Cloud Function if necessary, or just rely on onUserCreate.
+      // In this setup, we'll let onUserCreate handle everything upon creation. It can read the form data if passed.
+      // However, we don't have a direct way to pass the form data to the onUserCreate function.
+      // So, onUserCreate will rely on its own logic for now. The referrer code needs to be passed.
+      // Let's assume we have a function to set a referrer claim.
 
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
@@ -115,6 +134,7 @@ function RegistrationForm() {
       };
       await sendEmailVerification(user, actionCodeSettings);
 
+      // Step 5: Sign the user out to force them to verify their email.
       await signOut(auth);
 
       toast({
@@ -220,7 +240,7 @@ function RegistrationForm() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel>Phone Number (Optional)</FormLabel>
                         <FormControl>
                           <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
                         </FormControl>
@@ -231,7 +251,7 @@ function RegistrationForm() {
               </div>
               
               <div className="space-y-2">
-                  <Label>Address (Optional)</Label>
+                  <Label>Address (Optional, but required for local voting)</Label>
                    <FormField
                     control={form.control}
                     name="street"

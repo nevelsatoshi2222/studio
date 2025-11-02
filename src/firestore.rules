@@ -1,8 +1,75 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if a user is an admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null;
+      // ANY authenticated user can create THEIR OWN user document.
+      // This is secure because the {userId} wildcard must match their own uid.
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // A user can read THEIR OWN document.
+      // An admin can read ANY user's document.
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
+      // A user can update THEIR OWN document.
+      // An admin can update ANY user's document.
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
+      // Only an admin can delete a user document.
+      allow delete: if request.auth != null && isAdmin();
+    }
+
+    // This rule allows a logged-in user to query the 'users' collection
+    // ONLY IF they are filtering for users they have referred.
+    // This is the key to making the "My Team" page work securely.
+    match /users/{userId} {
+      allow list: if request.auth != null && request.query.where.get('referredBy', null) == request.auth.uid;
+    }
+
+    match /transactions/{transactionId} {
+      // Admins can read all transaction logs for auditing.
+      allow read: if request.auth != null && isAdmin();
+      // Transactions are only created by secure Cloud Functions, not by clients.
+      allow write: if false;
+    }
+
+    match /presales/{presaleId} {
+        // Users can create their own presale verification requests.
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        // Admins can read all presale documents to verify them.
+        allow read: if request.auth != null && isAdmin();
+        // Admins can update a presale document's status to 'COMPLETED'.
+        allow update: if request.auth != null && isAdmin();
+    }
+
+    match /withdrawal_requests/{requestId} {
+        // Users can create their own withdrawal requests.
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        // Admins can read and update all withdrawal requests to process them.
+        allow read, update: if request.auth != null && isAdmin();
+    }
+
+    match /social_posts/{postId} {
+        // Any authenticated user can create a post.
+        allow create: if request.auth != null;
+        // Any user (even unauthenticated) can read posts.
+        allow read: if true;
+        // Users can only update or delete their own posts.
+        allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+     match /forums/{postId} {
+        // Any authenticated user can create a forum post.
+        allow create: if request.auth != null;
+        // Any user (even unauthenticated) can read posts.
+        allow read: if true;
+        // Users can only update or delete their own posts.
+        allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
   }
 }
