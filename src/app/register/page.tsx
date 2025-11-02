@@ -133,7 +133,7 @@ function RegistrationForm() {
         referralCode: referralCode,
         walletPublicKey: null,
         isVerified: false,
-        status: (data.role && data.role !== 'User') ? 'Pending' : 'Active',
+        status: 'Active',
         role: data.role || 'User',
         jobTitle: data.jobTitle || '',
         avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,

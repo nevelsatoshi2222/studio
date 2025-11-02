@@ -92,9 +92,9 @@ export default function TeamPage() {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'users'), where('referredBy', '==', user.uid));
   }, [firestore, user]);
-
-  const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
   
+  const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
+ //// const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
   const getAvatarUrl = (avatarId: string) => {
     return `https://picsum.photos/seed/${avatarId}/40/40`;
   };

@@ -65,10 +65,9 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             referralCode: referralCode, // The generated code
             walletPublicKey: null,
             isVerified: false,
-            // If a user registers for a specific role (e.g., Influencer), they start as 'Pending'.
-            // The client-side logic will need to be updated to pass this role if we want that functionality back.
-            // For now, we default to 'Active' for simplicity and reliability.
-            status: finalRole === 'User' ? 'Active' : 'Pending',
+            // If a user registers for a specific role (e.g., Influencer), they start as 'Active'.
+            // The logic for 'Pending' status will be handled by admin application review, not at creation.
+            status: 'Active',
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
