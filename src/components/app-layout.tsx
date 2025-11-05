@@ -243,7 +243,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 {isSuperAdmin && (
                                     <>
                                         <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
-                                        <SidebarMenuSubItem><Link href="/admin/fulfillment"><SidebarMenuSubButton>Fulfillment</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                     </>
                                 )}
                                 {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (

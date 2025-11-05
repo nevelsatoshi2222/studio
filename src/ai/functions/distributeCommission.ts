@@ -16,28 +16,25 @@ const COMMISSION_RATES = {
 
 /**
  * Cloud Function to process a new presale purchase and pay commissions up the referral chain.
- * This is triggered when a presale document's status is updated to 'COMPLETED'.
+ * This is now triggered when a presale document is CREATED.
  * This is a secure, server-side operation.
  */
 export const distributeCommission = functions.firestore
     .document('presales/{presaleId}')
-    .onUpdate(async (change, context) => {
-        const presaleAfter = change.after.data();
-        const presaleBefore = change.before.data();
-
-        // --- Trigger Condition ---
-        // Only run if the status was NOT 'COMPLETED' before, and IS 'COMPLETED' now.
-        // This ensures it runs exactly once when an admin verifies a purchase.
-        if (presaleBefore.status === 'COMPLETED' || presaleAfter.status !== 'COMPLETED') {
-            functions.logger.log(`Presale ${context.params.presaleId} status not newly completed. Exiting.`);
+    .onCreate(async (snapshot, context) => {
+        const presaleData = snapshot.data();
+        
+        // --- Exit if data is missing ---
+        if (!presaleData) {
+            functions.logger.log(`Presale document ${context.params.presaleId} has no data. Exiting.`);
             return null;
         }
-
-        const buyerId: string = presaleAfter.userId;
-        const purchaseAmount: number = presaleAfter.pgcCredited; // Commission is on total PGC credited
-        const presaleRef = change.after.ref;
         
-        functions.logger.log(`Processing commission for presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmount} PGC.`);
+        const buyerId: string = presaleData.userId;
+        const purchaseAmount: number = presaleData.pgcCredited; // Commission is on total PGC credited
+        const presaleRef = snapshot.ref;
+        
+        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmount} PGC.`);
 
         // 1. Get the buyer's referrer (Level 1 Upline)
         const buyerDoc = await db.collection('users').doc(buyerId).get();
@@ -103,6 +100,10 @@ export const distributeCommission = functions.firestore
             try {
                 await batch.commit();
                 functions.logger.log(`Successfully paid commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
+
+                // 6. Update the presale status to 'COMPLETED' after successful commission payout
+                await presaleRef.update({ status: 'COMPLETED' });
+
             } catch (error) {
                 functions.logger.error(`Error committing commission batch for presale ${presaleRef.id}:`, error);
                 // In a production system, you might add retry logic or a dead-letter queue here.
@@ -113,4 +114,3 @@ export const distributeCommission = functions.firestore
 
         return null;
     });
-
