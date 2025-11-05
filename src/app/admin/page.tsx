@@ -20,7 +20,7 @@ import { Users, ClipboardList, CheckCircle, Briefcase, Megaphone, HelpCircle, Us
 const adminNavItems = [
     { href: '/admin/create-admin', icon: UserPlus, label: 'Create Admin', description: 'Create new admin accounts and assign roles.', requiredRole: 'Super Admin' },
     { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.', requiredRole: ['Super Admin', 'Franchisee Management Admin'] },
-    { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Process withdrawal requests and presale purchases.', requiredRole: 'Super Admin' },
+    { href: '/admin/fulfillment', icon: CheckCircle, label: 'Fulfillment', description: 'Approve presale purchases to distribute commissions.', requiredRole: 'Super Admin' },
     { href: '/admin/jobs', icon: Briefcase, label: 'Job Management', description: 'Create and manage job postings.', requiredRole: ['Super Admin', 'Job Management Admin'] },
     { href: '/admin/social', icon: Megaphone, label: 'Social Media', description: 'Moderate social media content.', requiredRole: ['Super Admin', 'Social Media Management Admin'] },
     { href: '/admin/quiz', icon: HelpCircle, label: 'Quiz Management', description: 'Manage quiz questions and tournaments.', requiredRole: ['Super Admin', 'Quiz Management Admin'] },
