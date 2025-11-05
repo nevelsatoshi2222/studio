@@ -37,7 +37,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut, getAuth } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { firebaseConfig } from '@/firebase/config';
@@ -123,7 +123,7 @@ function RegistrationForm() {
     try {
       // Step 1: Use a secondary, isolated Firebase app instance for registration
       const secondaryApp = createSecondaryApp();
-      const secondaryAuth = getApps().find(app => app.name === 'userRegistrationApp') ? getApps().find(app => app.name === 'userRegistrationApp')!.auth : getAuth(secondaryApp);
+      const secondaryAuth = getAuth(secondaryApp);
       
       // Step 2: Create the user in Firebase Auth.
       const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);

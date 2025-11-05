@@ -25,13 +25,9 @@ service cloud.firestore {
 
       // Only an admin can delete a user document.
       allow delete: if request.auth != null && isAdmin();
-    }
-
-    // This rule allows a logged-in user to query the 'users' collection
-    // ONLY IF they are filtering for users they have referred.
-    // This is the key to making the "My Team" page work securely.
-    match /users/{userId} {
-      allow list: if request.auth != null && request.query.where.get('referredBy', null) == request.auth.uid;
+      
+      // Allow a user to query the 'users' collection to find their direct referrals.
+      allow list: if request.auth != null && request.query.where[0][2] == request.auth.uid;
     }
 
     match /transactions/{transactionId} {
@@ -48,13 +44,15 @@ service cloud.firestore {
         allow read: if request.auth != null && isAdmin();
         // Admins can update a presale document's status to 'COMPLETED'.
         allow update: if request.auth != null && isAdmin();
+        // Allow list for admins to see all pending requests
+        allow list: if request.auth != null && isAdmin();
     }
 
-    match /withdrawal_requests/{requestId} {
+    match /withdrawalRequests/{requestId} {
         // Users can create their own withdrawal requests.
         allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
         // Admins can read and update all withdrawal requests to process them.
-        allow read, update: if request.auth != null && isAdmin();
+        allow read, update, list: if request.auth != null && isAdmin();
     }
 
     match /social_posts/{postId} {
@@ -73,6 +71,15 @@ service cloud.firestore {
         allow read: if true;
         // Users can only update or delete their own posts.
         allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+    match /poll_responses/{responseId} {
+        // A user can create a response if the doc ID matches their UID and the poll ID.
+        allow create: if request.auth != null && responseId.split('_')[0] == request.auth.uid;
+        // A user can only read their own responses.
+        allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+        // Prevent updates to keep votes immutable.
+        allow update, delete: if false;
     }
   }
 }
