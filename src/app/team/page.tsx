@@ -323,14 +323,18 @@ export default function TeamPage() {
                   An overview of your network depth. This data is updated automatically when a new member joins your downline.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-4">
+              <CardContent className="grid md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
                     <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Total Team Size (All 15 Levels)</div>
+                    <div className="text-sm text-muted-foreground">Total Free Team Size</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-24" /> : totalTeamSize}</div>
+                </div>
+                 <div className="p-4 rounded-lg bg-muted">
+                    <div className="text-sm text-muted-foreground">Total Paid Team Size</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-24" /> : paidTeamSize}</div>
                 </div>
               </CardContent>
             </Card>

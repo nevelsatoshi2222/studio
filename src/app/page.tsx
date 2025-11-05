@@ -24,36 +24,56 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRightLeft, MessageSquare } from 'lucide-react';
-import { transactions } from '@/lib/data';
+import { ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { placeholderImages } from '@/lib/placeholder-images.json';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
-import { IGC_TOKEN_MINT_ADDRESS, PGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
+import { IGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { collection, query, where, orderBy, limit, doc } from 'firebase/firestore';
+import type { Transaction } from '@/lib/types';
 
 
 export default function Dashboard() {
+  const { user, isUserLoading: isAppUserLoading } = useUser();
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [igcBalance, setIgcBalance] = useState<number | null>(null);
-  const [pgcBalance, setPgcBalance] = useState<number | null>(null);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+  const [isWalletBalanceLoading, setIsWalletBalanceLoading] = useState(false);
   
   const firestore = useFirestore();
+
+  // Fetch the user's Firestore document for the PGC balance
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
+  const pgcBalance = userProfile?.pgcBalance ?? 0;
+
+  // Fetch the user's latest transactions from Firestore
+  const transactionsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'transactions'),
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc'),
+      limit(5)
+    );
+  }, [firestore, user]);
+
+  const { data: transactions, isLoading: areTransactionsLoading } = useCollection<Transaction>(transactionsQuery);
 
 
   useEffect(() => {
     if (publicKey && connection) {
-      setIsBalanceLoading(true);
-      const fetchBalances = async () => {
+      setIsWalletBalanceLoading(true);
+      const fetchIgcBalance = async () => {
         try {
-          // Fetch IGC Balance
+          // Fetch IGC Balance from Solana Wallet
           const igcMint = new PublicKey(IGC_TOKEN_MINT_ADDRESS);
           const igcTokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
             mint: igcMint,
@@ -64,34 +84,21 @@ export default function Dashboard() {
           } else {
             setIgcBalance(0);
           }
-
-          // Fetch PGC Balance
-          const pgcMint = new PublicKey(PGC_TOKEN_MINT_ADDRESS);
-          const pgcTokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-            mint: pgcMint,
-          });
-
-          if (pgcTokenAccounts.value.length > 0) {
-            const pgcBal = pgcTokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
-            setPgcBalance(pgcBal);
-          } else {
-            setPgcBalance(0);
-          }
-
         } catch (error) {
-          console.error("Failed to fetch token balances:", error);
+          console.error("Failed to fetch IGC token balance:", error);
           setIgcBalance(null);
-          setPgcBalance(null);
         } finally {
-          setIsBalanceLoading(false);
+          setIsWalletBalanceLoading(false);
         }
       };
-      fetchBalances();
+      fetchIgcBalance();
     } else {
       setIgcBalance(null);
-      setPgcBalance(null);
     }
   }, [publicKey, connection]);
+
+  const isBalanceLoading = isAppUserLoading || isProfileLoading;
+  const isAnyLoading = isBalanceLoading || isWalletBalanceLoading || areTransactionsLoading;
 
   return (
     <AppLayout>
@@ -99,7 +106,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-2">
           <h1 className="font-headline text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's your overview of the Idea Governance platform.
+            Welcome back, {user?.displayName || 'guest'}! Here's your overview.
           </p>
         </div>
 
@@ -148,12 +155,12 @@ export default function Dashboard() {
           </Card>
           <Card className="lg:col-span-4">
             <CardHeader>
-              <CardTitle>My Wallet</CardTitle>
-              <CardDescription>Your personal wallet details.</CardDescription>
+              <CardTitle>My Wallet & Balances</CardTitle>
+              <CardDescription>Your connected wallet and in-app PGC balance from commissions and rewards.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Wallet Address</p>
+                <p className="text-sm font-medium text-muted-foreground">Solana Wallet Address</p>
                 {publicKey ? (
                    <p className="font-mono text-sm break-all">
                      {publicKey.toBase58()}
@@ -163,8 +170,8 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">IGC Balance</p>
-                {isBalanceLoading ? (
+                <p className="text-sm font-medium text-muted-foreground">Wallet IGC Balance</p>
+                {isWalletBalanceLoading ? (
                   <Skeleton className="h-8 w-32" />
                 ) : publicKey ? (
                   <p className="text-2xl font-bold">{igcBalance?.toLocaleString('en-US') ?? '0'} IGC</p>
@@ -173,11 +180,11 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">PGC Balance</p>
+                <p className="text-sm font-medium text-muted-foreground">In-App PGC Balance</p>
                 {isBalanceLoading ? (
                   <Skeleton className="h-8 w-32" />
-                ) : publicKey ? (
-                  <p className="text-2xl font-bold">{pgcBalance?.toLocaleString('en-US') ?? '0'} PGC</p>
+                ) : user ? (
+                  <p className="text-2xl font-bold">{pgcBalance.toLocaleString('en-US')} PGC</p>
                 ) : (
                    <p className="text-2xl font-bold">-- PGC</p>
                 )}
@@ -193,8 +200,8 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>Your latest ITC transactions.</CardDescription>
+                <CardTitle>Recent PGC Transactions</CardTitle>
+                <CardDescription>Your latest PGC rewards and commissions.</CardDescription>
               </div>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/transactions">View All</Link>
@@ -206,22 +213,40 @@ export default function Dashboard() {
                   <TableRow>
                     <TableHead>Type</TableHead>
                     <TableHead>Amount</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead className="text-right">Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.slice(0, 4).map(tx => (
-                    <TableRow key={tx.hash}>
-                      <TableCell className="font-medium flex items-center gap-2">
-                        <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
-                        <span>{tx.from.slice(0, 6)}...{tx.from.slice(-4)}</span>
+                  {isAnyLoading ? (
+                    <>
+                      <TableRow><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                      <TableRow><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                    </>
+                  ) : transactions && transactions.length > 0 ? (
+                    transactions.map(tx => (
+                      <TableRow key={tx.id}>
+                        <TableCell>
+                          <Badge variant={tx.type === 'COMMISSION' ? 'default' : 'secondary'}>{tx.type}</Badge>
+                        </TableCell>
+                        <TableCell className="font-medium text-green-500">+{tx.amount.toFixed(2)} PGC</TableCell>
+                        <TableCell>
+                          {tx.type === 'COMMISSION' && `Commission from Level ${tx.level}`}
+                          {tx.type === 'RANK_REWARD' && `Achieved rank: ${tx.rewardName}`}
+                          {tx.type === 'PURCHASE' && 'Initial PGC purchase'}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString() : 'Just now'}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center">
+                        No transactions found. Refer a user or complete a task to earn PGC.
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{tx.value} ITC</Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground">{tx.age}</TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
