@@ -103,10 +103,14 @@ export default function ProfilePage() {
     },
   });
 
-  // This logic determines if the user just registered.
+  // THIS IS THE KEY FIX: Optimistically generate the referral code on the client for new users.
+  // This logic determines if the user just registered (e.g., within the last 60 seconds).
   const isNewUser = user && (Date.now() - new Date(user.metadata.creationTime || 0).getTime() < 60000);
   
-  // This is the key fix: Optimistically generate the referral code on the client for new users.
+  // The display referral code now has a reliable fallback.
+  // 1. Try to get it from the loaded Firestore document.
+  // 2. If that's loading AND the user is new, calculate it on the client. This is the optimistic UI part.
+  // 3. Otherwise, show "Generating..."
   const optimisticReferralCode = user ? `PGC-${user.uid.substring(0, 8).toUpperCase()}` : null;
   const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : 'Generating...');
 
@@ -407,3 +411,5 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
+
+    
