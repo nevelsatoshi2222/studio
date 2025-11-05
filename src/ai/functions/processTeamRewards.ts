@@ -71,8 +71,6 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
         const uplineRef = db.collection('users').doc(currentUplineId);
         const uplineDoc = await uplineRef.get();
         
-        // THIS IS THE CRITICAL FIX:
-        // Ensure the upline user document exists before trying to update it.
         if (!uplineDoc.exists) {
             functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
             break;
@@ -101,6 +99,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
                 userId: currentUplineId,
                 type: 'RANK_REWARD',
                 amount: rewardAmount,
+                currency: 'PGC', // Rank rewards are in PGC
                 rewardName: nextFreeRank.name,
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
@@ -127,6 +126,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
                     userId: currentUplineId,
                     type: 'RANK_REWARD',
                     amount: rewardAmount,
+                    currency: 'PGC', // Rank rewards are in PGC
                     rewardName: nextPaidRank.name,
                     timestamp: admin.firestore.FieldValue.serverTimestamp()
                 });

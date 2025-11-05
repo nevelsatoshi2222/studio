@@ -109,7 +109,8 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             area: '',
             state: '',
             country: customClaims?.country || '',
-            pgcBalance: 0,
+            pgcBalance: 0, // PGC is for rewards
+            usdtBalance: 0, // USDT is for commissions
             referredBy: referrerUid || 'ADMIN_ROOT_USER', 
             referralCode: referralCode,
             walletPublicKey: null,

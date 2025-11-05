@@ -197,7 +197,8 @@ export default function TeamPage() {
         return query(
           collection(firestore, 'transactions'), 
           where('userId', '==', user.uid),
-          where('type', '==', 'COMMISSION')
+          where('type', '==', 'COMMISSION'),
+          where('currency', '==', 'USDT') // Fetch only USDT commissions
         );
       }, [firestore, user]);
       
@@ -222,19 +223,19 @@ export default function TeamPage() {
             <CardHeader>
                 <CardTitle>Commission Earnings by Level</CardTitle>
                 <CardDescription>
-                    This is a live breakdown of your PGC earnings from your referral network, updated automatically when commissions are paid.
+                    This is a live breakdown of your USDT earnings from your referral network, updated automatically when commissions are paid.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="p-6 rounded-lg border bg-green-500/10 text-green-700 mb-6">
                     <h4 className="font-semibold text-sm uppercase tracking-wider">Total Commission Earned</h4>
-                    <p className="text-4xl font-bold text-green-600">{totalCommission.toFixed(4)} PGC</p>
+                    <p className="text-4xl font-bold text-green-600">${totalCommission.toFixed(4)} USDT</p>
                  </div>
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Level</TableHead>
-                            <TableHead className="text-right">Total PGC Earned</TableHead>
+                            <TableHead className="text-right">Total USDT Earned</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -248,7 +249,7 @@ export default function TeamPage() {
                         ) : earningsByLevel.map((earning) => (
                             <TableRow key={earning.level}>
                                 <TableCell>Level {earning.level}</TableCell>
-                                <TableCell className="text-right font-medium">{earning.total.toFixed(4)} PGC</TableCell>
+                                <TableCell className="text-right font-medium">${earning.total.toFixed(4)} USDT</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

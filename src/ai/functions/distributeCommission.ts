@@ -31,10 +31,11 @@ export const distributeCommission = functions.firestore
         }
         
         const buyerId: string = presaleData.userId;
-        const purchaseAmount: number = presaleData.pgcCredited; // Commission is on total PGC credited
+        // **FIX**: Commission is now calculated on the USDT amount of the purchase.
+        const purchaseAmountUSDT: number = presaleData.amountUSDT; 
         const presaleRef = snapshot.ref;
         
-        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmount} PGC.`);
+        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmountUSDT} USDT.`);
 
         // 1. Get the buyer's referrer (Level 1 Upline)
         const buyerDoc = await db.collection('users').doc(buyerId).get();
@@ -64,22 +65,23 @@ export const distributeCommission = functions.firestore
 
             // Determine commission rate based on level
             const rate = level <= 5 ? COMMISSION_RATES.LEVEL_1_TO_5 : COMMISSION_RATES.LEVEL_6_TO_15;
-            const commissionAmount = purchaseAmount * rate;
+            const commissionAmount = purchaseAmountUSDT * rate;
             
             // Reference to the current upline user
             const uplineRef = db.collection('users').doc(currentUplineId);
             
-            // 2. Add balance update to the batch
+            // 2. **FIX**: Add USDT balance update to the batch.
             batch.update(uplineRef, {
-                pgcBalance: admin.firestore.FieldValue.increment(commissionAmount)
+                usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
             });
             
-            // 3. Add transaction log to the batch
+            // 3. **FIX**: Add USDT transaction log to the batch.
             const transactionRef = db.collection('transactions').doc();
             batch.set(transactionRef, {
                 userId: currentUplineId,
                 type: 'COMMISSION',
                 amount: commissionAmount,
+                currency: 'USDT', // Specify currency
                 level: level,
                 purchaseRef: presaleRef.path, // Store the path to the presale document
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
@@ -99,7 +101,7 @@ export const distributeCommission = functions.firestore
         if (transactionCount > 0) {
             try {
                 await batch.commit();
-                functions.logger.log(`Successfully paid commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
+                functions.logger.log(`Successfully paid USDT commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
 
                 // 6. Update the presale status to 'COMPLETED' after successful commission payout
                 await presaleRef.update({ status: 'COMPLETED' });
