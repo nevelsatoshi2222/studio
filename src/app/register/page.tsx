@@ -142,7 +142,7 @@ function RegistrationForm() {
             role: data.role || 'User', 
             country: data.country,
             isPaid: data.buyPackage,
-            referredByCode: data.referredBy
+            referredByCode: data.referredBy // Correctly pass the referrer code
           } 
       });
 
