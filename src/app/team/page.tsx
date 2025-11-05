@@ -1,13 +1,12 @@
-
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -19,25 +18,42 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign, Award, Info, Gem, Star as StarIcon, Crown, Shield } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award, Crown, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
-import { AffiliateRewardTier } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
 import React from 'react';
 
+// Reward data structure
+const freeTrackRewards = [
+  { name: 'Bronze', reward: '1 Coin', requirement: '5 direct free referrals', limit: 'First 78,125 Achievers' },
+  { name: 'Silver', reward: '2 Coins', requirement: '5 team members achieve Bronze', limit: 'First 15,625 Achievers' },
+  { name: 'Gold', reward: '4 Coins', requirement: '5 team members achieve Silver', limit: 'First 3,125 Achievers' },
+  { name: 'Emerald', reward: '10 Coins', requirement: '5 team members achieve Gold', limit: 'First 625 Achievers' },
+  { name: 'Platinum', reward: '20 Coins', requirement: '5 team members achieve Emerald', limit: 'First 125 Achievers' },
+  { name: 'Diamond', reward: '250 Coins', requirement: '5 team members achieve Platinum', limit: 'First 25 Achievers' },
+  { name: 'Crown', reward: '1000 Coins', requirement: '5 team members achieve Diamond', limit: 'First 5 Achievers' },
+];
+
+const paidTrackRewards = [
+  { name: 'Bronze Star', reward: '2.5 Coins', requirement: '5 direct paid members', limit: 'First 15,625 Achievers' },
+  { name: 'Silver Star', reward: '5 Coins', requirement: '5 team members achieve Bronze Star', limit: 'First 3,125 Achievers' },
+  { name: 'Gold Star', reward: '10 Coins', requirement: '5 team members achieve Silver Star', limit: 'First 625 Achievers' },
+  { name: 'Emerald Star', reward: '20 Coins', requirement: '5 team members achieve Gold Star', limit: 'First 125 Achievers' },
+  { name: 'Platinum Star', reward: '125 Coins', requirement: '5 team members achieve Emerald Star', limit: 'First 25 Achievers' },
+  { name: 'Diamond Star', reward: '1250 Coins', requirement: '5 team members achieve Platinum Star', limit: 'First 5 Achievers' },
+  { name: 'Crown Star', reward: '6250 Coins', requirement: '5 team members achieve Diamond Star', limit: 'First 1 Achiever' },
+];
 
 type TeamMember = {
   id: string;
   name: string;
-  avatarId: string;
-  registeredAt: any;
   email: string;
+  registeredAt: any;
   currentFreeRank?: string;
   currentPaidRank?: string;
 };
@@ -61,21 +77,21 @@ const UserRowSkeleton = () => (
 const rankIcons: { [key: string]: React.FC<any> } = {
     'Bronze': Users,
     'Silver': Award,
-    'Gold': Gem,
+    'Gold': Crown,
     'Emerald': Shield,
-    'Platinum': StarIcon,
+    'Platinum': Crown,
     'Diamond': Shield,
     'Crown': Crown,
-    'Bronze Star': StarIcon,
+    'Bronze Star': Award,
     'Silver Star': Award,
-    'Gold Star': Gem,
+    'Gold Star': Crown,
     'Emerald Star': Shield,
-    'Platinum Star': StarIcon,
+    'Platinum Star': Crown,
     'Diamond Star': Shield,
     'Crown Star': Crown,
 };
 
-const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier; progress: number; goal: number }) => {
+const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number; goal: number }) => {
     const Icon = rankIcons[tier.name] || Award;
     const isAchieved = progress >= goal;
     const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : 0;
@@ -94,7 +110,7 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier; p
                 
                 <div className="mt-2">
                     <Progress value={progressPercent} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">{progress.toLocaleString()} / {goal.toLocaleString()} members</p>
+                    <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
                 </div>
 
                 <div className={`text-xs font-semibold mt-2 ${isAchieved ? 'text-green-700' : 'text-primary/80'}`}>{tier.limit}</div>
@@ -103,17 +119,11 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier; p
     );
 };
 
-// This component fetches data for a single member using their ID.
+// This component fetches data for a single member
 function TeamMemberRow({ memberId }: { memberId: string }) {
     const firestore = useFirestore();
-    const memberDocRef = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return doc(firestore, 'users', memberId);
-    }, [firestore, memberId]);
-
+    const memberDocRef = doc(firestore, 'users', memberId);
     const { data: member, isLoading } = useDoc<TeamMember>(memberDocRef);
-
-    const getAvatarUrl = (avatarId: string) => `https://picsum.photos/seed/${avatarId}/40/40`;
 
     if (isLoading) {
         return <UserRowSkeleton />;
@@ -122,7 +132,7 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
     if (!member) {
         return (
             <TableRow>
-                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data for ID: {memberId}</TableCell>
+                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data</TableCell>
             </TableRow>
         );
     }
@@ -132,14 +142,31 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
             <TableCell>
                 <div className="flex items-center gap-3">
                     <Avatar>
-                        <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} />
                         <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{member.name}</span>
+                    <div>
+                        <div className="font-medium">{member.name}</div>
+                        <div className="text-sm text-muted-foreground">{member.email}</div>
+                    </div>
                 </div>
             </TableCell>
-            <TableCell>{member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
-            <TableCell className="text-right">{member.email}</TableCell>
+            <TableCell>
+                {member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+            </TableCell>
+            <TableCell>
+                <div className="flex gap-2">
+                    {member.currentFreeRank && member.currentFreeRank !== 'None' && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                            {member.currentFreeRank}
+                        </span>
+                    )}
+                    {member.currentPaidRank && member.currentPaidRank !== 'None' && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                            {member.currentPaidRank}
+                        </span>
+                    )}
+                </div>
+            </TableCell>
         </TableRow>
     );
 }
@@ -148,25 +175,21 @@ export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // Fetch the current user's document to get referral IDs, ranks, and team sizes
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-
+  // Fetch the current user's document
+  const userDocRef = doc(firestore, 'users', user?.uid || 'temp');
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ 
-    directReferrals: string[];
-    totalTeamSize: number;
-    paidTeamSize: number;
-    freeRank: string;
-    paidRank: string;
-   }>(userDocRef);
+    direct_team: string[];
+    currentFreeRank: string;
+    currentPaidRank: string;
+    freeAchievers?: { bronze: number };
+    paidAchievers?: { bronzeStar: number };
+  }>(userDocRef);
 
-  const directMemberIds = userProfile?.directReferrals || [];
-  const totalTeamSize = userProfile?.totalTeamSize || 0;
-  const paidTeamSize = userProfile?.paidTeamSize || 0;
-  const currentFreeRank = userProfile?.freeRank || 'None';
-  const currentPaidRank = userProfile?.paidRank || 'None';
+  const directMemberIds = userProfile?.direct_team || [];
+  const currentFreeRank = userProfile?.currentFreeRank || 'None';
+  const currentPaidRank = userProfile?.currentPaidRank || 'None';
+  const bronzeAchievers = userProfile?.freeAchievers?.bronze || 0;
+  const bronzeStarAchievers = userProfile?.paidAchievers?.bronzeStar || 0;
 
   const EarningTable = () => {
     const earningsData = Array.from({ length: 15 }, (_, i) => {
@@ -180,7 +203,7 @@ export default function TeamPage() {
             <CardHeader>
                 <CardTitle>Earning Commission by Level</CardTitle>
                 <CardDescription>
-                    Your affiliate program offers deep, multi-level rewards. You earn a percentage of the PGC purchased by members in your network, down to 15 levels. This is calculated and paid out automatically by a secure Cloud Function.
+                    Your affiliate program offers deep, multi-level rewards. You earn a percentage of the PGC purchased by members in your network, down to 15 levels.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -201,15 +224,10 @@ export default function TeamPage() {
                     </TableBody>
                 </Table>
                  <div className="p-4 rounded-lg border bg-green-500/10 text-green-700 mt-6">
-                    <h4 className="font-semibold text-lg flex items-center gap-2">Total Commission: <span className="text-green-600">2% Distributed</span></h4>
+                    <h4 className="font-semibold text-lg flex items-center gap-2">Total Commission: <span className="text-green-600">2% Distributed Across Levels</span></h4>
                     <p className="mt-1 text-green-800">This structure allows you to benefit from the network effect, as your earnings grow exponentially with your team's expansion.</p>
                 </div>
             </CardContent>
-             <CardFooter>
-                <Button asChild>
-                    <Link href="/affiliate-marketing">Learn More About the Program</Link>
-                </Button>
-            </CardFooter>
         </Card>
     );
   };
@@ -226,11 +244,15 @@ export default function TeamPage() {
         <Card>
           <CardHeader>
             <CardTitle>Free User Track</CardTitle>
-            <CardDescription>Your current rank is: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
+            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {nextFreeRank ? (
-              <RewardTierCard tier={nextFreeRank} progress={totalTeamSize} goal={nextFreeRank.requirement} />
+              <RewardTierCard 
+                tier={nextFreeRank} 
+                progress={bronzeAchievers} 
+                goal={5} 
+              />
             ) : (
                 <Alert>
                     <Crown className="h-4 w-4" />
@@ -243,11 +265,15 @@ export default function TeamPage() {
         <Card>
           <CardHeader>
             <CardTitle>Paid User (Star) Track</CardTitle>
-            <CardDescription>Your current rank is: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
+            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              {nextPaidRank ? (
-              <RewardTierCard tier={nextPaidRank} progress={paidTeamSize} goal={nextPaidRank.requirement} />
+              <RewardTierCard 
+                tier={nextPaidRank} 
+                progress={bronzeStarAchievers} 
+                goal={5} 
+              />
             ) : (
                 <Alert>
                     <Crown className="h-4 w-4" />
@@ -260,7 +286,6 @@ export default function TeamPage() {
       </div>
     );
   };
-
 
   if (isUserLoading) {
     return (
@@ -315,36 +340,43 @@ export default function TeamPage() {
               <DollarSign className="mr-2 h-4 w-4" /> Commission
             </TabsTrigger>
           </TabsList>
+          
           <TabsContent value="team-summary" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Team Summary</CardTitle>
                 <CardDescription>
-                  An overview of your network depth. This data is updated automatically when a new member joins your downline.
+                  An overview of your network. This data updates automatically when new members join.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
+                    <div className="text-sm text-muted-foreground">Direct Referrals</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Total Free Team Size</div>
-                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-24" /> : totalTeamSize}</div>
+                    <div className="text-sm text-muted-foreground">Bronze Achievers</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeAchievers}</div>
                 </div>
-                 <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Total Paid Team Size</div>
-                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-24" /> : paidTeamSize}</div>
+                <div className="p-4 rounded-lg bg-muted">
+                    <div className="text-sm text-muted-foreground">Bronze Star Achievers</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeStarAchievers}</div>
                 </div>
               </CardContent>
+              <CardFooter>
+                <Button asChild>
+                  <Link href="/profile">Get Your Referral Link</Link>
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
+          
           <TabsContent value="direct-members" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Direct Members ({directMemberIds.length})</CardTitle>
                 <CardDescription>
-                  Users you have personally referred to the platform (Level 1).
+                  Users you have personally referred to the platform.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -353,33 +385,38 @@ export default function TeamPage() {
                     <TableRow>
                       <TableHead>Member</TableHead>
                       <TableHead>Join Date</TableHead>
-                      <TableHead className="text-right">Email</TableHead>
+                      <TableHead>Rank</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isProfileLoading ? (
-                      <><UserRowSkeleton /><UserRowSkeleton /></>
+                      <>
+                        <UserRowSkeleton />
+                        <UserRowSkeleton />
+                      </>
                     ) : directMemberIds.length > 0 ? (
-                        directMemberIds.map((memberId) => (
-                           <TeamMemberRow key={memberId} memberId={memberId} />
-                        ))
+                      directMemberIds.map((memberId) => (
+                        <TeamMemberRow key={memberId} memberId={memberId} />
+                      ))
                     ) : (
-                         <TableRow>
-                            <TableCell colSpan={3} className="h-24 text-center">
-                                You haven't referred any members yet. Share your referral link from your profile!
-                            </TableCell>
-                        </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={3} className="h-24 text-center">
+                          You haven't referred any members yet. Share your referral link from your profile!
+                        </TableCell>
+                      </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
           </TabsContent>
-           <TabsContent value="rewards" className="mt-6">
+           
+          <TabsContent value="rewards" className="mt-6">
             <RewardsDashboard />
           </TabsContent>
+          
           <TabsContent value="earnings" className="mt-6">
-             <EarningTable />
+            <EarningTable />
           </TabsContent>
         </Tabs>
       </div>

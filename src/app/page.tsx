@@ -15,25 +15,13 @@ import {
   CardTitle,
   CardFooter,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRightLeft } from 'lucide-react';
-import Link from 'next/link';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { IGC_TOKEN_MINT_ADDRESS } from '@/lib/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
-import { collection, query, where, orderBy, limit, doc } from 'firebase/firestore';
-import type { Transaction } from '@/lib/types';
+import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 
 export default function Dashboard() {
@@ -53,20 +41,6 @@ export default function Dashboard() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
   const pgcBalance = userProfile?.pgcBalance ?? 0;
-
-  // Fetch the user's latest transactions from Firestore
-  const transactionsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(
-      collection(firestore, 'transactions'),
-      where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc'),
-      limit(5)
-    );
-  }, [firestore, user]);
-
-  const { data: transactions, isLoading: areTransactionsLoading } = useCollection<Transaction>(transactionsQuery);
-
 
   useEffect(() => {
     if (publicKey && connection) {
@@ -98,7 +72,6 @@ export default function Dashboard() {
   }, [publicKey, connection]);
 
   const isBalanceLoading = isAppUserLoading || isProfileLoading;
-  const isAnyLoading = isBalanceLoading || isWalletBalanceLoading || areTransactionsLoading;
 
   return (
     <AppLayout>
@@ -193,63 +166,6 @@ export default function Dashboard() {
              <CardFooter>
                  <Button disabled={!publicKey}>Send / Receive</Button>
              </CardFooter>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-1">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Recent PGC Transactions</CardTitle>
-                <CardDescription>Your latest PGC rewards and commissions.</CardDescription>
-              </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/transactions">View All</Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isAnyLoading ? (
-                    <>
-                      <TableRow><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
-                      <TableRow><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
-                    </>
-                  ) : transactions && transactions.length > 0 ? (
-                    transactions.map(tx => (
-                      <TableRow key={tx.id}>
-                        <TableCell>
-                          <Badge variant={tx.type === 'COMMISSION' ? 'default' : 'secondary'}>{tx.type}</Badge>
-                        </TableCell>
-                        <TableCell className="font-medium text-green-500">+{tx.amount.toFixed(2)} PGC</TableCell>
-                        <TableCell>
-                          {tx.type === 'COMMISSION' && `Commission from Level ${tx.level}`}
-                          {tx.type === 'RANK_REWARD' && `Achieved rank: ${tx.rewardName}`}
-                          {tx.type === 'PURCHASE' && 'Initial PGC purchase'}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString() : 'Just now'}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
-                        No transactions found. Refer a user or complete a task to earn PGC.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
           </Card>
         </div>
       </div>
