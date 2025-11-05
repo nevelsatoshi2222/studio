@@ -58,6 +58,21 @@
             "status": { "type": "string", "enum": ["COMPLETED", "PENDING_VERIFICATION"], "description": "Status of the purchase verification." }
         },
         "required": ["userId", "amountUSDT", "pgcCredited", "status"]
+    },
+    "WithdrawalRequest": {
+        "title": "Withdrawal Request",
+        "type": "object",
+        "description": "A user's request to withdraw their earned USDT commissions.",
+        "properties": {
+            "userId": { "type": "string", "description": "User requesting the withdrawal." },
+            "userName": { "type": "string", "description": "Name of the user for easy identification." },
+            "amount": { "type": "number", "description": "Amount of USDT to withdraw." },
+            "currency": { "type": "string", "enum": ["USDT"], "description": "The currency for withdrawal." },
+            "walletAddress": { "type": "string", "description": "The Solana wallet address to send the funds to." },
+            "requestedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the request." },
+            "status": { "type": "string", "enum": ["pending", "completed", "rejected"], "description": "Status of the withdrawal request." }
+        },
+        "required": ["userId", "amount", "currency", "walletAddress", "requestedAt", "status"]
     }
   },
   "auth": {
@@ -67,7 +82,8 @@
     "structure": [
       { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
       { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
-      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } }
+      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } },
+      { "path": "/withdrawalRequests/{requestId}", "definition": { "schema": { "$ref": "#/entities/WithdrawalRequest" } } }
     ]
   }
 }

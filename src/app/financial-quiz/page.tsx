@@ -229,7 +229,7 @@ function PollCard({ poll, userHasSubmitted }: { poll: Poll; userHasSubmitted: bo
 
       toast({
         title: "Vote Submitted!",
-        description: `Your response for "${poll.question.substring(0, 30)}..." has been recorded. You've earned PGC for participating!`,
+        description: `Your response for "${poll.question.substring(0, 30)}..." has been recorded. You've earned 2 PGC for participating!`,
       });
 
       // The parent component's state will update via useCollection, automatically disabling this card.
@@ -376,7 +376,7 @@ export default function FinancialQuizPage() {
               <Award className="h-4 w-4 text-primary" />
               <AlertTitle className="font-bold text-primary">Poll Instructions</AlertTitle>
               <AlertDescription>
-                  Review each question and select the answers you agree with. Your rewards will be calculated based on your final score and the tournament rules above.
+                  Review each question and select the answers you agree with. You will earn **2 PGC** for each poll you complete as a participation reward. Your final score will determine eligibility for further tournament rounds.
               </AlertDescription>
           </Alert>
         )}
