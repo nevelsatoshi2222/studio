@@ -113,3 +113,4 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
     });
 });
+
