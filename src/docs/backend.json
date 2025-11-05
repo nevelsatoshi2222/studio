@@ -1,0 +1,71 @@
+
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a registered user of the platform.",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID (The Doc ID)" },
+        "referredBy": { "type": "string", "description": "The uid of the referrer (Level 1 Upline)" },
+        "walletPublicKey": { "type": "string", "description": "The connected Solana Public Key" },
+        "pgcBalance": { "type": "number", "description": "Current token balance (The single source of truth)" },
+        "isVerified": { "type": "boolean", "description": "KYC/KYL status" },
+        "name": { "type": "string", "description": "User's full name." },
+        "email": { "type": "string", "description": "User's email address.", "format": "email" },
+        "role": { "type": "string", "description": "The role of the user on the platform." },
+        "street": { "type": "string", "description": "User's street address." },
+        "village": { "type": "string", "description": "User's village or ward." },
+        "block": { "type": "string", "description": "User's block or kasba." },
+        "taluka": { "type": "string", "description": "User's taluka." },
+        "district": { "type": "string", "description": "User's district." },
+        "state": { "type": "string", "description": "User's state or province." },
+        "country": { "type": "string", "description": "User's country." },
+        "registeredAt": { "type": "string", "format": "date-time", "description": "The timestamp when the user registered." },
+        "totalTeamSize": { "type": "number", "description": "Total number of users in the referral downline (all 15 levels)." },
+        "paidTeamSize": { "type": "number", "description": "Total number of users in the downline who have made a purchase." },
+        "freeRank": { "type": "string", "description": "The user's current rank in the free referral track." },
+        "paidRank": { "type": "string", "description": "The user's current rank in the paid referral track." },
+        "isPaid": { "type": "boolean", "description": "Indicates if the user has made an initial purchase." }
+      },
+      "required": ["uid", "name", "email", "pgcBalance", "isVerified"]
+    },
+    "Transaction": {
+        "title": "Transaction",
+        "type": "object",
+        "description": "Logs every crypto financial event for auditing.",
+        "properties": {
+            "userId": { "type": "string", "description": "User who is receiving the funds." },
+            "type": { "type": "string", "enum": ["PURCHASE", "COMMISSION", "WITHDRAWAL", "RANK_REWARD"], "description": "The type of transaction." },
+            "amount": { "type": "number", "description": "Amount of PGC tokens." },
+            "purchaseRef": { "type": "string", "description": "Link to the original presales document (if type is COMMISSION)." },
+            "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." },
+            "rewardName": { "type": "string", "description": "Name of the rank achieved for RANK_REWARD transactions." }
+        },
+        "required": ["userId", "type", "amount", "timestamp"]
+    },
+    "Presale": {
+        "title": "Presale",
+        "type": "object",
+        "description": "Represents a presale purchase awaiting admin verification.",
+        "properties": {
+            "userId": { "type": "string", "description": "User who made the Presale purchase." },
+            "amountUSDT": { "type": "number", "description": "Purchase amount in USDT." },
+            "pgcCredited": { "type": "number", "description": "Total PGC to be issued to the buyer (incl. bonus)." },
+            "status": { "type": "string", "enum": ["COMPLETED", "PENDING_VERIFICATION"], "description": "Status of the purchase verification." }
+        },
+        "required": ["userId", "amountUSDT", "pgcCredited", "status"]
+    }
+  },
+  "auth": {
+    "providers": ["password", "anonymous"]
+  },
+  "firestore": {
+    "structure": [
+      { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
+      { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
+      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } }
+    ]
+  }
+}
