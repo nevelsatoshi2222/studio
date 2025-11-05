@@ -107,7 +107,63 @@ function RegistrationForm() {
     let userCredential;
     try {
       // Step 1: Create the user in Firebase Auth.
+      // The onUserCreate cloud function will handle creating the user document in Firestore.
       userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      
+      // Step 2: Update their Auth profile with their name.
+      await updateProfile(user, { displayName: data.name });
+
+      // Step 3: Call a cloud function to set custom claims.
+      // This is a secure way to assign roles or other metadata.
+      const functions = getFunctions(auth.app);
+      const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+      await setCustomClaims({ 
+          uid: user.uid, 
+          claims: { 
+            role: data.role, 
+            country: data.country,
+            isPaid: data.buyPackage,
+            referredByCode: data.referredBy
+          } 
+      });
+
+      // Step 4: If they chose to buy a package, log the presale.
+      // This will trigger the distributeCommission function.
+      if (data.buyPackage) {
+        const firestore = useFirestore();
+        const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+        await addDoc(collection(firestore, 'presales'), {
+          userId: user.uid,
+          amountUSDT: 100, // Example amount
+          pgcCredited: 200, // Example PGC
+          status: 'PENDING_VERIFICATION', // This will be handled by the backend function
+          purchaseDate: serverTimestamp(),
+          registeredWithPurchase: true,
+        });
+        toast({
+          title: "Test Purchase Submitted",
+          description: "A $100 package purchase has been logged for commission testing.",
+        });
+      }
+
+      // Step 5: Send verification email
+      const actionCodeSettings = {
+          url: `${window.location.origin}/login`,
+          handleCodeInApp: true,
+      };
+      await sendEmailVerification(user, actionCodeSettings);
+
+      // Step 6: Sign the user out to force them to verify their email.
+      await signOut(auth);
+
+      toast({
+          title: 'Registration Successful!',
+          description: 'Please check your email to verify your account before logging in.',
+      });
+      
+      router.push('/login');
+      
     } catch (error: any) {
         console.error('Registration failed:', error);
         
@@ -122,68 +178,6 @@ function RegistrationForm() {
             variant: 'destructive',
             title: 'Registration Failed',
             description,
-        });
-        // Stop execution if user creation failed
-        return;
-    }
-
-    try {
-        const user = userCredential.user;
-        const functions = getFunctions(auth.app);
-        const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
-        
-        // Step 2: Set custom claims for the new user.
-        const claims = {
-            referredBy: data.referredBy,
-            country: data.country,
-            role: data.role,
-            isPaid: data.buyPackage
-        };
-        await setCustomClaims({ uid: user.uid, claims });
-
-        // Step 3: Update their Auth profile with their name.
-        await updateProfile(user, { displayName: data.name });
-        
-        if (data.buyPackage) {
-            const firestore = useFirestore();
-            const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-            await addDoc(collection(firestore, 'presales'), {
-            userId: user.uid,
-            amountUSDT: 100,
-            pgcCredited: 200, 
-            status: 'PENDING_VERIFICATION',
-            purchaseDate: serverTimestamp(),
-            registeredWithPurchase: true,
-            });
-            toast({
-            title: "Purchase Submitted",
-            description: "Test purchase of $100 package logged for commission testing.",
-            });
-        }
-
-        // Step 4: Send verification email
-        const actionCodeSettings = {
-            url: `${window.location.origin}/login`,
-            handleCodeInApp: true,
-        };
-        await sendEmailVerification(user, actionCodeSettings);
-
-        // Step 5: Sign the user out to force them to verify their email.
-        await signOut(auth);
-
-        toast({
-            title: 'Registration Successful!',
-            description: 'Please check your email to verify your account before logging in.',
-        });
-        
-        router.push('/login');
-      
-    } catch (error: any) {
-        console.error('Error during post-registration steps:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Registration Incomplete',
-            description: 'Your user was created, but an error occurred setting up your profile. Please contact support.',
         });
     }
   };

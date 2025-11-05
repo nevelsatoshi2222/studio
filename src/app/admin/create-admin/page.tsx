@@ -1,7 +1,7 @@
 
 'use client';
 import { useEffect } from 'react';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { ShieldAlert, UserPlus } from 'lucide-react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const adminRoles = [
     { value: 'User Management Admin', label: 'User Management' },
@@ -48,9 +48,7 @@ function createSecondaryApp(): FirebaseApp {
 }
 
 function CreateAdminForm() {
-    const firestore = useFirestore();
     const { toast } = useToast();
-    const router = useRouter();
 
     const form = useForm<CreateAdminFormValues>({
         resolver: zodResolver(createAdminSchema),
@@ -63,32 +61,33 @@ function CreateAdminForm() {
     });
 
     const onSubmit = async (data: CreateAdminFormValues) => {
-        if (!firestore) return;
-
         try {
+            // Use a secondary Firebase app instance to create admins
+            // This avoids conflicts with the currently logged-in user's session
             const secondaryApp = createSecondaryApp();
             const secondaryAuth = getAuth(secondaryApp);
+            const functions = getFunctions(secondaryApp);
 
+            // Create the user in Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
             const user = userCredential.user;
 
+            // Update their display name in Auth
             await updateProfile(user, { displayName: data.name });
 
-            const userDocRef = doc(firestore, 'users', user.uid);
-            await setDoc(userDocRef, {
-                id: user.uid,
-                name: data.name,
-                email: data.email,
-                role: data.role,
-                status: 'Active',
-                registeredAt: serverTimestamp(),
-                pgcBalance: 0,
-                avatarId: `user-avatar-${Math.ceil(Math.random() * 4)}`,
+            // Call a Cloud Function to set their custom role claim
+            const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+            await setCustomClaims({ 
+                uid: user.uid, 
+                claims: { 
+                  role: data.role,
+                  country: 'N/A' // Admins don't need a country for voting
+                } 
             });
             
             toast({
                 title: "Admin Created",
-                description: `Successfully created admin user ${data.name} with the role ${data.role}.`,
+                description: `Successfully created admin user ${data.name} with the role ${data.role}. The onUserCreate function will build their Firestore document.`,
             });
 
             form.reset();
@@ -110,7 +109,7 @@ function CreateAdminForm() {
                     <UserPlus /> Create New Admin
                 </CardTitle>
                 <CardDescription>
-                    Use this form to create a new administrator account and assign them a specific management role. This corresponds to the Manager groups in the documentation.
+                    Use this form to create a new administrator account and assign them a specific management role. The `onUserCreate` Cloud Function will automatically create their corresponding document in Firestore.
                 </CardDescription>
             </CardHeader>
             <Form {...form}>

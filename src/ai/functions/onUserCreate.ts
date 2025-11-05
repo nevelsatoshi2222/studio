@@ -46,7 +46,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
     
     // The client may pass custom claims during registration, including a referrer code.
-    const referredByCode = user.customClaims?.referredBy as string | undefined;
+    const referredByCode = user.customClaims?.referredByCode as string | undefined;
 
     const userDocRef = db.collection('users').doc(uid);
 
@@ -67,6 +67,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             if (referrerDoc) {
                 referrerUid = referrerDoc.id;
                 referrerDocRef = referrerDoc.ref;
+                functions.logger.log(`Found referrer ${referrerUid} for new user ${uid}.`);
             }
         }
         
@@ -81,6 +82,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
         
         let finalRole = user.customClaims?.role as string || 'User';
+        // Special case for the root admin user
         if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
             finalRole = 'Super Admin';
         }
@@ -103,12 +105,13 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             referralCode: referralCode,
             walletPublicKey: null,
             isVerified: false,
-            status: 'Active',
+            status: 'Active', // Set status to Active by default for ALL users.
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
             directReferrals: [], // Initialize with an empty array for the new user
             totalTeamSize: 0, // Initialize team size
+            paidTeamSize: 0,
             freeRank: 'None',
             paidRank: 'None',
             isPaid: user.customClaims?.isPaid || false // Track if user made a purchase on registration
@@ -117,8 +120,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         transaction.set(userDocRef, userDocumentData);
         functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
         
-        // After transaction commit, trigger the team rewards processing task.
-        // We do this outside the transaction to avoid contention.
     }).then(() => {
         // Enqueue a task to process team rewards for the new user and their upline.
         // This is a non-blocking call.
