@@ -128,8 +128,8 @@ export default function Dashboard() {
           </Card>
           <Card className="lg:col-span-4">
             <CardHeader>
-              <CardTitle>My Wallet & Balances</CardTitle>
-              <CardDescription>Your connected wallet and in-app PGC balance from commissions and rewards.</CardDescription>
+              <CardTitle>My Wallet</CardTitle>
+              <CardDescription>Your connected wallet and in-app balances from commissions and rewards.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-1">
@@ -153,7 +153,7 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">In-App PGC Balance</p>
+                <p className="text-sm font-medium text-muted-foreground">In-App Balance (Commissions & Rewards)</p>
                 {isBalanceLoading ? (
                   <Skeleton className="h-8 w-32" />
                 ) : user ? (

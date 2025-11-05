@@ -222,10 +222,14 @@ export default function TeamPage() {
             <CardHeader>
                 <CardTitle>Commission Earnings by Level</CardTitle>
                 <CardDescription>
-                    This is a live breakdown of your PGC earnings from your referral network, updated automatically.
+                    This is a live breakdown of your PGC earnings from your referral network, updated automatically when commissions are paid.
                 </CardDescription>
             </CardHeader>
             <CardContent>
+                 <div className="p-6 rounded-lg border bg-green-500/10 text-green-700 mb-6">
+                    <h4 className="font-semibold text-sm uppercase tracking-wider">Total Commission Earned</h4>
+                    <p className="text-4xl font-bold text-green-600">{totalCommission.toFixed(4)} PGC</p>
+                 </div>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -249,9 +253,6 @@ export default function TeamPage() {
                         ))}
                     </TableBody>
                 </Table>
-                 <div className="p-4 rounded-lg border bg-green-500/10 text-green-700 mt-6">
-                    <h4 className="font-semibold text-lg flex items-center gap-2">Total Commission Earned: <span className="text-green-600">{totalCommission.toFixed(4)} PGC</span></h4>
-                 </div>
             </CardContent>
         </Card>
     );
