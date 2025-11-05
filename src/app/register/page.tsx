@@ -103,84 +103,88 @@ function RegistrationForm() {
         });
         return;
     }
+    
+    let userCredential;
     try {
-      // Step 1: Create a temporary auth instance to set custom claims.
-      // This allows us to pass data to the onUserCreate Cloud Function securely.
-      const functions = getFunctions(auth.app);
-      const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
-      
-      const claims = {
-        referredBy: data.referredBy,
-        country: data.country,
-        role: data.role,
-        isPaid: data.buyPackage
-      };
+      // Step 1: Create the user in Firebase Auth.
+      userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+    } catch (error: any) {
+        console.error('Registration failed:', error);
+        
+        let description = 'An unexpected error occurred. Please try again.';
+        if (error.code === 'auth/email-already-in-use') {
+            description = 'This email address is already registered. Please use a different email or log in.';
+        } else if (error.message) {
+            description = error.message;
+        }
 
-      // We don't need to await this, but we create the user with claims in mind.
-      // The actual user creation happens in the onUserCreate trigger.
-      
-      // Step 2: Create the user in Firebase Auth.
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const user = userCredential.user;
-      
-      // Step 3: Set custom claims for the new user.
-      await setCustomClaims({ uid: user.uid, claims });
-
-      // Step 4: Update their Auth profile with their name.
-      await updateProfile(user, { displayName: data.name });
-
-      // The onUserCreate cloud function will automatically trigger to create the Firestore document.
-      // If buyPackage is checked, we also need to log this for the commission function.
-      if (data.buyPackage) {
-        // This is a temporary solution for testing. In production, this would be tied to a real payment.
-        const firestore = useFirestore(); // This hook should be available if auth is.
-        const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-        await addDoc(collection(firestore, 'presales'), {
-          userId: user.uid,
-          amountUSDT: 100,
-          pgcCredited: 200, // 100 PGC + 100 Bonus
-          status: 'PENDING_VERIFICATION', // This will trigger the commission function
-          purchaseDate: serverTimestamp(),
-          registeredWithPurchase: true,
-        });
         toast({
-          title: "Purchase Submitted",
-          description: "Test purchase of $100 package logged for commission testing.",
+            variant: 'destructive',
+            title: 'Registration Failed',
+            description,
         });
-      }
+        // Stop execution if user creation failed
+        return;
+    }
 
-      // Step 5: Send verification email
-      const actionCodeSettings = {
-        url: `${window.location.origin}/login`,
-        handleCodeInApp: true,
-      };
-      await sendEmailVerification(user, actionCodeSettings);
+    try {
+        const user = userCredential.user;
+        const functions = getFunctions(auth.app);
+        const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+        
+        // Step 2: Set custom claims for the new user.
+        const claims = {
+            referredBy: data.referredBy,
+            country: data.country,
+            role: data.role,
+            isPaid: data.buyPackage
+        };
+        await setCustomClaims({ uid: user.uid, claims });
 
-      // Step 6: Sign the user out to force them to verify their email.
-      await signOut(auth);
+        // Step 3: Update their Auth profile with their name.
+        await updateProfile(user, { displayName: data.name });
+        
+        if (data.buyPackage) {
+            const firestore = useFirestore();
+            const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+            await addDoc(collection(firestore, 'presales'), {
+            userId: user.uid,
+            amountUSDT: 100,
+            pgcCredited: 200, 
+            status: 'PENDING_VERIFICATION',
+            purchaseDate: serverTimestamp(),
+            registeredWithPurchase: true,
+            });
+            toast({
+            title: "Purchase Submitted",
+            description: "Test purchase of $100 package logged for commission testing.",
+            });
+        }
 
-      toast({
-        title: 'Registration Successful!',
-        description: 'Please check your email to verify your account before logging in.',
-      });
-      
-      router.push('/login');
+        // Step 4: Send verification email
+        const actionCodeSettings = {
+            url: `${window.location.origin}/login`,
+            handleCodeInApp: true,
+        };
+        await sendEmailVerification(user, actionCodeSettings);
+
+        // Step 5: Sign the user out to force them to verify their email.
+        await signOut(auth);
+
+        toast({
+            title: 'Registration Successful!',
+            description: 'Please check your email to verify your account before logging in.',
+        });
+        
+        router.push('/login');
       
     } catch (error: any) {
-      console.error('Registration failed:', error);
-      
-      let description = 'An unexpected error occurred. Please try again.';
-      if (error.code === 'auth/email-already-in-use') {
-        description = 'This email address is already registered. Please use a different email or log in.';
-      } else if (error.message) {
-          description = error.message;
-      }
-
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description,
-      });
+        console.error('Error during post-registration steps:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Registration Incomplete',
+            description: 'Your user was created, but an error occurred setting up your profile. Please contact support.',
+        });
     }
   };
 
