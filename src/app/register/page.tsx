@@ -36,10 +36,26 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { firebaseConfig } from '@/firebase/config';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+
+
+// This secondary app instance is crucial to avoid conflicts with the main app's auth state.
+// It allows us to create a new user and set their claims without affecting the current session.
+function createSecondaryApp(): FirebaseApp {
+    const apps = getApps();
+    const secondaryAppName = 'userRegistrationApp';
+    const existingApp = apps.find(app => app.name === secondaryAppName);
+    if (existingApp) {
+        return existingApp;
+    }
+    return initializeApp(firebaseConfig, secondaryAppName);
+}
+
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -65,13 +81,13 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const mainAuth = useAuth(); // Use the main auth hook for functions
+  const { toast } = useToast();
+
   const referredByCode = searchParams.get('ref') || '';
   const role = searchParams.get('role');
   const jobTitle = searchParams.get('title');
-
-  const auth = useAuth();
-  const { toast } = useToast();
-
+  
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -95,7 +111,7 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth) {
+    if (!mainAuth) {
         toast({
            variant: 'destructive',
             title: 'Error',
@@ -104,48 +120,31 @@ function RegistrationForm() {
         return;
     }
     
-    let userCredential;
     try {
-      // Step 1: Create the user in Firebase Auth.
-      // The onUserCreate cloud function will handle creating the user document in Firestore.
-      userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      // Step 1: Use a secondary, isolated Firebase app instance for registration
+      const secondaryApp = createSecondaryApp();
+      const secondaryAuth = getApps().find(app => app.name === 'userRegistrationApp') ? getApps().find(app => app.name === 'userRegistrationApp')!.auth : getAuth(secondaryApp);
+      
+      // Step 2: Create the user in Firebase Auth.
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
       const user = userCredential.user;
       
-      // Step 2: Update their Auth profile with their name.
+      // Step 3: Update their Auth profile with their name.
       await updateProfile(user, { displayName: data.name });
 
-      // Step 3: Call a cloud function to set custom claims.
-      // This is a secure way to assign roles or other metadata.
-      const functions = getFunctions(auth.app);
+      // Step 4: Call a cloud function to set custom claims. This is the secure way to pass data to onUserCreate.
+      const functions = getFunctions(mainAuth.app);
       const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+      
       await setCustomClaims({ 
           uid: user.uid, 
           claims: { 
-            role: data.role, 
+            role: data.role || 'User', 
             country: data.country,
             isPaid: data.buyPackage,
             referredByCode: data.referredBy
           } 
       });
-
-      // Step 4: If they chose to buy a package, log the presale.
-      // This will trigger the distributeCommission function.
-      if (data.buyPackage) {
-        const firestore = useFirestore();
-        const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-        await addDoc(collection(firestore, 'presales'), {
-          userId: user.uid,
-          amountUSDT: 100, // Example amount
-          pgcCredited: 200, // Example PGC
-          status: 'PENDING_VERIFICATION', // This will be handled by the backend function
-          purchaseDate: serverTimestamp(),
-          registeredWithPurchase: true,
-        });
-        toast({
-          title: "Test Purchase Submitted",
-          description: "A $100 package purchase has been logged for commission testing.",
-        });
-      }
 
       // Step 5: Send verification email
       const actionCodeSettings = {
@@ -153,10 +152,10 @@ function RegistrationForm() {
           handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
-
-      // Step 6: Sign the user out to force them to verify their email.
-      await signOut(auth);
-
+      
+      // Step 6: Explicitly sign the new user out of the secondary auth instance
+      await signOut(secondaryAuth);
+      
       toast({
           title: 'Registration Successful!',
           description: 'Please check your email to verify your account before logging in.',

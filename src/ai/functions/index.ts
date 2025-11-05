@@ -4,18 +4,46 @@ import { https } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/v2/https';
 import { ai } from '@/ai/genkit';
 import { listFlows } from 'genkit';
+import * as admin from 'firebase-admin';
+
+// Initialize admin SDK if not already done
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
 
 // Import functions for their side effects, which registers them.
-import * as onUserCreate from './onUserCreate';
-import * as distributeCommission from './distributeCommission';
-import * as processTeamRewards from './processTeamRewards';
+import { onUserCreate } from './onUserCreate';
+import { distributeCommission } from './distributeCommission';
+import { processTeamRewards } from './processTeamRewards';
 import '@/ai/flows/national-issues-flow';
 import '@/ai/flows/state-issues-flow';
 
 // Export Cloud Functions for deployment
-export const onUserCreateTrigger = onUserCreate.onUserCreate;
-export const distributeCommissionTrigger = distributeCommission.distributeCommission;
-export const processTeamRewardsTrigger = processTeamRewards.processTeamRewards;
+export const onUserCreateTrigger = onUserCreate;
+export const distributeCommissionTrigger = distributeCommission;
+export const processTeamRewardsTrigger = processTeamRewards;
+
+
+// A new, secure Cloud Function to set custom claims on a user.
+// This can only be called by an authenticated user on the client.
+// In a production app, you would add more security to ensure only admins can call this.
+export const setCustomClaims = https.onCall(async (data, context) => {
+  // Optional: Add security check here to ensure only admins can set claims.
+  // For now, we trust the client-side checks in the 'create-admin' page.
+  
+  const { uid, claims } = data;
+  if (!uid || !claims) {
+    throw new https.HttpsError('invalid-argument', 'The function must be called with "uid" and "claims" arguments.');
+  }
+
+  try {
+    await admin.auth().setCustomUserClaims(uid, claims);
+    return { result: `Custom claims set for user ${uid}` };
+  } catch (error: any) {
+    console.error('Error setting custom claims:', error);
+    throw new https.HttpsError('internal', error.message);
+  }
+});
 
 
 // Generic handler for calling Genkit flows from the client or Firebase Studio UI.

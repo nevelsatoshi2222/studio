@@ -1,7 +1,7 @@
 
 'use client';
 import { useEffect } from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,7 @@ function createSecondaryApp(): FirebaseApp {
 
 function CreateAdminForm() {
     const { toast } = useToast();
+    const mainAuth = useAuth(); // Use the main auth from the provider
 
     const form = useForm<CreateAdminFormValues>({
         resolver: zodResolver(createAdminSchema),
@@ -66,8 +67,7 @@ function CreateAdminForm() {
             // This avoids conflicts with the currently logged-in user's session
             const secondaryApp = createSecondaryApp();
             const secondaryAuth = getAuth(secondaryApp);
-            const functions = getFunctions(secondaryApp);
-
+            
             // Create the user in Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
             const user = userCredential.user;
@@ -76,6 +76,8 @@ function CreateAdminForm() {
             await updateProfile(user, { displayName: data.name });
 
             // Call a Cloud Function to set their custom role claim
+            // This ensures the `onUserCreate` function has the role info it needs.
+            const functions = getFunctions(mainAuth.app); // Use the main app for calling functions
             const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
             await setCustomClaims({ 
                 uid: user.uid, 
@@ -86,8 +88,8 @@ function CreateAdminForm() {
             });
             
             toast({
-                title: "Admin Created",
-                description: `Successfully created admin user ${data.name} with the role ${data.role}. The onUserCreate function will build their Firestore document.`,
+                title: "Admin Account Initiated",
+                description: `Successfully created admin user ${data.name}. The onUserCreate function will now build their Firestore document.`,
             });
 
             form.reset();

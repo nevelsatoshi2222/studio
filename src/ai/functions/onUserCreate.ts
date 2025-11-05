@@ -121,11 +121,28 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
         
     }).then(() => {
-        // Enqueue a task to process team rewards for the new user and their upline.
+        // After successfully creating the user, check if a purchase was made during registration.
+        // If so, create the presale document which will trigger commission distribution.
+        const isPaid = user.customClaims?.isPaid as boolean | undefined;
+        if (isPaid) {
+            functions.logger.log(`User ${uid} registered with a package. Creating presale document.`);
+            const presaleCollection = db.collection('presales');
+            return presaleCollection.add({
+                userId: uid,
+                amountUSDT: 100, // This is the fixed test amount
+                pgcCredited: 200, // 100 base + 100 bonus
+                status: 'PENDING_VERIFICATION', // This status will be updated by the commission function
+                purchaseDate: admin.firestore.FieldValue.serverTimestamp(),
+                registeredWithPurchase: true,
+            });
+        }
+        return Promise.resolve();
+    }).then(() => {
+        // Now, enqueue a task to process team rewards. This happens regardless of purchase.
         // This is a non-blocking call.
         const queue = getFunctions().taskQueue('processTeamRewards');
         return queue.enqueue({ newUserId: uid });
     }).catch(error => {
-        functions.logger.error("Error in onUserCreate transaction or enqueueing task:", error);
+        functions.logger.error("Error in onUserCreate transaction or follow-up tasks:", error);
     });
 });
