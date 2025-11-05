@@ -245,10 +245,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                         <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                     </>
                                 )}
+                                {(isSuperAdmin || userRole === 'User Management Admin') && (
+                                    <SidebarMenuSubItem><Link href="/users"><SidebarMenuSubButton>User Management</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                )}
                                 {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (
                                     <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                                 )}
-                                <SidebarMenuSubItem><Link href="/users"><SidebarMenuSubButton>User Management</SidebarMenuSubButton></Link></SidebarMenuSubItem>
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </Collapsible>

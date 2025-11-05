@@ -15,10 +15,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users, ClipboardList, CheckCircle, Briefcase, Megaphone, HelpCircle, UserPlus, RefreshCcw, Wrench } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, Briefcase, Megaphone, HelpCircle, UserPlus, RefreshCcw, Wrench, Users2 } from 'lucide-react';
 
 const adminNavItems = [
     { href: '/admin/create-admin', icon: UserPlus, label: 'Create Admin', description: 'Create new admin accounts and assign roles.', requiredRole: 'Super Admin' },
+    { href: '/users', icon: Users2, label: 'User Management', description: 'View, search, and manage all platform users.', requiredRole: ['Super Admin', 'User Management Admin'] },
     { href: '/admin/applications', icon: ClipboardList, label: 'Applications', description: 'Review and manage all user applications.', requiredRole: ['Super Admin', 'Franchisee Management Admin'] },
     { href: '/admin/jobs', icon: Briefcase, label: 'Job Management', description: 'Create and manage job postings.', requiredRole: ['Super Admin', 'Job Management Admin'] },
     { href: '/admin/social', icon: Megaphone, label: 'Social Media', description: 'Moderate social media content.', requiredRole: ['Super Admin', 'Social Media Management Admin'] },
