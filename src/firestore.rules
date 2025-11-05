@@ -2,84 +2,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if a user is an admin
-    function isAdmin() {
-      // This is now safer because it checks for the existence of the document first.
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
-    }
-
+    // Temporary rules for testing referral system
     match /users/{userId} {
-      // ANY authenticated user can create THEIR OWN user document.
-      // This is secure because the {userId} wildcard must match their own uid.
-      allow create: if request.auth != null && request.auth.uid == userId;
-
-      // A user can read THEIR OWN document.
-      // An admin can read ANY user's document.
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-
-      // A user can update THEIR OWN document.
-      // An admin can update ANY user's document.
-      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
-
-      // Only an admin can delete a user document.
-      allow delete: if request.auth != null && isAdmin();
-      
-      // Allow a user to query the 'users' collection to find their direct referrals.
-      allow list: if request.auth != null && request.query.where[0][2] == request.auth.uid;
+      allow read, write: if request.auth != null;
     }
-
-    match /transactions/{transactionId} {
-      // Admins can read all transaction logs for auditing.
-      allow read: if request.auth != null && isAdmin();
-      // Transactions are only created by secure Cloud Functions, not by clients.
-      allow write: if false;
+    
+    // Keep other collections restricted
+    match /transactions/{document} {
+      allow read, write: if false;
     }
-
-    match /presales/{presaleId} {
-        // Users can create their own presale verification requests.
-        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-        // Admins can read all presale documents to verify them.
-        allow read: if request.auth != null && isAdmin();
-        // Admins can update a presale document's status to 'COMPLETED'.
-        allow update: if request.auth != null && isAdmin();
-        // Allow list for admins to see all pending requests
-        allow list: if request.auth != null && isAdmin();
+    match /withdrawalRequests/{document} {
+      allow read, write: if false;
     }
-
-    match /withdrawalRequests/{requestId} {
-        // Users can create their own withdrawal requests.
-        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-        // Admins can read and update all withdrawal requests to process them.
-        allow read, update, list: if request.auth != null && isAdmin();
-    }
-
-    match /social_posts/{postId} {
-        // Any authenticated user can create a post.
-        allow create: if request.auth != null;
-        // Any user (even unauthenticated) can read posts.
-        allow read: if true;
-        // Users can only update or delete their own posts.
-        allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
-    }
-
-     match /forums/{postId} {
-        // Any authenticated user can create a forum post.
-        allow create: if request.auth != null;
-        // Any user (even unauthenticated) can read posts.
-        allow read: if true;
-        // Users can only update or delete their own posts.
-        allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
-    }
-
-    match /poll_responses/{responseId} {
-        // A user can create a response if the doc ID matches their UID and the poll ID.
-        allow create: if request.auth != null && responseId.split('_')[0] == request.auth.uid;
-        // A user can only read their own responses.
-        allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-        // Prevent updates to keep votes immutable.
-        allow update, delete: if false;
+    match /presales/{document} {
+      allow read, write: if false;
     }
   }
-}
+} 
