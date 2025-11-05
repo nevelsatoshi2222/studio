@@ -1,10 +1,13 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
     // Helper function to check if a user is an admin
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
+      // This is now safer because it checks for the existence of the document first.
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
     }
 
     match /users/{userId} {

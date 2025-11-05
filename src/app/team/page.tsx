@@ -94,7 +94,6 @@ export default function TeamPage() {
   }, [firestore, user]);
   
   const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
- //// const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
   const getAvatarUrl = (avatarId: string) => {
     return `https://picsum.photos/seed/${avatarId}/40/40`;
   };
