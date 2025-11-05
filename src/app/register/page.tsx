@@ -1,3 +1,4 @@
+
 'use client';
 import { Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/app-layout';
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { UserPlus } from 'lucide-react';
 import { countries } from '@/lib/data';
@@ -34,10 +36,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth } from '@/firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut, getIdTokenResult, IdTokenResult } from 'firebase/auth';
+import { useAuth, useFirestore } from '@/firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -55,6 +58,7 @@ const registrationSchema = z.object({
   referredBy: z.string().optional(),
   role: z.string().optional(),
   jobTitle: z.string().optional(),
+  buyPackage: z.boolean().default(false).optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -67,6 +71,7 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -87,11 +92,12 @@ function RegistrationForm() {
       area: '',
       state: '',
       country: '',
+      buyPackage: false,
     },
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth) {
+    if (!auth || !firestore) {
         toast({
            variant: 'destructive',
             title: 'Error',
@@ -100,41 +106,44 @@ function RegistrationForm() {
         return;
     }
     try {
-      // Step 1: Set custom claims for the user. We need a way to do this server-side.
-      // Since we can't directly call an admin function, we rely on the onUserCreate trigger
-      // to handle the role and referrer logic. We can pass the data via custom claims.
-      const functions = getFunctions(auth.app);
-      const addCustomClaims = httpsCallable(functions, 'addCustomClaims');
-      
-      // We will pass the referrer code and role to be set as custom claims
-      // This is a placeholder for where such a function would be called.
-      // For now, the `onUserCreate` function will handle this logic.
-      const registrationPayload = {
-          referredBy: data.referredBy,
-          role: data.role,
-          country: data.country
-      };
-      
-      // Step 2: Create the user in Firebase Auth.
+      // Step 1: Create the user in Firebase Auth. We need to do this first to get a UID.
+      // We pass the auth instance, but don't set custom claims here directly.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Step 3: Update their Auth profile with their name.
+      // Step 2: Update their Auth profile with their name.
       await updateProfile(user, { displayName: data.name });
 
-      // Step 4: Manually set custom claims by calling a Cloud Function if necessary, or just rely on onUserCreate.
-      // In this setup, we'll let onUserCreate handle everything upon creation. It can read the form data if passed.
-      // However, we don't have a direct way to pass the form data to the onUserCreate function.
-      // So, onUserCreate will rely on its own logic for now. The referrer code needs to be passed.
-      // Let's assume we have a function to set a referrer claim.
+      // Step 3 (Conditional): If buy package is checked, create a presale document.
+      // This will trigger the `distributeCommission` cloud function.
+      if (data.buyPackage) {
+        const presaleCollection = collection(firestore, 'presales');
+        await addDoc(presaleCollection, {
+            userId: user.uid,
+            amountUSDT: 100,
+            pgcCredited: 200, // For the $100 package, it's 100 PGC + 100 PGC bonus
+            status: 'PENDING_VERIFICATION', // The function will handle this
+            purchaseDate: serverTimestamp(),
+            registeredWithPurchase: true, // Flag for tracking
+        });
+         toast({
+            title: 'Purchase Submitted',
+            description: 'Test purchase of $100 package has been logged for commission testing.',
+        });
+      }
 
+      // Step 4: The `onUserCreate` Cloud Function will handle creating the user document
+      // in Firestore, including the `referredBy` and `role` fields. This is more secure.
+      // We just need to make sure the user is created in Auth.
+
+      // Step 5: Send verification email
       const actionCodeSettings = {
         url: `${window.location.origin}/login`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
 
-      // Step 5: Sign the user out to force them to verify their email.
+      // Step 6: Sign the user out to force them to verify their email.
       await signOut(auth);
 
       toast({
@@ -383,6 +392,30 @@ function RegistrationForm() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="buyPackage"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Register with a $100 USD package purchase (for testing)
+                      </FormLabel>
+                      <FormDescription>
+                        Check this box to automatically create a $100 presale purchase for this user upon registration. This will trigger the commission distribution for testing purposes.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
