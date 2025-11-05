@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign, Award, Info } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award, Info, Gem, Star as StarIcon, Crown, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
@@ -58,8 +58,25 @@ const UserRowSkeleton = () => (
     </TableRow>
 );
 
-const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, progress: number, goal: number }) => {
-    const Icon = tier.icon;
+const rankIcons: { [key: string]: React.FC<any> } = {
+    'Bronze': Users,
+    'Silver': Award,
+    'Gold': Gem,
+    'Emerald': Shield,
+    'Platinum': StarIcon,
+    'Diamond': Shield,
+    'Crown': Crown,
+    'Bronze Star': StarIcon,
+    'Silver Star': Award,
+    'Gold Star': Gem,
+    'Emerald Star': Shield,
+    'Platinum Star': StarIcon,
+    'Diamond Star': Shield,
+    'Crown Star': Crown,
+};
+
+const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier; progress: number; goal: number }) => {
+    const Icon = rankIcons[tier.name] || Award;
     const isAchieved = progress >= goal;
     const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : 0;
 
@@ -77,7 +94,7 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, p
                 
                 <div className="mt-2">
                     <Progress value={progressPercent} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
+                    <p className="text-xs text-muted-foreground mt-1">{progress.toLocaleString()} / {goal.toLocaleString()} members</p>
                 </div>
 
                 <div className={`text-xs font-semibold mt-2 ${isAchieved ? 'text-green-700' : 'text-primary/80'}`}>{tier.limit}</div>
@@ -131,15 +148,25 @@ export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // Fetch the current user's document to get the list of direct referral IDs
+  // Fetch the current user's document to get referral IDs, ranks, and team sizes
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ directReferrals: string[] }>(userDocRef);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ 
+    directReferrals: string[];
+    totalTeamSize: number;
+    paidTeamSize: number;
+    freeRank: string;
+    paidRank: string;
+   }>(userDocRef);
 
   const directMemberIds = userProfile?.directReferrals || [];
+  const totalTeamSize = userProfile?.totalTeamSize || 0;
+  const paidTeamSize = userProfile?.paidTeamSize || 0;
+  const currentFreeRank = userProfile?.freeRank || 'None';
+  const currentPaidRank = userProfile?.paidRank || 'None';
 
   const EarningTable = () => {
     const earningsData = Array.from({ length: 15 }, (_, i) => {
@@ -188,40 +215,46 @@ export default function TeamPage() {
   };
   
   const RewardsDashboard = () => {
-    const directReferralCount = directMemberIds.length;
+    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
+    const nextFreeRank = freeTrackRewards[freeRankIndex + 1];
+
+    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
+    const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
 
     return (
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
             <CardTitle>Free User Track</CardTitle>
-            <CardDescription>Rewards for growing your network with free members.</CardDescription>
+            <CardDescription>Your current rank is: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-              <RewardTierCard tier={freeTrackRewards[0]} progress={directReferralCount} goal={5} />
-               <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Deeper Rank Progress Coming Soon</AlertTitle>
-                <AlertDescription>
-                    Calculating ranks beyond Bronze requires deep analysis of your network, which is being developed as a secure backend process for accuracy and performance. This section will update automatically when live.
-                </AlertDescription>
-            </Alert>
+            {nextFreeRank ? (
+              <RewardTierCard tier={nextFreeRank} progress={totalTeamSize} goal={nextFreeRank.requirement} />
+            ) : (
+                <Alert>
+                    <Crown className="h-4 w-4" />
+                    <AlertTitle>Congratulations!</AlertTitle>
+                    <AlertDescription>You have achieved the highest rank in the Free User Track!</AlertDescription>
+                </Alert>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Paid User (Star) Track</CardTitle>
-            <CardDescription>Higher rewards when your referrals purchase or stake.</CardDescription>
+            <CardDescription>Your current rank is: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             <RewardTierCard tier={paidTrackRewards[0]} progress={0} goal={5} />
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>Feature in Development</AlertTitle>
-              <AlertDescription>
-                Tracking for paid user achievements is being built. This section will update automatically once live.
-              </AlertDescription>
-            </Alert>
+             {nextPaidRank ? (
+              <RewardTierCard tier={nextPaidRank} progress={paidTeamSize} goal={nextPaidRank.requirement} />
+            ) : (
+                <Alert>
+                    <Crown className="h-4 w-4" />
+                    <AlertTitle>Congratulations!</AlertTitle>
+                    <AlertDescription>You have achieved the highest rank in the Paid User Track!</AlertDescription>
+                </Alert>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -287,7 +320,7 @@ export default function TeamPage() {
               <CardHeader>
                 <CardTitle>Team Summary</CardTitle>
                 <CardDescription>
-                  An overview of your network depth.
+                  An overview of your network depth. This data is updated automatically when a new member joins your downline.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-4">
@@ -295,15 +328,9 @@ export default function TeamPage() {
                     <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
-                 <div className="p-4 rounded-lg bg-muted md:col-span-2">
-                    <p className="text-sm text-muted-foreground">Full Team Tree (Levels 2-15)</p>
-                    <Alert className="mt-2">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Under Development</AlertTitle>
-                      <AlertDescription>
-                        Calculating the full team tree across 15 levels is a complex operation. We are building an efficient and secure backend process to provide this data. Please check back soon!
-                      </AlertDescription>
-                    </Alert>
+                 <div className="p-4 rounded-lg bg-muted">
+                    <div className="text-sm text-muted-foreground">Total Team Size (All 15 Levels)</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-24" /> : totalTeamSize}</div>
                 </div>
               </CardContent>
             </Card>
@@ -327,7 +354,7 @@ export default function TeamPage() {
                   </TableHeader>
                   <TableBody>
                     {isProfileLoading ? (
-                      <UserRowSkeleton />
+                      <><UserRowSkeleton /><UserRowSkeleton /></>
                     ) : directMemberIds.length > 0 ? (
                         directMemberIds.map((memberId) => (
                            <TeamMemberRow key={memberId} memberId={memberId} />

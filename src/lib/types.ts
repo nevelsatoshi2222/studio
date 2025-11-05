@@ -8,6 +8,7 @@ export type Transaction = {
   purchaseRef?: any; // DocumentReference
   level?: number;
   timestamp: any; // Timestamp
+  rewardName?: string;
 };
 
 export type User = {
@@ -31,6 +32,11 @@ export type User = {
   avatarId: string;
   status: 'Active' | 'Pending' | 'Rejected' | 'Banned';
   jobTitle?: string;
+  totalTeamSize?: number;
+  paidTeamSize?: number;
+  freeRank?: string;
+  paidRank?: string;
+  isPaid?: boolean;
 };
 
 export type Presale = {
@@ -234,6 +240,7 @@ export type AffiliateRewardTier = {
     reward: string;
     limit: string;
     requirement: string;
+    goal?: number;
 };
 
 export type SubmittedContent = {

@@ -8,12 +8,14 @@ import { listFlows } from 'genkit';
 // Import functions for their side effects, which registers them.
 import * as onUserCreate from './onUserCreate';
 import * as distributeCommission from './distributeCommission';
+import * as processTeamRewards from './processTeamRewards';
 import '@/ai/flows/national-issues-flow';
 import '@/ai/flows/state-issues-flow';
 
 // Export Cloud Functions for deployment
 export const onUserCreateTrigger = onUserCreate.onUserCreate;
 export const distributeCommissionTrigger = distributeCommission.distributeCommission;
+export const processTeamRewardsTrigger = processTeamRewards.processTeamRewards;
 
 
 // Generic handler for calling Genkit flows from the client or Firebase Studio UI.

@@ -40,7 +40,6 @@ import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -71,7 +70,6 @@ function RegistrationForm() {
   const jobTitle = searchParams.get('title');
 
   const auth = useAuth();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const form = useForm<RegistrationFormValues>({
@@ -97,7 +95,7 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    if (!auth || !firestore) {
+    if (!auth) {
         toast({
            variant: 'destructive',
             title: 'Error',
@@ -106,35 +104,50 @@ function RegistrationForm() {
         return;
     }
     try {
-      // Step 1: Create the user in Firebase Auth. We need to do this first to get a UID.
-      // We pass the auth instance, but don't set custom claims here directly.
+      // Step 1: Create a temporary auth instance to set custom claims.
+      // This allows us to pass data to the onUserCreate Cloud Function securely.
+      const functions = getFunctions(auth.app);
+      const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+      
+      const claims = {
+        referredBy: data.referredBy,
+        country: data.country,
+        role: data.role,
+        isPaid: data.buyPackage
+      };
+
+      // We don't need to await this, but we create the user with claims in mind.
+      // The actual user creation happens in the onUserCreate trigger.
+      
+      // Step 2: Create the user in Firebase Auth.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Step 2: Update their Auth profile with their name.
+      // Step 3: Set custom claims for the new user.
+      await setCustomClaims({ uid: user.uid, claims });
+
+      // Step 4: Update their Auth profile with their name.
       await updateProfile(user, { displayName: data.name });
 
-      // Step 3 (Conditional): If buy package is checked, create a presale document.
-      // This will trigger the `distributeCommission` cloud function.
+      // The onUserCreate cloud function will automatically trigger to create the Firestore document.
+      // If buyPackage is checked, we also need to log this for the commission function.
       if (data.buyPackage) {
-        const presaleCollection = collection(firestore, 'presales');
-        await addDoc(presaleCollection, {
-            userId: user.uid,
-            amountUSDT: 100,
-            pgcCredited: 200, // For the $100 package, it's 100 PGC + 100 PGC bonus
-            status: 'PENDING_VERIFICATION', // The function will handle this
-            purchaseDate: serverTimestamp(),
-            registeredWithPurchase: true, // Flag for tracking
+        // This is a temporary solution for testing. In production, this would be tied to a real payment.
+        const firestore = useFirestore(); // This hook should be available if auth is.
+        const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+        await addDoc(collection(firestore, 'presales'), {
+          userId: user.uid,
+          amountUSDT: 100,
+          pgcCredited: 200, // 100 PGC + 100 Bonus
+          status: 'PENDING_VERIFICATION', // This will trigger the commission function
+          purchaseDate: serverTimestamp(),
+          registeredWithPurchase: true,
         });
-         toast({
-            title: 'Purchase Submitted',
-            description: 'Test purchase of $100 package has been logged for commission testing.',
+        toast({
+          title: "Purchase Submitted",
+          description: "Test purchase of $100 package logged for commission testing.",
         });
       }
-
-      // Step 4: The `onUserCreate` Cloud Function will handle creating the user document
-      // in Firestore, including the `referredBy` and `role` fields. This is more secure.
-      // We just need to make sure the user is created in Auth.
 
       // Step 5: Send verification email
       const actionCodeSettings = {

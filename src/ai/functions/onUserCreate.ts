@@ -2,6 +2,7 @@
 'use server';
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { getFunctions } from 'firebase-admin/functions';
 
 // This Cloud Function is the primary and ONLY method for creating a user document.
 // It is a secure, server-side trigger that runs after a user is created in Firebase Auth.
@@ -106,11 +107,24 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
-            directReferrals: [] // Initialize with an empty array
+            directReferrals: [], // Initialize with an empty array for the new user
+            totalTeamSize: 0, // Initialize team size
+            freeRank: 'None',
+            paidRank: 'None',
+            isPaid: user.customClaims?.isPaid || false // Track if user made a purchase on registration
         };
 
         transaction.set(userDocRef, userDocumentData);
         functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
+        
+        // After transaction commit, trigger the team rewards processing task.
+        // We do this outside the transaction to avoid contention.
+    }).then(() => {
+        // Enqueue a task to process team rewards for the new user and their upline.
+        // This is a non-blocking call.
+        const queue = getFunctions().taskQueue('processTeamRewards');
+        return queue.enqueue({ newUserId: uid });
+    }).catch(error => {
+        functions.logger.error("Error in onUserCreate transaction or enqueueing task:", error);
     });
 });
-
