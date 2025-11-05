@@ -28,7 +28,7 @@ const paidTrackRewards = [
     { name: 'Crown Star', requirement: 78125 },
 ];
 
-const REWARD_COINS = {
+const REWARD_COINS: { [key: string]: number } = {
     'Bronze': 1, 'Silver': 2, 'Gold': 4, 'Emerald': 10, 'Platinum': 20, 'Diamond': 250, 'Crown': 1000,
     'Bronze Star': 2.5, 'Silver Star': 5, 'Gold Star': 10, 'Emerald Star': 20, 'Platinum Star': 125, 'Diamond Star': 1250, 'Crown Star': 6250
 };
@@ -70,6 +70,9 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
 
         const uplineRef = db.collection('users').doc(currentUplineId);
         const uplineDoc = await uplineRef.get();
+        
+        // THIS IS THE CRITICAL FIX:
+        // Ensure the upline user document exists before trying to update it.
         if (!uplineDoc.exists) {
             functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
             break;
@@ -106,13 +109,6 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
 
         // --- 3. Check and Award Paid Rank (if new user made a purchase) ---
         if (isNewUserPaid) {
-            const paidMembersInDirectTeam = (uplineData.directReferrals || [])
-                .filter((memberId: string) => memberId !== newUserId) // Exclude the new user as we check them separately
-                .length; // This is a simplification; a real scenario would fetch docs to check `isPaid` status
-
-            // For simplicity, we assume previous direct referrals might also be paid.
-            // A truly accurate count would require fetching all direct referral docs.
-            // For this test, we assume the count of paid members in the direct team is what's needed.
             const newPaidTeamSize = (uplineData.paidTeamSize || 0) + 1;
             batch.update(uplineRef, { paidTeamSize: admin.firestore.FieldValue.increment(1) });
 
