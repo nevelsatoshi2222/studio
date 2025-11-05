@@ -46,9 +46,10 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
     
     // The client may pass custom claims during registration, including a referrer code.
-    const referredByCode = user.customClaims?.referredByCode as string | undefined;
+    const customClaims = (await admin.auth().getUser(uid)).customClaims;
+    const referredByCode = customClaims?.referredByCode as string | undefined;
 
-    functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, user.customClaims);
+    functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, customClaims);
 
 
     const userDocRef = db.collection('users').doc(uid);
@@ -89,7 +90,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
         
-        let finalRole = user.customClaims?.role as string || 'User';
+        let finalRole = customClaims?.role as string || 'User';
         // Special case for the root admin user
         if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
             finalRole = 'Super Admin';
@@ -107,7 +108,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             district: '',
             area: '',
             state: '',
-            country: user.customClaims?.country || '',
+            country: customClaims?.country || '',
             pgcBalance: 0,
             referredBy: referrerUid || 'ADMIN_ROOT_USER', 
             referralCode: referralCode,
@@ -122,7 +123,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             paidTeamSize: 0,
             freeRank: 'None',
             paidRank: 'None',
-            isPaid: user.customClaims?.isPaid || false // Track if user made a purchase on registration
+            isPaid: customClaims?.isPaid || false // Track if user made a purchase on registration
         };
 
         transaction.set(userDocRef, userDocumentData);
@@ -131,7 +132,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     }).then(() => {
         // After successfully creating the user, check if a purchase was made during registration.
         // If so, create the presale document which will trigger commission distribution.
-        const isPaid = user.customClaims?.isPaid as boolean | undefined;
+        const isPaid = customClaims?.isPaid as boolean | undefined;
         if (isPaid) {
             functions.logger.log(`User ${uid} registered with a package. Creating presale document.`);
             const presaleCollection = db.collection('presales');
