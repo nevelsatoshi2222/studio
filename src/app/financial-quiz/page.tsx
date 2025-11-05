@@ -254,7 +254,15 @@ function PollCard({ poll, userHasSubmitted }: { poll: Poll; userHasSubmitted: bo
             <CardTitle className="mt-2">{poll.question}</CardTitle>
             {userHasSubmitted && <Badge variant="secondary" className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Completed</Badge>}
         </div>
-        <CardDescription>{poll.explanation}</CardDescription>
+        {userHasSubmitted ? (
+            <CardDescription className="pt-2 text-green-600 font-medium">
+                <span className="font-bold">Explanation:</span> {poll.explanation}
+            </CardDescription>
+        ) : (
+            <CardDescription>
+                Select your answer(s) below. The explanation will be revealed after you submit your vote.
+            </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="space-y-8">
         <div>
