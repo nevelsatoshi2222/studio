@@ -22,13 +22,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, UserPlus, DollarSign, Award, Info } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
 import { AffiliateRewardTier } from '@/lib/types';
 import { Progress } from '@/components/ui/progress';
+import React from 'react';
+
 
 type TeamMember = {
   id: string;
@@ -84,20 +86,61 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: AffiliateRewardTier, p
     );
 };
 
+// This component fetches data for a single member using their ID.
+function TeamMemberRow({ memberId }: { memberId: string }) {
+    const firestore = useFirestore();
+    const memberDocRef = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return doc(firestore, 'users', memberId);
+    }, [firestore, memberId]);
+
+    const { data: member, isLoading } = useDoc<TeamMember>(memberDocRef);
+
+    const getAvatarUrl = (avatarId: string) => `https://picsum.photos/seed/${avatarId}/40/40`;
+
+    if (isLoading) {
+        return <UserRowSkeleton />;
+    }
+
+    if (!member) {
+        return (
+            <TableRow>
+                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data for ID: {memberId}</TableCell>
+            </TableRow>
+        );
+    }
+
+    return (
+        <TableRow key={member.id}>
+            <TableCell>
+                <div className="flex items-center gap-3">
+                    <Avatar>
+                        <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{member.name}</span>
+                </div>
+            </TableCell>
+            <TableCell>{member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
+            <TableCell className="text-right">{member.email}</TableCell>
+        </TableRow>
+    );
+}
+
 export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  const directMembersQuery = useMemoFirebase(() => {
+  // Fetch the current user's document to get the list of direct referral IDs
+  const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return query(collection(firestore, 'users'), where('referredBy', '==', user.uid));
+    return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
-  
-  const { data: directMembers, isLoading: areDirectMembersLoading } = useCollection<TeamMember>(directMembersQuery);
-  const getAvatarUrl = (avatarId: string) => {
-    return `https://picsum.photos/seed/${avatarId}/40/40`;
-  };
-  
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ directReferrals: string[] }>(userDocRef);
+
+  const directMemberIds = userProfile?.directReferrals || [];
+
   const EarningTable = () => {
     const earningsData = Array.from({ length: 15 }, (_, i) => {
       const level = i + 1;
@@ -145,7 +188,7 @@ export default function TeamPage() {
   };
   
   const RewardsDashboard = () => {
-    const directReferralCount = directMembers?.length || 0;
+    const directReferralCount = directMemberIds.length;
 
     return (
       <div className="grid md:grid-cols-2 gap-8">
@@ -250,7 +293,7 @@ export default function TeamPage() {
               <CardContent className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
                     <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
-                    <div className="text-3xl font-bold">{areDirectMembersLoading ? <Skeleton className="h-8 w-16" /> : directMembers?.length || 0}</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted md:col-span-2">
                     <p className="text-sm text-muted-foreground">Full Team Tree (Levels 2-15)</p>
@@ -268,7 +311,7 @@ export default function TeamPage() {
           <TabsContent value="direct-members" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Direct Members ({directMembers?.length || 0})</CardTitle>
+                <CardTitle>Direct Members ({directMemberIds.length})</CardTitle>
                 <CardDescription>
                   Users you have personally referred to the platform (Level 1).
                 </CardDescription>
@@ -283,26 +326,11 @@ export default function TeamPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {areDirectMembersLoading ? (
-                        <>
-                            <UserRowSkeleton />
-                            <UserRowSkeleton />
-                        </>
-                    ) : directMembers && directMembers.length > 0 ? (
-                        directMembers.map((member) => (
-                          <TableRow key={member.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} />
-                                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium">{member.name}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
-                            <TableCell className="text-right">{member.email}</TableCell>
-                          </TableRow>
+                    {isProfileLoading ? (
+                      <UserRowSkeleton />
+                    ) : directMemberIds.length > 0 ? (
+                        directMemberIds.map((memberId) => (
+                           <TeamMemberRow key={memberId} memberId={memberId} />
                         ))
                     ) : (
                          <TableRow>

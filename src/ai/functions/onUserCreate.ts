@@ -15,11 +15,11 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 /**
- * Finds a user ID by their referral code.
+ * Finds a user by their referral code and returns their full document data.
  * @param {string} referralCode The referral code to look for.
- * @returns {Promise<string|null>} The UID of the user with the given code, or null if not found.
+ * @returns {Promise<admin.firestore.DocumentSnapshot|null>} The snapshot of the user with the given code, or null if not found.
  */
-async function findUserByReferralCode(referralCode: string): Promise<string | null> {
+async function findUserByReferralCode(referralCode: string): Promise<admin.firestore.DocumentSnapshot | null> {
     if (!referralCode) {
         return null;
     }
@@ -32,8 +32,8 @@ async function findUserByReferralCode(referralCode: string): Promise<string | nu
         return null;
     }
 
-    // Return the UID of the found user.
-    return snapshot.docs[0].id;
+    // Return the full document snapshot of the found user.
+    return snapshot.docs[0];
 }
 
 
@@ -47,12 +47,10 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     // The client may pass custom claims during registration, including a referrer code.
     const referredByCode = user.customClaims?.referredBy as string | undefined;
 
-    // The user document reference
     const userDocRef = db.collection('users').doc(uid);
 
     return db.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userDocRef);
-        // This check is a safety net. In a normal flow, the document should never exist yet.
         if (userDoc.exists) {
             functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
             return;
@@ -60,28 +58,37 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 
         functions.logger.log(`Creating new user document for ${uid}.`);
 
-        // --- THIS IS THE FIX ---
-        // 1. Asynchronously find the referrer's UID using their referral code.
         let referrerUid: string | null = null;
+        let referrerDocRef: admin.firestore.DocumentReference | null = null;
+
         if (referredByCode) {
-            referrerUid = await findUserByReferralCode(referredByCode);
+            const referrerDoc = await findUserByReferralCode(referredByCode);
+            if (referrerDoc) {
+                referrerUid = referrerDoc.id;
+                referrerDocRef = referrerDoc.ref;
+            }
+        }
+        
+        // If a valid referrer was found, add the new user's UID to the referrer's directReferrals array.
+        if (referrerDocRef) {
+            transaction.update(referrerDocRef, {
+                directReferrals: admin.firestore.FieldValue.arrayUnion(uid)
+            });
+             functions.logger.log(`Scheduled update for referrer ${referrerUid} to add new user ${uid}.`);
         }
 
-        // 2. Generate a unique referral code for the new user.
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
-
-        // 3. Default role is 'User'. Special roles can be assigned.
+        
         let finalRole = user.customClaims?.role as string || 'User';
         if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
             finalRole = 'Super Admin';
         }
         
-        // 4. Prepare the complete user document data.
         const userDocumentData = {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
             email: email,
-            phone: user.phoneNumber || '',
+            phone: user.phoneNumber || null,
             street: '',
             village: '',
             block: '',
@@ -91,16 +98,15 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             state: '',
             country: user.customClaims?.country || '',
             pgcBalance: 0,
-            // 5. Save the referrer's UID. If not found, default to a root admin.
             referredBy: referrerUid || 'ADMIN_ROOT_USER', 
             referralCode: referralCode,
             walletPublicKey: null,
             isVerified: false,
-            // THIS IS THE FIX: All regular users start as 'Active'.
             status: 'Active',
             role: finalRole,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
+            directReferrals: [] // Initialize with an empty array
         };
 
         transaction.set(userDocRef, userDocumentData);
