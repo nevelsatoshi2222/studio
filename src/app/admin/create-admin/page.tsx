@@ -14,7 +14,7 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { ShieldAlert, UserPlus } from 'lucide-react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -86,6 +86,10 @@ function CreateAdminForm() {
                   country: 'N/A' // Admins don't need a country for voting
                 } 
             });
+
+            // IMPORTANT: Sign out the newly created admin from the secondary auth instance
+            // This prevents the new user's session from interfering with the current admin's session.
+            await signOut(secondaryAuth);
             
             toast({
                 title: "Admin Account Initiated",

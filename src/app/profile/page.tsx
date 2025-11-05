@@ -103,6 +103,14 @@ export default function ProfilePage() {
     },
   });
 
+  // This logic determines if the user just registered.
+  const isNewUser = user && (Date.now() - new Date(user.metadata.creationTime || 0).getTime() < 60000);
+  
+  // This is the key fix: Optimistically generate the referral code on the client for new users.
+  const optimisticReferralCode = user ? `PGC-${user.uid.substring(0, 8).toUpperCase()}` : null;
+  const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : 'Generating...');
+
+
   useEffect(() => {
     if (userProfile) {
       form.reset({
@@ -186,24 +194,19 @@ export default function ProfilePage() {
     });
   };
 
-  const referralLink = user && userProfile?.referralCode ? `${window.location.origin}/register?ref=${userProfile.referralCode}` : null;
+  const referralLink = displayReferralCode !== 'Generating...' ? `${window.location.origin}/register?ref=${displayReferralCode}` : null;
 
   const copyToClipboard = (textToCopy: string | null, toastMessage: string) => {
     if (!textToCopy) return;
-  // Temporary clipboard fix
-const textArea = document.createElement('textarea');
-textArea.value = textToCopy;
-document.body.appendChild(textArea);
-textArea.select();
-document.execCommand('copy');
-document.body.removeChild(textArea);
-    toast({
-      title: 'Copied!',
-      description: toastMessage,
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        toast({
+          title: 'Copied!',
+          description: toastMessage,
+        });
     });
   };
 
-  if (isUserLoading || (user && isProfileLoading)) {
+  if (isUserLoading || (user && isProfileLoading && !isNewUser)) {
     return <AppLayout><ProfileLoadingSkeleton /></AppLayout>;
   }
 
@@ -320,12 +323,12 @@ document.body.removeChild(textArea);
                         <Input
                             id="referral-code-display"
                             readOnly
-                            value={userProfile?.referralCode || 'Generating...'}
+                            value={displayReferralCode}
                             className="font-mono text-lg text-primary flex-1"
                         />
                         <Button
-                            onClick={() => copyToClipboard(userProfile?.referralCode, 'Your referral code has been copied.')}
-                            disabled={!userProfile?.referralCode}
+                            onClick={() => copyToClipboard(displayReferralCode, 'Your referral code has been copied.')}
+                            disabled={displayReferralCode === 'Generating...'}
                         >
                             <Copy className="mr-2 h-4 w-4"/> Copy Code
                         </Button>
