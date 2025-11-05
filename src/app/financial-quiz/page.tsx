@@ -20,13 +20,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Award, CheckCircle, Loader2 } from 'lucide-react';
+import { Award, CheckCircle, Loader2, Trophy, Star, Shield, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, updateDoc, increment, collection, where, query } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { QuizRewardTier } from '@/lib/types';
+import React from 'react';
+
+const quizRewardTiers: QuizRewardTier[] = [
+  {
+    level: 'Initial Qualification',
+    icon: Users,
+    rewards: [
+      { score: '< 40% Correct', prize: '2 PGC', limit: 'First 20,000 Achievers' },
+      { score: '> 40% Correct', prize: '3 PGC', limit: 'First 5,000 Achievers' },
+      { score: '100% Correct', prize: '5 PGC', limit: 'First 2,000 Achievers (Qualifies for next round)' },
+    ],
+  },
+  {
+    level: 'Qualifier Round',
+    icon: Shield,
+    rewards: [
+      { score: 'Top 200 Scorers', prize: '20 PGC', limit: 'Qualifies for Semi-Finals' },
+    ],
+  },
+  {
+    level: 'Semi-Final Round',
+    icon: Star,
+    rewards: [
+      { score: 'Top 20 Scorers', prize: '100 PGC', limit: 'Qualifies for Finals' },
+    ],
+  },
+  {
+    level: 'Final Round',
+    icon: Trophy,
+    rewards: [
+      { score: '1st Place Winner', prize: '5,000 PGC', limit: '' },
+      { score: '4 Runners-up', prize: '1,000 PGC', limit: '' },
+    ],
+  },
+];
 
 const quizPolls = [
     {
@@ -188,12 +224,12 @@ function PollCard({ poll, userHasSubmitted }: { poll: Poll; userHasSubmitted: bo
       // 2. Award PGC for participation (if not already awarded)
       const userRef = doc(firestore, 'users', user.uid);
       await updateDoc(userRef, {
-        pgcBalance: increment(1) // Award 1 PGC for participation
+        pgcBalance: increment(2) // Award base 2 PGC for participation
       });
 
       toast({
         title: "Vote Submitted!",
-        description: `Your response for "${poll.question.substring(0, 30)}..." has been recorded. You've earned 1 PGC!`,
+        description: `Your response for "${poll.question.substring(0, 30)}..." has been recorded. You've earned PGC for participating!`,
       });
 
       // The parent component's state will update via useCollection, automatically disabling this card.
@@ -265,13 +301,12 @@ function PollCard({ poll, userHasSubmitted }: { poll: Poll; userHasSubmitted: bo
       <CardFooter>
         <Button onClick={handleSubmit} disabled={!isAnyOptionSelected || isSubmitting || userHasSubmitted}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {userHasSubmitted ? 'Vote Submitted' : 'Submit Votes & Earn 1 PGC'}
+            {userHasSubmitted ? 'Vote Submitted' : 'Submit & Earn PGC'}
         </Button>
       </CardFooter>
     </Card>
   );
 };
-
 
 export default function FinancialQuizPage() {
   const { user } = useUser();
@@ -292,34 +327,59 @@ export default function FinancialQuizPage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8 max-w-3xl mx-auto">
+      <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl font-headline">Financial Awareness Poll</CardTitle>
-            <CardDescription>Test your knowledge, become an informed citizen, and share your opinion on key financial topics. Earn PGC for participating!</CardDescription>
+            <CardTitle className="text-3xl font-headline">Financial Awareness Quiz</CardTitle>
+            <CardDescription>Test your knowledge on key financial topics to earn rewards and qualify for the main tournament.</CardDescription>
           </CardHeader>
-          {!user ? (
-            <CardContent>
-              <Alert>
-                <Award className="h-4 w-4" />
-                <AlertTitle>Please Login to Participate</AlertTitle>
-                <AlertDescription>
-                  You must be logged in to participate in the poll and earn rewards. <Link href="/login" className="font-bold text-primary hover:underline">Login Now</Link>
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          ) : (
-            <CardContent>
-              <Alert className="border-primary">
-                  <Award className="h-4 w-4 text-primary" />
-                  <AlertTitle className="font-bold text-primary">Poll Instructions</AlertTitle>
-                  <AlertDescription>
-                      Review each question, select the answers you agree with, and specify your level of agreement. You'll earn 1 PGC for each poll you complete.
-                  </AlertDescription>
-              </Alert>
-            </CardContent>
-          )}
         </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-3"><Trophy className="h-6 w-6 text-primary" /> Quiz Tournament Rules & Rewards</CardTitle>
+                <CardDescription>Achieve high scores to earn PGC and advance through the tournament rounds.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {quizRewardTiers.map((tier, index) => {
+                    const Icon = tier.icon;
+                    return (
+                         <div key={index} className="rounded-lg border">
+                             <div className="p-4 bg-muted/50 rounded-t-lg">
+                                <h3 className="font-bold text-lg flex items-center gap-3"><Icon className="h-5 w-5 text-primary" /> {tier.level}</h3>
+                            </div>
+                            <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {tier.rewards.map((reward, rewardIndex) => (
+                                     <div key={rewardIndex} className="p-3 rounded-md bg-background border">
+                                        <p className="font-semibold text-primary text-xl">{reward.prize}</p>
+                                        <p className="text-sm text-muted-foreground font-medium">{reward.score}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{reward.limit}</p>
+                                    </div>
+                                ))}
+                            </div>
+                         </div>
+                    )
+                })}
+            </CardContent>
+        </Card>
+
+        {!user ? (
+          <Alert>
+            <Award className="h-4 w-4" />
+            <AlertTitle>Please Login to Participate</AlertTitle>
+            <AlertDescription>
+              You must be logged in to participate in the polls and earn rewards. <Link href="/login" className="font-bold text-primary hover:underline">Login Now</Link>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert className="border-primary">
+              <Award className="h-4 w-4 text-primary" />
+              <AlertTitle className="font-bold text-primary">Poll Instructions</AlertTitle>
+              <AlertDescription>
+                  Review each question and select the answers you agree with. Your rewards will be calculated based on your final score and the tournament rules above.
+              </AlertDescription>
+          </Alert>
+        )}
         
         {user && (
             <div className="space-y-6">

@@ -250,3 +250,13 @@ export type SubmittedContent = {
   status: 'Pending' | 'Approved' | 'Rejected';
   views?: number;
 };
+
+export type QuizRewardTier = {
+    level: string;
+    icon: LucideIcon;
+    rewards: {
+        score: string;
+        prize: string;
+        limit: string;
+    }[];
+};
