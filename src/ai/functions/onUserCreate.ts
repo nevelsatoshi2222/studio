@@ -48,6 +48,9 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     // The client may pass custom claims during registration, including a referrer code.
     const referredByCode = user.customClaims?.referredByCode as string | undefined;
 
+    functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, user.customClaims);
+
+
     const userDocRef = db.collection('users').doc(uid);
 
     return db.runTransaction(async (transaction) => {
@@ -63,12 +66,17 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         let referrerDocRef: admin.firestore.DocumentReference | null = null;
 
         if (referredByCode) {
+            functions.logger.log(`User ${uid} was referred by code: ${referredByCode}. Searching for referrer.`);
             const referrerDoc = await findUserByReferralCode(referredByCode);
             if (referrerDoc) {
                 referrerUid = referrerDoc.id;
                 referrerDocRef = referrerDoc.ref;
                 functions.logger.log(`Found referrer ${referrerUid} for new user ${uid}.`);
+            } else {
+                functions.logger.warn(`Referrer with code ${referredByCode} was not found.`);
             }
+        } else {
+            functions.logger.log(`User ${uid} has no referrer code.`);
         }
         
         // If a valid referrer was found, add the new user's UID to the referrer's directReferrals array.
@@ -140,9 +148,12 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     }).then(() => {
         // Now, enqueue a task to process team rewards. This happens regardless of purchase.
         // This is a non-blocking call.
+        functions.logger.log(`Enqueuing team reward processing for new user ${uid}.`);
         const queue = getFunctions().taskQueue('processTeamRewards');
         return queue.enqueue({ newUserId: uid });
     }).catch(error => {
         functions.logger.error("Error in onUserCreate transaction or follow-up tasks:", error);
+        // Throwing the error ensures that Firebase knows the function failed
+        throw new functions.https.HttpsError('internal', 'Failed to complete user creation process.');
     });
 });
