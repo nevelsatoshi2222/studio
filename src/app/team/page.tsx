@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -21,41 +22,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, UserPlus, DollarSign, Award, Crown, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import React from 'react';
-
-// Reward data structure
-const freeTrackRewards = [
-  { name: 'Bronze', reward: '1 Coin', requirement: '5 direct free referrals', limit: 'First 78,125 Achievers' },
-  { name: 'Silver', reward: '2 Coins', requirement: '5 team members achieve Bronze', limit: 'First 15,625 Achievers' },
-  { name: 'Gold', reward: '4 Coins', requirement: '5 team members achieve Silver', limit: 'First 3,125 Achievers' },
-  { name: 'Emerald', reward: '10 Coins', requirement: '5 team members achieve Gold', limit: 'First 625 Achievers' },
-  { name: 'Platinum', reward: '20 Coins', requirement: '5 team members achieve Emerald', limit: 'First 125 Achievers' },
-  { name: 'Diamond', reward: '250 Coins', requirement: '5 team members achieve Platinum', limit: 'First 25 Achievers' },
-  { name: 'Crown', reward: '1000 Coins', requirement: '5 team members achieve Diamond', limit: 'First 5 Achievers' },
-];
-
-const paidTrackRewards = [
-  { name: 'Bronze Star', reward: '2.5 Coins', requirement: '5 direct paid members', limit: 'First 15,625 Achievers' },
-  { name: 'Silver Star', reward: '5 Coins', requirement: '5 team members achieve Bronze Star', limit: 'First 3,125 Achievers' },
-  { name: 'Gold Star', reward: '10 Coins', requirement: '5 team members achieve Silver Star', limit: 'First 625 Achievers' },
-  { name: 'Emerald Star', reward: '20 Coins', requirement: '5 team members achieve Gold Star', limit: 'First 125 Achievers' },
-  { name: 'Platinum Star', reward: '125 Coins', requirement: '5 team members achieve Emerald Star', limit: 'First 25 Achievers' },
-  { name: 'Diamond Star', reward: '1250 Coins', requirement: '5 team members achieve Platinum Star', limit: 'First 5 Achievers' },
-  { name: 'Crown Star', reward: '6250 Coins', requirement: '5 team members achieve Diamond Star', limit: 'First 1 Achiever' },
-];
+import React, { useMemo } from 'react';
+import type { AffiliateRewardTier, Transaction } from '@/lib/types';
+import { freeTrackRewards, paidTrackRewards } from '@/lib/data';
 
 type TeamMember = {
   id: string;
   name: string;
   email: string;
   registeredAt: any;
-  currentFreeRank?: string;
-  currentPaidRank?: string;
+  avatarId: string;
+  freeRank?: string;
+  paidRank?: string;
 };
 
 const UserRowSkeleton = () => (
@@ -65,12 +48,16 @@ const UserRowSkeleton = () => (
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="space-y-1">
                     <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
                 </div>
             </div>
         </TableCell>
         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+        <TableCell>
+            <div className="flex gap-2">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-16" />
+            </div>
+        </TableCell>
     </TableRow>
 );
 
@@ -122,7 +109,11 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number;
 // This component fetches data for a single member
 function TeamMemberRow({ memberId }: { memberId: string }) {
     const firestore = useFirestore();
-    const memberDocRef = doc(firestore, 'users', memberId);
+    const memberDocRef = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return doc(firestore, 'users', memberId);
+    }, [firestore, memberId]);
+    
     const { data: member, isLoading } = useDoc<TeamMember>(memberDocRef);
 
     if (isLoading) {
@@ -136,12 +127,15 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
             </TableRow>
         );
     }
+    
+    const getAvatarUrl = (avatarId: string) => `https://picsum.photos/seed/${avatarId}/40/40`;
 
     return (
         <TableRow key={member.id}>
             <TableCell>
                 <div className="flex items-center gap-3">
                     <Avatar>
+                        <AvatarImage src={getAvatarUrl(member.avatarId)} alt={member.name} />
                         <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -154,16 +148,19 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
                 {member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
             </TableCell>
             <TableCell>
-                <div className="flex gap-2">
-                    {member.currentFreeRank && member.currentFreeRank !== 'None' && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                            {member.currentFreeRank}
+                <div className="flex flex-col gap-1 text-xs">
+                    {member.freeRank && member.freeRank !== 'None' && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 w-fit">
+                            {member.freeRank}
                         </span>
                     )}
-                    {member.currentPaidRank && member.currentPaidRank !== 'None' && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                            {member.currentPaidRank}
+                    {member.paidRank && member.paidRank !== 'None' && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 w-fit">
+                            {member.paidRank}
                         </span>
+                    )}
+                     {(!member.freeRank || member.freeRank === 'None') && (!member.paidRank || member.paidRank === 'None') && (
+                        <span className="text-muted-foreground">No Rank</span>
                     )}
                 </div>
             </TableCell>
@@ -175,35 +172,57 @@ export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // Fetch the current user's document
-  const userDocRef = doc(firestore, 'users', user?.uid || 'temp');
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ 
-    direct_team: string[];
-    currentFreeRank: string;
-    currentPaidRank: string;
-    freeAchievers?: { bronze: number };
-    paidAchievers?: { bronzeStar: number };
+    directReferrals: string[];
+    totalTeamSize: number;
+    paidTeamSize: number;
+    freeRank: string;
+    paidRank: string;
   }>(userDocRef);
 
-  const directMemberIds = userProfile?.direct_team || [];
-  const currentFreeRank = userProfile?.currentFreeRank || 'None';
-  const currentPaidRank = userProfile?.currentPaidRank || 'None';
-  const bronzeAchievers = userProfile?.freeAchievers?.bronze || 0;
-  const bronzeStarAchievers = userProfile?.paidAchievers?.bronzeStar || 0;
+  const directMemberIds = userProfile?.directReferrals || [];
+  const totalTeamSize = userProfile?.totalTeamSize || 0;
+  const paidTeamSize = userProfile?.paidTeamSize || 0;
+  const currentFreeRank = userProfile?.freeRank || 'None';
+  const currentPaidRank = userProfile?.paidRank || 'None';
 
   const EarningTable = () => {
-    const earningsData = Array.from({ length: 15 }, (_, i) => {
-      const level = i + 1;
-      let commission = level <= 5 ? 0.2 : 0.1;
-      return { level, commission: `${commission}%` };
-    });
+      const commissionQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return query(
+          collection(firestore, 'transactions'), 
+          where('userId', '==', user.uid),
+          where('type', '==', 'COMMISSION')
+        );
+      }, [firestore, user]);
+      
+      const { data: commissions, isLoading: isLoadingCommissions } = useCollection<Transaction>(commissionQuery);
 
+      const earningsByLevel = useMemo(() => {
+        const levels = Array.from({ length: 15 }, (_, i) => ({ level: i + 1, total: 0 }));
+        if (commissions) {
+            commissions.forEach(tx => {
+                if (tx.level && tx.level >= 1 && tx.level <= 15) {
+                    levels[tx.level - 1].total += tx.amount;
+                }
+            });
+        }
+        return levels;
+      }, [commissions]);
+
+      const totalCommission = useMemo(() => earningsByLevel.reduce((acc, level) => acc + level.total, 0), [earningsByLevel]);
+    
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Earning Commission by Level</CardTitle>
+                <CardTitle>Commission Earnings by Level</CardTitle>
                 <CardDescription>
-                    Your affiliate program offers deep, multi-level rewards. You earn a percentage of the PGC purchased by members in your network, down to 15 levels.
+                    This is a live breakdown of your PGC earnings from your referral network, updated automatically.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -211,22 +230,28 @@ export default function TeamPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Level</TableHead>
-                            <TableHead className="text-right">Commission Rate</TableHead>
+                            <TableHead className="text-right">Total PGC Earned</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {earningsData.map((earning) => (
+                        {isLoadingCommissions ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : earningsByLevel.map((earning) => (
                             <TableRow key={earning.level}>
                                 <TableCell>Level {earning.level}</TableCell>
-                                <TableCell className="text-right font-medium">{earning.commission}</TableCell>
+                                <TableCell className="text-right font-medium">{earning.total.toFixed(4)} PGC</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
                  <div className="p-4 rounded-lg border bg-green-500/10 text-green-700 mt-6">
-                    <h4 className="font-semibold text-lg flex items-center gap-2">Total Commission: <span className="text-green-600">2% Distributed Across Levels</span></h4>
-                    <p className="mt-1 text-green-800">This structure allows you to benefit from the network effect, as your earnings grow exponentially with your team's expansion.</p>
-                </div>
+                    <h4 className="font-semibold text-lg flex items-center gap-2">Total Commission Earned: <span className="text-green-600">{totalCommission.toFixed(4)} PGC</span></h4>
+                 </div>
             </CardContent>
         </Card>
     );
@@ -250,8 +275,8 @@ export default function TeamPage() {
             {nextFreeRank ? (
               <RewardTierCard 
                 tier={nextFreeRank} 
-                progress={bronzeAchievers} 
-                goal={5} 
+                progress={totalTeamSize} 
+                goal={nextFreeRank.requirement as unknown as number}
               />
             ) : (
                 <Alert>
@@ -271,8 +296,8 @@ export default function TeamPage() {
              {nextPaidRank ? (
               <RewardTierCard 
                 tier={nextPaidRank} 
-                progress={bronzeStarAchievers} 
-                goal={5} 
+                progress={paidTeamSize} 
+                goal={nextPaidRank.requirement as unknown as number}
               />
             ) : (
                 <Alert>
@@ -351,16 +376,16 @@ export default function TeamPage() {
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Direct Referrals</div>
+                    <div className="text-sm text-muted-foreground">Direct Referrals (Level 1)</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Bronze Achievers</div>
-                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeAchievers}</div>
+                    <div className="text-sm text-muted-foreground">Total Team Size (Free)</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : totalTeamSize}</div>
                 </div>
                 <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Bronze Star Achievers</div>
-                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeStarAchievers}</div>
+                    <div className="text-sm text-muted-foreground">Total Team Size (Paid)</div>
+                    <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : paidTeamSize}</div>
                 </div>
               </CardContent>
               <CardFooter>
