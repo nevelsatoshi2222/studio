@@ -105,7 +105,7 @@ export default function ProfilePage() {
 
   // THIS IS THE KEY FIX: Optimistically generate the referral code on the client for new users.
   // This logic determines if the user just registered (e.g., within the last 60 seconds).
-  const isNewUser = user && (Date.now() - new Date(user.metadata.creationTime || 0).getTime() < 60000);
+  const isNewUser = user && user.metadata.creationTime && (Date.now() - new Date(user.metadata.creationTime).getTime() < 60000);
   
   // The display referral code now has a reliable fallback.
   // 1. Try to get it from the loaded Firestore document.
@@ -411,5 +411,3 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
-
-    
