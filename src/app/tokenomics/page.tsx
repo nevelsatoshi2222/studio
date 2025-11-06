@@ -63,8 +63,8 @@ import Image from 'next/image';
 import { FundAllocation } from '@/lib/types';
 
 const coinInfo = [
-    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: () => <Image src="https://picsum.photos/seed/pgc-coin/24/24" alt="PGC Coin" width={24} height={24} />, totalSupply: 800_000_000_000, isPgc: true },
-    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: () => <Image src="https://picsum.photos/seed/igc-coin/20/20" alt="IGC Coin" width={20} height={20} />, totalSupply: 8_000_000_000 },
+    { id: 'pgc', name: 'PGC', fullName: 'Public Governance Coin', icon: Vote, totalSupply: 800_000_000_000, isPgc: true },
+    { id: 'igc', name: 'IGC', fullName: 'Idea Governance Coin', icon: Network, totalSupply: 8_000_000_000 },
     { id: 'itc', name: 'ITC', fullName: 'International Trade Coin', icon: Globe, totalSupply: 8_000_000_000 },
     { id: 'ice', name: 'ICE', fullName: 'International Crypto Exchange', icon: Coins, totalSupply: 8_000_000_000 },
     { id: 'job', name: 'JOB', fullName: 'Job Coin', icon: Briefcase, totalSupply: 1_000_000_000 },

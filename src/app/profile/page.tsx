@@ -285,7 +285,6 @@ export default function ProfilePage() {
                     <div>
                         <p className="text-sm text-muted-foreground">In-App PGC Balance (Rewards)</p>
                         <div className="flex items-baseline gap-2">
-                            <Image src="https://picsum.photos/seed/pgc-coin/28/28" alt="PGC Coin" width={28} height={28} />
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>

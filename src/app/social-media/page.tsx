@@ -25,6 +25,7 @@ import {
   Facebook,
   Hash,
   Loader2,
+  Vote,
 } from 'lucide-react';
 import { users } from '@/lib/data';
 import Image from 'next/image';
@@ -208,13 +209,11 @@ function PostCard({ post }: { post: SocialPost }) {
             <div className="flex items-center gap-2">
                 {post.mentionsPgc && (
                     <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
-                         <Image src="https://picsum.photos/seed/pgc-logo/16/16" alt="PGC logo" width={16} height={16} className="h-4 w-4" />
                          <span className="text-xs font-bold text-primary">PGC</span>
                     </div>
                 )}
                 {post.mentionsIgc && (
                     <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
-                        <Image src="https://picsum.photos/seed/igc-logo/16/16" alt="IGC logo" width={16} height={16} className="h-4 w-4" />
                         <span className="text-xs font-bold text-primary">IGC</span>
                     </div>
                 )}

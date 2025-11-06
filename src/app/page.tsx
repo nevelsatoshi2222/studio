@@ -90,7 +90,6 @@ export default function Dashboard() {
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
               </div>
-              <Image src="https://picsum.photos/seed/igc-coin/32/32" alt="IGC Coin" width={32} height={32} />
             </CardHeader>
             <CardContent>
               <IgcTicker />
@@ -102,7 +101,6 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                <Image src="https://picsum.photos/seed/pgc-coin/40/40" alt="PGC Coin" width={40} height={40} />
             </CardHeader>
             <CardContent>
               <PgcTicker />
