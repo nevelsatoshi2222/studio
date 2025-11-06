@@ -1,5 +1,4 @@
 
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 // Ensure admin is initialized only once.
@@ -19,14 +18,14 @@ const COMMISSION_RATES = {
  * This is now triggered when a presale document is CREATED.
  * This is a secure, server-side operation.
  */
-export const distributeCommission = functions.firestore
+export const distributeCommission = admin.firestore
     .document('presales/{presaleId}')
     .onCreate(async (snapshot, context) => {
         const presaleData = snapshot.data();
         
         // --- Exit if data is missing ---
         if (!presaleData) {
-            functions.logger.log(`Presale document ${context.params.presaleId} has no data. Exiting.`);
+            console.log(`Presale document ${context.params.presaleId} has no data. Exiting.`);
             return null;
         }
         
@@ -35,19 +34,19 @@ export const distributeCommission = functions.firestore
         const purchaseAmountUSDT: number = presaleData.amountUSDT; 
         const presaleRef = snapshot.ref;
         
-        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmountUSDT} USDT.`);
+        console.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmountUSDT} USDT.`);
 
         // 1. Get the buyer's referrer (Level 1 Upline)
         const buyerDoc = await db.collection('users').doc(buyerId).get();
         if (!buyerDoc.exists) {
-            functions.logger.error(`Buyer document for ${buyerId} not found.`);
+            console.error(`Buyer document for ${buyerId} not found.`);
             return null;
         }
         const referrerId: string | undefined = buyerDoc.data()?.referredBy;
 
         // If no referrer or the referrer is the root admin, there's no commission to pay out.
         if (!referrerId || referrerId === 'ADMIN_ROOT_USER') {
-            functions.logger.log(`Purchase by ${buyerId} has no valid referrer. Exiting commission payout.`);
+            console.log(`Purchase by ${buyerId} has no valid referrer. Exiting commission payout.`);
             return null;
         }
 
@@ -59,7 +58,7 @@ export const distributeCommission = functions.firestore
 
         for (let level = 1; level <= maxLevels; level++) {
             if (!currentUplineId || currentUplineId === 'ADMIN_ROOT_USER') {
-                functions.logger.log(`Reached top of the referral chain at level ${level-1}.`);
+                console.log(`Reached top of the referral chain at level ${level-1}.`);
                 break;
             }
 
@@ -91,7 +90,7 @@ export const distributeCommission = functions.firestore
             // 4. Find the next upline user (the referrer of the current upline)
             const uplineDoc = await uplineRef.get();
             if (!uplineDoc.exists) {
-                functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
+                console.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
                 break;
             }
             currentUplineId = uplineDoc.data()?.referredBy;
@@ -101,17 +100,17 @@ export const distributeCommission = functions.firestore
         if (transactionCount > 0) {
             try {
                 await batch.commit();
-                functions.logger.log(`Successfully paid USDT commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
+                console.log(`Successfully paid USDT commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
 
                 // 6. Update the presale status to 'COMPLETED' after successful commission payout
                 await presaleRef.update({ status: 'COMPLETED' });
 
             } catch (error) {
-                functions.logger.error(`Error committing commission batch for presale ${presaleRef.id}:`, error);
+                console.error(`Error committing commission batch for presale ${presaleRef.id}:`, error);
                 // In a production system, you might add retry logic or a dead-letter queue here.
             }
         } else {
-            functions.logger.log(`No commissions were batched for presale ${presaleRef.id}.`);
+            console.log(`No commissions were batched for presale ${presaleRef.id}.`);
         }
 
         return null;

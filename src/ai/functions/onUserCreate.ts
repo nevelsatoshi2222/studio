@@ -1,6 +1,5 @@
 
 'use server';
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { getFunctions } from 'firebase-admin/functions';
 
@@ -29,7 +28,7 @@ async function findUserByReferralCode(referralCode: string): Promise<admin.fires
     const snapshot = await usersRef.where('referralCode', '==', referralCode).limit(1).get();
 
     if (snapshot.empty) {
-        functions.logger.warn(`Referral code ${referralCode} not found.`);
+        console.warn(`Referral code ${referralCode} not found.`);
         return null;
     }
 
@@ -42,14 +41,14 @@ async function findUserByReferralCode(referralCode: string): Promise<admin.fires
  * [PRIMARY] Cloud Function to create a user document in Firestore when a new
  * user is created in Firebase Auth. This is the single source of truth for user doc creation.
  */
-export const onUserCreate = functions.auth.user().onCreate(async (user) => {
+export const onUserCreate = admin.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
     
     // The client may pass custom claims during registration, including a referrer code.
     const customClaims = (await admin.auth().getUser(uid)).customClaims;
     const referredByCode = customClaims?.referredByCode as string | undefined;
 
-    functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, customClaims);
+    console.log(`New user created: ${uid}, email: ${email}. Custom claims:`, customClaims);
 
 
     const userDocRef = db.collection('users').doc(uid);
@@ -57,27 +56,27 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     return db.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userDocRef);
         if (userDoc.exists) {
-            functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
+            console.log(`User document for ${uid} already exists. Fallback function exiting.`);
             return;
         }
 
-        functions.logger.log(`Creating new user document for ${uid}.`);
+        console.log(`Creating new user document for ${uid}.`);
 
         let referrerUid: string | null = null;
         let referrerDocRef: admin.firestore.DocumentReference | null = null;
 
         if (referredByCode) {
-            functions.logger.log(`User ${uid} was referred by code: ${referredByCode}. Searching for referrer.`);
+            console.log(`User ${uid} was referred by code: ${referredByCode}. Searching for referrer.`);
             const referrerDoc = await findUserByReferralCode(referredByCode);
             if (referrerDoc) {
                 referrerUid = referrerDoc.id;
                 referrerDocRef = referrerDoc.ref;
-                functions.logger.log(`Found referrer ${referrerUid} for new user ${uid}.`);
+                console.log(`Found referrer ${referrerUid} for new user ${uid}.`);
             } else {
-                functions.logger.warn(`Referrer with code ${referredByCode} was not found.`);
+                console.warn(`Referrer with code ${referredByCode} was not found.`);
             }
         } else {
-            functions.logger.log(`User ${uid} has no referrer code.`);
+            console.log(`User ${uid} has no referrer code.`);
         }
         
         // If a valid referrer was found, add the new user's UID to the referrer's directReferrals array.
@@ -85,7 +84,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             transaction.update(referrerDocRef, {
                 directReferrals: admin.firestore.FieldValue.arrayUnion(uid)
             });
-             functions.logger.log(`Scheduled update for referrer ${referrerUid} to add new user ${uid}.`);
+             console.log(`Scheduled update for referrer ${referrerUid} to add new user ${uid}.`);
         }
 
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
@@ -128,14 +127,14 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         };
 
         transaction.set(userDocRef, userDocumentData);
-        functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
+        console.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
         
     }).then(() => {
         // After successfully creating the user, check if a purchase was made during registration.
         // If so, create the presale document which will trigger commission distribution.
         const isPaid = customClaims?.isPaid as boolean | undefined;
         if (isPaid) {
-            functions.logger.log(`User ${uid} registered with a package. Creating presale document.`);
+            console.log(`User ${uid} registered with a package. Creating presale document.`);
             const presaleCollection = db.collection('presales');
             return presaleCollection.add({
                 userId: uid,
@@ -150,12 +149,12 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     }).then(() => {
         // Now, enqueue a task to process team rewards. This happens regardless of purchase.
         // This is a non-blocking call.
-        functions.logger.log(`Enqueuing team reward processing for new user ${uid}.`);
+        console.log(`Enqueuing team reward processing for new user ${uid}.`);
         const queue = getFunctions().taskQueue('processTeamRewards');
         return queue.enqueue({ newUserId: uid });
     }).catch(error => {
-        functions.logger.error("Error in onUserCreate transaction or follow-up tasks:", error);
+        console.error("Error in onUserCreate transaction or follow-up tasks:", error);
         // Throwing the error ensures that Firebase knows the function failed
-        throw new functions.https.HttpsError('internal', 'Failed to complete user creation process.');
+        throw new Error('Failed to complete user creation process.');
     });
 });

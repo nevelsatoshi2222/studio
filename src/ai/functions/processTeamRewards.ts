@@ -1,6 +1,5 @@
 
 'use server';
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 if (!admin.apps.length) {
@@ -37,18 +36,18 @@ const REWARD_COINS: { [key: string]: number } = {
  * This function processes team counts and rank achievements.
  * It's triggered by a task queue whenever a new user is created.
  */
-export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (data) => {
+export const processTeamRewards = admin.tasks.taskQueue().onDispatch(async (data) => {
     const { newUserId } = data as { newUserId: string };
     if (!newUserId) {
-        functions.logger.error('No newUserId provided in task data.');
+        console.error('No newUserId provided in task data.');
         return;
     }
 
-    functions.logger.log(`Processing team rewards triggered by new user: ${newUserId}`);
+    console.log(`Processing team rewards triggered by new user: ${newUserId}`);
 
     const newUserDoc = await db.collection('users').doc(newUserId).get();
     if (!newUserDoc.exists) {
-        functions.logger.error(`New user document ${newUserId} not found.`);
+        console.error(`New user document ${newUserId} not found.`);
         return;
     }
     const newUser = newUserDoc.data()!;
@@ -56,7 +55,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
     let currentUplineId = newUser.referredBy;
 
     if (!currentUplineId || currentUplineId === 'ADMIN_ROOT_USER') {
-        functions.logger.log(`New user ${newUserId} has no upline. Exiting.`);
+        console.log(`New user ${newUserId} has no upline. Exiting.`);
         return;
     }
 
@@ -72,7 +71,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
         const uplineDoc = await uplineRef.get();
         
         if (!uplineDoc.exists) {
-            functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
+            console.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
             break;
         }
 
@@ -103,7 +102,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
                 rewardName: nextFreeRank.name,
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
-            functions.logger.log(`User ${currentUplineId} achieved rank ${nextFreeRank.name} and was awarded ${rewardAmount} PGC.`);
+            console.log(`User ${currentUplineId} achieved rank ${nextFreeRank.name} and was awarded ${rewardAmount} PGC.`);
         }
 
         // --- 3. Check and Award Paid Rank (if new user made a purchase) ---
@@ -130,7 +129,7 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
                     rewardName: nextPaidRank.name,
                     timestamp: admin.firestore.FieldValue.serverTimestamp()
                 });
-                functions.logger.log(`User ${currentUplineId} achieved PAID rank ${nextPaidRank.name} and was awarded ${rewardAmount} PGC.`);
+                console.log(`User ${currentUplineId} achieved PAID rank ${nextPaidRank.name} and was awarded ${rewardAmount} PGC.`);
             }
         }
         
@@ -140,8 +139,8 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
 
     try {
         await batch.commit();
-        functions.logger.log(`Successfully processed team updates for new user ${newUserId}.`);
+        console.log(`Successfully processed team updates for new user ${newUserId}.`);
     } catch (error) {
-        functions.logger.error(`Error committing batch for team rewards processing:`, error);
+        console.error(`Error committing batch for team rewards processing:`, error);
     }
 });
