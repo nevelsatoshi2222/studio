@@ -151,7 +151,7 @@ export default function PresalePage() {
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                                 <Image src="https://storage.googleapis.com/project-spark-348216.appspot.com/vision_public-governance-859029-c316e_1723055490400_0.png" alt="PGC Coin" width={40} height={40} />
+                                 <Image src="https://picsum.photos/seed/pgc-coin/40/40" alt="PGC Coin" width={40} height={40} />
                                  <div>
                                     <p className="font-bold text-2xl">${pkg.amountUSD} <span className="text-sm font-normal text-muted-foreground">USDT</span></p>
                                  </div>
