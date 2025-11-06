@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { UserPlus, Crown, Sparkles, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,9 +39,8 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { useAuth as useMainAuth } from '@/firebase'; // Use the main auth hook
+import { useAuth as useMainAuth } from '@/firebase';
 
-// --- Registration Schema ---
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -53,7 +52,6 @@ const registrationSchema = z.object({
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-// --- Helper: Create a secondary Firebase app for isolated auth operations ---
 function createSecondaryApp(): FirebaseApp {
     const apps = getApps();
     const secondaryAppName = 'secondaryRegistrationApp';
@@ -61,11 +59,9 @@ function createSecondaryApp(): FirebaseApp {
     if (existingApp) {
         return existingApp;
     }
-    // Initialize with a unique name
     return initializeApp(firebaseConfig, secondaryAppName);
 }
 
-// --- Country List ---
 const countries = [
   { label: 'India', value: 'India' },
   { label: 'United States', value: 'United States' },
@@ -74,12 +70,11 @@ const countries = [
   { label: 'Australia', value: 'Australia' },
 ];
 
-// --- The Registration Form Component ---
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const mainAuth = useMainAuth(); // Get the main auth instance from our provider
+  const mainAuth = useMainAuth(); 
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
@@ -95,44 +90,33 @@ function RegistrationForm() {
 
   const onSubmit = async (data: RegistrationFormValues) => {
     try {
-      // 1. Initialize a secondary, isolated Firebase app instance.
-      // This is crucial to prevent the current user's session from interfering.
       const secondaryApp = createSecondaryApp();
       const secondaryAuth = getAuth(secondaryApp);
       
-      // 2. Call the Cloud Function to set custom claims FIRST.
-      // This attaches the referral code and country to the user's auth token before they are created.
-      const functions = getFunctions(mainAuth.app); // Use main app's functions instance
-      const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
-
-      // 3. Create the user in Firebase Auth using the secondary instance.
       const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
       const authUser = userCredential.user;
 
-      // 4. Now that the user exists, set their claims.
-      await setCustomClaims({
-        uid: authUser.uid,
-        claims: {
-          role: 'User', // All new signups start as 'User'
-          country: data.country,
-          referredByCode: data.referredByCode || null,
-          isPaid: data.accountType === 'paid',
-        },
-      });
-      
-      // 5. Update their display name in Auth. The backend `onUserCreate` function will read this.
       await updateProfile(authUser, { displayName: data.name });
 
-      // 6. IMPORTANT: Sign out the new user from the secondary auth instance.
-      // This prevents the new user's session from replacing the current user's (if any).
+      const functions = getFunctions(mainAuth.app);
+      const createUserDocument = httpsCallable(functions, 'createUserDocument');
+
+      await createUserDocument({
+        uid: authUser.uid,
+        email: data.email,
+        name: data.name,
+        country: data.country,
+        referredByCode: data.referredByCode || null,
+        isPaid: data.accountType === 'paid'
+      });
+
       await signOut(secondaryAuth);
       
       toast({
         title: 'Registration Successful! 🎉',
-        description: "You will be redirected to the login page. Please check your email for a verification link.",
+        description: "Your user document has been created. Please log in.",
       });
 
-      // 7. Redirect to login page for a clean user flow.
       router.push('/login');
 
     } catch (error: any) {
@@ -140,6 +124,8 @@ function RegistrationForm() {
       let errorMessage = 'Registration failed. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'This email is already registered. Please login or use a different email.';
+      } else if (error.details) {
+        errorMessage = error.details.message || errorMessage;
       }
       toast({
         variant: 'destructive',
@@ -283,3 +269,5 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
+
+    
