@@ -1,5 +1,6 @@
+
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
   Card,
@@ -11,7 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { UserPlus, Crown } from 'lucide-react';
+import { UserPlus, Crown, Sparkles, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,205 +34,118 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { auth, db } from '@/lib/config';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, getDoc, increment } from 'firebase/firestore';
+import Link from 'next/link';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { firebaseConfig } from '@/firebase/config';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useAuth as useMainAuth } from '@/firebase'; // Use the main auth hook
 
-// Simple registration schema - removed optional fields for testing
+// --- Registration Schema ---
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
   country: z.string().min(1, { message: 'Please select a country' }),
-  referredBy: z.string().optional(),
+  referredByCode: z.string().optional(),
   accountType: z.enum(['free', 'paid']),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-// Generate UNIQUE referral code
-const generateReferralCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-};
+// --- Helper: Create a secondary Firebase app for isolated auth operations ---
+function createSecondaryApp(): FirebaseApp {
+    const apps = getApps();
+    const secondaryAppName = 'secondaryRegistrationApp';
+    const existingApp = apps.find(app => app.name === secondaryAppName);
+    if (existingApp) {
+        return existingApp;
+    }
+    // Initialize with a unique name
+    return initializeApp(firebaseConfig, secondaryAppName);
+}
 
-// Simple countries list for testing
+// --- Country List ---
 const countries = [
-  { label: 'India', value: 'india' },
-  { label: 'United States', value: 'us' },
-  { label: 'United Kingdom', value: 'uk' },
+  { label: 'India', value: 'India' },
+  { label: 'United States', value: 'United States' },
+  { label: 'United Kingdom', value: 'United Kingdom' },
+  { label: 'Canada', value: 'Canada' },
+  { label: 'Australia', value: 'Australia' },
 ];
 
+// --- The Registration Form Component ---
 function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referredByCode = searchParams.get('ref') || '';
-
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const mainAuth = useMainAuth(); // Get the main auth instance from our provider
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: '',
-      referredBy: referredByCode,
       email: '',
       password: '',
       country: '',
+      referredByCode: searchParams.get('ref') || '',
       accountType: 'free',
     },
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
-    console.log('🔄 STARTING REGISTRATION...', data);
-    setIsSubmitting(true);
-
     try {
-      // Step 1: Create user in Firebase Auth
-      console.log('📝 Creating auth user...');
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      // 1. Initialize a secondary, isolated Firebase app instance.
+      // This is crucial to prevent the current user's session from interfering.
+      const secondaryApp = createSecondaryApp();
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      // 2. Call the Cloud Function to set custom claims FIRST.
+      // This attaches the referral code and country to the user's auth token before they are created.
+      const functions = getFunctions(mainAuth.app); // Use main app's functions instance
+      const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+
+      // 3. Create the user in Firebase Auth using the secondary instance.
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
       const authUser = userCredential.user;
-      console.log('✅ AUTH USER CREATED:', authUser.uid);
 
-      // Step 2: Update profile with name
+      // 4. Now that the user exists, set their claims.
+      await setCustomClaims({
+        uid: authUser.uid,
+        claims: {
+          role: 'User', // All new signups start as 'User'
+          country: data.country,
+          referredByCode: data.referredByCode || null,
+          isPaid: data.accountType === 'paid',
+        },
+      });
+      
+      // 5. Update their display name in Auth. The backend `onUserCreate` function will read this.
       await updateProfile(authUser, { displayName: data.name });
-      console.log('✅ USER PROFILE UPDATED');
 
-      // Step 3: Generate referral code
-      const newReferralCode = generateReferralCode();
-      console.log('🎯 GENERATED REFERRAL CODE:', newReferralCode);
-
-      // Step 4: Find referrer if referral code was used
-      let referrerUserId = null;
-
-      if (data.referredBy && data.referredBy.trim() !== '') {
-        console.log('🔍 LOOKING UP REFERRER CODE:', data.referredBy);
-        
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('referralCode', '==', data.referredBy.trim()));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          const referrerDoc = querySnapshot.docs[0];
-          referrerUserId = referrerDoc.id;
-          console.log('✅ REFERRER FOUND:', referrerDoc.data().email);
-        } else {
-          console.log('❌ REFERRER NOT FOUND');
-        }
-      }
-
-      // Step 5: Create user document in Firestore
-      const isPaidAccount = data.accountType === 'paid';
-      const initialBalance = isPaidAccount ? 10000 : 1000;
-
-      const userDocData = {
-        email: data.email,
-        name: data.name,
-        referralCode: newReferralCode,
-        referredByUserId: referrerUserId,
-        role: 'User',
-        status: 'Active',
-        accountType: data.accountType,
-        registeredAt: new Date(),
-        country: data.country,
-        usdBalance: initialBalance,
-        pgcBalance: initialBalance * 10,
-        currentFreeRank: 'None',
-        currentPaidRank: 'None',
-        freeAchievers: { bronze: 0, silver: 0, gold: 0 },
-        paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
-        freeAchievements: { bronze: false, silver: false, gold: false },
-        paidAchievements: { bronzeStar: false, silverStar: false, goldStar: false },
-        totalCommission: 0,
-        walletAddress: '',
-        direct_team: [],
-      };
-
-      console.log('💾 SAVING USER TO FIRESTORE...');
-      await setDoc(doc(db, 'users', authUser.uid), userDocData);
-      console.log('✅ USER DOCUMENT SAVED TO FIRESTORE');
-
-      // Step 6: Update referrer's team if exists
-      if (referrerUserId) {
-        console.log('💰 UPDATING REFERRER TEAM...');
-        
-        const referrerUpdateData: any = {
-          direct_team: arrayUnion(authUser.uid),
-        };
-
-        if (data.accountType === 'free') {
-          referrerUpdateData['freeAchievers.bronze'] = increment(1);
-        } else if (data.accountType === 'paid') {
-          referrerUpdateData['paidAchievers.bronzeStar'] = increment(1);
-          referrerUpdateData.totalCommission = increment(50);
-          referrerUpdateData.usdBalance = increment(50);
-        }
-
-        await updateDoc(doc(db, 'users', referrerUserId), referrerUpdateData);
-        console.log('✅ REFERRER UPDATED');
-
-        // Check for Bronze reward
-        const referrerDoc = await getDoc(doc(db, 'users', referrerUserId));
-        if (referrerDoc.exists()) {
-          const referrerData = referrerDoc.data();
-          const directTeamCount = referrerData.direct_team?.length || 0;
-          
-          if (directTeamCount >= 5 && (!referrerData.currentFreeRank || referrerData.currentFreeRank === 'None')) {
-            console.log('🎉 AWARDING BRONZE TO REFERRER!');
-            await updateDoc(doc(db, 'users', referrerUserId), {
-              currentFreeRank: 'Bronze',
-              coins: increment(1),
-              usdBalance: increment(10),
-              'freeAchievements.bronze': true
-            });
-          }
-        }
-      }
-
-      // Step 7: Send email verification
-      console.log('📧 SENDING VERIFICATION EMAIL...');
-      await sendEmailVerification(authUser);
-      console.log('✅ VERIFICATION EMAIL SENT');
-
-      // Step 8: Sign out
-      await signOut(auth);
-      console.log('✅ USER SIGNED OUT');
-
-      // Step 9: Show success message
+      // 6. IMPORTANT: Sign out the new user from the secondary auth instance.
+      // This prevents the new user's session from replacing the current user's (if any).
+      await signOut(secondaryAuth);
+      
       toast({
         title: 'Registration Successful! 🎉',
-        description: `Your referral code: ${newReferralCode}. Please check your email to verify your account.`,
+        description: "You will be redirected to the login page. Please check your email for a verification link.",
       });
 
-      console.log('🎉 REGISTRATION COMPLETED');
+      // 7. Redirect to login page for a clean user flow.
       router.push('/login');
 
     } catch (error: any) {
       console.error('❌ REGISTRATION ERROR:', error);
-      
       let errorMessage = 'Registration failed. Please try again.';
-      
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email is already registered. Please use a different email.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password is too weak. Please use a stronger password.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address. Please check your email.';
-      } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = 'This email is already registered. Please login or use a different email.';
       }
-
       toast({
         variant: 'destructive',
         title: 'Registration Failed',
         description: errorMessage,
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -245,160 +158,118 @@ function RegistrationForm() {
             </div>
             <div>
                 <CardTitle className="text-2xl font-headline">Create Your Account</CardTitle>
-                <CardDescription>Join the Public Governance platform</CardDescription>
+                <CardDescription>Join the platform and start building your network.</CardDescription>
             </div>
         </div>
       </CardHeader>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <CardContent className="space-y-4">
-            {/* Name Field */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        {countries.map(country => (
+                          <SelectItem key={country.value} value={country.value}>{country.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            {/* Email Field */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address *</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
-                  </FormControl>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Password Field */}
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password *</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormDescription>Must be at least 6 characters</FormDescription>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                  <FormDescription>Must be at least 6 characters.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Country Field */}
             <FormField
               control={form.control}
-              name="country"
+              name="referredByCode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Country *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your country" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {countries.map(country => (
-                        <SelectItem key={country.value} value={country.value}>
-                          {country.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Referral Code (Optional)</FormLabel>
+                  <FormControl><Input placeholder="Enter referral code from your inviter" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Account Type */}
-            <FormField
+             <FormField
               control={form.control}
               name="accountType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Account Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select account type" />
-                      </SelectTrigger>
-                    </FormControl>
+                  <FormLabel>Membership</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select account type" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      <SelectItem value="free">
-                        <div className="flex items-center gap-2">
-                          <UserPlus className="h-4 w-4" />
-                          <span>Free Account</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="paid">
-                        <div className="flex items-center gap-2">
-                          <Crown className="h-4 w-4 text-yellow-600" />
-                          <span>Paid Account - $100 USD</span>
-                        </div>
-                      </SelectItem>
+                      <SelectItem value="free">Free Membership</SelectItem>
+                      <SelectItem value="paid">Paid Membership ($100)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    {form.watch('accountType') === 'paid' 
-                      ? 'Paid accounts earn higher commissions' 
-                      : 'Free accounts can earn through referrals'}
+                     {form.watch('accountType') === 'paid' 
+                      ? 'Paid members enable higher commission rates for their referrers.' 
+                      : 'You can upgrade to a paid membership at any time.'}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Referral Code */}
-            <FormField
-              control={form.control}
-              name="referredBy"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Referral Code (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter referral code" {...field} />
-                  </FormControl>
-                  <FormDescription>If someone referred you, enter their code here</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-
-          <CardFooter>
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isSubmitting}
-              size="lg"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Creating Account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
+            
+            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting} size="lg">
+              {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Registering...</> : 'Create Account'}
             </Button>
-          </CardFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </CardContent>
+
+      <CardFooter className="flex-col gap-2">
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline font-semibold">
+            Login here
+          </Link>
+        </p>
+      </CardFooter>
     </Card>
   );
 }
