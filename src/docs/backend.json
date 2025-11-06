@@ -43,7 +43,8 @@
             "currency": { "type": "string", "enum": ["PGC", "USDT"], "description": "The currency of the transaction." },
             "purchaseRef": { "type": "string", "description": "Link to the original presales document (if type is COMMISSION)." },
             "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." },
-            "rewardName": { "type": "string", "description": "Name of the rank achieved for RANK_REWARD transactions." }
+            "rewardName": { "type": "string", "description": "Name of the rank achieved for RANK_REWARD transactions." },
+             "level": { "type": "number", "description": "The referral level from which the commission was earned." }
         },
         "required": ["userId", "type", "amount", "currency", "timestamp"]
     },
