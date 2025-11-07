@@ -110,7 +110,7 @@ function RegistrationForm() {
         pgcBalance: 0,
         usdtBalance: 0,
         referredByCode: data.referredByCode || null, // Pass the code for the backend function
-        referralCode: referralCode,
+        referralCode: referralCode, // The new user's own referral code
         walletPublicKey: null,
         isVerified: false,
         status: 'Active',
@@ -118,6 +118,7 @@ function RegistrationForm() {
         avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
         registeredAt: serverTimestamp(),
         directReferrals: [],
+        upline: [],
         totalTeamSize: 0,
         paidTeamSize: 0,
         freeRank: 'None',
@@ -130,7 +131,7 @@ function RegistrationForm() {
       
       toast({
         title: 'Registration Successful! 🎉',
-        description: "Your account has been created. Please log in.",
+        description: "Your account has been created. The system is now processing your referral details.",
       });
 
       router.push('/login');
