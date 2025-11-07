@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 import {
   Transaction,
   User,
@@ -1047,15 +1038,23 @@ export const airdropRewards: AirdropReward[] = [
 ];
 
 export const freeTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze', icon: UsersIcon, reward: '100 PGC', limit: '', requirement: '10 Direct Members', goal: 10 },
-    { name: 'Silver', icon: Award, reward: '1,000 PGC', limit: '', requirement: '100 Team Members', goal: 100 },
-    { name: 'Gold', icon: Gem, reward: '10,000 PGC', limit: '', requirement: '1,000 Team Members', goal: 1000 },
+    { name: 'Bronze', icon: UsersIcon, reward: '1 PGC', limit: '', requirement: '5 direct members', goal: 5 },
+    { name: 'Silver', icon: Award, reward: '10 PGC', limit: '', requirement: '10 direct members', goal: 10 },
+    { name: 'Gold', icon: Gem, reward: '50 PGC', limit: '', requirement: '25 direct members', goal: 25 },
+    { name: 'Emerald', icon: Shield, reward: '100 PGC', limit: '', requirement: '50 direct members', goal: 50 },
+    { name: 'Platinum', icon: Star, reward: '1,000 PGC', limit: 'First 1000 Achievers', requirement: '100 direct members', goal: 100 },
+    { name: 'Diamond', icon: Shield, reward: '10,000 PGC', limit: 'First 200 Achievers', requirement: '250 direct members', goal: 250 },
+    { name: 'Crown', icon: Crown, reward: '100,000 PGC', limit: 'First 40 Achievers', requirement: '500 direct members', goal: 500 },
 ];
 
 export const paidTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze Star', icon: UserPlus, reward: '1,000 PGC', limit: '', requirement: '10 Paid Members', goal: 10 },
-    { name: 'Silver Star', icon: Award, reward: '10,000 PGC', limit: '', requirement: '100 Paid Members', goal: 100 },
-    { name: 'Gold Star', icon: Gem, reward: '100,000 PGC', limit: '', requirement: '1,000 Paid Members', goal: 1000 },
+    { name: 'Bronze Star', icon: UserPlus, reward: '2.5 PGC', limit: '', requirement: '5 paid members in team', goal: 5 },
+    { name: 'Silver Star', icon: Award, reward: '25 PGC', limit: '', requirement: '50 paid members in team', goal: 50 },
+    { name: 'Gold Star', icon: Gem, reward: '250 PGC', limit: '', requirement: '500 paid members in team', goal: 500 },
+    { name: 'Emerald Star', icon: Shield, reward: '1,250 PGC', limit: '', requirement: '2500 paid members in team', goal: 2500 },
+    { name: 'Platinum Star', icon: Star, reward: '5,000 PGC', limit: 'First 1000 Achievers', requirement: '10000 paid members in team', goal: 10000 },
+    { name: 'Diamond Star', icon: Shield, reward: '25,000 PGC', limit: 'First 200 Achievers', requirement: '50000 paid members in team', goal: 50000 },
+    { name: 'Crown Star', icon: Crown, reward: '125,000 PGC', limit: 'First 40 Achievers', requirement: '100,000 paid members in team', goal: 100000 },
 ];
 
 export const influencerTiers = [
