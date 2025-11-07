@@ -5,6 +5,7 @@
 
 
 
+
 import {
   Transaction,
   User,
@@ -29,7 +30,8 @@ import {
   ArtItem,
   AirdropReward,
   FundAllocation,
-  AffiliateRewardTier
+  AffiliateRewardTier,
+  LevelCommission
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 import { Users as UsersIcon, Star, Award, Gem, Shield, Crown, UserPlus } from 'lucide-react';
@@ -1092,4 +1094,22 @@ export const influencerTiers = [
         description: "Get an extra 1,000 PGC plus all lower-tier rewards. Limited to the first 8 achievers.",
         criteria: "Above 10 Million Views"
     }
+];
+
+export const levelCommissions: LevelCommission[] = [
+    { level: 1, percentage: 0.2 }, // 0.2%
+    { level: 2, percentage: 0.1 }, // 0.1%
+    { level: 3, percentage: 0.05 }, // 0.05%
+    { level: 4, percentage: 0.05 },
+    { level: 5, percentage: 0.05 },
+    { level: 6, percentage: 0.05 },
+    { level: 7, percentage: 0.05 },
+    { level: 8, percentage: 0.05 },
+    { level: 9, percentage: 0.05 },
+    { level: 10, percentage: 0.05 },
+    { level: 11, percentage: 0.05 },
+    { level: 12, percentage: 0.05 },
+    { level: 13, percentage: 0.05 },
+    { level: 14, percentage: 0.05 },
+    { level: 15, percentage: 0.05 },
 ];

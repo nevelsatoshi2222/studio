@@ -1,4 +1,5 @@
 
+
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
@@ -261,4 +262,9 @@ export type QuizRewardTier = {
         prize: string;
         limit: string;
     }[];
+};
+
+export type LevelCommission = {
+    level: number;
+    percentage: number;
 };
