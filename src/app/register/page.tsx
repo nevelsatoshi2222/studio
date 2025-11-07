@@ -35,9 +35,9 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { useAuth, useFirestore, useMemoFirebase } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, getDocs, collection, query, where, updateDoc, arrayUnion, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDocs, collection, query, where, writeBatch } from 'firebase/firestore';
 
 
 const registrationSchema = z.object({
@@ -90,25 +90,7 @@ function RegistrationForm() {
       const user = userCredential.user;
       await updateProfile(user, { displayName: data.name });
 
-      const batch = writeBatch(firestore);
-
-      // 2. Find Referrer
-      let referrerUid: string | null = null;
-      let referrerDocRef = null;
-      if (data.referredByCode) {
-        const usersRef = collection(firestore, 'users');
-        const q = query(usersRef, where('referralCode', '==', data.referredByCode));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const referrerDoc = querySnapshot.docs[0];
-          referrerUid = referrerDoc.id;
-          referrerDocRef = referrerDoc.ref;
-        } else {
-          toast({ variant: 'destructive', title: 'Invalid Referral Code', description: 'The referral code you entered was not found.' });
-        }
-      }
-
-      // 3. Prepare New User Document
+      // 2. Prepare the user document. The onUserCreate function will handle the rest.
       const newUserDocRef = doc(firestore, 'users', user.uid);
       const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
       
@@ -127,7 +109,7 @@ function RegistrationForm() {
         country: data.country,
         pgcBalance: 0,
         usdtBalance: 0,
-        referredBy: referrerUid || 'ADMIN_ROOT_USER',
+        referredByCode: data.referredByCode || null, // Pass the code for the backend function
         referralCode: referralCode,
         walletPublicKey: null,
         isVerified: false,
@@ -142,17 +124,9 @@ function RegistrationForm() {
         paidRank: 'None',
         isPaid: data.accountType === 'paid'
       };
-      batch.set(newUserDocRef, userDocumentData);
-
-      // 4. Update Referrer's Document
-      if (referrerDocRef) {
-        batch.update(referrerDocRef, {
-          directReferrals: arrayUnion(user.uid)
-        });
-      }
-
-      // 5. Commit all writes atomically
-      await batch.commit();
+      
+      // Set the document. This will trigger the onUserCreate function on the backend.
+      await setDoc(newUserDocRef, userDocumentData);
       
       toast({
         title: 'Registration Successful! 🎉',
