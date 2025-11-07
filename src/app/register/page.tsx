@@ -37,7 +37,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, getDocs, collection, query, where, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 
 const registrationSchema = z.object({
@@ -122,7 +122,7 @@ function RegistrationForm() {
         paidTeamSize: 0,
         freeRank: 'None',
         paidRank: 'None',
-        isPaid: data.accountType === 'paid'
+        isPaid: data.accountType === 'paid' // This is the critical flag
       };
       
       // Set the document. This will trigger the onUserCreate function on the backend.
@@ -247,7 +247,7 @@ function RegistrationForm() {
                   </Select>
                   <FormDescription>
                      {form.watch('accountType') === 'paid' 
-                      ? 'Paid members enable higher commission rates for their referrers.' 
+                      ? 'Paid members enable commissions for their referrers.' 
                       : 'You can upgrade to a paid membership at any time.'}
                   </FormDescription>
                   <FormMessage />

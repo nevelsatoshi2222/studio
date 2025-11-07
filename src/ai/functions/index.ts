@@ -4,19 +4,17 @@ import * as admin from 'firebase-admin';
 import { freeTrackRewards, paidTrackRewards, levelCommissions } from '../../lib/data';
 
 admin.initializeApp();
-
 const db = admin.firestore();
 
 type UserData = {
     uid: string;
     referredBy?: string;
-    referralCode?: string;
+    upline?: string[];
     isPaid: boolean;
     totalTeamSize: number;
     paidTeamSize: number;
     freeRank: string;
     paidRank: string;
-    upline?: string[];
 };
 
 // This function triggers when a new user document is created.
@@ -66,7 +64,6 @@ export const onUserCreate = functions.firestore
                 const updatePayload: { [key: string]: admin.firestore.FieldValue } = {
                     totalTeamSize: admin.firestore.FieldValue.increment(1)
                 };
-                // THIS IS THE CRITICAL FIX: Increment paidTeamSize if the new user is paid
                 if (newUser.isPaid) {
                     updatePayload.paidTeamSize = admin.firestore.FieldValue.increment(1);
                 }
@@ -74,16 +71,47 @@ export const onUserCreate = functions.firestore
             }
         }
         
+        // 3. Distribute commissions if the new user is a paid member
+        if (newUser.isPaid && upline.length > 0) {
+            const purchaseAmount = 100; // Assume a $100 purchase for a "paid" user
+            for (let i = 0; i < upline.length; i++) {
+                const uplineMemberId = upline[i];
+                const level = i + 1;
+
+                if (level > levelCommissions.length) break;
+
+                const commissionRate = levelCommissions.find(lc => lc.level === level)?.percentage;
+                if (commissionRate === undefined) continue;
+
+                const commissionAmount = purchaseAmount * commissionRate;
+                if (commissionAmount > 0) {
+                    const uplineMemberRef = db.collection('users').doc(uplineMemberId);
+                    batch.update(uplineMemberRef, {
+                        usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
+                    });
+
+                    const commissionTxRef = db.collection('transactions').doc();
+                    batch.set(commissionTxRef, {
+                        userId: uplineMemberId,
+                        type: 'COMMISSION',
+                        amount: commissionAmount,
+                        currency: 'USDT',
+                        fromUser: newUser.uid,
+                        level: level,
+                        timestamp: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }
+        }
+
         await batch.commit();
 
-        // 3. Post-commit: Check ranks for all upline members (run after sizes are committed)
-        // This is done separately to ensure we read the *new* team sizes.
+        // 4. Post-commit: Check ranks for all upline members (run after sizes are committed)
         if (upline.length > 0) {
             const rankPromises = upline.map(async (uplineMemberId) => {
                 try {
                     const uplineMemberSnap = await db.collection('users').doc(uplineMemberId).get();
                     if (uplineMemberSnap.exists) {
-                        // Pass the fresh data to the checking function
                         await checkAndAwardRank(uplineMemberSnap.id, uplineMemberSnap.data() as UserData);
                     }
                 } catch(e) {
@@ -95,75 +123,6 @@ export const onUserCreate = functions.firestore
 
         console.log(`Processed new user ${newUser.uid} with referrer ${referrerId || 'None'}`);
     });
-
-// This function triggers when a Presale document is updated, specifically when it becomes 'COMPLETED'.
-export const onPresaleComplete = functions.firestore
-    .document('presales/{presaleId}')
-    .onUpdate(async (change, context) => {
-        const before = change.before.data();
-        const after = change.after.data();
-
-        // Check if the status has changed from 'PENDING_VERIFICATION' to 'COMPLETED'
-        if (before.status !== 'COMPLETED' && after.status === 'COMPLETED') {
-            console.log(`Presale ${context.params.presaleId} completed for user ${after.userId}. Distributing commissions.`);
-            const buyerId = after.userId;
-            const purchaseAmount = after.amountUSDT;
-
-            const userDoc = await db.collection('users').doc(buyerId).get();
-            if (!userDoc.exists) {
-                console.error(`Buyer user document ${buyerId} not found.`);
-                return;
-            }
-
-            const buyerData = userDoc.data() as UserData;
-            const upline = buyerData.upline;
-
-            if (!upline || upline.length === 0) {
-                console.log(`User ${buyerId} has no upline. No commissions to distribute.`);
-                return;
-            }
-
-            const commissionBatch = db.batch();
-
-            // Distribute commissions up the chain
-            for (let i = 0; i < upline.length; i++) {
-                const uplineMemberId = upline[i];
-                const level = i + 1; // Level 1 is the direct referrer
-
-                if (level > levelCommissions.length) break; // Stop if we've exceeded our defined commission levels
-
-                const commissionRate = levelCommissions.find(lc => lc.level === level)?.percentage;
-                if (commissionRate === undefined) continue;
-
-                // Calculate commission based on the percentage of the purchase amount
-                const commissionAmount = purchaseAmount * commissionRate;
-
-                if (commissionAmount > 0) {
-                    const uplineMemberRef = db.collection('users').doc(uplineMemberId);
-                    commissionBatch.update(uplineMemberRef, {
-                        usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
-                    });
-
-                    const commissionTxRef = db.collection('transactions').doc();
-                    commissionBatch.set(commissionTxRef, {
-                        userId: uplineMemberId,
-                        type: 'COMMISSION',
-                        amount: commissionAmount,
-                        currency: 'USDT',
-                        fromUser: buyerId,
-                        level: level,
-                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                        purchaseRef: change.after.ref.path
-                    });
-
-                    console.log(`Level ${level} commission of ${commissionAmount} USDT for ${uplineMemberId}`);
-                }
-            }
-            await commissionBatch.commit();
-            console.log(`Finished distributing commissions for presale ${context.params.presaleId}.`);
-        }
-    });
-
 
 async function checkAndAwardRank(userId: string, user: UserData): Promise<void> {
     const userRef = db.collection('users').doc(userId);
@@ -189,7 +148,7 @@ async function checkAndAwardRank(userId: string, user: UserData): Promise<void> 
                     timestamp: admin.firestore.FieldValue.serverTimestamp()
                 });
             }
-            ranksUpdated.push(rank.name);
+            ranksUpdated.push(`Free: ${rank.name}`);
             break; // Award the highest applicable rank and stop
         }
     }
@@ -198,7 +157,6 @@ async function checkAndAwardRank(userId: string, user: UserData): Promise<void> 
     const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank);
     for (let i = paidTrackRewards.length - 1; i > currentPaidRankIndex; i--) {
         const rank = paidTrackRewards[i];
-        // THIS IS THE CRITICAL FIX: Use paidTeamSize for paid rank check
         if (user.paidTeamSize >= rank.goal) {
             batch.update(userRef, { paidRank: rank.name });
             const pgcReward = parseFloat(rank.reward.split(' ')[0]);
@@ -214,7 +172,7 @@ async function checkAndAwardRank(userId: string, user: UserData): Promise<void> 
                     timestamp: admin.firestore.FieldValue.serverTimestamp()
                 });
             }
-            ranksUpdated.push(rank.name);
+            ranksUpdated.push(`Paid: ${rank.name}`);
             break; // Award the highest applicable rank and stop
         }
     }
