@@ -1,3 +1,4 @@
+
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -91,7 +92,6 @@ const RewardTierCard = ({ tier, progress, goal, isAchieved }: { tier: AffiliateR
                 <h4 className="font-semibold text-lg">{tier.name}</h4>
                 <div className={`text-lg font-bold ${isAchieved ? 'text-green-600' : 'text-primary'}`}>{tier.reward}</div>
                 <p className="text-sm text-muted-foreground mt-1">{tier.requirement}</p>
-                <div className="text-xs font-semibold mt-1 text-primary/80">{tier.limit}</div>
             </div>
             
             <div className="mt-4">
@@ -119,7 +119,7 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
     if (!member) {
         return (
             <TableRow>
-                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data</TableCell>
+                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data for ID: {memberId}</TableCell>
             </TableRow>
         );
     }
@@ -245,7 +245,7 @@ export default function TeamPage() {
                         ) : earningsByLevel.map((earning) => (
                             <TableRow key={earning.level}>
                                 <TableCell>Level {earning.level}</TableCell>
-                                <TableCell className="text-right font-medium">${earning.total.toFixed(2)} USDT</TableCell>
+                                <TableCell className="text-right font-medium">${earning.total.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -256,25 +256,11 @@ export default function TeamPage() {
   };
   
   const RewardsDashboard = () => {
-    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank) ?? -1;
+    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
     const nextFreeRank = freeRankIndex > -1 ? freeTrackRewards[freeRankIndex + 1] : freeTrackRewards[0];
 
-    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank) ?? -1;
+    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
     const nextPaidRank = paidRankIndex > -1 ? paidTrackRewards[paidRankIndex + 1] : paidTrackRewards[0];
-
-    const freeMembersForNextRank = useMemo(() => {
-        if (!nextFreeRank || !nextFreeRank.requirement.includes('direct members')) {
-             return totalTeamSize;
-        }
-        return directMemberIds.length;
-    }, [nextFreeRank, totalTeamSize, directMemberIds]);
-
-    const paidMembersForNextRank = useMemo(() => {
-       if (!nextPaidRank || !nextPaidRank.requirement.includes('direct members')) {
-             return paidTeamSize;
-        }
-        return paidTeamSize; // Assuming paid rank is always based on total paid members
-    }, [nextPaidRank, paidTeamSize]);
 
     return (
       <div className="grid md:grid-cols-2 gap-8">
@@ -287,8 +273,8 @@ export default function TeamPage() {
             {nextFreeRank ? (
               <RewardTierCard 
                 tier={nextFreeRank} 
-                progress={freeMembersForNextRank} 
-                goal={nextFreeRank.goal as number}
+                progress={totalTeamSize} 
+                goal={nextFreeRank.goal}
                 isAchieved={freeRankIndex >= freeTrackRewards.indexOf(nextFreeRank)}
               />
             ) : (
@@ -309,8 +295,8 @@ export default function TeamPage() {
              {nextPaidRank ? (
               <RewardTierCard 
                 tier={nextPaidRank} 
-                progress={paidTeamSize} // Paid track is based on total paid team members
-                goal={nextPaidRank.goal as number}
+                progress={paidTeamSize} 
+                goal={nextPaidRank.goal}
                 isAchieved={paidRankIndex >= paidTrackRewards.indexOf(nextPaidRank)}
               />
             ) : (
