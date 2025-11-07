@@ -1,4 +1,3 @@
-
 'use client';
 import { AppLayout } from '@/components/app-layout';
 import {
@@ -64,43 +63,40 @@ const UserRowSkeleton = () => (
 const rankIcons: { [key: string]: React.FC<any> } = {
     'Bronze': Users,
     'Silver': Award,
-    'Gold': Crown,
+    'Gold': Gem,
     'Emerald': Shield,
-    'Platinum': Crown,
+    'Platinum': Star,
     'Diamond': Shield,
     'Crown': Crown,
-    'Bronze Star': Award,
+    'Bronze Star': UserPlus,
     'Silver Star': Award,
-    'Gold Star': Crown,
+    'Gold Star': Gem,
     'Emerald Star': Shield,
-    'Platinum Star': Crown,
+    'Platinum Star': Star,
     'Diamond Star': Shield,
     'Crown Star': Crown,
 };
 
-const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number; goal: number }) => {
+
+const RewardTierCard = ({ tier, progress, goal, isAchieved }: { tier: AffiliateRewardTier; progress: number; goal: number; isAchieved: boolean }) => {
     const Icon = rankIcons[tier.name] || Award;
-    const isAchieved = progress >= goal;
-    const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : 0;
+    const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : (isAchieved ? 100 : 0);
 
     return (
-        <div className={`flex items-start gap-4 rounded-lg border p-4 ${isAchieved ? 'bg-green-500/10 border-green-500' : 'bg-muted/30'}`}>
-            <div className={`flex h-10 w-10 items-center justify-center rounded-md mt-1 ${isAchieved ? 'bg-green-500/20 text-green-600' : 'bg-primary/10 text-primary'}`}>
-                <Icon className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-                <div className="flex justify-between items-center">
-                    <h4 className="font-semibold text-lg">{tier.name}</h4>
-                    <div className={`text-lg font-bold ${isAchieved ? 'text-green-600' : 'text-primary'}`}>{tier.reward}</div>
+        <div className={`flex flex-col h-full rounded-lg border p-4 ${isAchieved ? 'bg-green-500/10 border-green-500' : 'bg-muted/30'}`}>
+            <div className="flex-grow">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-md mb-4 ${isAchieved ? 'bg-green-500/20 text-green-600' : 'bg-primary/10 text-primary'}`}>
+                    <Icon className="h-6 w-6" />
                 </div>
+                <h4 className="font-semibold text-lg">{tier.name}</h4>
+                <div className={`text-lg font-bold ${isAchieved ? 'text-green-600' : 'text-primary'}`}>{tier.reward}</div>
                 <p className="text-sm text-muted-foreground mt-1">{tier.requirement}</p>
-                
-                <div className="mt-2">
-                    <Progress value={progressPercent} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
-                </div>
-
-                <div className={`text-xs font-semibold mt-2 ${isAchieved ? 'text-green-700' : 'text-primary/80'}`}>{tier.limit}</div>
+                <div className="text-xs font-semibold mt-1 text-primary/80">{tier.limit}</div>
+            </div>
+            
+            <div className="mt-4">
+                <Progress value={progressPercent} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1 text-center">{progress} / {goal} Members</p>
             </div>
         </div>
     );
@@ -229,7 +225,7 @@ export default function TeamPage() {
             <CardContent>
                  <div className="p-6 rounded-lg border bg-green-500/10 text-green-700 mb-6">
                     <h4 className="font-semibold text-sm uppercase tracking-wider">Total Commission Earned</h4>
-                    <p className="text-4xl font-bold text-green-600">${totalCommission.toFixed(4)} USDT</p>
+                    <p className="text-4xl font-bold text-green-600">${totalCommission.toFixed(2)} USDT</p>
                  </div>
                 <Table>
                     <TableHeader>
@@ -249,7 +245,7 @@ export default function TeamPage() {
                         ) : earningsByLevel.map((earning) => (
                             <TableRow key={earning.level}>
                                 <TableCell>Level {earning.level}</TableCell>
-                                <TableCell className="text-right font-medium">${earning.total.toFixed(4)} USDT</TableCell>
+                                <TableCell className="text-right font-medium">${earning.total.toFixed(2)} USDT</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -260,25 +256,40 @@ export default function TeamPage() {
   };
   
   const RewardsDashboard = () => {
-    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
-    const nextFreeRank = freeTrackRewards[freeRankIndex + 1];
+    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank) ?? -1;
+    const nextFreeRank = freeRankIndex > -1 ? freeTrackRewards[freeRankIndex + 1] : freeTrackRewards[0];
 
-    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
-    const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
+    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank) ?? -1;
+    const nextPaidRank = paidRankIndex > -1 ? paidTrackRewards[paidRankIndex + 1] : paidTrackRewards[0];
+
+    const freeMembersForNextRank = useMemo(() => {
+        if (!nextFreeRank || !nextFreeRank.requirement.includes('direct members')) {
+             return totalTeamSize;
+        }
+        return directMemberIds.length;
+    }, [nextFreeRank, totalTeamSize, directMemberIds]);
+
+    const paidMembersForNextRank = useMemo(() => {
+       if (!nextPaidRank || !nextPaidRank.requirement.includes('direct members')) {
+             return paidTeamSize;
+        }
+        return paidTeamSize; // Assuming paid rank is always based on total paid members
+    }, [nextPaidRank, paidTeamSize]);
 
     return (
       <div className="grid md:grid-cols-2 gap-8">
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle>Free User Track</CardTitle>
             <CardDescription>Your current rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="flex-grow">
             {nextFreeRank ? (
               <RewardTierCard 
                 tier={nextFreeRank} 
-                progress={totalTeamSize} 
+                progress={freeMembersForNextRank} 
                 goal={nextFreeRank.goal as number}
+                isAchieved={freeRankIndex >= freeTrackRewards.indexOf(nextFreeRank)}
               />
             ) : (
                 <Alert>
@@ -289,17 +300,18 @@ export default function TeamPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle>Paid User (Star) Track</CardTitle>
             <CardDescription>Your current rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="flex-grow">
              {nextPaidRank ? (
               <RewardTierCard 
                 tier={nextPaidRank} 
-                progress={paidTeamSize} 
+                progress={paidTeamSize} // Paid track is based on total paid team members
                 goal={nextPaidRank.goal as number}
+                isAchieved={paidRankIndex >= paidTrackRewards.indexOf(nextPaidRank)}
               />
             ) : (
                 <Alert>
@@ -382,11 +394,11 @@ export default function TeamPage() {
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
                 </div>
                  <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Total Team Size (Free)</div>
+                    <div className="text-sm text-muted-foreground">Total Team Size (All Members)</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : totalTeamSize}</div>
                 </div>
                 <div className="p-4 rounded-lg bg-muted">
-                    <div className="text-sm text-muted-foreground">Total Team Size (Paid)</div>
+                    <div className="text-sm text-muted-foreground">Total Paid Members</div>
                     <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : paidTeamSize}</div>
                 </div>
               </CardContent>

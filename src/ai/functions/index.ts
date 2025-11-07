@@ -9,22 +9,20 @@ const db = admin.firestore();
 
 type UserData = {
     uid: string;
-    referredByCode?: string;
     referredBy?: string;
+    referralCode?: string;
     isPaid: boolean;
-    directReferrals: string[];
     totalTeamSize: number;
     paidTeamSize: number;
     freeRank: string;
     paidRank: string;
-    referralCode?: string;
 };
 
 // This is the robust, consolidated function that will fix the referral and rank system.
 export const onUserCreate = functions.firestore
     .document('users/{userId}')
     .onCreate(async (snap, context) => {
-        const newUser = snap.data() as UserData;
+        const newUser = snap.data() as UserData & { referredByCode?: string };
         const batch = db.batch();
         
         let upline: string[] = [];
@@ -52,13 +50,15 @@ export const onUserCreate = functions.firestore
                 upline.push(referrerId);
                 const referrerData = referrerDoc.data() as UserData;
                 
-                // Build the rest of the upline (up to 15 levels)
+                // Build the rest of the upline (up to 14 more levels)
                 let currentUplineMemberId = referrerData.referredBy;
                 for (let i = 0; i < 14 && currentUplineMemberId; i++) {
-                    if (currentUplineMemberId === 'ADMIN_ROOT_USER') break;
-                    upline.push(currentUplineMemberId);
+                    // Stop if we hit a placeholder or non-existent user
+                    if (currentUplineMemberId === 'ADMIN_ROOT_USER') break; 
+                    
                     const nextUplineDoc = await db.collection('users').doc(currentUplineMemberId).get();
                     if (nextUplineDoc.exists) {
+                         upline.push(currentUplineMemberId);
                         currentUplineMemberId = (nextUplineDoc.data() as UserData).referredBy;
                     } else {
                         break;
@@ -69,58 +69,61 @@ export const onUserCreate = functions.firestore
             }
         }
         
-        // 2. Update team sizes and check for rewards for the entire upline
-        for (const [index, uplineMemberId] of upline.entries()) {
+        // 2. Update team sizes for the entire upline
+        for (const uplineMemberId of upline) {
             const uplineMemberRef = db.collection('users').doc(uplineMemberId);
-            
-            // Increment team sizes
-            batch.update(uplineMemberRef, {
-                totalTeamSize: admin.firestore.FieldValue.increment(1),
-                paidTeamSize: admin.firestore.FieldValue.increment(newUser.isPaid ? 1 : 0),
-            });
-
-            // Handle commissions for direct (Level 1) referrer
-            if (index === 0 && newUser.isPaid) {
-                const commissionAmount = 10; // $10 commission for a $100 paid user
-                 batch.update(uplineMemberRef, {
-                    usdtBalance: admin.firestore.FieldValue.increment(commissionAmount),
-                });
-                const commissionTxRef = db.collection('transactions').doc();
-                batch.set(commissionTxRef, {
-                    userId: uplineMemberId,
-                    type: 'COMMISSION',
-                    amount: commissionAmount,
-                    currency: 'USDT',
-                    level: 1,
-                    fromUser: newUser.uid,
-                    timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                });
+            const updatePayload: { [key: string]: admin.firestore.FieldValue } = {
+                totalTeamSize: admin.firestore.FieldValue.increment(1)
+            };
+            if (newUser.isPaid) {
+                updatePayload.paidTeamSize = admin.firestore.FieldValue.increment(1);
             }
+            batch.update(uplineMemberRef, updatePayload);
+        }
+        
+        // 3. Handle commissions for direct (Level 1) referrer
+        if (referrerId && newUser.isPaid) {
+            const commissionAmount = 10; // $10 commission for a $100 paid user
+            const directReferrerRef = db.collection('users').doc(referrerId);
+            batch.update(directReferrerRef, {
+                usdtBalance: admin.firestore.FieldValue.increment(commissionAmount),
+            });
+            const commissionTxRef = db.collection('transactions').doc();
+            batch.set(commissionTxRef, {
+                userId: referrerId,
+                type: 'COMMISSION',
+                amount: commissionAmount,
+                currency: 'USDT',
+                level: 1,
+                fromUser: newUser.uid,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            });
         }
         
         await batch.commit();
 
-        // 3. Post-commit: Check ranks for all upline members (run after sizes are committed)
+        // 4. Post-commit: Check ranks for all upline members (run after sizes are committed)
         // This is done separately to ensure we read the *new* team sizes.
         for (const uplineMemberId of upline) {
-            const uplineMemberRef = db.collection('users').doc(uplineMemberId);
-            const uplineMemberSnap = await uplineMemberRef.get();
+            const uplineMemberSnap = await db.collection('users').doc(uplineMemberId).get();
             if (uplineMemberSnap.exists) {
-                await checkAndAwardRank(uplineMemberSnap.data() as UserData, uplineMemberRef);
+                await checkAndAwardRank(uplineMemberSnap.id, uplineMemberSnap.data() as UserData);
             }
         }
 
         console.log(`Processed new user ${newUser.uid} with upline:`, upline);
     });
 
-async function checkAndAwardRank(user: UserData, userRef: admin.firestore.DocumentReference): Promise<void> {
+async function checkAndAwardRank(userId: string, user: UserData): Promise<void> {
+    const userRef = db.collection('users').doc(userId);
     const rankBatch = db.batch();
     let rankUpdated = false;
 
     // Find the next applicable rank in the free track
-    const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === user.freeRank);
+    const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === user.freeRank) ?? -1;
+    // We check all ranks higher than the current one to see if any goal is met
     const nextFreeRank = freeTrackRewards.find((rank, index) => 
-        index > currentFreeRankIndex && user.totalTeamSize >= (rank.goal || 0)
+        index > currentFreeRankIndex && (user.totalTeamSize >= (rank.goal || Infinity))
     );
 
     if (nextFreeRank) {
@@ -131,7 +134,7 @@ async function checkAndAwardRank(user: UserData, userRef: admin.firestore.Docume
             rankBatch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcReward) });
             const freeRankTx = db.collection('transactions').doc();
             rankBatch.set(freeRankTx, {
-                userId: user.uid,
+                userId: userId,
                 type: 'RANK_REWARD',
                 amount: pgcReward,
                 currency: 'PGC',
@@ -142,9 +145,9 @@ async function checkAndAwardRank(user: UserData, userRef: admin.firestore.Docume
     }
 
     // Find the next applicable rank in the paid track
-    const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank);
+    const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank) ?? -1;
     const nextPaidRank = paidTrackRewards.find((rank, index) => 
-        index > currentPaidRankIndex && user.paidTeamSize >= (rank.goal || 0)
+        index > currentPaidRankIndex && (user.paidTeamSize >= (rank.goal || Infinity))
     );
     
     if (nextPaidRank) {
@@ -155,7 +158,7 @@ async function checkAndAwardRank(user: UserData, userRef: admin.firestore.Docume
             rankBatch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcStarReward) });
              const paidRankTx = db.collection('transactions').doc();
             rankBatch.set(paidRankTx, {
-                userId: user.uid,
+                userId: userId,
                 type: 'RANK_REWARD',
                 amount: pgcStarReward,
                 currency: 'PGC',
@@ -167,6 +170,6 @@ async function checkAndAwardRank(user: UserData, userRef: admin.firestore.Docume
 
     if (rankUpdated) {
         await rankBatch.commit();
-        console.log(`Updated ranks for user ${user.uid}`);
+        console.log(`Updated ranks for user ${userId}`);
     }
 }
