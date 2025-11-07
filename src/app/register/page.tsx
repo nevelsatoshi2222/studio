@@ -35,11 +35,10 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
-import { firebaseConfig } from '@/firebase/config';
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { useAuth as useMainAuth } from '@/firebase';
+import { useAuth, useFirestore, useMemoFirebase } from '@/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp, getDocs, collection, query, where, updateDoc, arrayUnion, writeBatch } from 'firebase/firestore';
+
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -51,16 +50,6 @@ const registrationSchema = z.object({
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
-
-function createSecondaryApp(): FirebaseApp {
-    const apps = getApps();
-    const secondaryAppName = 'secondaryRegistrationApp';
-    const existingApp = apps.find(app => app.name === secondaryAppName);
-    if (existingApp) {
-        return existingApp;
-    }
-    return initializeApp(firebaseConfig, secondaryAppName);
-}
 
 const countries = [
   { label: 'India', value: 'India' },
@@ -74,7 +63,8 @@ function RegistrationForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const mainAuth = useMainAuth(); 
+  const auth = useAuth(); 
+  const firestore = useFirestore();
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
@@ -89,32 +79,84 @@ function RegistrationForm() {
   });
 
   const onSubmit = async (data: RegistrationFormValues) => {
+    if (!auth || !firestore) {
+      toast({ variant: 'destructive', title: 'Firebase not initialized.' });
+      return;
+    }
+
     try {
-      const secondaryApp = createSecondaryApp();
-      const secondaryAuth = getAuth(secondaryApp);
+      // 1. Create Auth User
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      await updateProfile(user, { displayName: data.name });
+
+      const batch = writeBatch(firestore);
+
+      // 2. Find Referrer
+      let referrerUid: string | null = null;
+      let referrerDocRef = null;
+      if (data.referredByCode) {
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('referralCode', '==', data.referredByCode));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const referrerDoc = querySnapshot.docs[0];
+          referrerUid = referrerDoc.id;
+          referrerDocRef = referrerDoc.ref;
+        } else {
+          toast({ variant: 'destructive', title: 'Invalid Referral Code', description: 'The referral code you entered was not found.' });
+        }
+      }
+
+      // 3. Prepare New User Document
+      const newUserDocRef = doc(firestore, 'users', user.uid);
+      const referralCode = `PGC-${user.uid.substring(0, 8).toUpperCase()}`;
       
-      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
-      const authUser = userCredential.user;
-
-      await updateProfile(authUser, { displayName: data.name });
-
-      const functions = getFunctions(mainAuth.app);
-      const createUserDocument = httpsCallable(functions, 'createUserDocument');
-
-      await createUserDocument({
-        uid: authUser.uid,
-        email: data.email,
+      const userDocumentData = {
+        uid: user.uid,
         name: data.name,
+        email: data.email,
+        phone: null,
+        street: '',
+        village: '',
+        block: '',
+        taluka: '',
+        district: '',
+        area: '',
+        state: '',
         country: data.country,
-        referredByCode: data.referredByCode || null,
+        pgcBalance: 0,
+        usdtBalance: 0,
+        referredBy: referrerUid || 'ADMIN_ROOT_USER',
+        referralCode: referralCode,
+        walletPublicKey: null,
+        isVerified: false,
+        status: 'Active',
+        role: 'User',
+        avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
+        registeredAt: serverTimestamp(),
+        directReferrals: [],
+        totalTeamSize: 0,
+        paidTeamSize: 0,
+        freeRank: 'None',
+        paidRank: 'None',
         isPaid: data.accountType === 'paid'
-      });
+      };
+      batch.set(newUserDocRef, userDocumentData);
 
-      await signOut(secondaryAuth);
+      // 4. Update Referrer's Document
+      if (referrerDocRef) {
+        batch.update(referrerDocRef, {
+          directReferrals: arrayUnion(user.uid)
+        });
+      }
+
+      // 5. Commit all writes atomically
+      await batch.commit();
       
       toast({
         title: 'Registration Successful! 🎉',
-        description: "Your user document has been created. Please log in.",
+        description: "Your account has been created. Please log in.",
       });
 
       router.push('/login');
@@ -124,8 +166,6 @@ function RegistrationForm() {
       let errorMessage = 'Registration failed. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'This email is already registered. Please login or use a different email.';
-      } else if (error.details) {
-        errorMessage = error.details.message || errorMessage;
       }
       toast({
         variant: 'destructive',
@@ -269,5 +309,4 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-
     
