@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign, Award, Crown, Shield, Gem, Star } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award, Crown, Shield, Gem } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase';
@@ -66,14 +66,14 @@ const rankIcons: { [key: string]: React.FC<any> } = {
     'Silver': Award,
     'Gold': Gem,
     'Emerald': Shield,
-    'Platinum': Star,
+    'Platinum': Gem,
     'Diamond': Shield,
     'Crown': Crown,
     'Bronze Star': UserPlus,
     'Silver Star': Award,
     'Gold Star': Gem,
     'Emerald Star': Shield,
-    'Platinum Star': Star,
+    'Platinum Star': Gem,
     'Diamond Star': Shield,
     'Crown Star': Crown,
 };

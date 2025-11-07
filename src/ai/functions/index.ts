@@ -34,12 +34,12 @@ export const onUserCreate = functions.firestore
         let referrerId: string | undefined = undefined;
 
         // Use 'referredByCode' from the registration form to find the referrer.
-        const referralCode = newUser.referredByCode;
+        const referredByCode = newUser.referredByCode;
 
         // 1. Find the referrer and build the upline chain
-        if (referralCode) {
+        if (referredByCode) {
             const referrerQuery = await db.collection('users')
-                .where('referralCode', '==', referralCode)
+                .where('referralCode', '==', referredByCode)
                 .limit(1)
                 .get();
 
@@ -62,7 +62,7 @@ export const onUserCreate = functions.firestore
                     directReferrals: admin.firestore.FieldValue.arrayUnion(newUserId)
                 });
             } else {
-                 console.log(`Referral code ${referralCode} not found.`);
+                 console.log(`Referral code ${referredByCode} not found.`);
             }
         }
         
