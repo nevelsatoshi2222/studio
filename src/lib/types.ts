@@ -5,6 +5,7 @@ export type Transaction = {
   userId: string;
   type: "PURCHASE" | "COMMISSION" | "WITHDRAWAL" | "RANK_REWARD";
   amount: number;
+  currency: 'PGC' | 'USDT';
   purchaseRef?: any; // DocumentReference
   level?: number;
   timestamp: any; // Timestamp
@@ -17,6 +18,7 @@ export type User = {
   referralCode?: string;
   walletPublicKey?: string;
   pgcBalance: number;
+  usdtBalance: number;
   isVerified: boolean;
   name: string;
   email: string;
