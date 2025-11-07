@@ -109,8 +109,8 @@ function RegistrationForm() {
         country: data.country,
         pgcBalance: 0,
         usdtBalance: 0,
-        referredByCode: data.referredByCode || null, // Pass the code for the backend function
         referralCode: referralCode, // The new user's own referral code
+        referredByCode: data.referredByCode || null, // Pass the code for the backend function
         walletPublicKey: null,
         isVerified: false,
         status: 'Active',
@@ -284,6 +284,4 @@ export default function RegisterPage() {
     </AppLayout>
   );
 }
-    
-
     
