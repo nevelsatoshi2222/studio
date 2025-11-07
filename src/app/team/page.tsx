@@ -278,7 +278,7 @@ export default function TeamPage() {
               <RewardTierCard 
                 tier={nextFreeRank} 
                 progress={totalTeamSize} 
-                goal={nextFreeRank.requirement as unknown as number}
+                goal={nextFreeRank.goal as number}
               />
             ) : (
                 <Alert>
@@ -299,7 +299,7 @@ export default function TeamPage() {
               <RewardTierCard 
                 tier={nextPaidRank} 
                 progress={paidTeamSize} 
-                goal={nextPaidRank.requirement as unknown as number}
+                goal={nextPaidRank.goal as number}
               />
             ) : (
                 <Alert>
