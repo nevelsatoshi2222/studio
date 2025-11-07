@@ -4,7 +4,6 @@ import * as admin from 'firebase-admin';
 import { freeTrackRewards, paidTrackRewards, levelCommissions } from '../../lib/data';
 
 // Initialize Firebase Admin SDK
-// This should only be done once per application instance.
 if (admin.apps.length === 0) {
   admin.initializeApp();
 }
@@ -26,14 +25,14 @@ interface UserData {
 export const onUserCreate = functions.firestore
     .document('users/{userId}')
     .onCreate(async (snap, context) => {
-        const newUser = snap.data() as UserData & { referralCode?: string; referredByCode?: string };
+        const newUser = snap.data() as UserData & { referredByCode?: string; };
         const newUserId = context.params.userId;
         const batch = db.batch();
         
         let upline: string[] = [];
         let referrerId: string | undefined = undefined;
 
-        // THE CORE FIX: Use 'referredByCode' which is what the registration form provides.
+        // Use 'referredByCode' from the registration form to find the referrer.
         const referralCode = newUser.referredByCode;
 
         // 1. Find the referrer and build the upline chain
@@ -51,7 +50,7 @@ export const onUserCreate = functions.firestore
                 // Build the upline for the new user
                 upline = [referrerId, ...(referrerData.upline || [])].slice(0, 15);
 
-                // Update the new user with the direct referrer's ID and their upline
+                // Update the new user doc with the direct referrer's ID and their upline
                 batch.update(snap.ref, { 
                     referredBy: referrerId,
                     upline: upline
@@ -117,38 +116,30 @@ export const onUserCreate = functions.firestore
 
         // 4. Post-commit: Check ranks for all upline members (run after sizes are committed)
         if (upline.length > 0) {
-            // Use Promise.all to check ranks in parallel after the main batch is committed.
-            await Promise.all(upline.map(async (uplineMemberId) => {
-                try {
-                    const uplineMemberSnap = await db.collection('users').doc(uplineMemberId).get();
-                    if (uplineMemberSnap.exists) {
-                        // Pass the fresh data to the rank check function
-                        await checkAndAwardRank(uplineMemberSnap.id, uplineMemberSnap.data() as UserData);
-                    }
-                } catch(e) {
-                    console.error(`Error checking rank for upline member ${uplineMemberId}`, e);
-                }
-            }));
+            await Promise.all(upline.map(uplineMemberId => checkAndAwardRank(uplineMemberId)));
         }
 
         console.log(`Processed new user ${newUserId} with referrer ${referrerId || 'None'}`);
     });
 
-async function checkAndAwardRank(userId: string, user: UserData): Promise<void> {
+async function checkAndAwardRank(userId: string): Promise<void> {
     const userRef = db.collection('users').doc(userId);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) return;
+    
+    const user = userSnap.data() as UserData;
     const batch = db.batch();
     let ranksUpdated: string[] = [];
 
     // --- Check Free Track ---
-    const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === user.freeRank);
+    const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === user.freeRank) ?? -1;
     // Iterate from highest rank to lowest to award the best possible rank
     for (let i = freeTrackRewards.length - 1; i > currentFreeRankIndex; i--) {
         const rank = freeTrackRewards[i];
         if (user.totalTeamSize >= rank.goal) {
             batch.update(userRef, { freeRank: rank.name });
-            // Rewards are PGC strings like "1 PGC"
             const pgcReward = parseFloat(rank.reward.split(' ')[0]);
-            if (!isNaN(pgcReward)) {
+            if (!isNaN(pgcReward) && pgcReward > 0) {
                 batch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcReward) });
                 const rankTxRef = db.collection('transactions').doc();
                 batch.set(rankTxRef, {
@@ -161,20 +152,18 @@ async function checkAndAwardRank(userId: string, user: UserData): Promise<void> 
                 });
             }
             ranksUpdated.push(`Free: ${rank.name}`);
-            break; // Award the highest applicable rank and stop checking for this track
+            break; // Award the highest applicable rank and stop
         }
     }
 
     // --- Check Paid Track ---
-    const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank);
-    // Iterate from highest rank to lowest
+    const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank) ?? -1;
     for (let i = paidTrackRewards.length - 1; i > currentPaidRankIndex; i--) {
         const rank = paidTrackRewards[i];
         if (user.paidTeamSize >= rank.goal) {
             batch.update(userRef, { paidRank: rank.name });
-             // Rewards are PGC strings like "2.5 PGC"
             const pgcReward = parseFloat(rank.reward.split(' ')[0]);
-            if (!isNaN(pgcReward)) {
+            if (!isNaN(pgcReward) && pgcReward > 0) {
                 batch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcReward) });
                 const rankTxRef = db.collection('transactions').doc();
                 batch.set(rankTxRef, {
@@ -187,7 +176,7 @@ async function checkAndAwardRank(userId: string, user: UserData): Promise<void> 
                 });
             }
             ranksUpdated.push(`Paid: ${rank.name}`);
-            break; // Award the highest applicable rank and stop checking for this track
+            break; // Award the highest applicable rank and stop
         }
     }
 
