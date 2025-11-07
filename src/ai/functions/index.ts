@@ -186,3 +186,5 @@ async function checkAndAwardRank(userId: string): Promise<void> {
         console.log(`User ${userId} awarded new ranks: ${ranksUpdated.join(', ')}`);
     }
 }
+
+    

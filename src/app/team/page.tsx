@@ -66,14 +66,14 @@ const rankIcons: { [key: string]: React.FC<any> } = {
     'Silver': Award,
     'Gold': Gem,
     'Emerald': Shield,
-    'Platinum': Gem,
+    'Platinum': Star,
     'Diamond': Shield,
     'Crown': Crown,
     'Bronze Star': UserPlus,
     'Silver Star': Award,
     'Gold Star': Gem,
     'Emerald Star': Shield,
-    'Platinum Star': Gem,
+    'Platinum Star': Star,
     'Diamond Star': Shield,
     'Crown Star': Crown,
 };
@@ -448,3 +448,5 @@ export default function TeamPage() {
     </AppLayout>
   );
 }
+
+    
