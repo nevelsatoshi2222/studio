@@ -1,12 +1,10 @@
 
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { transactions } from '@/lib/data';
 
 export default function TransactionsPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">Transactions</h1>
@@ -49,6 +47,5 @@ export default function TransactionsPage() {
             </CardContent>
           </Card>
       </div>
-    </AppLayout>
   );
 }

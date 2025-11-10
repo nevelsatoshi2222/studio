@@ -98,7 +98,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
             } else {
               // User is authenticated in Firebase Auth, but has no document in Firestore yet.
               // This can happen during registration before the doc is created.
-              // It is also important for the special `admin@publicgovernance.com` user, who might not have a doc initially.
               setUserAuthState({ user: firebaseUser as AppUser, isUserLoading: false, userError: null });
             }
           } catch (error) {

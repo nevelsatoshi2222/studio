@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -37,7 +36,6 @@ const iconMap: { [key: string]: React.FC<any> } = {
 
 export default function AirdropPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <Card className="bg-gradient-to-br from-primary/10 to-background">
           <CardHeader className="text-center">
@@ -99,6 +97,5 @@ export default function AirdropPage() {
             </CardFooter>
         </Card>
       </div>
-    </AppLayout>
   );
 }

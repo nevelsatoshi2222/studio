@@ -1,16 +1,15 @@
 
-
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
   userId: string;
   type: "PURCHASE" | "COMMISSION" | "WITHDRAWAL" | "RANK_REWARD";
   amount: number;
-  currency: 'PGC' | 'USDT';
   purchaseRef?: any; // DocumentReference
   level?: number;
   timestamp: any; // Timestamp
   rewardName?: string;
+  usdtAmount?: number;
 };
 
 export type User = {
@@ -252,19 +251,4 @@ export type SubmittedContent = {
   submittedAt: Date;
   status: 'Pending' | 'Approved' | 'Rejected';
   views?: number;
-};
-
-export type QuizRewardTier = {
-    level: string;
-    icon: LucideIcon;
-    rewards: {
-        score: string;
-        prize: string;
-        limit: string;
-    }[];
-};
-
-export type LevelCommission = {
-    level: number;
-    percentage: number;
 };

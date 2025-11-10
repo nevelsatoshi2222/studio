@@ -1,7 +1,6 @@
-
 'use client';
 import { useState } from 'react';
-import { AppLayout } from '@/components/app-layout';
+import AppLayout from '@/components/app-layout'; // ✅ FIXED IMPORT
 import { Button } from '@/components/ui/button';
 import {
   Card,

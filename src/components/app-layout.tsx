@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import Link from 'next/link';
@@ -87,12 +86,12 @@ const mainNavItems = [
   { href: '/social-media', icon: Rss, label: 'Social Media' },
   { href: '/exchange', icon: BarChart2, label: 'Crypto Exchange' },
   { href: '/tokenomics', icon: PieChartIcon, label: 'Coins & Tokenomics' },
+  { href: '/help', icon: HelpCircle, label: 'Help & Support' },
 ];
 
 const programNavItems = [
   { href: '/staking', icon: Lock, label: 'Staking' },
   { href: '/airdrop', icon: Gift, label: 'Airdrop' },
-  { href: '/financial-quiz', icon: HelpCircleIcon, label: 'Financial Quiz' },
   { href: '/voting', icon: Vote, label: 'Voting Hub'},
   { href: '/quiz', icon: Trophy, label: 'Quiz Competition'},
   { href: '/sports', icon: Trophy, label: 'Sports Competition'},
@@ -105,7 +104,7 @@ const programNavItems = [
 ];
 
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const { toast } = useToast();
@@ -165,11 +164,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                               </div>
                           </DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                           <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild>
                               <Link href="/profile">Profile</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                               <Link href="/team">My Team</Link>
+                          </DropdownMenuItem>
+                          {/* ADD COMMISSION TAB HERE */}
+                          <DropdownMenuItem asChild>
+                              <Link href="/commission">Commission</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                               <Link href="/settings">Settings</Link>

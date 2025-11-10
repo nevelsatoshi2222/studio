@@ -1,7 +1,7 @@
 
 'use client';
 import { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/app-layout';
+import  AppLayout  from '@/components/app-layout';
 import { IceTicker } from '@/components/ice-ticker';
 import { ItcTicker } from '@/components/itc-ticker';
 import { IgcTicker } from '@/components/igc-ticker';

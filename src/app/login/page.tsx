@@ -1,7 +1,7 @@
 
 'use client';
 import { Suspense, useEffect } from 'react';
-import { AppLayout } from '@/components/app-layout';
+import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,

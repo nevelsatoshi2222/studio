@@ -1,3 +1,9 @@
+
+
+
+
+
+
 import {
   Transaction,
   User,
@@ -22,8 +28,7 @@ import {
   ArtItem,
   AirdropReward,
   FundAllocation,
-  AffiliateRewardTier,
-  LevelCommission
+  AffiliateRewardTier
 } from './types';
 import { placeholderImages } from './placeholder-images.json';
 import { Users as UsersIcon, Star, Award, Gem, Shield, Crown, UserPlus } from 'lucide-react';
@@ -1038,23 +1043,23 @@ export const airdropRewards: AirdropReward[] = [
 ];
 
 export const freeTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze', icon: UsersIcon, reward: '1 PGC', limit: '', requirement: '5 direct members', goal: 5 },
-    { name: 'Silver', icon: Award, reward: '10 PGC', limit: '', requirement: '10 direct members', goal: 10 },
-    { name: 'Gold', icon: Gem, reward: '50 PGC', limit: '', requirement: '25 direct members', goal: 25 },
-    { name: 'Emerald', icon: Shield, reward: '100 PGC', limit: '', requirement: '50 direct members', goal: 50 },
-    { name: 'Platinum', icon: Star, reward: '1,000 PGC', limit: 'First 1000 Achievers', requirement: '100 direct members', goal: 100 },
-    { name: 'Diamond', icon: Shield, reward: '10,000 PGC', limit: 'First 200 Achievers', requirement: '250 direct members', goal: 250 },
-    { name: 'Crown', icon: Crown, reward: '100,000 PGC', limit: 'First 40 Achievers', requirement: '500 direct members', goal: 500 },
+    { name: 'Bronze', icon: UsersIcon, reward: '1 Coin', limit: 'First 78,125 Achievers', requirement: '5 people join successfully with your affiliate link.' },
+    { name: 'Silver', icon: Award, reward: '2 Coins', limit: 'First 15,625 Achievers', requirement: '5 team members achieve Bronze Reward.' },
+    { name: 'Gold', icon: Gem, reward: '4 Coins', limit: 'First 3,125 Achievers', requirement: '5 team members achieve Silver Reward.' },
+    { name: 'Emerald', icon: Shield, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 team members achieve Gold Reward.' },
+    { name: 'Platinum', icon: Star, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 team members achieve Emerald Reward.' },
+    { name: 'Diamond', icon: Shield, reward: '250 Coins', limit: 'First 25 Achievers', requirement: '5 team members achieve Platinum Reward.' },
+    { name: 'Crown', icon: Crown, reward: '1000 Coins', limit: 'First 5 Achievers', requirement: '5 team members achieve Diamond Reward.' },
 ];
 
 export const paidTrackRewards: AffiliateRewardTier[] = [
-    { name: 'Bronze Star', icon: UserPlus, reward: '2.5 PGC', limit: '', requirement: '5 paid members in team', goal: 5 },
-    { name: 'Silver Star', icon: Award, reward: '25 PGC', limit: '', requirement: '50 paid members in team', goal: 50 },
-    { name: 'Gold Star', icon: Gem, reward: '250 PGC', limit: '', requirement: '500 paid members in team', goal: 500 },
-    { name: 'Emerald Star', icon: Shield, reward: '1,250 PGC', limit: '', requirement: '2500 paid members in team', goal: 2500 },
-    { name: 'Platinum Star', icon: Star, reward: '5,000 PGC', limit: 'First 1000 Achievers', requirement: '10000 paid members in team', goal: 10000 },
-    { name: 'Diamond Star', icon: Shield, reward: '25,000 PGC', limit: 'First 200 Achievers', requirement: '50000 paid members in team', goal: 50000 },
-    { name: 'Crown Star', icon: Crown, reward: '125,000 PGC', limit: 'First 40 Achievers', requirement: '100,000 paid members in team', goal: 100000 },
+    { name: 'Bronze Star', icon: UserPlus, reward: '2.5 Coins', limit: 'First 15,625 Achievers', requirement: '5 direct members pay for any package or buy staking.' },
+    { name: 'Silver Star', icon: Award, reward: '5 Coins', limit: 'First 3,125 Achievers', requirement: '5 team members achieve Bronze Star Reward.' },
+    { name: 'Gold Star', icon: Gem, reward: '10 Coins', limit: 'First 625 Achievers', requirement: '5 team members achieve Silver Star Reward.' },
+    { name: 'Emerald Star', icon: Shield, reward: '20 Coins', limit: 'First 125 Achievers', requirement: '5 team members achieve Gold Star Reward.' },
+    { name: 'Platinum Star', icon: Star, reward: '125 Coins', limit: 'First 25 Achievers', requirement: '5 team members achieve Emerald Star Reward.' },
+    { name: 'Diamond Star', icon: Shield, reward: '1,250 Coins', limit: 'First 5 Achievers', requirement: '5 team members achieve Platinum Star Reward.' },
+    { name: 'Crown Star', icon: Crown, reward: '6,250 Coins', limit: 'First 1 Achiever', requirement: '5 people in your direct team achieve Diamond Star Reward.' },
 ];
 
 export const influencerTiers = [
@@ -1096,20 +1101,20 @@ export const influencerTiers = [
     }
 ];
 
-export const levelCommissions: LevelCommission[] = [
-    { level: 1, percentage: 0.2 }, // 0.2%
-    { level: 2, percentage: 0.1 }, // 0.1%
-    { level: 3, percentage: 0.05 }, // 0.05%
-    { level: 4, percentage: 0.05 },
-    { level: 5, percentage: 0.05 },
-    { level: 6, percentage: 0.05 },
-    { level: 7, percentage: 0.05 },
-    { level: 8, percentage: 0.05 },
-    { level: 9, percentage: 0.05 },
-    { level: 10, percentage: 0.05 },
-    { level: 11, percentage: 0.05 },
-    { level: 12, percentage: 0.05 },
-    { level: 13, percentage: 0.05 },
-    { level: 14, percentage: 0.05 },
-    { level: 15, percentage: 0.05 },
-];
+export const levelCommissions = {
+    1: 0.002, // 0.2%
+    2: 0.002,
+    3: 0.002,
+    4: 0.002,
+    5: 0.002,
+    6: 0.001, // 0.1%
+    7: 0.001,
+    8: 0.001,
+    9: 0.001,
+    10: 0.001,
+    11: 0.001,
+    12: 0.001,
+    13: 0.001,
+    14: 0.001,
+    15: 0.001,
+};

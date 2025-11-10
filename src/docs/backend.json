@@ -10,8 +10,7 @@
         "uid": { "type": "string", "description": "Firebase Auth UID (The Doc ID)" },
         "referredBy": { "type": "string", "description": "The uid of the referrer (Level 1 Upline)" },
         "walletPublicKey": { "type": "string", "description": "The connected Solana Public Key" },
-        "pgcBalance": { "type": "number", "description": "Current PGC token balance (from rewards)." },
-        "usdtBalance": { "type": "number", "description": "Current USDT balance (from commissions)." },
+        "pgcBalance": { "type": "number", "description": "Current token balance (The single source of truth)" },
         "isVerified": { "type": "boolean", "description": "KYC/KYL status" },
         "name": { "type": "string", "description": "User's full name." },
         "email": { "type": "string", "description": "User's email address.", "format": "email" },
@@ -30,7 +29,7 @@
         "paidRank": { "type": "string", "description": "The user's current rank in the paid referral track." },
         "isPaid": { "type": "boolean", "description": "Indicates if the user has made an initial purchase." }
       },
-      "required": ["uid", "name", "email", "pgcBalance", "usdtBalance", "isVerified"]
+      "required": ["uid", "name", "email", "pgcBalance", "isVerified"]
     },
     "Transaction": {
         "title": "Transaction",
@@ -39,14 +38,12 @@
         "properties": {
             "userId": { "type": "string", "description": "User who is receiving the funds." },
             "type": { "type": "string", "enum": ["PURCHASE", "COMMISSION", "WITHDRAWAL", "RANK_REWARD"], "description": "The type of transaction." },
-            "amount": { "type": "number", "description": "Amount of tokens (PGC for rewards, USDT for commissions)." },
-            "currency": { "type": "string", "enum": ["PGC", "USDT"], "description": "The currency of the transaction." },
+            "amount": { "type": "number", "description": "Amount of PGC tokens." },
             "purchaseRef": { "type": "string", "description": "Link to the original presales document (if type is COMMISSION)." },
             "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." },
-            "rewardName": { "type": "string", "description": "Name of the rank achieved for RANK_REWARD transactions." },
-             "level": { "type": "number", "description": "The referral level from which the commission was earned." }
+            "rewardName": { "type": "string", "description": "Name of the rank achieved for RANK_REWARD transactions." }
         },
-        "required": ["userId", "type", "amount", "currency", "timestamp"]
+        "required": ["userId", "type", "amount", "timestamp"]
     },
     "Presale": {
         "title": "Presale",
@@ -59,21 +56,6 @@
             "status": { "type": "string", "enum": ["COMPLETED", "PENDING_VERIFICATION"], "description": "Status of the purchase verification." }
         },
         "required": ["userId", "amountUSDT", "pgcCredited", "status"]
-    },
-    "WithdrawalRequest": {
-        "title": "Withdrawal Request",
-        "type": "object",
-        "description": "A user's request to withdraw their earned USDT commissions.",
-        "properties": {
-            "userId": { "type": "string", "description": "User requesting the withdrawal." },
-            "userName": { "type": "string", "description": "Name of the user for easy identification." },
-            "amount": { "type": "number", "description": "Amount of USDT to withdraw." },
-            "currency": { "type": "string", "enum": ["USDT"], "description": "The currency for withdrawal." },
-            "walletAddress": { "type": "string", "description": "The Solana wallet address to send the funds to." },
-            "requestedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the request." },
-            "status": { "type": "string", "enum": ["pending", "completed", "rejected"], "description": "Status of the withdrawal request." }
-        },
-        "required": ["userId", "amount", "currency", "walletAddress", "requestedAt", "status"]
     }
   },
   "auth": {
@@ -83,8 +65,7 @@
     "structure": [
       { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
       { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
-      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } },
-      { "path": "/withdrawalRequests/{requestId}", "definition": { "schema": { "$ref": "#/entities/WithdrawalRequest" } } }
+      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } }
     ]
   }
 }

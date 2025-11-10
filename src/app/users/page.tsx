@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -30,7 +29,6 @@ export default function UsersPage() {
   const { data: users, isLoading } = useCollection<User>(usersQuery);
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">User Management</h1>
@@ -123,6 +121,5 @@ export default function UsersPage() {
             </CardContent>
           </Card>
       </div>
-    </AppLayout>
   );
 }

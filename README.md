@@ -1,5 +1,5 @@
-# Firebase Studio
+# Public Governance
 
-This is a NextJS starter in Firebase Studio.
+This is a Next.js project created in Firebase Studio.
 
-To get started, take a look at src/app/page.tsx.
+To get started, take a look at `src/app/page.tsx`.

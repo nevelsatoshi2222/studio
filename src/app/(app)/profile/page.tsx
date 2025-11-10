@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -103,8 +102,14 @@ export default function ProfilePage() {
     },
   });
 
+  // THIS IS THE KEY FIX: Optimistically generate the referral code on the client for new users.
+  // This logic determines if the user just registered (e.g., within the last 60 seconds).
   const isNewUser = user && user.metadata.creationTime && (Date.now() - new Date(user.metadata.creationTime).getTime() < 60000);
   
+  // The display referral code now has a reliable fallback.
+  // 1. Try to get it from the loaded Firestore document.
+  // 2. If that's loading AND the user is new, calculate it on the client. This is the optimistic UI part.
+  // 3. Otherwise, show "Generating..."
   const optimisticReferralCode = user ? `PGC-${user.uid.substring(0, 8).toUpperCase()}` : null;
   const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : 'Generating...');
 
@@ -115,7 +120,7 @@ export default function ProfilePage() {
         name: userProfile.name || '',
         walletPublicKey: userProfile.walletPublicKey || '',
       });
-      setWithdrawAmount(userProfile.usdtBalance || 0); // Default to withdrawing USDT
+      setWithdrawAmount(userProfile.pgcBalance || 0);
     } else if (user) {
         form.reset({
             name: user.displayName || user.email?.split('@')[0] || 'User',
@@ -155,8 +160,8 @@ export default function ProfilePage() {
         toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Withdrawal amount must be greater than zero.'});
         return;
     }
-    if (withdrawAmount > (userProfile?.usdtBalance || 0)) {
-        toast({ variant: 'destructive', title: 'Insufficient Balance', description: 'Withdrawal amount cannot exceed your USDT balance.'});
+    if (withdrawAmount > (userProfile?.pgcBalance || 0)) {
+        toast({ variant: 'destructive', title: 'Insufficient Balance', description: 'Withdrawal amount cannot exceed your balance.'});
         return;
     }
 
@@ -165,17 +170,16 @@ export default function ProfilePage() {
         userId: user.uid,
         userName: userProfile.name,
         amount: withdrawAmount,
-        currency: 'USDT',
         walletAddress: userProfile.walletPublicKey,
         requestedAt: serverTimestamp(),
         status: 'pending',
     });
     if (userDocRef) {
-      updateDocumentNonBlocking(userDocRef, { usdtBalance: increment(-withdrawAmount) });
+      updateDocumentNonBlocking(userDocRef, { pgcBalance: increment(-withdrawAmount) });
     }
     toast({
         title: 'Withdrawal Requested',
-        description: `Your request to withdraw ${withdrawAmount.toLocaleString()} USDT has been submitted.`,
+        description: `Your request to withdraw ${withdrawAmount.toLocaleString()} PGC has been submitted.`,
     });
     setIsWithdrawModalOpen(false);
   }
@@ -189,7 +193,7 @@ export default function ProfilePage() {
     updateDocumentNonBlocking(userDocRef, {
         kycStatus: 'pending',
         nationalIdUrl: nationalIdFile ? `kyc_uploads/${user?.uid}/${nationalIdFile.name}` : '',
-        taxIdUrl: taxIdFile ? `kyc-uploads/${user?.uid}/${taxIdFile.name}` : '',
+        taxIdUrl: taxIdFile ? `ky-uploads/${user?.uid}/${taxIdFile.name}` : '',
     });
   };
 
@@ -206,12 +210,11 @@ export default function ProfilePage() {
   };
 
   if (isUserLoading || (user && isProfileLoading && !isNewUser)) {
-    return <AppLayout><ProfileLoadingSkeleton /></AppLayout>;
+    return <ProfileLoadingSkeleton />;
   }
 
   if (!user) {
     return (
-      <AppLayout>
         <Card>
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
@@ -221,12 +224,11 @@ export default function ProfilePage() {
             <Button asChild><Link href="/login">Login</Link></Button>
           </CardFooter>
         </Card>
-      </AppLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <>
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <div>
           <h1 className="font-headline text-3xl font-bold">My Profile</h1>
@@ -283,30 +285,24 @@ export default function ProfilePage() {
             <CardContent className="grid md:grid-cols-2 gap-6">
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
                     <div>
-                        <p className="text-sm text-muted-foreground">In-App PGC Balance (Rewards)</p>
+                        <p className="text-sm text-muted-foreground">In-App PGC Balance</p>
                         <div className="flex items-baseline gap-2">
+                            <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png" alt="PGC Coin" width={28} height={28} />
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
                     </div>
+                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Request Withdrawal</Button>
                 </div>
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
                     <div>
-                        <p className="text-sm text-muted-foreground">Commission Balance (USDT)</p>
-                        <div className="flex items-baseline gap-2">
-                             <DollarSign className="h-7 w-7 text-green-500" />
-                            <span className="text-4xl font-bold">${userProfile?.usdtBalance?.toLocaleString() || 0}</span>
-                            <span className="text-xl text-muted-foreground">USDT</span>
-                        </div>
+                        <p className="text-sm text-muted-foreground">Team & Staking</p>
+                        <p className="text-lg">View your affiliate team, earnings, and staked assets.</p>
                     </div>
-                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.usdtBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Withdraw USDT</Button>
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                     <Button asChild variant="outline" className="w-full justify-between">
+                     <Button asChild variant="outline">
                         <Link href="/team">Go to My Team <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
-                     <Button asChild variant="outline" className="w-full justify-between">
+                     <Button asChild variant="outline">
                         <Link href="/staking">Go to Staking <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
@@ -382,9 +378,9 @@ export default function ProfilePage() {
         <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Request USDT Withdrawal</DialogTitle>
+                    <DialogTitle>Request PGC Withdrawal</DialogTitle>
                     <DialogDescription>
-                        Enter the amount of USDT you wish to withdraw to your linked Solana wallet: <strong className="font-mono text-xs">{userProfile?.walletPublicKey}</strong>
+                        Enter the amount of PGC you wish to withdraw to your linked Solana wallet: <strong className="font-mono text-xs">{userProfile?.walletPublicKey}</strong>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -396,11 +392,11 @@ export default function ProfilePage() {
                                 type="number"
                                 value={withdrawAmount}
                                 onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-                                max={userProfile?.usdtBalance || 0}
+                                max={userProfile?.pgcBalance || 0}
                             />
-                            <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7" onClick={() => setWithdrawAmount(userProfile?.usdtBalance || 0)}>Max</Button>
+                            <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7" onClick={() => setWithdrawAmount(userProfile?.pgcBalance || 0)}>Max</Button>
                         </div>
-                        <p className="text-xs text-muted-foreground">Available Balance: ${(userProfile?.usdtBalance || 0).toLocaleString()} USDT</p>
+                        <p className="text-xs text-muted-foreground">Available Balance: {(userProfile?.pgcBalance || 0).toLocaleString()} PGC</p>
                     </div>
                 </div>
                 <DialogFooter>
@@ -409,6 +405,6 @@ export default function ProfilePage() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    </AppLayout>
+    </>
   );
 }
