@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -13,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight, ExternalLink, Key } from 'lucide-react';
+import { Copy, UploadCloud, UserCog, Wallet, Landmark, Send, DollarSign, ChevronRight, ExternalLink, Key, MapPin, Shield, CheckCircle, XCircle, Globe, Building, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -86,6 +85,8 @@ export default function ProfilePage() {
   const [taxIdFile, setTaxIdFile] = useState<File | null>(null);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState(0);
+  const [isSavingGeoData, setIsSavingGeoData] = useState(false);
+  const [referralLink, setReferralLink] = useState<string | null>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -113,7 +114,6 @@ export default function ProfilePage() {
   const optimisticReferralCode = user ? `PGC-${user.uid.substring(0, 8).toUpperCase()}` : null;
   const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : 'Generating...');
 
-
   useEffect(() => {
     if (userProfile) {
       form.reset({
@@ -134,6 +134,12 @@ export default function ProfilePage() {
        form.setValue('walletPublicKey', publicKey.toBase58());
     }
   }, [publicKey, form]);
+
+  useEffect(() => {
+    if (displayReferralCode !== 'Generating...') {
+      setReferralLink(`${window.location.origin}/register?ref=${displayReferralCode}`);
+    }
+  }, [displayReferralCode]);
 
   const handleProfileSubmit = (data: ProfileFormValues) => {
     if (!userDocRef || !user) return;
@@ -197,7 +203,54 @@ export default function ProfilePage() {
     });
   };
 
-  const referralLink = displayReferralCode !== 'Generating...' ? `${window.location.origin}/register?ref=${displayReferralCode}` : null;
+  const updateGeographicalField = (field: string, value: string) => {
+    if (!userDocRef) return;
+    
+    updateDocumentNonBlocking(userDocRef, {
+      [field]: value,
+      geoDataUpdatedAt: new Date(),
+    });
+  };
+
+  const saveGeographicalData = async () => {
+    if (!userDocRef || !user) return;
+    
+    setIsSavingGeoData(true);
+    try {
+      await updateDocumentNonBlocking(userDocRef, {
+        geoDataVerified: false, // Reset verification when data changes
+        geoDataUpdatedAt: new Date(),
+      });
+      
+      toast({
+        title: 'Geographical Data Updated',
+        description: 'Your location information has been saved. It will be used for voting eligibility.',
+      });
+    } catch (error) {
+      console.error('Error saving geographical data:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Update Failed',
+        description: 'There was an error saving your geographical data.',
+      });
+    } finally {
+      setIsSavingGeoData(false);
+    }
+  };
+
+  const getVotingEligibility = () => {
+    if (!userProfile) return {};
+    
+    return {
+      international: true, // All users can vote internationally
+      national: !!userProfile.country,
+      state: !!userProfile.country && !!userProfile.state,
+      district: !!userProfile.country && !!userProfile.state && !!userProfile.district,
+      taluka: !!userProfile.country && !!userProfile.state && !!userProfile.district && !!userProfile.taluka,
+      village: !!userProfile.country && !!userProfile.state && !!userProfile.district && !!userProfile.taluka && !!userProfile.village,
+      street: !!userProfile.country && !!userProfile.state && !!userProfile.district && !!userProfile.taluka && !!userProfile.village && !!userProfile.street,
+    };
+  };
 
   const copyToClipboard = (textToCopy: string | null, toastMessage: string) => {
     if (!textToCopy) return;
@@ -208,6 +261,8 @@ export default function ProfilePage() {
         });
     });
   };
+
+  const eligibility = getVotingEligibility();
 
   if (isUserLoading || (user && isProfileLoading && !isNewUser)) {
     return <ProfileLoadingSkeleton />;
@@ -232,10 +287,10 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <div>
           <h1 className="font-headline text-3xl font-bold">My Profile</h1>
-          <p className="text-muted-foreground">Manage your account details, team, and finances.</p>
+          <p className="text-muted-foreground">Manage your account details, team, finances, and voting eligibility.</p>
         </div>
 
-        {/* User Info & Profile Form */}
+        {/* User Info & Profile Form - 1st */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleProfileSubmit)}>
             <Card>
@@ -275,12 +330,12 @@ export default function ProfilePage() {
             </Card>
           </form>
         </Form>
-        
-        {/* Financial Hub Card */}
+
+        {/* Financial Hub Card - 2nd */}
         <Card>
             <CardHeader>
-                <CardTitle>Financial & Referral Hub</CardTitle>
-                <CardDescription>Your financial overview, referral tools, and actions.</CardDescription>
+                <CardTitle>Financial Hub</CardTitle>
+                <CardDescription>Your financial overview and actions</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-6">
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
@@ -306,39 +361,282 @@ export default function ProfilePage() {
                         <Link href="/staking">Go to Staking <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="referral-link">Your Affiliate Link</Label>
-                    <p className="text-xs text-muted-foreground">Share this link to have new users join your network. You can also give them just the code.</p>
-                    <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
-                         <Link href={referralLink || '#'} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
-                            {referralLink || 'Your link will appear here once your code is generated.'}
-                        </Link>
-                        <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost" disabled={!referralLink}>
-                            <Copy className="h-5 w-5" />
-                        </Button>
-                    </div>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="referral-code-display">Your Unique Referral Code</Label>
-                     <div className="flex items-center space-x-2">
-                        <Input
-                            id="referral-code-display"
-                            readOnly
-                            value={displayReferralCode}
-                            className="font-mono text-lg text-primary flex-1"
-                        />
-                        <Button
-                            onClick={() => copyToClipboard(displayReferralCode, 'Your referral code has been copied.')}
-                            disabled={displayReferralCode === 'Generating...'}
-                        >
-                            <Copy className="mr-2 h-4 w-4"/> Copy Code
-                        </Button>
-                    </div>
-                </div>
             </CardContent>
         </Card>
 
-        {/* KYC Card */}
+        {/* Unique Referral Code - 3rd */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Unique Referral Code</CardTitle>
+            <CardDescription>Share your code to grow your team and earn rewards</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="referral-code-display">Referral Code</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="referral-code-display"
+                  readOnly
+                  value={displayReferralCode}
+                  className="font-mono text-lg text-primary flex-1"
+                />
+                <Button
+                  onClick={() => copyToClipboard(displayReferralCode, 'Your referral code has been copied.')}
+                  disabled={displayReferralCode === 'Generating...'}
+                >
+                  <Copy className="mr-2 h-4 w-4"/> Copy Code
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Referral Link - 4th */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Referral Link</CardTitle>
+            <CardDescription>Share this link to have new users join your network</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="referral-link">Affiliate Link</Label>
+              <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
+                {referralLink ? (
+                  <Link href={referralLink} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
+                    {referralLink}
+                  </Link>
+                ) : (
+                  <span className="flex-1 text-muted-foreground font-mono text-sm truncate">
+                    Your link will appear here once your code is generated.
+                  </span>
+                )}
+                <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost" disabled={!referralLink}>
+                  <Copy className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Geographical Data Form - 5th */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Geographical Information for Voting
+            </CardTitle>
+            <CardDescription>
+              Update your geographical details to participate in local governance voting. This information determines your voting eligibility.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={userProfile?.stateDisplay || userProfile?.state || ''}
+                  onChange={(e) => updateGeographicalField('stateDisplay', e.target.value)}
+                  placeholder="e.g., Maharashtra, California"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="district">District</Label>
+                <Input
+                  id="district"
+                  value={userProfile?.districtDisplay || userProfile?.district || ''}
+                  onChange={(e) => updateGeographicalField('districtDisplay', e.target.value)}
+                  placeholder="e.g., Mumbai, Los Angeles"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="taluka">Taluka/Block</Label>
+                <Input
+                  id="taluka"
+                  value={userProfile?.talukaDisplay || userProfile?.taluka || ''}
+                  onChange={(e) => updateGeographicalField('talukaDisplay', e.target.value)}
+                  placeholder="e.g., Andheri, Saran"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="village">Village/Ward</Label>
+                <Input
+                  id="village"
+                  value={userProfile?.villageDisplay || userProfile?.village || ''}
+                  onChange={(e) => updateGeographicalField('villageDisplay', e.target.value)}
+                  placeholder="e.g., Juhu, Downtown"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="street">Street</Label>
+                <Input
+                  id="street"
+                  value={userProfile?.streetDisplay || userProfile?.street || ''}
+                  onChange={(e) => updateGeographicalField('streetDisplay', e.target.value)}
+                  placeholder="e.g., MG Road, Main Street"
+                />
+              </div>
+            </div>
+
+            <Button 
+              onClick={saveGeographicalData}
+              disabled={isSavingGeoData}
+              className="w-full md:w-auto"
+            >
+              {isSavingGeoData ? 'Saving...' : 'Save Geographical Data'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Voting Eligibility Status - 6th */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Voting Eligibility Status
+            </CardTitle>
+            <CardDescription>
+              Your current voting eligibility based on geographical information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  <span>International Voting</span>
+                </div>
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Eligible
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Landmark className="h-4 w-4" />
+                  <span>National Voting</span>
+                </div>
+                {eligibility.national ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add Country
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Building className="h-4 w-4" />
+                  <span>State Voting</span>
+                </div>
+                {eligibility.state ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add State
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>District Voting</span>
+                </div>
+                {eligibility.district ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add District
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>Taluka Voting</span>
+                </div>
+                {eligibility.taluka ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add Taluka
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  <span>Village Voting</span>
+                </div>
+                {eligibility.village ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add Village
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  <span>Street Voting</span>
+                </div>
+                {eligibility.street ? (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Eligible
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-orange-600">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    Add Street
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> You can only vote in polls that match your geographical area. 
+                Complete all geographical fields to participate in local governance at all levels.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* KYC Card - 7th */}
         <Card>
             <CardHeader>
               <CardTitle>KYC Verification</CardTitle>

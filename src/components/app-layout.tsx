@@ -170,9 +170,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                           <DropdownMenuItem asChild>
                               <Link href="/team">My Team</Link>
                           </DropdownMenuItem>
-                          {/* ADD COMMISSION TAB HERE */}
                           <DropdownMenuItem asChild>
                               <Link href="/commission">Commission</Link>
+                          </DropdownMenuItem>
+                          {/* QUIZ OPINION TAB ADDED HERE */}
+                          <DropdownMenuItem asChild>
+                              <Link href="/quiz-opinion">Quiz Opinion</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                               <Link href="/settings">Settings</Link>
@@ -217,12 +220,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarMenu>
           {mainNavItems.map((item) => (
             <SidebarMenuItem key={item.label}>
-              <Link href={item.href} passHref>
-                <SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href={item.href}>
                     <item.icon />
                     <span>{item.label}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -242,17 +245,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                             <SidebarMenuSub>
-                                <SidebarMenuSubItem><Link href="/admin"><SidebarMenuSubButton>Dashboard</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><SidebarMenuSubButton asChild><Link href="/admin">Dashboard</Link></SidebarMenuSubButton></SidebarMenuSubItem>
                                 {isSuperAdmin && (
                                     <>
-                                        <SidebarMenuSubItem><Link href="/admin/create-admin"><SidebarMenuSubButton>Create Admin</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                        <SidebarMenuSubItem><SidebarMenuSubButton asChild><Link href="/admin/create-admin">Create Admin</Link></SidebarMenuSubButton></SidebarMenuSubItem>
                                     </>
                                 )}
                                 {(isSuperAdmin || userRole === 'User Management Admin') && (
-                                    <SidebarMenuSubItem><Link href="/users"><SidebarMenuSubButton>User Management</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton asChild><Link href="/users">User Management</Link></SidebarMenuSubButton></SidebarMenuSubItem>
                                 )}
                                 {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (
-                                    <SidebarMenuSubItem><Link href="/admin/applications"><SidebarMenuSubButton>Applications</SidebarMenuSubButton></Link></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton asChild><Link href="/admin/applications">Applications</Link></SidebarMenuSubButton></SidebarMenuSubItem>
                                 )}
                             </SidebarMenuSub>
                         </CollapsibleContent>
@@ -265,12 +268,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarMenu>
           {programNavItems.map((item) => (
             <SidebarMenuItem key={item.label}>
-              <Link href={item.href} passHref>
-                <SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href={item.href}>
                     <item.icon />
                     <span>{item.label}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -279,20 +282,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
          {!user && (
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href="/login" passHref>
-                  <SidebarMenuButton>
+                <SidebarMenuButton asChild>
+                  <Link href="/login">
                       <LogIn />
                       <span>Login</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/register" passHref>
-                  <SidebarMenuButton>
+                <SidebarMenuButton asChild>
+                  <Link href="/register">
                       <UserPlus />
                       <span>Register</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           )}

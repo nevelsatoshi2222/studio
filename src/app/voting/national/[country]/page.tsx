@@ -1,6 +1,6 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
+import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,

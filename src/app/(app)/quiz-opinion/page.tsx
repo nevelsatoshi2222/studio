@@ -73,6 +73,8 @@ export default function QuizOpinionPage() {
         } finally {
           setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     };
 
@@ -104,7 +106,114 @@ export default function QuizOpinionPage() {
       correctAnswer: 3,
       explanation: "Calculation: ₹47.66 lakh crore / 140 crore people ≈ ₹34,042 per person. ₹35,000 is the nearest option."
     },
-    // ... (include all your other questions here)
+    {
+      id: 3,
+      question: "What percentage of India's budget is allocated to interest payments on existing debt?",
+      options: [
+        "5-10%",
+        "15-20%",
+        "25-30%",
+        "Over 35%"
+      ],
+      correctAnswer: 1,
+      explanation: "Interest payments consume about 20-25% of India's total budget expenditure, making it one of the largest components."
+    },
+    {
+      id: 4,
+      question: "Which sector receives the highest allocation in India's budget?",
+      options: [
+        "Defense",
+        "Education",
+        "Infrastructure",
+        "Subsidies and transfers"
+      ],
+      correctAnswer: 3,
+      explanation: "Subsidies and transfers (including food, fertilizer, and other welfare schemes) typically receive the largest share of budget allocations."
+    },
+    {
+      id: 5,
+      question: "What is the approximate fiscal deficit target for India in 2024-2025?",
+      options: [
+        "3.5% of GDP",
+        "4.5% of GDP",
+        "5.5% of GDP",
+        "6.5% of GDP"
+      ],
+      correctAnswer: 2,
+      explanation: "India's fiscal deficit target for 2024-25 is 5.1% of GDP, with ₹16.85 lakh crore in borrowing."
+    },
+    {
+      id: 6,
+      question: "How much does India plan to spend on infrastructure development in 2024-2025?",
+      options: [
+        "₹5 Lakh Crore",
+        "₹10 Lakh Crore",
+        "₹15 Lakh Crore",
+        "₹20 Lakh Crore"
+      ],
+      correctAnswer: 1,
+      explanation: "Capital expenditure outlay for infrastructure has been increased to ₹11.11 lakh crore for 2024-25."
+    },
+    {
+      id: 7,
+      question: "What is the projected nominal GDP growth rate assumed in the 2024-2025 budget?",
+      options: [
+        "8-9%",
+        "10-11%",
+        "12-13%",
+        "14-15%"
+      ],
+      correctAnswer: 1,
+      explanation: "The budget assumes 10.5% nominal GDP growth for 2024-25, which is crucial for revenue projections."
+    },
+    {
+      id: 8,
+      question: "Which of these statements about India's tax revenue is most accurate?",
+      options: [
+        "Direct taxes contribute more than indirect taxes",
+        "Indirect taxes contribute more than direct taxes",
+        "Both contribute equally",
+        "Corporate tax is the largest source"
+      ],
+      correctAnswer: 0,
+      explanation: "In recent years, direct taxes (income tax, corporate tax) have surpassed indirect taxes (GST, customs) as the largest revenue source."
+    },
+    {
+      id: 9,
+      question: "What is the approximate size of India's stimulus packages during COVID-19 as percentage of GDP?",
+      options: [
+        "5%",
+        "10%",
+        "15%",
+        "20%"
+      ],
+      correctAnswer: 1,
+      explanation: "India's COVID-19 stimulus packages totaled around 10-12% of GDP, including monetary and fiscal measures."
+    },
+    {
+      id: 10,
+      question: "How does India's tax-to-GDP ratio compare with developed countries?",
+      options: [
+        "Much higher",
+        "Slightly higher",
+        "Comparable",
+        "Significantly lower"
+      ],
+      correctAnswer: 3,
+      explanation: "India's tax-to-GDP ratio is around 11-12%, significantly lower than OECD average of 34% and developed countries' 25-45%."
+    },
+    {
+      id: 11,
+      question: "What percentage of Indian households invest in stock markets?",
+      options: [
+        "1-2%",
+        "5-7%",
+        "10-12%",
+        "15-20%"
+      ],
+      correctAnswer: 1,
+      explanation: "Only about 5-7% of Indian households directly invest in stock markets, though mutual fund participation is growing rapidly."
+    },
     {
       id: 12,
       question: "How satisfied are you with the current budget allocation for education and healthcare in India?",
@@ -323,9 +432,117 @@ export default function QuizOpinionPage() {
         </p>
       </div>
 
-      {/* Rest of your quiz interface remains the same */}
-      {/* ... (include all your existing quiz UI code) ... */}
-      
+      {/* Progress Bar */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium">
+              Question {currentQuestion + 1} of {quizQuestions.length}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {Math.round(progress)}% Complete
+            </span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </CardContent>
+      </Card>
+
+      {/* Question Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">
+            {quizQuestions[currentQuestion].question}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={userAnswers[currentQuestion]?.toString() || ""}
+            onValueChange={(value) => handleAnswerSelect(parseInt(value))}
+            className="space-y-4"
+          >
+            {quizQuestions[currentQuestion].options.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
+                  {option}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+
+          {/* Explanation Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-4"
+            onClick={() => setShowExplanation(showExplanation === currentQuestion ? null : currentQuestion)}
+          >
+            {showExplanation === currentQuestion ? 'Hide Explanation' : 'Show Explanation'}
+          </Button>
+
+          {showExplanation === currentQuestion && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-blue-800 text-sm">
+                {quizQuestions[currentQuestion].explanation}
+              </p>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePreviousQuestion}
+            disabled={currentQuestion === 0}
+          >
+            Previous
+          </Button>
+          
+          {currentQuestion === quizQuestions.length - 1 ? (
+            <Button
+              onClick={handleCompleteQuiz}
+              disabled={!allQuestionsAnswered || isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Submitting...
+                </>
+              ) : (
+                'Complete Quiz'
+              )}
+            </Button>
+          ) : (
+            <Button onClick={handleNextQuestion}>
+              Next Question
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+
+      {/* Quick Navigation */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Question Navigation</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-6 gap-2">
+            {quizQuestions.map((_, index) => (
+              <Button
+                key={index}
+                variant={currentQuestion === index ? "default" : userAnswers[index] !== undefined ? "secondary" : "outline"}
+                size="sm"
+                onClick={() => setCurrentQuestion(index)}
+                className="h-10"
+              >
+                {index + 1}
+                {userAnswers[index] !== undefined && (
+                  <CheckCircle className="h-3 w-3 ml-1" />
+                )}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

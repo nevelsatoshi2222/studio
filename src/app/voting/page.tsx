@@ -1,8 +1,6 @@
-
-
 'use client';
-import { useState } from 'react';
-import { AppLayout } from '@/components/app-layout';
+import { Suspense, useState } from 'react';
+import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardDescription,
@@ -44,10 +42,34 @@ const votingLevels = [
 ];
 
 const localVotingLevels = [
-    { title: 'District', href: '/voting/district', icon: Map, description: "Vote on district-wide policies and budgets." },
-    { title: 'Taluka / Block', href: '/voting/taluka', icon: MapPin, description: "Address issues at the sub-district level." },
-    { title: 'Village / Ward', href: '/voting/village', icon: Home, description: "Manage community-specific projects." },
-    { title: 'Street', href: '/voting/street', icon: Home, description: "Handle hyper-local maintenance and improvements." },
+    { 
+      title: 'District', 
+      href: '/voting/district', 
+      icon: Map, 
+      description: "Vote on district-wide policies and budgets.",
+      comingSoon: false // ACTIVATED
+    },
+    { 
+      title: 'Taluka / Block', 
+      href: '/voting/taluka', 
+      icon: MapPin, 
+      description: "Address issues at the sub-district level.",
+      comingSoon: false // ACTIVATED
+    },
+    { 
+      title: 'Village / Ward', 
+      href: '/voting/village', 
+      icon: Home, 
+      description: "Manage community-specific projects.",
+      comingSoon: false // ACTIVATED
+    },
+    { 
+      title: 'Street', 
+      href: '/voting/street', 
+      icon: Home, 
+      description: "Handle hyper-local maintenance and improvements.",
+      comingSoon: false // ACTIVATED
+    },
 ]
 
 export default function VotingHubPage() {
@@ -86,26 +108,42 @@ export default function VotingHubPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Local Voting</CardTitle>
-                <CardDescription>Engage in governance at the district, taluka, village, and street levels. This feature is coming soon.</CardDescription>
+                <CardDescription>All local governance levels are now active! Participate in decisions that directly impact your community.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
                 {localVotingLevels.map(level => {
                     const Icon = level.icon;
                     return (
-                        <div key={level.title} className="p-4 rounded-lg border bg-muted/50 flex items-start gap-4">
+                      <Link 
+                        href={level.href} 
+                        key={level.title} 
+                        className="group"
+                      >
+                        <div className="p-4 rounded-lg border bg-muted/50 flex items-start gap-4 transition-colors hover:border-primary hover:bg-muted/80 cursor-pointer">
                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
                                 <Icon className="h-5 w-5" />
                             </div>
-                            <div>
-                                <h4 className="font-semibold">{level.title}</h4>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-semibold">{level.title}</h4>
+                                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                </div>
                                 <p className="text-sm text-muted-foreground">{level.description}</p>
+                                <div className="mt-2">
+                                  <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                                    Available Now
+                                  </span>
+                                </div>
                             </div>
                         </div>
+                      </Link>
                     )
                 })}
             </CardContent>
-            <CardFooter>
-                <Button disabled>Go to Local Voting (Coming Soon)</Button>
+            <CardFooter className="flex flex-col items-start gap-4">
+                <div className="text-sm text-muted-foreground">
+                  <strong>All local voting levels are now active!</strong> Participate in governance from district to street level.
+                </div>
             </CardFooter>
         </Card>
 

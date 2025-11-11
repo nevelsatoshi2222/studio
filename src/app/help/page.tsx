@@ -45,11 +45,11 @@ export default function HelpPage() {
               <CardDescription>Can't find an answer? Reach out to our support team directly.</CardDescription>
             </CardHeader>
             <CardContent>
-              <a href="mailto:support@publicgovernance.com" className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted">
+              <a href="mailto:support@publicgovernance.app" className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted">
                 <Mail className="h-6 w-6 text-primary"/>
                 <div>
                     <p className="font-semibold">Email Us</p>
-                    <p className="text-sm text-muted-foreground">support@publicgovernance.com</p>
+                    <p className="text-sm text-muted-foreground">support@publicgovernance.app</p>
                 </div>
               </a>
             </CardContent>
