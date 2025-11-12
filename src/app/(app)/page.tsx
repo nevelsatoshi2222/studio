@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
+import { placeholderImages } from '@/lib/placeholder-images.json';
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -39,6 +40,8 @@ export default function Dashboard() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
   const pgcBalance = userProfile?.pgcBalance ?? 0;
+
+  const pgcLogo = placeholderImages.find(p => p.id === 'pgc-logo');
 
   useEffect(() => {
     if (publicKey && connection && IGC_TOKEN_MINT_ADDRESS !== "YOUR_IGC_TOKEN_MINT_ADDRESS_HERE") {
@@ -99,7 +102,7 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png" alt="PGC Coin" width={40} height={40} />
+                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={40} height={40} />}
             </CardHeader>
             <CardContent>
               <PgcTicker />
