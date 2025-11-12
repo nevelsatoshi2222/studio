@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { IceTicker } from '@/components/ice-ticker';
@@ -20,7 +21,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import AppLayout from '@/components/app-layout';
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -72,7 +72,6 @@ export default function Dashboard() {
   const isBalanceLoading = isAppUserLoading || isProfileLoading;
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="font-headline text-3xl font-bold">Dashboard</h1>
@@ -167,6 +166,5 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-    </AppLayout>
   );
 }
