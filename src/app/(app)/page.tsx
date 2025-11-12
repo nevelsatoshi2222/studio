@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { placeholderImages } from '@/lib/placeholder-images.json';
+import { placeholderImages } from '@/lib/image-loader'; // CORRECTED IMPORT
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -90,7 +90,7 @@ export default function Dashboard() {
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
               </div>
-              <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png" alt="IGC Coin" width={32} height={32} />
+              <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png" alt="IGC Coin" width={40} height={40} />
             </CardHeader>
             <CardContent>
               <IgcTicker />

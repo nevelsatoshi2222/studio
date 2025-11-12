@@ -43,7 +43,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { placeholderImages } from '@/lib/placeholder-images.json';
+import { placeholderImages } from '@/lib/image-loader'; // CORRECTED IMPORT
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
