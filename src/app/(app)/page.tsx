@@ -32,7 +32,7 @@ const pgcLogo = {
 const igcLogo = {
   id: "igc-logo",
   description: "The official logo for the Idea Governance Coin.",
-  imageUrl: "https://placehold.co/40x40/000000/FFF?text=IGC",
+  imageUrl: "https://placehold.co/100x100/000000/FFF?text=IGC",
   imageHint: "igc logo"
 };
 
@@ -96,24 +96,24 @@ export default function Dashboard() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center gap-4">
+              {igcLogo && <Image src={igcLogo.imageUrl} alt="IGC Coin" width={100} height={100} data-ai-hint={igcLogo.imageHint}/>}
               <div>
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
               </div>
-              {igcLogo && <Image src={igcLogo.imageUrl} alt="IGC Coin" width={40} height={40} data-ai-hint={igcLogo.imageHint}/>}
             </CardHeader>
             <CardContent>
               <IgcTicker />
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center gap-4">
+                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={100} height={100} data-ai-hint={pgcLogo.imageHint}/>}
                 <div>
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={40} height={40} data-ai-hint={pgcLogo.imageHint}/>}
             </CardHeader>
             <CardContent>
               <PgcTicker />
