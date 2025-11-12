@@ -1,12 +1,6 @@
 {
   "placeholderImages": [
     {
-      "id": "pgc-logo",
-      "description": "The official logo for the Public Governance Coin.",
-      "imageUrl": "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
-      "imageHint": "pgc logo"
-    },
-    {
       "id": "social-quiz",
       "description": "A dynamic image representing a quiz or knowledge competition.",
       "imageUrl": "https://picsum.photos/seed/social-quiz/600/400",

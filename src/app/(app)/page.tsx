@@ -25,8 +25,15 @@ import { doc } from 'firebase/firestore';
 const pgcLogo = {
   id: "pgc-logo",
   description: "The official logo for the Public Governance Coin.",
-  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
+  imageUrl: "https://picsum.photos/seed/pgc/40/40",
   imageHint: "pgc logo"
+};
+
+const igcLogo = {
+  id: "igc-logo",
+  description: "The official logo for the Idea Governance Coin.",
+  imageUrl: "https://picsum.photos/seed/igc/40/40",
+  imageHint: "igc logo"
 };
 
 export default function Dashboard() {
@@ -94,7 +101,7 @@ export default function Dashboard() {
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
               </div>
-              <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png" alt="IGC Coin" width={40} height={40} />
+              {igcLogo && <Image src={igcLogo.imageUrl} alt="IGC Coin" width={40} height={40} data-ai-hint={igcLogo.imageHint}/>}
             </CardHeader>
             <CardContent>
               <IgcTicker />
@@ -106,7 +113,7 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={40} height={40} />}
+                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={40} height={40} data-ai-hint={pgcLogo.imageHint}/>}
             </CardHeader>
             <CardContent>
               <PgcTicker />
