@@ -43,7 +43,13 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { placeholderImages } from '@/lib/image-loader'; // CORRECTED IMPORT
+
+const pgcLogo = {
+  id: "pgc-logo",
+  description: "The official logo for the Public Governance Coin.",
+  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
+  imageHint: "pgc logo"
+};
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -96,8 +102,6 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<any>(userDocRef);
-
-  const pgcLogo = placeholderImages.find(p => p.id === 'pgc-logo');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),

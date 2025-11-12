@@ -21,7 +21,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { placeholderImages } from '@/lib/image-loader'; // CORRECTED IMPORT
+
+const pgcLogo = {
+  id: "pgc-logo",
+  description: "The official logo for the Public Governance Coin.",
+  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
+  imageHint: "pgc logo"
+};
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -40,8 +46,6 @@ export default function Dashboard() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
   const pgcBalance = userProfile?.pgcBalance ?? 0;
-
-  const pgcLogo = placeholderImages.find(p => p.id === 'pgc-logo');
 
   useEffect(() => {
     if (publicKey && connection && IGC_TOKEN_MINT_ADDRESS !== "YOUR_IGC_TOKEN_MINT_ADDRESS_HERE") {
