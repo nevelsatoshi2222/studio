@@ -1,4 +1,3 @@
-// src/app/page.tsx - COMPLETE FILE (EXACTLY AS YOU HAVE IT)
 'use client';
 import { useState, useEffect } from 'react';
 import { IceTicker } from '@/components/ice-ticker';
@@ -21,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-
+import AppLayout from '@/components/app-layout';
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -73,6 +72,7 @@ export default function Dashboard() {
   const isBalanceLoading = isAppUserLoading || isProfileLoading;
 
   return (
+    <AppLayout>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="font-headline text-3xl font-bold">Dashboard</h1>
@@ -88,6 +88,7 @@ export default function Dashboard() {
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
               </div>
+              <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png" alt="IGC Coin" width={32} height={32} />
             </CardHeader>
             <CardContent>
               <IgcTicker />
@@ -99,6 +100,7 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
+                <Image src="https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png" alt="PGC Coin" width={40} height={40} />
             </CardHeader>
             <CardContent>
               <PgcTicker />
@@ -124,8 +126,8 @@ export default function Dashboard() {
           </Card>
           <Card className="lg:col-span-4">
             <CardHeader>
-              <CardTitle>My Wallet</CardTitle>
-              <CardDescription>Your connected wallet and in-app balances from commissions and rewards.</CardDescription>
+              <CardTitle>My Wallet & Balances</CardTitle>
+              <CardDescription>Your connected wallet and in-app PGC balance from commissions and rewards.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-1">
@@ -149,7 +151,7 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">In-App Balance (Commissions & Rewards)</p>
+                <p className="text-sm font-medium text-muted-foreground">In-App PGC Balance</p>
                 {isBalanceLoading ? (
                   <Skeleton className="h-8 w-32" />
                 ) : user ? (
@@ -165,5 +167,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+    </AppLayout>
   );
 }
