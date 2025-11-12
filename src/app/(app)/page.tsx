@@ -21,7 +21,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { PgcLogo } from '@/components/ui/pgc-logo';
 import { IgcLogo } from '@/components/ui/igc-logo';
 
 export default function Dashboard() {
@@ -86,7 +85,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="p-0 overflow-hidden">
                 <div className="bg-muted flex h-32 items-center justify-center">
-                    <PgcLogo className="h-[100px] w-[100px]" />
+                    <Image src="/pgc-logo.png" alt="PGC Logo" width={100} height={100} />
                 </div>
             </CardHeader>
             <CardContent className="p-4">
