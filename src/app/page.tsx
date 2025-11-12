@@ -1,7 +1,6 @@
 
 'use client';
 import { useState, useEffect } from 'react';
-import  AppLayout  from '@/components/app-layout';
 import { IceTicker } from '@/components/ice-ticker';
 import { ItcTicker } from '@/components/itc-ticker';
 import { IgcTicker } from '@/components/igc-ticker';
@@ -74,7 +73,6 @@ export default function Dashboard() {
   const isBalanceLoading = isAppUserLoading || isProfileLoading;
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="font-headline text-3xl font-bold">Dashboard</h1>
@@ -167,6 +165,5 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-    </AppLayout>
   );
 }
