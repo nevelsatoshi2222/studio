@@ -25,14 +25,14 @@ import { doc } from 'firebase/firestore';
 const pgcLogo = {
   id: "pgc-logo",
   description: "The official logo for the Public Governance Coin.",
-  imageUrl: "https://picsum.photos/seed/pgc/40/40",
+  imageUrl: "https://placehold.co/40x40/000000/FFF?text=PGC",
   imageHint: "pgc logo"
 };
 
 const igcLogo = {
   id: "igc-logo",
   description: "The official logo for the Idea Governance Coin.",
-  imageUrl: "https://picsum.photos/seed/igc/40/40",
+  imageUrl: "https://placehold.co/40x40/000000/FFF?text=IGC",
   imageHint: "igc logo"
 };
 
