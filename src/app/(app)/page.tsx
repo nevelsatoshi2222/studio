@@ -21,20 +21,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
-
-const pgcLogo = {
-  id: "pgc-logo",
-  description: "The official logo for the Public Governance Coin.",
-  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
-  imageHint: "pgc logo"
-};
-
-const igcLogo = {
-  id: "igc-logo",
-  description: "The official logo for the Idea Governance Coin.",
-  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png",
-  imageHint: "igc logo"
-};
+import { PgcLogo } from '@/components/ui/pgc-logo';
+import { IgcLogo } from '@/components/ui/igc-logo';
 
 export default function Dashboard() {
   const { user, isUserLoading: isAppUserLoading } = useUser();
@@ -98,21 +86,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="p-0 overflow-hidden">
                 <div className="bg-muted flex h-32 items-center justify-center">
-                    <Image src={igcLogo.imageUrl} alt={igcLogo.description} width={100} height={100} data-ai-hint={igcLogo.imageHint}/>
-                </div>
-            </CardHeader>
-            <CardContent className="p-4">
-                <CardTitle>IGC Ticker</CardTitle>
-                <CardDescription>Idea Governance Coin.</CardDescription>
-                <div className="mt-4">
-                    <IgcTicker />
-                </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="p-0 overflow-hidden">
-                <div className="bg-muted flex h-32 items-center justify-center">
-                    <Image src={pgcLogo.imageUrl} alt={pgcLogo.description} width={100} height={100} data-ai-hint={pgcLogo.imageHint}/>
+                    <PgcLogo className="h-[100px] w-[100px]" />
                 </div>
             </CardHeader>
             <CardContent className="p-4">
@@ -120,6 +94,20 @@ export default function Dashboard() {
                 <CardDescription>Public Governance Coin.</CardDescription>
                 <div className="mt-4">
                     <PgcTicker />
+                </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="p-0 overflow-hidden">
+                <div className="bg-muted flex h-32 items-center justify-center">
+                    <IgcLogo className="h-[100px] w-[100px]" />
+                </div>
+            </CardHeader>
+            <CardContent className="p-4">
+                <CardTitle>IGC Ticker</CardTitle>
+                <CardDescription>Idea Governance Coin.</CardDescription>
+                <div className="mt-4">
+                    <IgcTicker />
                 </div>
             </CardContent>
           </Card>
