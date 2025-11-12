@@ -2,7 +2,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -121,28 +120,26 @@ export default function DebugPage() {
     }, [isUserLoading, isSuperAdmin, router]);
 
     return (
-        <AppLayout>
-            <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="font-headline text-3xl font-bold flex items-center gap-2"><Wrench/> Debug Tools</h1>
-                    <p className="text-muted-foreground">
-                        A collection of tools for debugging and verifying platform data. Available only to Super Admins.
-                    </p>
-                </div>
-                {isUserLoading && <p>Verifying admin privileges...</p>}
-                {!isUserLoading && !isSuperAdmin && (
-                    <Card className="mt-8 border-destructive">
-                        <CardHeader className="text-center">
-                            <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
-                            <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
-                            <CardDescription>
-                                You do not have Super Admin privileges to access this page.
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
-                )}
-                {isSuperAdmin && <DebugTools />}
+        <div className="flex flex-col gap-8">
+            <div>
+                <h1 className="font-headline text-3xl font-bold flex items-center gap-2"><Wrench/> Debug Tools</h1>
+                <p className="text-muted-foreground">
+                    A collection of tools for debugging and verifying platform data. Available only to Super Admins.
+                </p>
             </div>
-        </AppLayout>
+            {isUserLoading && <p>Verifying admin privileges...</p>}
+            {!isUserLoading && !isSuperAdmin && (
+                <Card className="mt-8 border-destructive">
+                    <CardHeader className="text-center">
+                        <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+                        <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
+                        <CardDescription>
+                            You do not have Super Admin privileges to access this page.
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
+            )}
+            {isSuperAdmin && <DebugTools />}
+        </div>
     );
 }

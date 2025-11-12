@@ -1,7 +1,6 @@
 
 'use client';
 import { Suspense, useEffect } from 'react';
-import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -145,20 +144,16 @@ export default function LoginPage() {
   // show a loading state or return null to prevent flashing the login form.
   if (isUserLoading || user) {
     return (
-        <AppLayout>
-            <div className="flex justify-center items-center h-full">
-                <p>Loading...</p>
-            </div>
-        </AppLayout>
+        <div className="flex justify-center items-center h-full">
+            <p>Loading...</p>
+        </div>
     );
   }
 
   // Only render the login form if the user is not logged in and auth state is loaded.
   return (
-    <AppLayout>
       <Suspense fallback={<div>Loading...</div>}>
         <LoginForm />
       </Suspense>
-    </AppLayout>
   );
 }

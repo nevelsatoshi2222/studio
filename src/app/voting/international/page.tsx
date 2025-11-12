@@ -1,6 +1,5 @@
 
 'use client';
-import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -260,7 +259,6 @@ function PollCard({ poll }: { poll: Poll }) {
 
 export default function InternationalIssuesPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">International Issues Voting</h1>
@@ -275,6 +273,5 @@ export default function InternationalIssuesPage() {
             ))}
         </div>
       </div>
-    </AppLayout>
   );
 }

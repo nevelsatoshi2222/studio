@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -210,7 +209,6 @@ export default function AffiliateDashboard() {
 
   if (isLoading) {
     return (
-      <AppLayout>
         <div className="flex flex-col gap-8 max-w-6xl mx-auto">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -220,26 +218,22 @@ export default function AffiliateDashboard() {
           </div>
           <Skeleton className="h-96" />
         </div>
-      </AppLayout>
     );
   }
 
   if (!userData) {
     return (
-      <AppLayout>
         <div className="flex flex-col items-center justify-center h-64">
           <Users className="h-16 w-16 text-muted-foreground mb-4" />
           <h2 className="text-2xl font-bold mb-2">No Data Found</h2>
           <p className="text-muted-foreground">Unable to load affiliate data</p>
         </div>
-      </AppLayout>
     );
   }
 
   const nextRankInfo = getNextRankInfo();
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col gap-2">
@@ -704,6 +698,5 @@ export default function AffiliateDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
   );
 }

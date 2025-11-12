@@ -1,5 +1,4 @@
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Mail, BookOpen, LifeBuoy } from 'lucide-react';
@@ -29,7 +28,6 @@ const faqs = [
 
 export default function HelpPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <div>
           <h1 className="font-headline text-3xl font-bold">Help & Support</h1>
@@ -89,6 +87,5 @@ export default function HelpPage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
   );
 }

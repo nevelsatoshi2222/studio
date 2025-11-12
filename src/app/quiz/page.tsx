@@ -1,14 +1,6 @@
 
 'use client';
-import AppLayout from '@/components/app-layout';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Ticket, Users, ArrowRight, TrendingUp, HandHeart, PlusCircle } from 'lucide-react';
@@ -21,16 +13,15 @@ const prizeLevels = [
     { level: 3, name: "Kasba / Block Level", groupSize: 10, prize: "25 Quiz Coins", description: "10 winners from Level 2 compete." },
     { level: 4, name: "Taluka/City Level", groupSize: 10, prize: "125 Quiz Coins", description: "10 winners from Level 3 compete." },
     { level: 5, name: "District Level", groupSize: 10, prize: "1,250 Quiz Coins", description: "10 winners from Level 4 compete." },
-    { level: 6, name: "10 District Level", groupSize: 10, prize: "12,500 Quiz Coins", description: "10 winners from Level 5 compete." },
-    { level: 7, name: "State Level", groupSize: 10, prize: "125,000 Quiz Coins", description: "10 winners from Level 6 compete." },
-    { level: 8, name: "National Level", groupSize: 10, prize: "1.25 Million Quiz Coins", description: "10 winners from Level 7 compete." },
+    { level: 6, name: "10 District Level", groupSize: 10, prize: "12,500 Quiz Coins", description: "10 winners from Level 6 compete." },
+    { level: 7, name: "State Level", groupSize: 10, prize: "125,000 Quiz Coins", description: "10 winners from Level 7 compete." },
+    { level: 8, name: "National Level", groupSize: 10, prize: "1.25 Million Quiz Coins", description: "10 winners from Level 8 compete." },
     { level: 9, name: "Continental Level", groupSize: 10, prize: "12.5 Million Quiz Coins", description: "10 winners from Level 8 compete." },
     { level: 10, name: "Global Championship", groupSize: 10, prize: "125 Million Quiz Coins", description: "The final showdown between the world's best." },
 ];
 
 export default function QuizCompetitionPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <div>
@@ -135,6 +126,5 @@ export default function QuizCompetitionPage() {
         </Card>
 
       </div>
-    </AppLayout>
   );
 }

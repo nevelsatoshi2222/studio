@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -302,7 +301,6 @@ export default function SocialMediaPage() {
     const { data: socialPosts, isLoading } = useCollection<SocialPost>(postsQuery);
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
          <div className="text-center">
             <h1 className="font-headline text-3xl font-bold">Social Media Hub</h1>
@@ -378,6 +376,5 @@ export default function SocialMediaPage() {
             </aside>
          </div>
       </div>
-    </AppLayout>
   );
 }

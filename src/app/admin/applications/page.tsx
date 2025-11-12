@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { useMemoFirebase, useUser, useFirestore } from '@/firebase';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCollection } from '@/firebase';
@@ -202,40 +201,38 @@ export default function ApplicationsPage() {
 
 
     return (
-        <AppLayout>
-            <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="font-headline text-3xl font-bold">Application Management</h1>
-                    <p className="text-muted-foreground">
-                        Review and manage all pending user applications for various roles.
-                    </p>
-                </div>
-                {isUserLoading && (
-                     <div className="flex items-center justify-center h-64">
-                        <p>Verifying admin privileges...</p>
-                    </div>
-                )}
-
-                {/* This block shows the access denied message for non-admin users. */}
-                {!isUserLoading && user && !canAccessPage && (
-                    <Card className="mt-8 border-destructive">
-                        <CardHeader className="text-center">
-                            <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
-                            <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
-                            <CardDescription>
-                                You do not have the necessary permissions to view this page. Redirecting...
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
-                )}
-                
-                {/* 
-                  This block conditionally renders the table.
-                  Crucially, the `canAccessPage` prop is passed down. If false, the internal
-                  query in `ApplicationsTable` will be null, preventing any Firestore read.
-                */}
-                {canAccessPage && <ApplicationsTable canAccessPage={canAccessPage} />}
+        <div className="flex flex-col gap-8">
+            <div>
+                <h1 className="font-headline text-3xl font-bold">Application Management</h1>
+                <p className="text-muted-foreground">
+                    Review and manage all pending user applications for various roles.
+                </p>
             </div>
-        </AppLayout>
+            {isUserLoading && (
+                 <div className="flex items-center justify-center h-64">
+                    <p>Verifying admin privileges...</p>
+                </div>
+            )}
+
+            {/* This block shows the access denied message for non-admin users. */}
+            {!isUserLoading && user && !canAccessPage && (
+                <Card className="mt-8 border-destructive">
+                    <CardHeader className="text-center">
+                        <ShieldAlert className="mx-auto h-12 w-12 text-destructive" />
+                        <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
+                        <CardDescription>
+                            You do not have the necessary permissions to view this page. Redirecting...
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
+            )}
+            
+            {/* 
+              This block conditionally renders the table.
+              Crucially, the `canAccessPage` prop is passed down. If false, the internal
+              query in `ApplicationsTable` will be null, preventing any Firestore read.
+            */}
+            {canAccessPage && <ApplicationsTable canAccessPage={canAccessPage} />}
+        </div>
     );
 }

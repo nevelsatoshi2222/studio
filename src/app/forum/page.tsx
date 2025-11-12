@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -37,10 +36,10 @@ type PostFormValues = z.infer<typeof postSchema>;
 
 type ForumPost = {
   id: string;
-  title: string;
   authorId: string;
   authorName: string;
   authorAvatar: string;
+  title: string;
   topic: string;
   geography: string;
   upvotes: number;
@@ -240,7 +239,6 @@ export default function ForumPage() {
     const { data: forumPosts, isLoading } = useCollection<ForumPost>(postsQuery);
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">Forum & Governance</h1>
@@ -297,6 +295,5 @@ export default function ForumPage() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }

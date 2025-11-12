@@ -1,5 +1,4 @@
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -22,7 +21,6 @@ const competitionPhases = [
 
 export default function SportsCompetitionPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">The World Talent Championship: Sports</h1>
@@ -74,6 +72,5 @@ export default function SportsCompetitionPage() {
         </Card>
 
       </div>
-    </AppLayout>
   );
 }

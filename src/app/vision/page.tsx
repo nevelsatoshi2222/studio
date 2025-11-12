@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import AppLayout from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -256,7 +255,6 @@ export default function VisionRoadmapPage() {
   const [activeStage, setActiveStage] = useState(0);
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         {/* Hero Section with PGC Coin */}
         <Card className="bg-gradient-to-br from-primary/10 via-background to-background text-center relative overflow-hidden">
@@ -457,7 +455,7 @@ export default function VisionRoadmapPage() {
                             {stage.status === "active" && (
                               <div className="flex items-center gap-1">
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="text-sm text-green-600 font-medium">Active</span>
+                                <span className="text-sm text-green-500 font-medium">Active</span>
                               </div>
                             )}
                           </div>
@@ -545,6 +543,5 @@ export default function VisionRoadmapPage() {
           </CardFooter>
         </Card>
       </div>
-    </AppLayout>
   );
 }

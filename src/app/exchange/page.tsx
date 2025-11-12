@@ -1,7 +1,6 @@
 
 'use client';
 import { useState } from 'react';
-import { AppLayout } from '@/components/app-layout';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -241,7 +240,6 @@ function TradingInterface({ coinId }: { coinId: string }) {
 
 export default function ExchangePage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">Crypto Exchange</h1>
@@ -263,6 +261,5 @@ export default function ExchangePage() {
           ))}
         </Tabs>
       </div>
-    </AppLayout>
   );
 }

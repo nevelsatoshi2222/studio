@@ -1,5 +1,4 @@
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -42,7 +41,6 @@ const jobPostings = [
 
 export default function JobsPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
@@ -75,6 +73,5 @@ export default function JobsPage() {
             ))}
         </div>
       </div>
-    </AppLayout>
   );
 }

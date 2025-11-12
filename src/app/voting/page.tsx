@@ -1,6 +1,5 @@
 'use client';
 import { Suspense, useState } from 'react';
-import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardDescription,
@@ -74,7 +73,6 @@ const localVotingLevels = [
 
 export default function VotingHubPage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">Community Voting Hub</h1>
@@ -148,6 +146,5 @@ export default function VotingHubPage() {
         </Card>
 
       </div>
-    </AppLayout>
   );
 }

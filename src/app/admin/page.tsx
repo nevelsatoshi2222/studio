@@ -4,7 +4,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
-import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -63,7 +62,6 @@ export default function AdminPage() {
 
   if (isUserLoading || !user || !hasAdminRole) {
     return (
-      <AppLayout>
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/4" />
           <Skeleton className="h-4 w-1/2" />
@@ -78,7 +76,6 @@ export default function AdminPage() {
           </Card>
           <p className="text-center text-muted-foreground">Loading admin dashboard...</p>
         </div>
-      </AppLayout>
     );
   }
 
@@ -97,7 +94,6 @@ export default function AdminPage() {
   const visibleNavItems = getVisibleNavItems();
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         {/* Header */}
         <div>
@@ -172,6 +168,5 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }

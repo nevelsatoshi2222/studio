@@ -1,6 +1,5 @@
 
 'use client';
-import { AppLayout } from '@/components/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Building2, ShoppingBag, Utensils, Carrot, Wheat, Milk, GraduationCap, Plane, MapPin } from 'lucide-react';
 import Link from 'next/link';
@@ -33,7 +32,6 @@ const franchiseLevels = [
 
 export default function FranchiseePage() {
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <Card className="text-center">
             <CardHeader>
@@ -89,6 +87,5 @@ export default function FranchiseePage() {
         </Card>
 
       </div>
-    </AppLayout>
   );
 }

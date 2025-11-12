@@ -1,7 +1,6 @@
 
 'use client';
 import { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -314,7 +313,6 @@ export default function EcommercePage() {
   };
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">E-commerce Marketplace</h1>
@@ -450,6 +448,5 @@ export default function EcommercePage() {
             </main>
         </div>
       </div>
-    </AppLayout>
   );
 }

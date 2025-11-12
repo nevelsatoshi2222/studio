@@ -1,7 +1,6 @@
 
 'use client';
 
-import  AppLayout  from '@/components/app-layout';
 import {
   Card,
   CardContent,
@@ -86,7 +85,6 @@ export default function TokenomicsPage() {
     (100 / tokenStages.length);
 
   return (
-    <AppLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">
@@ -260,6 +258,5 @@ export default function TokenomicsPage() {
 
 
       </div>
-    </AppLayout>
   );
 }
