@@ -56,6 +56,8 @@ import {
   ClipboardList,
   CheckCircle,
   RefreshCcw,
+  Award, // ADD THIS IMPORT
+  Crown, // ADD THIS IMPORT
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -101,6 +103,8 @@ const programNavItems = [
   { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
   { href: '/franchisee', icon: Building2, label: 'Franchisee Program' },
   { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
+  // ADD REWARDS DASHBOARD TO MAIN NAVIGATION
+  { href: '/dashboard/rewards', icon: Award, label: 'My Rewards' },
 ];
 
 
@@ -173,7 +177,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                           <DropdownMenuItem asChild>
                               <Link href="/commission">Commission</Link>
                           </DropdownMenuItem>
-                          {/* QUIZ OPINION TAB ADDED HERE */}
+                          {/* ADD REWARDS DASHBOARD TO USER DROPDOWN */}
+                          <DropdownMenuItem asChild>
+                              <Link href="/dashboard/rewards" className="flex items-center">
+                                  <Award className="h-4 w-4 mr-2" />
+                                  My Rewards
+                              </Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                               <Link href="/quiz-opinion">Quiz Opinion</Link>
                           </DropdownMenuItem>
@@ -185,6 +195,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 <DropdownMenuSeparator />
                                  <DropdownMenuItem asChild>
                                     <Link href="/admin">Admin Dashboard</Link>
+                                </DropdownMenuItem>
+                                {/* ADD ADMIN REWARDS DASHBOARD */}
+                                <DropdownMenuItem asChild>
+                                    <Link href="/admin/rewards-dashboard" className="flex items-center">
+                                        <Crown className="h-4 w-4 mr-2" />
+                                        Rewards Admin
+                                    </Link>
                                 </DropdownMenuItem>
                             </>
                           )}
@@ -257,6 +274,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 {(isSuperAdmin || userRole === 'Franchisee Management Admin') && (
                                     <SidebarMenuSubItem><SidebarMenuSubButton asChild><Link href="/admin/applications">Applications</Link></SidebarMenuSubButton></SidebarMenuSubItem>
                                 )}
+                                {/* ADD ADMIN REWARDS DASHBOARD TO ADMIN PANEL */}
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild>
+                                        <Link href="/admin/rewards-dashboard" className="flex items-center">
+                                            <Crown className="h-4 w-4 mr-2" />
+                                            Rewards Dashboard
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                {/* ADD AFFILIATE REWARDS TO ADMIN PANEL */}
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild>
+                                        <Link href="/admin/affiliate-rewards" className="flex items-center">
+                                            <DollarSign className="h-4 w-4 mr-2" />
+                                            Affiliate Rewards
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </Collapsible>

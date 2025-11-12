@@ -1,4 +1,4 @@
-
+// src/app/page.tsx - COMPLETE FILE (EXACTLY AS YOU HAVE IT)
 'use client';
 import { useState, useEffect } from 'react';
 import { IceTicker } from '@/components/ice-ticker';

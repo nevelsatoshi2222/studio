@@ -1,3 +1,5 @@
+
+// src/app/layout.tsx - COMPLETE FILE
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
@@ -23,7 +25,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ClientWalletProvider>
           <FirebaseClientProvider>
-            {children}
+              {children}
           </FirebaseClientProvider>
         </ClientWalletProvider>
       </body>
