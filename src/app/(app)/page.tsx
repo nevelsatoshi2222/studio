@@ -96,27 +96,31 @@ export default function Dashboard() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center gap-4">
-              {igcLogo && <Image src={igcLogo.imageUrl} alt="IGC Coin" width={100} height={100} data-ai-hint={igcLogo.imageHint}/>}
-              <div>
+            <CardHeader className="p-0 overflow-hidden">
+                <div className="bg-muted flex h-32 items-center justify-center">
+                    <Image src={igcLogo.imageUrl} alt={igcLogo.description} width={100} height={100} data-ai-hint={igcLogo.imageHint}/>
+                </div>
+            </CardHeader>
+            <CardContent className="p-4">
                 <CardTitle>IGC Ticker</CardTitle>
                 <CardDescription>Idea Governance Coin.</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <IgcTicker />
+                <div className="mt-4">
+                    <IgcTicker />
+                </div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center gap-4">
-                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={100} height={100} data-ai-hint={pgcLogo.imageHint}/>}
-                <div>
-                    <CardTitle>PGC Ticker</CardTitle>
-                    <CardDescription>Public Governance Coin.</CardDescription>
+            <CardHeader className="p-0 overflow-hidden">
+                <div className="bg-muted flex h-32 items-center justify-center">
+                    <Image src={pgcLogo.imageUrl} alt={pgcLogo.description} width={100} height={100} data-ai-hint={pgcLogo.imageHint}/>
                 </div>
             </CardHeader>
-            <CardContent>
-              <PgcTicker />
+            <CardContent className="p-4">
+                <CardTitle>PGC Ticker</CardTitle>
+                <CardDescription>Public Governance Coin.</CardDescription>
+                <div className="mt-4">
+                    <PgcTicker />
+                </div>
             </CardContent>
           </Card>
           <Card>
