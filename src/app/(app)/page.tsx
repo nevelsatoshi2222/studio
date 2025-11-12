@@ -25,7 +25,7 @@ import { doc } from 'firebase/firestore';
 const pgcLogo = {
   id: "pgc-logo",
   description: "The official logo for the Public Governance Coin.",
-  imageUrl: "https://placehold.co/40x40/000000/FFF?text=PGC",
+  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
   imageHint: "pgc logo"
 };
 
