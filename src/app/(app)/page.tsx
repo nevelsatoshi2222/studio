@@ -106,7 +106,7 @@ export default function Dashboard() {
                     <CardTitle>PGC Ticker</CardTitle>
                     <CardDescription>Public Governance Coin.</CardDescription>
                 </div>
-                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={10} height={10} />}
+                {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={40} height={40} />}
             </CardHeader>
             <CardContent>
               <PgcTicker />
