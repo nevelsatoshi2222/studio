@@ -350,7 +350,7 @@ export default function ProfilePage() {
                     <div>
                         <p className="text-sm text-muted-foreground">In-App PGC Balance</p>
                         <div className="flex items-baseline gap-2">
-                            {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={28} height={28} />}
+                            {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={28} height={28} data-ai-hint={pgcLogo.imageHint} />}
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
