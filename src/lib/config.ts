@@ -1,3 +1,4 @@
+
 // Firebase Configuration - Prevents duplicate app error
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
@@ -31,11 +32,14 @@ export default app;
 
 // Wallet and Token Addresses
 export const CREATOR_TREASURY_WALLET_ADDRESS = "YOUR_WALLET_ADDRESS_HERE";
-export const IGC_TOKEN_MINT_ADDRESS = "your-igc-token-address";
-export const PGC_TOKEN_MINT_ADDRESS = "your-pgc-token-address";
+
+// DEVNET ADDRESSES - REPLACE WITH MAINNET FOR PRODUCTION
+export const PGC_TOKEN_MINT_ADDRESS = "YOUR_PGC_TOKEN_MINT_ADDRESS_HERE"; // Replace with your actual PGC mint address
+export const IGC_TOKEN_MINT_ADDRESS = "YOUR_IGC_TOKEN_MINT_ADDRESS_HERE"; // Replace with your actual IGC mint address
+export const USDT_MINT_ADDRESS = "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"; // This is the standard USDT mint on Solana Devnet
 
 // USDT Treasury Addresses for different networks
-export const CREATOR_TREASURY_SOLANA_USDT = "7fkp93Prj8bLn6uNQCuEDkfcubw6dt7JZJjAHSTJubVu";
+export const CREATOR_TREASURY_SOLANA_USDT = "7fkp93Prj8bLn6uNQCuEDkfcubw6dt7JZJjAHSTJubwVu"; // Make sure this is a valid Solana address in your control
 export const CREATOR_TREASURY_ETH_USDT = "0x6993318b80d7520b1ee1dc5d434c6b0105394661"; 
 export const CREATOR_TREASURY_BSC_USDT = "0x6993318b80d7520b1ee1dc5d434c6b0105394661";
 export const CREATOR_TREASURY_TRC20_USDT = "TUHziWJsVj8PjTcesCesMxRTiA7eWHKBnF";
@@ -48,3 +52,5 @@ export const COMMISSION_CONFIG = {
   PAID_REGISTRATION_BONUS: 50, // USD
   TOTAL_COMMISSION_POOL: 0.02, // 2% total
 };
+
+    

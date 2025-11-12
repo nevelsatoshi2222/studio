@@ -41,7 +41,7 @@ export default function Dashboard() {
   const pgcBalance = userProfile?.pgcBalance ?? 0;
 
   useEffect(() => {
-    if (publicKey && connection) {
+    if (publicKey && connection && IGC_TOKEN_MINT_ADDRESS !== "YOUR_IGC_TOKEN_MINT_ADDRESS_HERE") {
       setIsWalletBalanceLoading(true);
       const fetchIgcBalance = async () => {
         try {
@@ -65,7 +65,7 @@ export default function Dashboard() {
       };
       fetchIgcBalance();
     } else {
-      setIgcBalance(null);
+      setIgcBalance(0); // Default to 0 if no address or not connected
     }
   }, [publicKey, connection]);
 

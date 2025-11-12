@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,14 +12,24 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Flame, Gift, CheckCircle, Wallet, Zap, Loader2, Copy, AlertTriangle, TrendingUp, Star, Crown, Rocket, Sparkles, Award, Gem, Target, Coins } from 'lucide-react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CREATOR_TREASURY_WALLET_ADDRESS } from '@/lib/config';
+import { CREATOR_TREASURY_SOLANA_USDT, PGC_TOKEN_MINT_ADDRESS, USDT_MINT_ADDRESS } from '@/lib/config';
 import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Transaction,
+  SystemProgram,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+} from '@solana/web3.js';
+import {
+  getOrCreateAssociatedTokenAccount,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from '@solana/spl-token';
+
 
 // Updated presale packages with consistent yellow/gold theme
 const PRESALE_TIERS = [
@@ -75,7 +86,7 @@ const PRESALE_TIERS = [
     borderColor: 'border-yellow-600',
     textColor: 'text-yellow-300',
     badgeColor: 'bg-gradient-to-r from-yellow-600 to-yellow-800',
-    glowColor: 'shadow-yellow-500/30',
+    glowColor: 'shadow-yellow-500/20',
     stageColor: 'bg-yellow-900/30',
     borderStageColor: 'border-yellow-600/30'
   },
@@ -159,85 +170,114 @@ const PRESALE_TIERS = [
 
 export default function PresalePage() {
   const { user } = useUser();
-  const { publicKey, connected } = useWallet();
-  const firestore = useFirestore();
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const { toast } = useToast();
+
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [purchaseInitiated, setPurchaseInitiated] = useState(false);
 
   const handleSelectPackage = (amount: number) => {
     setSelectedPackage(amount);
-    setPurchaseInitiated(false); 
   };
 
-  const copyToClipboard = (text: string, entity: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied to Clipboard!',
-      description: `${entity} has been copied.`,
-    });
-  };
-
-  const handleInitiatePurchase = async () => {
-    if (!selectedPackage || !publicKey) return;
-
-    setIsProcessing(true);
-    
-    setTimeout(() => {
-        setPurchaseInitiated(true);
-        setIsProcessing(false);
-        toast({
-            title: "Action Required",
-            description: "Please follow the instructions to complete your payment.",
-        })
-    }, 500);
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!selectedPackage || !publicKey || !firestore || !user) {
-        toast({ variant: 'destructive', title: 'Error', description: 'User not logged in or connection error. Please try again.'});
-        return;
-    };
-
-    setIsProcessing(true);
-    try {
-      const presaleCollection = collection(firestore, 'presales');
-      const selectedPkg = PRESALE_TIERS.find(p => p.amountUSD === selectedPackage);
-      
-      if (!selectedPkg) throw new Error("Invalid package selected.");
-      
-      const totalPgc = selectedPkg.instantPgc;
-
-      await addDoc(presaleCollection, {
-        userId: user.uid,
-        amountUSDT: selectedPackage,
-        pgcCredited: totalPgc,
-        potentialPgc: selectedPkg.totalPgc,
-        currentStage: 0,
-        status: 'PENDING_VERIFICATION',
-        purchaseDate: serverTimestamp(),
-        tier: selectedPkg.tier,
-      });
-      
-      toast({
-        title: 'Verification Submitted!',
-        description: `Your purchase of ${totalPgc.toLocaleString()} PGC is pending verification. Potential: ${selectedPkg.totalPgc.toLocaleString()} PGC after 3 stages!`,
-      });
-      
-      setPurchaseInitiated(false);
-      setSelectedPackage(null);
-
-    } catch (error: any) {
+  const handlePurchase = async () => {
+    if (!connected || !publicKey || !selectedPackage) {
       toast({
         variant: 'destructive',
-        title: 'Submission Failed',
-        description: error.message || 'Could not log the purchase. Please try again.',
+        title: 'Error',
+        description: 'Please connect your wallet and select a package.',
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      const selectedPkg = PRESALE_TIERS.find(p => p.amountUSD === selectedPackage);
+      if (!selectedPkg) throw new Error('Invalid package selected');
+
+      // 1. Define mint addresses and amount
+      const usdtMint = new PublicKey(USDT_MINT_ADDRESS);
+      const usdtAmount = selectedPkg.amountUSD * (10 ** 6); // USDT has 6 decimals
+      const treasuryWallet = new PublicKey(CREATOR_TREASURY_SOLANA_USDT);
+
+      // 2. Get or create token accounts
+      const fromAta = await getAssociatedTokenAddress(usdtMint, publicKey);
+      const toAta = await getAssociatedTokenAddress(usdtMint, treasuryWallet);
+      
+      const fromAccount = await connection.getAccountInfo(fromAta);
+      if (!fromAccount) {
+        throw new Error('USDT account not found. Please ensure you have USDT in your wallet.');
+      }
+
+      // 3. Create transaction
+      const transaction = new Transaction().add(
+        createTransferInstruction(
+          fromAta,
+          toAta,
+          publicKey,
+          usdtAmount
+        )
+      );
+
+      // 4. Get recent blockhash and send transaction
+      const { blockhash } = await connection.getRecentBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = publicKey;
+
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, 'processed');
+
+      toast({
+        title: 'USDT Payment Sent!',
+        description: 'Processing your PGC transfer. This may take a moment...',
+      });
+
+      // 5. Call backend to verify payment and transfer PGC
+      const response = await fetch('/api/presale/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usdtTransactionSignature: signature,
+          userId: user?.uid,
+          packageAmountUSD: selectedPkg.amountUSD,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to finalize purchase.');
+      }
+
+      toast({
+        title: 'Purchase Successful! 🎉',
+        description: `You have received ${result.pgcAmount.toLocaleString()} PGC. Check your wallet!`,
+        action: (
+          <a
+            href={`https://explorer.solana.com/tx/${result.pgcTransactionSignature}?cluster=devnet`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline">View Transaction</Button>
+          </a>
+        ),
+      });
+
+    } catch (error: any) {
+      console.error('Purchase failed:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Purchase Failed',
+        description: error.message || 'An unknown error occurred. Please try again.',
       });
     } finally {
       setIsProcessing(false);
+      setSelectedPackage(null);
     }
   };
+
 
   return (
       <div className="flex flex-col gap-6 max-w-5xl mx-auto p-4">
@@ -385,170 +425,22 @@ export default function PresalePage() {
             ) : (
               <Button 
                 size="lg" 
-                onClick={handleInitiatePurchase} 
-                disabled={!selectedPackage || isProcessing || purchaseInitiated}
+                onClick={handlePurchase} 
+                disabled={!selectedPackage || isProcessing}
                 className="bg-gradient-to-r from-yellow-600 to-yellow-800 hover:from-yellow-500 hover:to-yellow-700 text-black font-black text-sm py-2.5 px-6 rounded-lg shadow-2xl transition-all duration-300 transform hover:scale-105 min-w-40 border border-yellow-400"
               >
-                {isProcessing && !purchaseInitiated ? (
+                {isProcessing ? (
                   <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                 ) : (
                   <Rocket className="mr-1.5 h-3.5 w-3.5" />
                 )}
-                {isProcessing && !purchaseInitiated ? 'PROCESSING...' : `INVEST $${selectedPackage || ''}`}
+                {isProcessing ? 'PROCESSING...' : `INVEST $${selectedPackage || ''}`}
               </Button>
             )}
           </CardFooter>
         </Card>
-
-        {/* Compact Investment Table */}
-        <Card className="bg-gradient-to-br from-gray-900 to-black border-yellow-600 border-2 shadow-2xl">
-          <CardHeader className="text-center py-4">
-            <CardTitle className="flex items-center justify-center gap-1.5 text-lg font-bold">
-              <Award className="h-4 w-4 text-yellow-400" />
-              <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-                PACKAGE BREAKDOWN
-              </span>
-              <Award className="h-4 w-4 text-yellow-400" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-yellow-600/30 overflow-hidden shadow-xl">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-yellow-700 to-yellow-900">
-                    <TableHead className="font-black text-yellow-100 text-xs border-r border-yellow-600/30">TIER</TableHead>
-                    <TableHead className="font-black text-yellow-100 text-xs border-r border-yellow-600/30">INVEST</TableHead>
-                    <TableHead className="font-black text-yellow-300 text-xs border-r border-yellow-600/30">INSTANT</TableHead>
-                    <TableHead className="font-black text-yellow-300 text-xs border-r border-yellow-600/30">STAGE 1</TableHead>
-                    <TableHead className="font-black text-yellow-300 text-xs border-r border-yellow-600/30">STAGE 2</TableHead>
-                    <TableHead className="font-black text-yellow-300 text-xs border-r border-yellow-600/30">STAGE 3</TableHead>
-                    <TableHead className="font-black text-yellow-300 text-xs">TOTAL</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {PRESALE_TIERS.map((tier) => (
-                    <TableRow key={tier.tier} className="bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 border-b border-yellow-600/10">
-                      <TableCell className="font-bold py-2">
-                        <div className="flex items-center gap-1">
-                          <div className={`p-0.5 rounded bg-gradient-to-r ${tier.gradient} border ${tier.borderColor}`}>
-                            <tier.icon className="h-2.5 w-2.5 text-yellow-400" />
-                          </div>
-                          <span className={tier.textColor}>{tier.tier}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <span className="font-black text-yellow-300">${tier.amountUSD}</span>
-                      </TableCell>
-                      <TableCell className="text-yellow-400 font-black py-2">
-                        {tier.instantPgc.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-yellow-400 font-black py-2">
-                        {tier.stage1.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-yellow-400 font-black py-2">
-                        {tier.stage2.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-yellow-400 font-black py-2">
-                        {tier.stage3.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-yellow-300 font-black py-2">
-                        {tier.totalPgc.toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-            {/* Ultra Compact Stage Explanation */}
-            <div className="mt-4 p-3 bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 rounded-lg border border-yellow-600/30">
-              <h4 className="font-bold text-sm mb-2 flex items-center gap-1 text-yellow-300">
-                <Zap className="h-3 w-3 text-yellow-400" />
-                GROWTH MECHANISM:
-              </h4>
-              <div className="grid grid-cols-4 gap-1 text-[10px]">
-                <div className="text-center p-1 bg-yellow-900/40 rounded border border-yellow-600/30">
-                  <div className="font-black text-yellow-300">INSTANT</div>
-                  <div className="text-base font-black text-yellow-400">2x</div>
-                </div>
-                <div className="text-center p-1 bg-yellow-900/40 rounded border border-yellow-600/30">
-                  <div className="font-black text-yellow-300">STAGE 1</div>
-                  <div className="text-base font-black text-yellow-400">2x</div>
-                </div>
-                <div className="text-center p-1 bg-yellow-900/40 rounded border border-yellow-600/30">
-                  <div className="font-black text-yellow-300">STAGE 2</div>
-                  <div className="text-base font-black text-yellow-400">2x</div>
-                </div>
-                <div className="text-center p-1 bg-yellow-900/40 rounded border border-yellow-600/30">
-                  <div className="font-black text-yellow-300">STAGE 3</div>
-                  <div className="text-base font-black text-yellow-400">2x</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Purchase Process */}
-        {purchaseInitiated && selectedPackage && (
-          <Card className="bg-gradient-to-br from-gray-900 to-black border-yellow-600 border-2 shadow-2xl">
-            <CardHeader className="text-center py-4">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-                COMPLETE INVESTMENT
-              </CardTitle>
-              <CardDescription className="text-yellow-200 text-sm">
-                Finalize your ${selectedPackage} investment
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Alert className="bg-gradient-to-r from-yellow-900/40 to-yellow-800/30 border border-yellow-600">
-                <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                <AlertTitle className="text-yellow-300 font-bold text-sm">SOLANA NETWORK ONLY</AlertTitle>
-                <AlertDescription className="text-yellow-200 text-xs">
-                  Send USDT on Solana (SPL) network only. Other networks will result in permanent loss.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-yellow-300">STEP 1: SEND ${selectedPackage} USDT</label>
-                <div className="flex items-center space-x-1.5 rounded border border-yellow-600/30 bg-yellow-900/20 p-2">
-                  <input type="text" value={CREATOR_TREASURY_WALLET_ADDRESS} readOnly className="flex-1 bg-transparent border-0 text-yellow-200 font-mono text-xs"/>
-                  <Button onClick={() => copyToClipboard(CREATOR_TREASURY_WALLET_ADDRESS, 'Address')} size="icon" variant="ghost" className="bg-gradient-to-r from-yellow-600 to-yellow-800 text-yellow-100 hover:from-yellow-500 hover:to-yellow-700 h-6 w-6">
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="p-2 bg-gradient-to-r from-yellow-900/40 to-yellow-800/30 rounded border border-yellow-600/40">
-                <h4 className="font-bold mb-1 text-yellow-300 text-sm">INVESTMENT SUMMARY:</h4>
-                {(() => {
-                  const pkg = PRESALE_TIERS.find(p => p.amountUSD === selectedPackage);
-                  if (!pkg) return null;
-                  return (
-                    <div className="space-y-0.5 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-yellow-200">Investment:</span>
-                        <span className="font-black text-yellow-300">${pkg.amountUSD}</span>
-                      </div>
-                      <div className="flex justify-between text-yellow-400">
-                        <span>Instant PGC:</span>
-                        <span className="font-black">{pkg.instantPgc.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-yellow-300">
-                        <span>Total Potential:</span>
-                        <span className="font-black">{pkg.totalPgc.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button size="lg" onClick={handleConfirmPayment} disabled={isProcessing} className="bg-gradient-to-r from-yellow-600 to-yellow-800 hover:from-yellow-500 hover:to-yellow-700 text-black font-bold py-2 px-4 rounded-lg text-sm min-w-32 border border-yellow-400">
-                {isProcessing ? <><Loader2 className="mr-1.5 h-3 w-3 animate-spin" />CONFIRMING...</> : '✅ PAYMENT SENT'}
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
       </div>
   );
 }
+
+    
