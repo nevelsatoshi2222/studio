@@ -32,7 +32,7 @@ const pgcLogo = {
 const igcLogo = {
   id: "igc-logo",
   description: "The official logo for the Idea Governance Coin.",
-  imageUrl: "https://placehold.co/100x100/000000/FFF?text=IGC",
+  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/igc-logo.png",
   imageHint: "igc logo"
 };
 
