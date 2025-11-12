@@ -38,18 +38,17 @@ import {
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
 
 // Financial Quiz Rewards Data
 const FINANCIAL_QUIZ_REWARDS = [
-  { achievers: 50000, reward: 1, stage: 'Round 1 - General Quiz' },
-  { achievers: 20000, reward: 2, stage: 'Round 1 - General Quiz' },
-  { achievers: 5000, reward: 3, stage: 'Round 1 - General Quiz' },
-  { achievers: 2000, reward: 5, stage: 'Round 1 - Qualifiers' },
-  { achievers: 200, reward: 20, stage: 'Semi-Final - Qualifiers' },
-  { achievers: 20, reward: 100, stage: 'Final - Qualifiers' },
-  { achievers: 4, reward: 1000, stage: 'Final - Runners Up' },
-  { achievers: 1, reward: 5000, stage: 'Final - Winner' },
+  { rewardSlots: 50000, reward: 1, stage: 'ROUND 1 - GENERAL QUIZ' },
+  { rewardSlots: 20000, reward: 2, stage: 'ROUND 1 - GENERAL QUIZ' },
+  { rewardSlots: 5000, reward: 3, stage: 'ROUND 1 - GENERAL QUIZ' },
+  { rewardSlots: 2000, reward: 5, stage: 'ROUND 1 - QUALIFIERS' },
+  { rewardSlots: 200, reward: 20, stage: 'SEMI-FINAL - QUALIFIERS' },
+  { rewardSlots: 20, reward: 100, stage: 'FINAL - QUALIFIERS' },
+  { rewardSlots: 4, reward: 1000, stage: 'FINAL - RUNNERS UP' },
+  { rewardSlots: 1, reward: 5000, stage: 'FINAL - WINNER' },
 ];
 
 // Updated Influencer Rewards Data
@@ -58,106 +57,131 @@ const INFLUENCER_REWARDS = {
     { 
       tier: 'DIAMOND', 
       followers: 50000, 
-      videoType: 'LONG VIDEO (15min - 2hr)', 
-      achievers: 1000, 
+      videoType: 'LONG VIDEO (15MIN - 2HR)', 
+      rewardSlots: 1000, 
       reward: 20, 
       earlyBonus: 20 
     },
     { 
       tier: 'GOLD', 
       followers: 20000, 
-      videoType: 'OVERVIEW VIDEO (3-8min)', 
-      achievers: 5000, 
+      videoType: 'OVERVIEW VIDEO (3-8MIN)', 
+      rewardSlots: 5000, 
       reward: 5, 
       earlyBonus: 5 
     },
     { 
       tier: 'SILVER', 
       followers: 5000, 
-      videoType: 'SHORT VIDEO (<3min)', 
-      achievers: 10000, 
+      videoType: 'SHORT VIDEO (<3MIN)', 
+      rewardSlots: 10000, 
       reward: 2, 
       earlyBonus: 2 
     },
   ],
   viewRewards: [
-    { views: 10000000, topAchievers: 8, reward: 1000 },
-    { views: 1000000, topAchievers: 40, reward: 200 },
-    { views: 100000, topAchievers: 200, reward: 50 },
-    { views: 10000, topAchievers: 1000, reward: 10 },
-    { views: 1000, topAchievers: 5000, reward: 5 },
-    { views: 1000, topAchievers: 20000, reward: 2 },
+    { views: 10000000, rewardSlots: 8, reward: 1000 },
+    { views: 1000000, rewardSlots: 40, reward: 200 },
+    { views: 100000, rewardSlots: 200, reward: 50 },
+    { views: 10000, rewardSlots: 1000, reward: 10 },
+    { views: 1000, rewardSlots: 5000, reward: 5 },
+    { views: 1000, rewardSlots: 20000, reward: 2 },
   ],
   earlyBonuses: [
-    { views: 100000, achievers: 10, reward: 100 },
-    { views: 10000, achievers: 100, reward: 50 },
+    { views: 100000, rewardSlots: 10, reward: 100 },
+    { views: 10000, rewardSlots: 100, reward: 50 },
   ]
 };
 
-// Updated Affiliate Rewards Data
-const AFFILIATE_REWARDS = [
+// Updated Affiliate Rewards Data - FREE ENTRY REWARDS
+const AFFILIATE_FREE_REWARDS = [
   { 
-    level: 'BRONZE STAR', 
+    level: 'BRONZE', 
     rewardSlots: 78125, 
     reward: 1, 
-    firstAchiever: 15625, 
-    firstReward: 5, 
-    topEarly: 625, 
-    extra: 5 
+    requirement: 'MAKE 5 FREE USER'
+  },
+  { 
+    level: 'SILVER', 
+    rewardSlots: 15625, 
+    reward: 2.5, 
+    requirement: 'MAKE 5 BRONZE'
+  },
+  { 
+    level: 'GOLD', 
+    rewardSlots: 3125, 
+    reward: 10, 
+    requirement: 'MAKE 5 SILVER'
+  },
+  { 
+    level: 'EMERALD', 
+    rewardSlots: 625, 
+    reward: 20, 
+    requirement: 'MAKE 5 GOLD'
+  },
+  { 
+    level: 'PLATINUM', 
+    rewardSlots: 125, 
+    reward: 50, 
+    requirement: 'MAKE 5 EMERALD'
+  },
+  { 
+    level: 'DIAMOND', 
+    rewardSlots: 25, 
+    reward: 250, 
+    requirement: 'MAKE 5 PLATINUM'
+  },
+  { 
+    level: 'CROWN', 
+    rewardSlots: 5, 
+    reward: 1000, 
+    requirement: 'MAKE 5 DIAMOND'
+  },
+];
+
+// Updated Affiliate Rewards Data - PAID USER REWARDS
+const AFFILIATE_PAID_REWARDS = [
+  { 
+    level: 'BRONZE STAR', 
+    rewardSlots: 15625, 
+    reward: 5, 
+    requirement: 'MAKE 5 PAID USER'
   },
   { 
     level: 'SILVER STAR', 
-    rewardSlots: 15625, 
-    reward: 2.5, 
-    firstAchiever: 3125, 
-    firstReward: 10, 
-    topEarly: 125, 
-    extra: 10 
+    rewardSlots: 3125, 
+    reward: 10, 
+    requirement: 'MAKE 5 BRONZE STAR'
   },
   { 
     level: 'GOLD STAR', 
-    rewardSlots: 3125, 
-    reward: 10, 
-    firstAchiever: 625, 
-    firstReward: 20, 
-    topEarly: 25, 
-    extra: 20 
+    rewardSlots: 625, 
+    reward: 20, 
+    requirement: 'MAKE 5 SILVER STAR'
   },
   { 
     level: 'EMERALD STAR', 
-    rewardSlots: 625, 
-    reward: 20, 
-    firstAchiever: 125, 
-    firstReward: 50, 
-    topEarly: 5, 
-    extra: 50 
+    rewardSlots: 125, 
+    reward: 50, 
+    requirement: 'MAKE 5 GOLD STAR'
   },
   { 
     level: 'PLATINUM STAR', 
-    rewardSlots: 125, 
-    reward: 50, 
-    firstAchiever: 25, 
-    firstReward: 250, 
-    topEarly: 1, 
-    extra: 250 
+    rewardSlots: 25, 
+    reward: 250, 
+    requirement: 'MAKE 5 EMERALD STAR'
   },
   { 
     level: 'DIAMOND STAR', 
-    rewardSlots: 25, 
-    reward: 250, 
-    firstAchiever: 5, 
-    firstReward: 1000, 
-    topEarly: 0, 
-    extra: 0 
+    rewardSlots: 5, 
+    reward: 1000, 
+    requirement: 'MAKE 5 PLATINUM STAR'
   },
   { 
     level: 'CROWN STAR', 
-    rewardSlots: 5, 
-    reward: 1000, 
-    firstAchiever: 1, 
-    firstReward: 5000, 
-    topEarly: 0, 
-    extra: 0 
+    rewardSlots: 1, 
+    reward: 5000, 
+    requirement: 'MAKE 5 DIAMOND STAR'
   },
 ];
 
@@ -165,7 +189,7 @@ const AFFILIATE_REWARDS = [
 const AIRDROP_DATA = {
   totalSlots: 20000,
   reward: 1,
-  description: 'First 20,000 early registrations'
+  description: 'FIRST 20,000 EARLY REGISTRATIONS'
 };
 
 // Working Links Configuration
@@ -185,10 +209,13 @@ export default function AirdropsRewardsPage() {
   const [activeTab, setActiveTab] = useState('airdrop');
   const [referralCount, setReferralCount] = useState(0);
   const [email, setEmail] = useState('');
+  const [affiliateType, setAffiliateType] = useState('free');
 
-  const calculateAffiliateEarnings = (referrals: number) => {
+  const calculateAffiliateEarnings = (referrals: number, type: string) => {
     let total = 0;
-    AFFILIATE_REWARDS.forEach(level => {
+    const rewards = type === 'free' ? AFFILIATE_FREE_REWARDS : AFFILIATE_PAID_REWARDS;
+    
+    rewards.forEach(level => {
       if (referrals >= level.rewardSlots) {
         total += level.reward;
       }
@@ -199,11 +226,10 @@ export default function AirdropsRewardsPage() {
   const handleAirdropRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Registration Successful!",
-      description: "You've been registered for the PGC airdrop. 1 PGC will be credited after presale.",
+      title: "REGISTRATION SUCCESSFUL!",
+      description: "YOU'VE BEEN REGISTERED FOR THE PGC AIRDROP. 1 PGC WILL BE CREDITED AFTER PRESALE.",
     });
     setEmail('');
-    // Redirect to airdrop registration page
     window.location.href = WORKING_LINKS.airdrop;
   };
 
@@ -212,10 +238,10 @@ export default function AirdropsRewardsPage() {
   };
 
   const tabs = [
-    { id: 'airdrop', label: 'Airdrops', icon: Gift, color: 'yellow' },
-    { id: 'financial', label: 'Financial Quiz', icon: Trophy, color: 'blue' },
-    { id: 'influencer', label: 'Influencer', icon: Video, color: 'purple' },
-    { id: 'affiliate', label: 'Affiliate', icon: Users, color: 'green' },
+    { id: 'airdrop', label: 'AIRDROPS', icon: Gift, color: 'yellow' },
+    { id: 'financial', label: 'FINANCIAL QUIZ', icon: Trophy, color: 'blue' },
+    { id: 'influencer', label: 'INFLUENCER', icon: Video, color: 'purple' },
+    { id: 'affiliate', label: 'AFFILIATE', icon: Users, color: 'green' },
   ];
 
   const getTabColors = (color: string) => {
@@ -264,20 +290,12 @@ export default function AirdropsRewardsPage() {
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-center items-center gap-4 mb-4">
-            {/* PGC Coin Image */}
-            <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center border-2 border-yellow-400 shadow-lg">
-              <div className="text-center">
-                <div className="text-[10px] font-bold text-white leading-tight">PUBLIC</div>
-                <div className="text-[10px] font-bold text-white leading-tight">GOVERNANCE</div>
-                <div className="text-[10px] font-bold text-white leading-tight">COIN</div>
-              </div>
-            </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white font-sans tracking-tight">
-                PGC Rewards & Airdrops
+                PGC REWARDS & AIRDROPS
               </h1>
               <p className="text-lg sm:text-xl text-gray-300 mt-2 font-light">
-                Exclusive Rewards for Early Supporters
+                EXCLUSIVE REWARDS FOR EARLY SUPPORTERS
               </p>
             </div>
           </div>
@@ -327,10 +345,10 @@ export default function AirdropsRewardsPage() {
               <CardHeader className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold">
                   <Gift className="h-5 w-5" />
-                  Early Registration Airdrop
+                  EARLY REGISTRATION AIRDROP
                 </CardTitle>
                 <CardDescription className="text-yellow-100 text-sm">
-                  Get 1 PGC FREE for early registration - Limited to first 20,000 users!
+                  GET 1 PGC FREE FOR EARLY REGISTRATION - LIMITED TO FIRST 20,000 USERS!
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
@@ -339,16 +357,16 @@ export default function AirdropsRewardsPage() {
                   <div className="space-y-6">
                     <div className="text-center">
                       <div className="text-5xl font-bold text-yellow-400 mb-2">1 PGC</div>
-                      <div className="text-base font-semibold text-yellow-300">FREE per Registration</div>
-                      <div className="text-xs text-yellow-400 mt-1">Limited to first 20,000 users</div>
+                      <div className="text-base font-semibold text-yellow-300">FREE PER REGISTRATION</div>
+                      <div className="text-xs text-yellow-400 mt-1">LIMITED TO FIRST 20,000 USERS</div>
                     </div>
 
                     <form onSubmit={handleAirdropRegistration} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-300">Email Address</label>
+                        <label className="text-sm font-semibold text-gray-300">EMAIL ADDRESS</label>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="ENTER YOUR EMAIL"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 focus:border-yellow-500"
@@ -361,20 +379,20 @@ export default function AirdropsRewardsPage() {
                         className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-bold py-3 text-base transition-all duration-200"
                       >
                         <UserPlus className="h-4 w-4 mr-2" />
-                        Claim My 1 PGC Airdrop
+                        CLAIM MY 1 PGC AIRDROP
                       </Button>
                     </form>
 
                     <div className="bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/30">
                       <h4 className="font-bold text-yellow-400 mb-2 flex items-center gap-2 text-sm">
                         <Zap className="h-4 w-4" />
-                        Instant Qualification
+                        INSTANT QUALIFICATION
                       </h4>
                       <ul className="text-xs text-yellow-300 space-y-1">
-                        <li>✅ No complex requirements</li>
-                        <li>✅ First 20,000 registrations only</li>
-                        <li>✅ 1 PGC credited after presale</li>
-                        <li>✅ Simple email registration</li>
+                        <li>✅ NO COMPLEX REQUIREMENTS</li>
+                        <li>✅ FIRST 20,000 REGISTRATIONS ONLY</li>
+                        <li>✅ 1 PGC CREDITED AFTER PRESALE</li>
+                        <li>✅ SIMPLE EMAIL REGISTRATION</li>
                       </ul>
                     </div>
                   </div>
@@ -384,26 +402,26 @@ export default function AirdropsRewardsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
                         <div className="text-2xl font-bold text-yellow-400">20,000</div>
-                        <div className="text-xs text-yellow-300">Total Slots</div>
+                        <div className="text-xs text-yellow-300">TOTAL SLOTS</div>
                       </div>
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
                         <div className="text-2xl font-bold text-yellow-400">1 PGC</div>
-                        <div className="text-xs text-yellow-300">Per User</div>
+                        <div className="text-xs text-yellow-300">PER USER</div>
                       </div>
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
                         <div className="text-2xl font-bold text-yellow-400">15,247</div>
-                        <div className="text-xs text-yellow-300">Registered</div>
+                        <div className="text-xs text-yellow-300">REGISTERED</div>
                       </div>
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
                         <div className="text-2xl font-bold text-yellow-400">4,753</div>
-                        <div className="text-xs text-yellow-300">Remaining</div>
+                        <div className="text-xs text-yellow-300">REMAINING</div>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
-                        <span className="text-gray-300 font-semibold">Registration Progress</span>
+                        <span className="text-gray-300 font-semibold">REGISTRATION PROGRESS</span>
                         <span className="text-yellow-400">76%</span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
@@ -416,9 +434,9 @@ export default function AirdropsRewardsPage() {
 
                     {/* Total Budget */}
                     <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 p-4 rounded-lg text-white text-center border border-yellow-500/30">
-                      <div className="text-sm font-bold mb-1">Total Airdrop Budget</div>
+                      <div className="text-sm font-bold mb-1">TOTAL AIRDROP BUDGET</div>
                       <div className="text-2xl font-black">20,000 PGC</div>
-                      <div className="text-yellow-200 text-xs mt-1">1 PGC × 20,000 users</div>
+                      <div className="text-yellow-200 text-xs mt-1">1 PGC × 20,000 USERS</div>
                     </div>
 
                     {/* Quick Actions */}
@@ -429,7 +447,7 @@ export default function AirdropsRewardsPage() {
                         className="flex-1 text-xs bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600"
                       >
                         <ExternalLink className="h-3 w-3 mr-1" />
-                        View Presale
+                        VIEW PRESALE
                       </Button>
                       <Button 
                         onClick={() => handleNavigation(WORKING_LINKS.dashboard)}
@@ -437,7 +455,7 @@ export default function AirdropsRewardsPage() {
                         className="flex-1 text-xs bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600"
                       >
                         <ExternalLink className="h-3 w-3 mr-1" />
-                        My Dashboard
+                        MY DASHBOARD
                       </Button>
                     </div>
                   </div>
@@ -451,11 +469,11 @@ export default function AirdropsRewardsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <CheckCircle className="h-4 w-4 text-yellow-400" />
-                    Simple Process
+                    SIMPLE PROCESS
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400 text-xs">Just register with email. No complex KYC or verification needed.</p>
+                  <p className="text-gray-400 text-xs">JUST REGISTER WITH EMAIL. NO COMPLEX KYC OR VERIFICATION NEEDED.</p>
                 </CardContent>
               </Card>
               
@@ -463,11 +481,11 @@ export default function AirdropsRewardsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <Calendar className="h-4 w-4 text-yellow-400" />
-                    First Come First Serve
+                    FIRST COME FIRST SERVE
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400 text-xs">Only the first 20,000 registrations qualify for the airdrop.</p>
+                  <p className="text-gray-400 text-xs">ONLY THE FIRST 20,000 REGISTRATIONS QUALIFY FOR THE AIRDROP.</p>
                 </CardContent>
               </Card>
               
@@ -475,11 +493,11 @@ export default function AirdropsRewardsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                     <Coins className="h-4 w-4 text-yellow-400" />
-                    Post-Presale Distribution
+                    POST-PRESALE DISTRIBUTION
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-400 text-xs">1 PGC will be credited to your wallet after presale completion.</p>
+                  <p className="text-gray-400 text-xs">1 PGC WILL BE CREDITED TO YOUR WALLET AFTER PRESALE COMPLETION.</p>
                 </CardContent>
               </Card>
             </div>
@@ -493,19 +511,19 @@ export default function AirdropsRewardsPage() {
               <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold">
                   <Trophy className="h-5 w-5" />
-                  Financial Quiz Rewards
+                  FINANCIAL QUIZ REWARDS
                 </CardTitle>
                 <CardDescription className="text-blue-100 text-sm">
-                  Test your financial knowledge and win big rewards!
+                  TEST YOUR FINANCIAL KNOWLEDGE AND WIN BIG REWARDS!
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-blue-400 mb-2">
-                      {FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.achievers * reward.reward), 0).toLocaleString()} PGC
+                      {FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.rewardSlots * reward.reward), 0).toLocaleString()} PGC
                     </div>
-                    <div className="text-base font-semibold text-blue-300">Total Quiz Rewards Pool</div>
+                    <div className="text-base font-semibold text-blue-300">TOTAL QUIZ REWARDS POOL</div>
                   </div>
 
                   <Button 
@@ -513,24 +531,24 @@ export default function AirdropsRewardsPage() {
                     className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 text-base"
                   >
                     <Trophy className="h-4 w-4 mr-2" />
-                    Start Financial Quiz
+                    START FINANCIAL QUIZ
                   </Button>
 
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-blue-500/30">
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[200px]">Stage</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[120px]">Reward Slots</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[100px]">Reward (PGC)</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[80px]">Action</TableHead>
+                          <TableHead className="text-blue-300 font-semibold text-xs w-[200px]">STAGE</TableHead>
+                          <TableHead className="text-blue-300 font-semibold text-xs w-[120px]">REWARD SLOTS</TableHead>
+                          <TableHead className="text-blue-300 font-semibold text-xs w-[100px]">REWARD (PGC)</TableHead>
+                          <TableHead className="text-blue-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {FINANCIAL_QUIZ_REWARDS.map((reward, index) => (
                           <TableRow key={index} className="border-blue-500/10 text-xs">
                             <TableCell className="text-gray-300 font-medium">{reward.stage}</TableCell>
-                            <TableCell className="text-gray-300">{reward.achievers.toLocaleString()}</TableCell>
+                            <TableCell className="text-gray-300">{reward.rewardSlots.toLocaleString()}</TableCell>
                             <TableCell className="text-blue-400 font-semibold">{reward.reward}</TableCell>
                             <TableCell>
                               <Button 
@@ -538,7 +556,7 @@ export default function AirdropsRewardsPage() {
                                 size="sm" 
                                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-7 px-3"
                               >
-                                Join
+                                JOIN
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -559,10 +577,10 @@ export default function AirdropsRewardsPage() {
               <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold">
                   <Video className="h-5 w-5" />
-                  Influencer Rewards Program
+                  INFLUENCER REWARDS PROGRAM
                 </CardTitle>
                 <CardDescription className="text-purple-100 text-sm">
-                  Create content and earn PGC rewards based on your reach and engagement
+                  CREATE CONTENT AND EARN PGC REWARDS BASED ON YOUR REACH AND ENGAGEMENT
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
@@ -572,75 +590,45 @@ export default function AirdropsRewardsPage() {
                     className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3 text-base"
                   >
                     <Video className="h-4 w-4 mr-2" />
-                    Join Influencer Program
+                    JOIN INFLUENCER PROGRAM
                   </Button>
 
                   {/* Follower Tiers Table */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-purple-400 border-b border-purple-500/30 pb-2">
-                      Follower Tier Rewards
+                      FOLLOWER TIER REWARDS
                     </h3>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow className="border-purple-500/30">
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">Level</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[140px]">Followers Required</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[180px]">Video Type</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[100px]">Reward (PGC)</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">Bonus</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">Action</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">LEVEL</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[140px]">FOLLOWERS REQUIRED</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[180px]">VIDEO TYPE</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[100px]">REWARD (PGC)</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">BONUS</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-purple-300 font-semibold">DIAMOND</TableCell>
-                            <TableCell className="text-gray-300">50,000+</TableCell>
-                            <TableCell className="text-gray-300">LONG VIDEO (15min - 2hr)</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">20</TableCell>
-                            <TableCell className="text-green-400 font-semibold">+20</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-purple-300 font-semibold">GOLD</TableCell>
-                            <TableCell className="text-gray-300">20,000+</TableCell>
-                            <TableCell className="text-gray-300">OVERVIEW VIDEO (3-8min)</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">5</TableCell>
-                            <TableCell className="text-green-400 font-semibold">+5</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-purple-300 font-semibold">SILVER</TableCell>
-                            <TableCell className="text-gray-300">5,000+</TableCell>
-                            <TableCell className="text-gray-300">SHORT VIDEO (&lt;3min)</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">2</TableCell>
-                            <TableCell className="text-green-400 font-semibold">+2</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
+                          {INFLUENCER_REWARDS.followerTiers.map((tier, index) => (
+                            <TableRow key={index} className="border-purple-500/10 text-xs">
+                              <TableCell className="text-purple-300 font-semibold">{tier.tier}</TableCell>
+                              <TableCell className="text-gray-300">{tier.followers.toLocaleString()}+</TableCell>
+                              <TableCell className="text-gray-300">{tier.videoType}</TableCell>
+                              <TableCell className="text-purple-400 font-semibold">{tier.reward}</TableCell>
+                              <TableCell className="text-green-400 font-semibold">+{tier.earlyBonus}</TableCell>
+                              <TableCell>
+                                <Button 
+                                  onClick={() => handleNavigation(WORKING_LINKS.influencer)}
+                                  size="sm" 
+                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
+                                >
+                                  JOIN
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -649,128 +637,37 @@ export default function AirdropsRewardsPage() {
                   {/* View-Based Rewards Table */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-purple-400 border-b border-purple-500/30 pb-2">
-                      View-Based Performance Rewards
+                      VIEW-BASED PERFORMANCE REWARDS
                     </h3>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow className="border-purple-500/30">
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[150px]">Views</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">Reward Slots</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">Reward (PGC)</TableHead>
-                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">Action</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[150px]">VIEWS</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">REWARD SLOTS</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[120px]">REWARD (PGC)</TableHead>
+                            <TableHead className="text-purple-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">1,00,00,000</TableCell>
-                            <TableCell className="text-gray-300">8</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">1000</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">10,00,000</TableCell>
-                            <TableCell className="text-gray-300">40</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">200</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">1,00,000</TableCell>
-                            <TableCell className="text-gray-300">200</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">50</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">10,000</TableCell>
-                            <TableCell className="text-gray-300">1000</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">10</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">1,000</TableCell>
-                            <TableCell className="text-gray-300">5000</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">5</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="border-purple-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">1,000</TableCell>
-                            <TableCell className="text-gray-300">20000</TableCell>
-                            <TableCell className="text-purple-400 font-semibold">2</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.influencer)}
-                                size="sm" 
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
-                          </TableRow>
+                          {INFLUENCER_REWARDS.viewRewards.map((reward, index) => (
+                            <TableRow key={index} className="border-purple-500/10 text-xs">
+                              <TableCell className="text-gray-300 font-medium">{reward.views.toLocaleString()}</TableCell>
+                              <TableCell className="text-gray-300">{reward.rewardSlots}</TableCell>
+                              <TableCell className="text-purple-400 font-semibold">{reward.reward}</TableCell>
+                              <TableCell>
+                                <Button 
+                                  onClick={() => handleNavigation(WORKING_LINKS.influencer)}
+                                  size="sm" 
+                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 px-3"
+                                >
+                                  JOIN
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
-                    </div>
-                  </div>
-
-                  {/* Early Bonus Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-purple-400 border-b border-purple-500/30 pb-2">
-                      Early Participant Bonuses
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-slate-700/50 border-purple-500/20">
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-purple-400">100,000+ views</div>
-                          <div className="text-gray-300 text-sm mt-1">10 Reward Slots</div>
-                          <div className="text-green-400 font-semibold text-sm">Bonus: 100 PGC each</div>
-                        </CardContent>
-                      </Card>
-                      <Card className="bg-slate-700/50 border-purple-500/20">
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-purple-400">10,000+ views</div>
-                          <div className="text-gray-300 text-sm mt-1">100 Reward Slots</div>
-                          <div className="text-green-400 font-semibold text-sm">Bonus: 50 PGC each</div>
-                        </CardContent>
-                      </Card>
                     </div>
                   </div>
                 </div>
@@ -786,27 +683,27 @@ export default function AirdropsRewardsPage() {
               <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold">
                   <Users className="h-5 w-5" />
-                  Affiliate Rewards Program
+                  AFFILIATE REWARDS PROGRAM
                 </CardTitle>
                 <CardDescription className="text-green-100 text-sm">
-                  Refer users and earn PGC through our multi-level affiliate system
+                  REFER USERS AND EARN PGC THROUGH OUR MULTI-LEVEL AFFILIATE SYSTEM
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-green-400 mb-2">
-                      {calculateAffiliateEarnings(referralCount)} PGC
+                      {calculateAffiliateEarnings(referralCount, affiliateType)} PGC
                     </div>
-                    <div className="text-base font-semibold text-green-300">Your Estimated Earnings</div>
-                    <div className="text-xs text-green-400 mt-1">Based on {referralCount} referrals</div>
+                    <div className="text-base font-semibold text-green-300">YOUR ESTIMATED EARNINGS</div>
+                    <div className="text-xs text-green-400 mt-1">BASED ON {referralCount} REFERRALS</div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
-                        placeholder="Enter referral count"
+                        placeholder="ENTER REFERRAL COUNT"
                         value={referralCount}
                         onChange={(e) => setReferralCount(Number(e.target.value))}
                         className="bg-slate-700 border-slate-600 text-white text-sm"
@@ -816,7 +713,33 @@ export default function AirdropsRewardsPage() {
                         className="bg-green-600 hover:bg-green-700 text-white"
                       >
                         <Share2 className="h-4 w-4 mr-1" />
-                        Get Link
+                        GET LINK
+                      </Button>
+                    </div>
+                    
+                    {/* Affiliate Type Selector */}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => setAffiliateType('free')}
+                        variant={affiliateType === 'free' ? "default" : "outline"}
+                        className={`flex-1 text-xs ${
+                          affiliateType === 'free' 
+                            ? 'bg-green-600 text-white' 
+                            : 'bg-slate-700 text-gray-300 border-slate-600'
+                        }`}
+                      >
+                        FREE USER REWARDS
+                      </Button>
+                      <Button
+                        onClick={() => setAffiliateType('paid')}
+                        variant={affiliateType === 'paid' ? "default" : "outline"}
+                        className={`flex-1 text-xs ${
+                          affiliateType === 'paid' 
+                            ? 'bg-green-600 text-white' 
+                            : 'bg-slate-700 text-gray-300 border-slate-600'
+                        }`}
+                      >
+                        PAID USER REWARDS
                       </Button>
                     </div>
                   </div>
@@ -826,39 +749,80 @@ export default function AirdropsRewardsPage() {
                     className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 text-base"
                   >
                     <Users className="h-4 w-4 mr-2" />
-                    Start Earning Now
+                    START EARNING NOW
                   </Button>
 
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-green-500/30">
-                          <TableHead className="text-green-300 font-semibold text-xs w-[150px]">Level</TableHead>
-                          <TableHead className="text-green-300 font-semibold text-xs w-[120px]">Reward Slots</TableHead>
-                          <TableHead className="text-green-300 font-semibold text-xs w-[120px]">Reward (PGC)</TableHead>
-                          <TableHead className="text-green-300 font-semibold text-xs w-[80px]">Action</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {AFFILIATE_REWARDS.map((level, index) => (
-                          <TableRow key={index} className="border-green-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">{level.level}</TableCell>
-                            <TableCell className="text-gray-300">{level.rewardSlots.toLocaleString()}</TableCell>
-                            <TableCell className="text-green-400 font-semibold">{level.reward}</TableCell>
-                            <TableCell>
-                              <Button 
-                                onClick={() => handleNavigation(WORKING_LINKS.affiliate)}
-                                size="sm" 
-                                className="bg-green-600 hover:bg-green-700 text-white text-xs h-7 px-3"
-                              >
-                                Join
-                              </Button>
-                            </TableCell>
+                  {/* Free Entry Rewards Table */}
+                  {affiliateType === 'free' && (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-green-500/30">
+                            <TableHead className="text-green-300 font-semibold text-xs w-[120px]">LEVEL</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[120px]">REWARD SLOTS</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[100px]">REWARD (PGC)</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[180px]">REQUIREMENT</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {AFFILIATE_FREE_REWARDS.map((level, index) => (
+                            <TableRow key={index} className="border-green-500/10 text-xs">
+                              <TableCell className="text-gray-300 font-medium">{level.level}</TableCell>
+                              <TableCell className="text-gray-300">{level.rewardSlots.toLocaleString()}</TableCell>
+                              <TableCell className="text-green-400 font-semibold">{level.reward}</TableCell>
+                              <TableCell className="text-gray-300 text-xs">{level.requirement}</TableCell>
+                              <TableCell>
+                                <Button 
+                                  onClick={() => handleNavigation(WORKING_LINKS.affiliate)}
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700 text-white text-xs h-7 px-3"
+                                >
+                                  JOIN
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+
+                  {/* Paid User Rewards Table */}
+                  {affiliateType === 'paid' && (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-green-500/30">
+                            <TableHead className="text-green-300 font-semibold text-xs w-[120px]">LEVEL</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[120px]">REWARD SLOTS</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[100px]">REWARD (PGC)</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[180px]">REQUIREMENT</TableHead>
+                            <TableHead className="text-green-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {AFFILIATE_PAID_REWARDS.map((level, index) => (
+                            <TableRow key={index} className="border-green-500/10 text-xs">
+                              <TableCell className="text-gray-300 font-medium">{level.level}</TableCell>
+                              <TableCell className="text-gray-300">{level.rewardSlots.toLocaleString()}</TableCell>
+                              <TableCell className="text-green-400 font-semibold">{level.reward}</TableCell>
+                              <TableCell className="text-gray-300 text-xs">{level.requirement}</TableCell>
+                              <TableCell>
+                                <Button 
+                                  onClick={() => handleNavigation(WORKING_LINKS.affiliate)}
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700 text-white text-xs h-7 px-3"
+                                >
+                                  JOIN
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -870,26 +834,29 @@ export default function AirdropsRewardsPage() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-xl font-bold">
               <TrendingUp className="h-5 w-5 text-yellow-400" />
-              Total Rewards Budget Summary
+              TOTAL REWARDS BUDGET SUMMARY
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-xl font-bold text-yellow-400">20,000 PGC</div>
-                <div className="text-yellow-300 text-xs">Airdrop Program</div>
+                <div className="text-yellow-300 text-xs">AIRDROP PROGRAM</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-blue-400">{FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.achievers * reward.reward), 0).toLocaleString()} PGC</div>
-                <div className="text-blue-300 text-xs">Financial Quiz</div>
+                <div className="text-xl font-bold text-blue-400">{FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.rewardSlots * reward.reward), 0).toLocaleString()} PGC</div>
+                <div className="text-blue-300 text-xs">FINANCIAL QUIZ</div>
               </div>
               <div>
                 <div className="text-xl font-bold text-purple-400">250,000 PGC</div>
-                <div className="text-purple-300 text-xs">Influencer Program</div>
+                <div className="text-purple-300 text-xs">INFLUENCER PROGRAM</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-green-400">{AFFILIATE_REWARDS.reduce((total, level) => total + (level.rewardSlots * level.reward), 0).toLocaleString()} PGC</div>
-                <div className="text-green-300 text-xs">Affiliate Program</div>
+                <div className="text-xl font-bold text-green-400">{
+                  (AFFILIATE_FREE_REWARDS.reduce((total, level) => total + (level.rewardSlots * level.reward), 0) +
+                  AFFILIATE_PAID_REWARDS.reduce((total, level) => total + (level.rewardSlots * level.reward), 0)).toLocaleString()
+                } PGC</div>
+                <div className="text-green-300 text-xs">AFFILIATE PROGRAM</div>
               </div>
             </div>
           </CardContent>

@@ -84,7 +84,7 @@ export default function Dashboard() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="p-0 overflow-hidden">
-                <div className="bg-muted flex h-32 items-center justify-center">
+                <div className="bg-muted flex h-56 items-center justify-center">
                     <Image src="/pgc-logo.png" alt="PGC Logo" width={100} height={100} />
                 </div>
             </CardHeader>
