@@ -1,3 +1,4 @@
+
 // components/LanguageSwitcher.tsx
 'use client';
 
