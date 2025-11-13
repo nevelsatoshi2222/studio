@@ -1,12 +1,10 @@
-// src/app/layout.tsx - COMPLETE FIXED FILE
 'use client';
 
 import './globals.css';
-import { FirebaseClientProvider, FirebaseProvider, initializeFirebase } from '@/firebase';
+import { FirebaseProvider, initializeFirebase } from '@/firebase';
 import { ClientWalletProvider } from '@/components/client-wallet-provider';
 import React, { Suspense } from 'react';
 import { LanguageProvider } from '@/contexts/LanguageContext';
-import ClientLayout from './client-layout/client-layout';
 import { Toaster } from '@/components/ui/toaster';
 
 // Initialize Firebase services ONCE
@@ -71,9 +69,7 @@ export default function RootLayout({
             <ClientWalletProvider>
                 <FirebaseProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
                     <LanguageProvider>
-                        <ClientLayout>
-                            {children}
-                        </ClientLayout>
+                        {children}
                     </LanguageProvider>
                 </FirebaseProvider>
             </ClientWalletProvider>
