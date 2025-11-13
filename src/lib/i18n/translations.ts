@@ -113,6 +113,50 @@ export const translations = {
         conclusion: "முடிவு"
       }
       // Add more Tamil translations...
+    },
+    gu: {
+      common: {
+        welcome: "પબ્લિક ગવર્નન્સ પ્લેટફોર્મ પર આપનું સ્વાગત છે",
+        loading: "લોડ કરી રહ્યું છે...",
+        submit: "સબમિટ કરો",
+        cancel: "રદ કરો",
+        next: "આગળ",
+        previous: "પહેલાં",
+        home: "મુખ્ય પૃષ્ઠ",
+        settings: "સેટિંગ્સ",
+        profile: "પ્રોફાઇલ",
+        logout: "લૉગ આઉટ",
+        login: "લોగిન",
+        signup: "સાઇન અપ કરો"
+      },
+      navigation: {
+        worldPerspective: "વિશ્વ પરિપ્રેક્ષ્ય",
+        newIndia: "નવા ભારતનું વિઝન",
+        quiz: "ગવર્નન્સ ક્વિઝ",
+        polls: "મતદાન",
+        conclusion: "નિષ્કર્ષ"
+      },
+      quiz: {
+        title: "ગવર્નન્સ જાગૃતિ ક્વિઝ",
+        start: "ક્વિઝ શરૂ કરો",
+        question: "પ્રશ્ન",
+        of: "માંથી",
+        correct: "સાચું",
+        incorrect: "ખોટું",
+        score: "સ્કોર",
+        completion: "પૂર્ણતા",
+        nextQuestion: "આગલો પ્રશ્ન",
+        previousQuestion: "પાછલો પ્રશ્ન",
+        submitQuiz: "ક્વિઝ સબમિટ કરો"
+      },
+      polls: {
+        title: "જાહેર અભિપ્રાય મતદાન",
+        vote: "મત આપો",
+        results: "પરિણામો",
+        totalVotes: "કુલ મત",
+        yourVote: "તમારો મત",
+        submitVotes: "મત સબમિટ કરો"
+      },
     }
     // Add other languages similarly...
   } as const;
