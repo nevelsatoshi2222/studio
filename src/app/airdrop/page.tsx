@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -34,7 +35,10 @@ import {
   CheckCircle,
   Calendar,
   UserPlus,
-  ExternalLink
+  ExternalLink,
+  Target,
+  Send,
+  MessageCircle
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -49,6 +53,14 @@ const FINANCIAL_QUIZ_REWARDS = [
   { rewardSlots: 20, reward: 100, stage: 'FINAL - QUALIFIERS' },
   { rewardSlots: 4, reward: 1000, stage: 'FINAL - RUNNERS UP' },
   { rewardSlots: 1, reward: 5000, stage: 'FINAL - WINNER' },
+];
+
+// Quiz Scoring System
+const QUIZ_SCORING_SYSTEM = [
+  { score: '100% CORRECT', reward: '5 PGC COIN' },
+  { score: '51-80% CORRECT', reward: '3 PGC COIN' },
+  { score: '36-50% CORRECT', reward: '2 PGC COIN' },
+  { score: 'BELOW 35%', reward: '1 PGC COIN' },
 ];
 
 // Updated Influencer Rewards Data
@@ -207,21 +219,15 @@ const WORKING_LINKS = {
 export default function AirdropsRewardsPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('airdrop');
-  const [referralCount, setReferralCount] = useState(0);
   const [email, setEmail] = useState('');
   const [affiliateType, setAffiliateType] = useState('free');
-
-  const calculateAffiliateEarnings = (referrals: number, type: string) => {
-    let total = 0;
-    const rewards = type === 'free' ? AFFILIATE_FREE_REWARDS : AFFILIATE_PAID_REWARDS;
-    
-    rewards.forEach(level => {
-      if (referrals >= level.rewardSlots) {
-        total += level.reward;
-      }
-    });
-    return total;
-  };
+  
+  // Offer to Admin State
+  const [offerType, setOfferType] = useState('influencer');
+  const [offerDetails, setOfferDetails] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
 
   const handleAirdropRegistration = (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,6 +241,19 @@ export default function AirdropsRewardsPage() {
 
   const handleNavigation = (link: string) => {
     window.location.href = link;
+  };
+
+  const handleOfferSubmission = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "OFFER SUBMITTED SUCCESSFULLY!",
+      description: "YOUR OFFER HAS BEEN SENT TO ADMIN. WE WILL CONTACT YOU SHORTLY.",
+    });
+    // Reset form
+    setOfferDetails('');
+    setContactName('');
+    setContactEmail('');
+    setContactPhone('');
   };
 
   const tabs = [
@@ -301,10 +320,7 @@ export default function AirdropsRewardsPage() {
           </div>
           <div className="flex flex-wrap justify-center items-center gap-2">
             <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
-              2M PGC SUPPLY
-            </Badge>
-            <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
-              1:1 BONUS
+              1M PGC SUPPLY
             </Badge>
             <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
               3-STAGE GROWTH
@@ -408,28 +424,6 @@ export default function AirdropsRewardsPage() {
                         <div className="text-2xl font-bold text-yellow-400">1 PGC</div>
                         <div className="text-xs text-yellow-300">PER USER</div>
                       </div>
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
-                        <div className="text-2xl font-bold text-yellow-400">15,247</div>
-                        <div className="text-xs text-yellow-300">REGISTERED</div>
-                      </div>
-                      <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
-                        <div className="text-2xl font-bold text-yellow-400">4,753</div>
-                        <div className="text-xs text-yellow-300">REMAINING</div>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-300 font-semibold">REGISTRATION PROGRESS</span>
-                        <span className="text-yellow-400">76%</span>
-                      </div>
-                      <div className="w-full bg-slate-700 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: '76%' }}
-                        ></div>
-                      </div>
                     </div>
 
                     {/* Total Budget */}
@@ -514,11 +508,29 @@ export default function AirdropsRewardsPage() {
                   FINANCIAL QUIZ REWARDS
                 </CardTitle>
                 <CardDescription className="text-blue-100 text-sm">
-                  TEST YOUR FINANCIAL KNOWLEDGE AND WIN BIG REWARDS!
+                  TEST YOUR FINANCIAL KNOWLEDGE AND WIN PGC COINS!
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-6">
+                <div className="space-y-8">
+                  {/* Scoring System */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-blue-400 border-b border-blue-500/30 pb-2 flex items-center gap-2">
+                      <Target className="h-5 w-5" />
+                      PGC COIN REWARDS - SCORING SYSTEM
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {QUIZ_SCORING_SYSTEM.map((item, index) => (
+                        <Card key={index} className="bg-slate-700/50 border-blue-500/20 text-center">
+                          <CardContent className="p-4">
+                            <div className="text-lg font-bold text-blue-400">{item.score}</div>
+                            <div className="text-2xl font-black text-white mt-2">{item.reward}</div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="text-center">
                     <div className="text-4xl font-bold text-blue-400 mb-2">
                       {FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.rewardSlots * reward.reward), 0).toLocaleString()} PGC
@@ -670,6 +682,89 @@ export default function AirdropsRewardsPage() {
                       </Table>
                     </div>
                   </div>
+
+                  {/* Offer to Admin Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-purple-400 border-b border-purple-500/30 pb-2 flex items-center gap-2">
+                      <MessageCircle className="h-5 w-5" />
+                      YOUR OFFER TO ADMIN REQUEST
+                    </h3>
+                    <Card className="bg-slate-700/50 border-purple-500/20">
+                      <CardContent className="p-6">
+                        <form onSubmit={handleOfferSubmission} className="space-y-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">OFFER TYPE</label>
+                            <Select value={offerType} onValueChange={setOfferType}>
+                              <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
+                                <SelectValue placeholder="SELECT OFFER TYPE" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="influencer">INFLUENCER COLLABORATION</SelectItem>
+                                <SelectItem value="affiliate">AFFILIATE PARTNERSHIP</SelectItem>
+                                <SelectItem value="custom">CUSTOM OFFER</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">YOUR OFFER DETAILS</label>
+                            <Textarea
+                              placeholder="DESCRIBE YOUR OFFER, YOUR REACH, AND WHAT YOU CAN BRING TO THE PGC COMMUNITY..."
+                              value={offerDetails}
+                              onChange={(e) => setOfferDetails(e.target.value)}
+                              className="bg-slate-600 border-slate-500 text-white placeholder:text-gray-400 min-h-[120px]"
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-300">YOUR NAME</label>
+                              <Input
+                                type="text"
+                                placeholder="ENTER YOUR NAME"
+                                value={contactName}
+                                onChange={(e) => setContactName(e.target.value)}
+                                className="bg-slate-600 border-slate-500 text-white"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-300">EMAIL</label>
+                              <Input
+                                type="email"
+                                placeholder="ENTER YOUR EMAIL"
+                                value={contactEmail}
+                                onChange={(e) => setContactEmail(e.target.value)}
+                                className="bg-slate-600 border-slate-500 text-white"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">PHONE NUMBER</label>
+                            <Input
+                              type="tel"
+                              placeholder="ENTER YOUR PHONE NUMBER"
+                              value={contactPhone}
+                              onChange={(e) => setContactPhone(e.target.value)}
+                              className="bg-slate-600 border-slate-500 text-white"
+                              required
+                            />
+                          </div>
+
+                          <Button 
+                            type="submit" 
+                            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3"
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            SUBMIT OFFER TO ADMIN
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -690,60 +785,7 @@ export default function AirdropsRewardsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-green-400 mb-2">
-                      {calculateAffiliateEarnings(referralCount, affiliateType)} PGC
-                    </div>
-                    <div className="text-base font-semibold text-green-300">YOUR ESTIMATED EARNINGS</div>
-                    <div className="text-xs text-green-400 mt-1">BASED ON {referralCount} REFERRALS</div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        placeholder="ENTER REFERRAL COUNT"
-                        value={referralCount}
-                        onChange={(e) => setReferralCount(Number(e.target.value))}
-                        className="bg-slate-700 border-slate-600 text-white text-sm"
-                      />
-                      <Button 
-                        onClick={() => handleNavigation(WORKING_LINKS.affiliate)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <Share2 className="h-4 w-4 mr-1" />
-                        GET LINK
-                      </Button>
-                    </div>
-                    
-                    {/* Affiliate Type Selector */}
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => setAffiliateType('free')}
-                        variant={affiliateType === 'free' ? "default" : "outline"}
-                        className={`flex-1 text-xs ${
-                          affiliateType === 'free' 
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-slate-700 text-gray-300 border-slate-600'
-                        }`}
-                      >
-                        FREE USER REWARDS
-                      </Button>
-                      <Button
-                        onClick={() => setAffiliateType('paid')}
-                        variant={affiliateType === 'paid' ? "default" : "outline"}
-                        className={`flex-1 text-xs ${
-                          affiliateType === 'paid' 
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-slate-700 text-gray-300 border-slate-600'
-                        }`}
-                      >
-                        PAID USER REWARDS
-                      </Button>
-                    </div>
-                  </div>
-
+                <div className="space-y-8">
                   <Button 
                     onClick={() => handleNavigation(WORKING_LINKS.affiliate)}
                     className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 text-base"
@@ -751,6 +793,32 @@ export default function AirdropsRewardsPage() {
                     <Users className="h-4 w-4 mr-2" />
                     START EARNING NOW
                   </Button>
+
+                  {/* Affiliate Type Selector */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setAffiliateType('free')}
+                      variant={affiliateType === 'free' ? "default" : "outline"}
+                      className={`flex-1 text-xs ${
+                        affiliateType === 'free' 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-slate-700 text-gray-300 border-slate-600'
+                      }`}
+                    >
+                      FREE USER REWARDS
+                    </Button>
+                    <Button
+                      onClick={() => setAffiliateType('paid')}
+                      variant={affiliateType === 'paid' ? "default" : "outline"}
+                      className={`flex-1 text-xs ${
+                        affiliateType === 'paid' 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-slate-700 text-gray-300 border-slate-600'
+                      }`}
+                    >
+                      PAID USER REWARDS
+                    </Button>
+                  </div>
 
                   {/* Free Entry Rewards Table */}
                   {affiliateType === 'free' && (
@@ -823,6 +891,89 @@ export default function AirdropsRewardsPage() {
                       </Table>
                     </div>
                   )}
+
+                  {/* Offer to Admin Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-green-400 border-b border-green-500/30 pb-2 flex items-center gap-2">
+                      <MessageCircle className="h-5 w-5" />
+                      YOUR OFFER TO ADMIN REQUEST
+                    </h3>
+                    <Card className="bg-slate-700/50 border-green-500/20">
+                      <CardContent className="p-6">
+                        <form onSubmit={handleOfferSubmission} className="space-y-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">OFFER TYPE</label>
+                            <Select value={offerType} onValueChange={setOfferType}>
+                              <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
+                                <SelectValue placeholder="SELECT OFFER TYPE" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="affiliate">AFFILIATE PARTNERSHIP</SelectItem>
+                                <SelectItem value="influencer">INFLUENCER COLLABORATION</SelectItem>
+                                <SelectItem value="custom">CUSTOM OFFER</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">YOUR OFFER DETAILS</label>
+                            <Textarea
+                              placeholder="DESCRIBE YOUR AFFILIATE NETWORK, YOUR MARKETING STRATEGIES, AND HOW YOU CAN HELP GROW PGC COMMUNITY..."
+                              value={offerDetails}
+                              onChange={(e) => setOfferDetails(e.target.value)}
+                              className="bg-slate-600 border-slate-500 text-white placeholder:text-gray-400 min-h-[120px]"
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-300">YOUR NAME</label>
+                              <Input
+                                type="text"
+                                placeholder="ENTER YOUR NAME"
+                                value={contactName}
+                                onChange={(e) => setContactName(e.target.value)}
+                                className="bg-slate-600 border-slate-500 text-white"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-300">EMAIL</label>
+                              <Input
+                                type="email"
+                                placeholder="ENTER YOUR EMAIL"
+                                value={contactEmail}
+                                onChange={(e) => setContactEmail(e.target.value)}
+                                className="bg-slate-600 border-slate-500 text-white"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-300">PHONE NUMBER</label>
+                            <Input
+                              type="tel"
+                              placeholder="ENTER YOUR PHONE NUMBER"
+                              value={contactPhone}
+                              onChange={(e) => setContactPhone(e.target.value)}
+                              className="bg-slate-600 border-slate-500 text-white"
+                              required
+                            />
+                          </div>
+
+                          <Button 
+                            type="submit" 
+                            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3"
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            SUBMIT OFFER TO ADMIN
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </CardContent>
             </Card>

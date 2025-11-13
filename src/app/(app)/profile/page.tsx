@@ -44,13 +44,6 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 
-const pgcLogo = {
-  id: "pgc-logo",
-  description: "The official logo for the Public Governance Coin.",
-  imageUrl: "https://storage.googleapis.com/stedi-assets/gcp-public-governance/pgc-logo.png",
-  imageHint: "pgc logo"
-};
-
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   walletPublicKey: z.string().optional(),
@@ -350,7 +343,7 @@ export default function ProfilePage() {
                     <div>
                         <p className="text-sm text-muted-foreground">In-App PGC Balance</p>
                         <div className="flex items-baseline gap-2">
-                            {pgcLogo && <Image src={pgcLogo.imageUrl} alt="PGC Coin" width={28} height={28} data-ai-hint={pgcLogo.imageHint} />}
+                            <Image src="/pgc-logo.png" alt="PGC Coin" width={28} height={28} />
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
