@@ -1,6 +1,6 @@
 'use client';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -33,12 +33,12 @@ export default function Dashboard() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sections.map(section => (
-          <Card key={section}>
+          <Card key={section} className="flex flex-col">
             <CardHeader>
               <CardTitle>{t(`navigation.${section}`)}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p>
+            <CardContent className="flex-grow">
+              <p className="text-sm text-muted-foreground">
                 {/* Dummy content - you can add specific descriptions here */}
                 Explore the {t(`navigation.${section}`)} section to learn more about our governance model.
               </p>
