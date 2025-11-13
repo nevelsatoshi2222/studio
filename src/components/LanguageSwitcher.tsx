@@ -1,7 +1,7 @@
 // components/LanguageSwitcher.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,12 +9,26 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown, Globe } from 'lucide-react';
 
 export function LanguageSwitcher() {
   const { currentLanguage, setLanguage, supportedLanguages, isLoading } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (isLoading) {
     return (
@@ -27,35 +41,84 @@ export function LanguageSwitcher() {
 
   const currentLang = supportedLanguages[currentLanguage];
 
+  const handleLanguageSelect = (languageCode: keyof typeof supportedLanguages) => {
+    setLanguage(languageCode);
+    setIsOpen(false);
+  };
+  
+  const indianLanguages = Object.entries(supportedLanguages).filter(([code]) => 
+    ['hi', 'ta', 'te', 'kn', 'ml', 'bn', 'mr', 'gu', 'pa'].includes(code)
+  );
+
+  const internationalLanguages = Object.entries(supportedLanguages).filter(([code]) => 
+    !['hi', 'ta', 'te', 'kn', 'ml', 'bn', 'mr', 'gu', 'pa', 'en'].includes(code)
+  );
+
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Globe className="h-4 w-4" />
-          <span>{currentLang.flag} {currentLang.nativeName}</span>
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {Object.entries(supportedLanguages).map(([code, language]) => (
+    <div ref={dropdownRef}>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            <span>{currentLang.flag} {currentLang.nativeName}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56 max-h-96 overflow-y-auto">
+          {/* Default/Current Language */}
           <DropdownMenuItem
-            key={code}
-            onClick={() => {
-              setLanguage(code as any);
-              setIsOpen(false);
-            }}
-            className={`flex items-center gap-2 ${
-              currentLanguage === code ? 'bg-blue-50 text-blue-700' : ''
-            }`}
-          >
-            <span className="text-lg">{language.flag}</span>
-            <div className="flex flex-col">
-              <span className="font-medium">{language.nativeName}</span>
-              <span className="text-xs text-gray-500">{language.name}</span>
-            </div>
+              key="en"
+              onClick={() => handleLanguageSelect('en')}
+              className={`flex items-center gap-2 ${
+                currentLanguage === 'en' ? 'bg-accent' : ''
+              }`}
+            >
+              <span className="text-lg">{supportedLanguages.en.flag}</span>
+              <div className="flex flex-col">
+                <span className="font-medium">{supportedLanguages.en.nativeName}</span>
+                <span className="text-xs text-muted-foreground">{supportedLanguages.en.name}</span>
+              </div>
           </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuSeparator />
+
+          {/* Indian Languages */}
+          <DropdownMenuLabel>Indian Languages</DropdownMenuLabel>
+          {indianLanguages.map(([code, language]) => (
+            <DropdownMenuItem
+              key={code}
+              onClick={() => handleLanguageSelect(code as any)}
+              className={`flex items-center gap-2 ${
+                currentLanguage === code ? 'bg-accent' : ''
+              }`}
+            >
+              <span className="text-lg">{language.flag}</span>
+              <div className="flex flex-col">
+                <span className="font-medium">{language.nativeName}</span>
+                <span className="text-xs text-muted-foreground">{language.name}</span>
+              </div>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+
+          {/* International Languages */}
+          <DropdownMenuLabel>International Languages</DropdownMenuLabel>
+          {internationalLanguages.map(([code, language]) => (
+            <DropdownMenuItem
+              key={code}
+              onClick={() => handleLanguageSelect(code as any)}
+              className={`flex items-center gap-2 ${
+                currentLanguage === code ? 'bg-accent' : ''
+              }`}
+            >
+              <span className="text-lg">{language.flag}</span>
+              <div className="flex flex-col">
+                <span className="font-medium">{language.nativeName}</span>
+                <span className="text-xs text-muted-foreground">{language.name}</span>
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
