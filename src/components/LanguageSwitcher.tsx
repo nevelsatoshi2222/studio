@@ -13,6 +13,7 @@ import {
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown, Globe } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function LanguageSwitcher() {
   const { currentLanguage, setLanguage, supportedLanguages, isLoading } = useLanguage();
@@ -64,59 +65,60 @@ export function LanguageSwitcher() {
             <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 max-h-96 overflow-y-auto">
-          {/* Default/Current Language */}
-          <DropdownMenuItem
-              key="en"
-              onClick={() => handleLanguageSelect('en')}
-              className={`flex items-center gap-2 ${
-                currentLanguage === 'en' ? 'bg-accent' : ''
-              }`}
-            >
-              <span className="text-lg">{supportedLanguages.en.flag}</span>
-              <div className="flex flex-col">
-                <span className="font-medium">{supportedLanguages.en.nativeName}</span>
-                <span className="text-xs text-muted-foreground">{supportedLanguages.en.name}</span>
-              </div>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="end" className="w-56 p-0">
+          <ScrollArea className="h-auto max-h-72">
+            <div className="p-1">
+              <DropdownMenuItem
+                  key="en"
+                  onClick={() => handleLanguageSelect('en')}
+                  className={`flex items-center gap-2 ${
+                    currentLanguage === 'en' ? 'bg-accent' : ''
+                  }`}
+                >
+                  <span className="text-lg">{supportedLanguages.en.flag}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{supportedLanguages.en.nativeName}</span>
+                    <span className="text-xs text-muted-foreground">{supportedLanguages.en.name}</span>
+                  </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
 
-          {/* Indian Languages */}
-          <DropdownMenuLabel>Indian Languages</DropdownMenuLabel>
-          {indianLanguages.map(([code, language]) => (
-            <DropdownMenuItem
-              key={code}
-              onClick={() => handleLanguageSelect(code as any)}
-              className={`flex items-center gap-2 ${
-                currentLanguage === code ? 'bg-accent' : ''
-              }`}
-            >
-              <span className="text-lg">{language.flag}</span>
-              <div className="flex flex-col">
-                <span className="font-medium">{language.nativeName}</span>
-                <span className="text-xs text-muted-foreground">{language.name}</span>
-              </div>
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
+              <DropdownMenuLabel>Indian Languages</DropdownMenuLabel>
+              {indianLanguages.map(([code, language]) => (
+                <DropdownMenuItem
+                  key={code}
+                  onClick={() => handleLanguageSelect(code as any)}
+                  className={`flex items-center gap-2 ${
+                    currentLanguage === code ? 'bg-accent' : ''
+                  }`}
+                >
+                  <span className="text-lg">{language.flag}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{language.nativeName}</span>
+                    <span className="text-xs text-muted-foreground">{language.name}</span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
 
-          {/* International Languages */}
-          <DropdownMenuLabel>International Languages</DropdownMenuLabel>
-          {internationalLanguages.map(([code, language]) => (
-            <DropdownMenuItem
-              key={code}
-              onClick={() => handleLanguageSelect(code as any)}
-              className={`flex items-center gap-2 ${
-                currentLanguage === code ? 'bg-accent' : ''
-              }`}
-            >
-              <span className="text-lg">{language.flag}</span>
-              <div className="flex flex-col">
-                <span className="font-medium">{language.nativeName}</span>
-                <span className="text-xs text-muted-foreground">{language.name}</span>
-              </div>
-            </DropdownMenuItem>
-          ))}
+              <DropdownMenuLabel>International Languages</DropdownMenuLabel>
+              {internationalLanguages.map(([code, language]) => (
+                <DropdownMenuItem
+                  key={code}
+                  onClick={() => handleLanguageSelect(code as any)}
+                  className={`flex items-center gap-2 ${
+                    currentLanguage === code ? 'bg-accent' : ''
+                  }`}
+                >
+                  <span className="text-lg">{language.flag}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{language.nativeName}</span>
+                    <span className="text-xs text-muted-foreground">{language.name}</span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          </ScrollArea>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
