@@ -1,7 +1,6 @@
 'use client';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -26,7 +25,7 @@ export default function Dashboard() {
               <CardTitle>{t('common.welcome')}</CardTitle>
               <CardDescription>Explore the platform in your preferred language.</CardDescription>
             </div>
-            <LanguageSwitcher />
+            {/* The LanguageSwitcher was here and has been moved to the main header */}
           </div>
         </CardHeader>
       </Card>
