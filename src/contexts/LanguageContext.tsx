@@ -5,15 +5,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export const supportedLanguages = {
   en: { name: 'English', nativeName: 'English', flag: '🇺🇸' },
   hi: { name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳' },
-  ta: { name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
-  te: { name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
-  kn: { name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
-  ml: { name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
-  bn: { name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳' },
-  mr: { name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
-  gu: { name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳' },
-  pa: { name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
-  // Adding more international languages
   es: { name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
   fr: { name: 'French', nativeName: 'Français', flag: '🇫🇷' },
   de: { name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
@@ -23,7 +14,15 @@ export const supportedLanguages = {
   ru: { name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
   pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
   it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-  ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷' }
+  ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  ta: { name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
+  te: { name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
+  kn: { name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
+  ml: { name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
+  bn: { name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳' },
+  mr: { name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
+  gu: { name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳' },
+  pa: { name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
 } as const;
 
 export type LanguageCode = keyof typeof supportedLanguages;
