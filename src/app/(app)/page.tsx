@@ -3,6 +3,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 // Main dashboard content sections
 const sections = [
@@ -25,7 +26,7 @@ export default function Dashboard() {
               <CardTitle>{t('common.welcome')}</CardTitle>
               <CardDescription>Explore the platform in your preferred language.</CardDescription>
             </div>
-            {/* The LanguageSwitcher was here and has been moved to the main header */}
+            <LanguageSwitcher />
           </div>
         </CardHeader>
       </Card>

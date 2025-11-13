@@ -348,7 +348,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger className="md:hidden" />
           </div>
           <div className="flex items-center gap-4">
-             <LanguageSwitcher />
              <SafeWalletButton />
              <UserAccountDropdown />
           </div>
