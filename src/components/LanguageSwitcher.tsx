@@ -66,7 +66,7 @@ export function LanguageSwitcher() {
             <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 p-0">
+        <DropdownMenuContent align="end" className="w-56">
           <ScrollArea className="h-auto max-h-72">
             <div className="p-1">
               <DropdownMenuItem
