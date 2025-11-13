@@ -1,3 +1,4 @@
+
 // components/LanguageSwitcher.tsx
 'use client';
 
@@ -14,6 +15,10 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const indianLanguages: (keyof typeof supportedLanguages)[] = ['hi', 'bn', 'mr', 'gu', 'ta'];
+const internationalLanguages: (keyof typeof supportedLanguages)[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ar', 'ru', 'pt'];
+
 
 export function LanguageSwitcher() {
   const { currentLanguage, setLanguage, supportedLanguages, isLoading } = useLanguage();
@@ -44,27 +49,64 @@ export function LanguageSwitcher() {
           <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] p-0">
+      <DialogContent className="sm:max-w-[480px] p-0">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle>Select your language</DialogTitle>
         </DialogHeader>
         <div className="border-t">
-          <ScrollArea className="h-[60vh] md:h-[50vh]">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4">
-              {Object.entries(supportedLanguages).map(([code, language]) => (
-                <button
-                  key={code}
-                  onClick={() => handleLanguageSelect(code as any)}
-                  className={cn(
-                    "flex flex-col items-center justify-center text-center p-3 gap-2 rounded-md transition-colors hover:bg-accent",
-                    currentLanguage === code ? 'bg-accent text-accent-foreground' : ''
-                  )}
-                >
-                  <span className="text-3xl">{language.flag}</span>
-                  <span className="text-sm font-medium">{language.nativeName}</span>
-                  <span className="text-xs text-muted-foreground">{language.name}</span>
-                </button>
-              ))}
+           <ScrollArea className="h-[60vh] max-h-96">
+            <div className="p-4 space-y-4">
+
+              {/* Indian Languages */}
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-2">Indian Languages</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {indianLanguages.map(code => {
+                    const language = supportedLanguages[code];
+                    return (
+                       <button
+                        key={code}
+                        onClick={() => handleLanguageSelect(code)}
+                        className={cn(
+                          "flex flex-col items-center justify-center text-center p-2 gap-1 rounded-md transition-colors hover:bg-accent",
+                          currentLanguage === code ? 'bg-accent text-accent-foreground' : ''
+                        )}
+                      >
+                        <span className="text-2xl">{language.flag}</span>
+                        <span className="text-xs font-medium">{language.nativeName}</span>
+                        <span className="text-xs text-muted-foreground">{language.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              
+              <div className="border-t"></div>
+
+              {/* International Languages */}
+               <div>
+                <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-2">International Languages</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {internationalLanguages.map(code => {
+                    const language = supportedLanguages[code];
+                    return (
+                       <button
+                        key={code}
+                        onClick={() => handleLanguageSelect(code)}
+                        className={cn(
+                          "flex flex-col items-center justify-center text-center p-2 gap-1 rounded-md transition-colors hover:bg-accent",
+                          currentLanguage === code ? 'bg-accent text-accent-foreground' : ''
+                        )}
+                      >
+                        <span className="text-2xl">{language.flag}</span>
+                        <span className="text-xs font-medium">{language.nativeName}</span>
+                        <span className="text-xs text-muted-foreground">{language.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
             </div>
           </ScrollArea>
         </div>

@@ -1,7 +1,9 @@
+
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
+// Curated list of important languages as requested
 export const supportedLanguages = {
   en: { name: 'English', nativeName: 'English', flag: '🇺🇸' },
   hi: { name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳' },
@@ -13,17 +15,12 @@ export const supportedLanguages = {
   ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
   ru: { name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
   pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
-  it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-  ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-  ta: { name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
-  te: { name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
-  kn: { name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
-  ml: { name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
-  bn: { name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳' },
+  bn: { name: 'Bengali', nativeName: 'বাংলা', flag: '🇧🇩' },
   mr: { name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
   gu: { name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳' },
-  pa: { name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+  ta: { name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
 } as const;
+
 
 export type LanguageCode = keyof typeof supportedLanguages;
 
@@ -32,57 +29,72 @@ interface LanguageContextType {
   setLanguage: (language: LanguageCode) => void;
   supportedLanguages: typeof supportedLanguages;
   isLoading: boolean;
+  translations: any; // Add translations to the context
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// This is a new component that forces a re-render when the language changes.
+function ForceRerender({ children }: { children: ReactNode }) {
+  const [, setTick] = useState(0);
+  
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setTick(tick => tick + 1);
+    };
+    
+    // We can use a simple event here, but the key is that this component listens and forces an update.
+    window.addEventListener('languageChange', handleLanguageChange);
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange);
+    };
+  }, []);
+
+  return <>{children}</>;
+}
+
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
   const [isLoading, setIsLoading] = useState(true);
+  const [translations, setTranslations] = useState({});
 
   useEffect(() => {
-    const initializeLanguage = () => {
+    async function loadTranslations(lang: LanguageCode) {
       try {
-        const savedLanguage = localStorage.getItem('preferred-language') as LanguageCode;
-        const language = savedLanguage && supportedLanguages[savedLanguage] 
-          ? savedLanguage 
-          : 'en';
-
-        setCurrentLanguage(language);
-        document.documentElement.lang = language;
+        const { translations } = await import('@/lib/i18n/translations');
+        setTranslations(translations);
       } catch (error) {
-        console.error('Error initializing language:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to load translations', error);
       }
-    };
-
-    initializeLanguage();
+    }
+    
+    const savedLanguage = (localStorage.getItem('preferred-language') as LanguageCode) || 'en';
+    setCurrentLanguage(savedLanguage);
+    loadTranslations(savedLanguage);
+    document.documentElement.lang = savedLanguage;
+    setIsLoading(false);
   }, []);
 
-  const setLanguage = (language: LanguageCode) => {
-    try {
-      setCurrentLanguage(language);
-      localStorage.setItem('preferred-language', language);
-      document.documentElement.lang = language;
-      
-      // Force a re-render of the entire app to update all text
-      window.dispatchEvent(new Event('languageChange'));
-    } catch (error) {
-      console.error('Error setting language:', error);
-    }
-  };
+  const setLanguage = useCallback((language: LanguageCode) => {
+    setCurrentLanguage(language);
+    localStorage.setItem('preferred-language', language);
+    document.documentElement.lang = language;
+    // Dispatch a custom event that our new component can listen to.
+    window.dispatchEvent(new Event('languageChange'));
+  }, []);
 
   const value: LanguageContextType = {
     currentLanguage,
     setLanguage,
     supportedLanguages,
-    isLoading
+    isLoading,
+    translations,
   };
 
   return (
     <LanguageContext.Provider value={value}>
-      {children}
+      <ForceRerender>{children}</ForceRerender>
     </LanguageContext.Provider>
   );
 }
