@@ -54,21 +54,21 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(5, 0.2, 2.5, 5, 1.0, '1:0.6'),
   calculateStageData(6, 0.5, 5, 10, 2.5, '1:0.5'),
   
-  // Vote-to-Unlock Stages with PDP release
-  calculateStageData(7, 1.0, 10, 20, 5.0, '1:0.45'),
-  calculateStageData(8, 1.0, 20, 50, 5.0, '1:0.4'),
-  calculateStageData(9, 1.0, 50, 100, 5.0, '1:0.35'),
-  calculateStageData(10, 1.0, 100, 200, 5.0, '1:0.3'),
-  calculateStageData(11, 1.0, 200, 500, 5.0, '1:0.25'),
-  calculateStageData(12, 1.0, 500, 1000, 5.0, '1:0.25'),
-  calculateStageData(13, 1.0, 1000, 1500, 5.0, '1:0.25'),
-  calculateStageData(14, 1.0, 1500, 2000, 5.0, '1:0.25'),
-  calculateStageData(15, 1.0, 2000, 3000, 5.0, '1:0.25'),
-  calculateStageData(16, 1.0, 3000, 4000, 5.0, '1:0.25'),
-  calculateStageData(17, 1.0, 4000, 5000, 5.0, '1:0.25'),
-  calculateStageData(18, 1.0, 5000, 7500, 5.0, '1:0.25'),
-  calculateStageData(19, 1.0, 7500, 10000, 5.0, '1:0.25'),
-  calculateStageData(20, 1.0, 10000, 12500, 5.0, '1:0.25'),
+  // Vote-to-Unlock Stages with new logic
+  calculateStageData(7, 0.75, 10, 20, 3.0, '1:0.45'),
+  calculateStageData(8, 1.0, 20, 50, 4.0, '1:0.4'),
+  calculateStageData(9, 1.0, 50, 100, 4.0, '1:0.35'),
+  calculateStageData(10, 1.0, 100, 200, 4.0, '1:0.3'),
+  calculateStageData(11, 1.0, 200, 500, 4.0, '1:0.25'),
+  calculateStageData(12, 1.0, 500, 1000, 4.0, '1:0.25'),
+  calculateStageData(13, 1.0, 1000, 1500, 4.0, '1:0.25'),
+  calculateStageData(14, 1.0, 1500, 2000, 4.0, '1:0.25'),
+  calculateStageData(15, 1.0, 2000, 3000, 4.0, '1:0.25'),
+  calculateStageData(16, 1.0, 3000, 4000, 4.0, '1:0.25'),
+  calculateStageData(17, 1.0, 4000, 5000, 4.0, '1:0.25'),
+  calculateStageData(18, 1.0, 5000, 7500, 4.0, '1:0.25'),
+  calculateStageData(19, 1.0, 7500, 10000, 4.0, '1:0.25'),
+  calculateStageData(20, 1.0, 10000, 12500, 4.0, '1:0.25'),
 ];
 
 
@@ -149,4 +149,5 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#84cc16', // lime-500
     }
   ];
+
 
