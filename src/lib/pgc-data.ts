@@ -34,7 +34,6 @@ const calculateStageData = (
     return {
         stage,
         percentOfTs: `${percentOfTs}%`,
-        coinsSoldB: coinsSoldB, // Kept for calculation, but won't be displayed
         priceRange: `$${priceLow.toLocaleString()}-${priceHigh.toLocaleString()}`,
         incomingFund: formatCurrency(incomingFundValue),
         pdpReleasePercent: `${pdpReleasePercent}%`,
@@ -46,30 +45,30 @@ const calculateStageData = (
 
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
-  { stage: 2, percentOfTs: '0.02%', coinsSoldB: 0.16, priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
-  { stage: 3, percentOfTs: '0.05%', coinsSoldB: 0.4, priceRange: '$1-2', incomingFund: '$600M', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 1, percentOfTs: '0.1%', priceRange: '$1-2', incomingFund: '$1.2B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 2, percentOfTs: '0.1%', priceRange: '$1-2', incomingFund: '$1.2B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
+  { stage: 3, percentOfTs: '0.2%', priceRange: '$1-2', incomingFund: '$2.4B', pdpReleasePercent: '-', pdpFundReleased: '-', bonusRatio: '1:1', status: 'Split' },
   
   // Mid-Stages with initial bonus
-  calculateStageData(4, 0.1, 1, 2.5, 0, '1:0.7'),
-  calculateStageData(5, 0.2, 2.5, 5, 0, '1:0.6'),
-  calculateStageData(6, 0.5, 5, 10, 0, '1:0.5'),
+  calculateStageData(4, 0.5, 1, 2.5, 0, '1:0.7'),
+  calculateStageData(5, 1.0, 2.5, 5, 0, '1:0.6'),
+  calculateStageData(6, 2.5, 5, 10, 0, '1:0.5'),
   
   // Vote-to-Unlock Stages with PDP release
-  calculateStageData(7, 1, 10, 20, 7.5, '1:0.45'),
-  calculateStageData(8, 1, 20, 50, 7, '1:0.4'),
-  calculateStageData(9, 1, 50, 100, 6.5, '1:0.35'),
-  calculateStageData(10, 1, 100, 200, 6, '1:0.3'),
-  calculateStageData(11, 1, 200, 500, 5.5, '1:0.25'),
-  calculateStageData(12, 1, 500, 1000, 5, '1:0.25'),
-  calculateStageData(13, 1, 1000, 1500, 4, '1:0.25'),
-  calculateStageData(14, 1, 1500, 2000, 4, '1:0.25'),
-  calculateStageData(15, 1, 2000, 3000, 4, '1:0.25'),
-  calculateStageData(16, 1, 3000, 4000, 4, '1:0.25'),
-  calculateStageData(17, 1, 4000, 5000, 3, '1:0.25'),
-  calculateStageData(18, 1, 5000, 7500, 3, '1:0.25'),
-  calculateStageData(19, 1, 7500, 10000, 3, '1:0.25'),
-  calculateStageData(20, 1, 10000, 12500, 3, '1:0.25'),
+  calculateStageData(7, 5, 10, 20, 7.5, '1:0.45'),
+  calculateStageData(8, 5, 20, 50, 7, '1:0.4'),
+  calculateStageData(9, 5, 50, 100, 6.5, '1:0.35'),
+  calculateStageData(10, 5, 100, 200, 6, '1:0.3'),
+  calculateStageData(11, 5, 200, 500, 5.5, '1:0.25'),
+  calculateStageData(12, 5, 500, 1000, 5, '1:0.25'),
+  calculateStageData(13, 5, 1000, 1500, 4, '1:0.25'),
+  calculateStageData(14, 5, 1500, 2000, 4, '1:0.25'),
+  calculateStageData(15, 5, 2000, 3000, 4, '1:0.25'),
+  calculateStageData(16, 5, 3000, 4000, 4, '1:0.25'),
+  calculateStageData(17, 5, 4000, 5000, 3, '1:0.25'),
+  calculateStageData(18, 5, 5000, 7500, 3, '1:0.25'),
+  calculateStageData(19, 5, 7500, 10000, 3, '1:0.25'),
+  calculateStageData(20, 5, 10000, 12500, 3, '1:0.25'),
 ];
 
 
@@ -150,3 +149,4 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#84cc16', // lime-500
     }
   ];
+
