@@ -49,25 +49,25 @@ const calculateStageData = (
 
 export const pgcSaleStages: PgcSaleStage[] = [
     calculateStageData(1, 0.02, 1, 2, '1:1'),
-    calculateStageData(2, 0.02, 2, 3, '1:1'),
-    calculateStageData(3, 0.05, 3, 5, '1:1'),
-    calculateStageData(4, 0.1, 5, 10, '1:0.7'),
-    calculateStageData(5, 0.2, 10, 20, '1:0.6'),
-    calculateStageData(6, 0.5, 20, 50, '1:0.5'),
-    calculateStageData(7, 0.75, 50, 100, '1:0.45'),
-    calculateStageData(8, 1.0, 100, 250, '1:0.4'),
-    calculateStageData(9, 1.0, 250, 375, '1:0.35'),
-    calculateStageData(10, 1.0, 375, 500, '1:0.3'),
-    calculateStageData(11, 1.0, 500, 625, '1:0.25'),
-    calculateStageData(12, 1.0, 625, 750, '1:0.25'),
+    calculateStageData(2, 0.02, 1, 2, '1:1'),
+    calculateStageData(3, 0.05, 1, 2, '1:1'),
+    calculateStageData(4, 0.1, 1, 2.5, '1:0.7'),
+    calculateStageData(5, 0.2, 2.5, 5, '1:0.6'),
+    calculateStageData(6, 0.5, 5, 10, '1:0.5'),
+    calculateStageData(7, 0.75, 10, 25, '1:0.45'),
+    calculateStageData(8, 1.0, 25, 50, '1:0.4'),
+    calculateStageData(9, 1.0, 50, 100, '1:0.35'),
+    calculateStageData(10, 1.0, 100, 250, '1:0.3'),
+    calculateStageData(11, 1.0, 250, 500, '1:0.25'),
+    calculateStageData(12, 1.0, 500, 750, '1:0.25'),
     calculateStageData(13, 0.75, 750, 1000, '1:0.25'),
-    calculateStageData(14, 0.75, 1000, 2500, '1:0.25'),
-    calculateStageData(15, 0.75, 2500, 5000, '1:0.25'),
-    calculateStageData(16, 0.5, 5000, 10000, '1:0.25'),
-    calculateStageData(17, 0.5, 10000, 25000, '1:0.25'),
-    calculateStageData(18, 0.5, 25000, 50000, '1:0.25'),
-    calculateStageData(19, 0.5, 50000, 75000, '1:0.25'),
-    calculateStageData(20, 0.5, 75000, 100000, '1:0.25'),
+    calculateStageData(14, 0.75, 1000, 2000, '1:0.25'),
+    calculateStageData(15, 0.5, 2000, 5000, '1:0.25'),
+    calculateStageData(16, 0.5, 5000, 7500, '1:0.25'),
+    calculateStageData(17, 0.5, 7500, 10000, '1:0.25'),
+    calculateStageData(18, 0.5, 10000, 25000, '1:0.25'),
+    calculateStageData(19, 0.5, 25000, 50000, '1:0.25'),
+    calculateStageData(20, 0.5, 50000, 100000, '1:0.25'),
     calculateStageData(21, 0.25, 100000, 200000, '1:0.25'),
     calculateStageData(22, 0.25, 200000, 300000, '1:0.25'),
     calculateStageData(23, 0.25, 300000, 400000, '1:0.25'),
@@ -85,18 +85,12 @@ export const pgcSaleStages: PgcSaleStage[] = [
 pgcSaleStages[0].status = 'Split';
 pgcSaleStages[1].status = 'Split';
 pgcSaleStages[2].status = 'Split';
+pgcSaleStages[3].status = 'Active';
 
 // The total sale allocation is the sum of all `percentOfTs`
 const totalSaleAllocation = pgcSaleStages.reduce((sum, stage) => sum + parseFloat(stage.percentOfTs), 0);
 
 export const pgcPotAllocations: PgcPotAllocation[] = [
-    {
-      name: 'Public Demand Pot (PDP)',
-      allocation: 100 - totalSaleAllocation - 10, // The remainder after sale and fixed pots
-      coinsB: 800 * ((100 - totalSaleAllocation - 10) / 100),
-      use: 'The largest community-governed fund, unlocked in stages and allocated via public voting.',
-      color: '#3b82f6', // blue-500
-    },
     {
       name: 'Token Sale Pot',
       allocation: totalSaleAllocation,
@@ -110,7 +104,14 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       coinsB: 80,
       use: 'Combined pot for Creators, CWP, WGCP, Rewards, and other small allocations.',
       color: '#f97316', // orange-500
-    }
+    },
+    {
+      name: 'Public Demand Pot (PDP)',
+      allocation: 100 - totalSaleAllocation - 10, // The remainder after sale and fixed pots
+      coinsB: 800 * ((100 - totalSaleAllocation - 10) / 100),
+      use: 'The largest community-governed fund, unlocked in stages and allocated via public voting.',
+      color: '#3b82f6', // blue-500
+    },
 ];
 
 export const fundDistributionModel: FundDistribution[] = [
@@ -130,3 +131,4 @@ export const fundDistributionModel: FundDistribution[] = [
   { category: 'Team', percentage: 3 },
   { category: 'Interest', percentage: 3 },
 ];
+
