@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
-const PDP_TOTAL_COINS = 800_000_000_000 * (69.4295 / 100); // Approx 555.436 Billion PGC
+const PDP_TOTAL_COINS = 800_000_000_000 * (69.4295 / 100);
 
 const calculateStageData = (
     stage: number,
@@ -46,15 +46,12 @@ const calculateStageData = (
 };
 
 export const pgcSaleStages: PgcSaleStage[] = [
-  // Presale and Early Stages
-  calculateStageData(1, 0.02, 1, 2, 0.1, '1:1'),
-  calculateStageData(2, 0.02, 1, 2, 0.1, '1:1'),
-  calculateStageData(3, 0.05, 1, 2, 0.2, '1:1'),
-  calculateStageData(4, 0.1, 1, 2.5, 0.5, '1:0.7'),
-  calculateStageData(5, 0.2, 2.5, 5, 1.0, '1:0.6'),
-  calculateStageData(6, 0.5, 5, 10, 2.5, '1:0.5'),
-  
-  // Vote-to-Unlock Stages with new logic
+  calculateStageData(1, 0.1, 1, 2, 0.1, '1:1'),
+  calculateStageData(2, 0.1, 1, 2, 0.1, '1:1'),
+  calculateStageData(3, 0.2, 1, 2, 0.2, '1:1'),
+  calculateStageData(4, 0.5, 1, 2.5, 0.5, '1:0.7'),
+  calculateStageData(5, 1.0, 2.5, 5, 1.0, '1:0.6'),
+  calculateStageData(6, 2.5, 5, 10, 2.5, '1:0.5'),
   calculateStageData(7, 0.75, 10, 20, 3.0, '1:0.45'),
   calculateStageData(8, 1.0, 20, 50, 4.0, '1:0.4'),
   calculateStageData(9, 1.0, 50, 100, 4.0, '1:0.35'),
@@ -75,7 +72,6 @@ export const pgcSaleStages: PgcSaleStage[] = [
 pgcSaleStages[0].status = 'Split';
 pgcSaleStages[1].status = 'Split';
 pgcSaleStages[2].status = 'Split';
-
 
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
@@ -134,9 +130,29 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       use: 'Micro-allocation for the exclusive presale (2M PGC for sale, 2M for 1:1 bonus).',
       color: '#ec4899', // pink-500
     },
+    {
+        name: 'Presale Affiliate Reward Pot',
+        allocation: 0.0000275,
+        coinsB: 0.00022,
+        use: 'Rewards for the affiliate program during the presale.',
+        color: '#84cc16'
+    },
+    {
+        name: 'Presale Influencer Reward Pot',
+        allocation: 0.0000125,
+        coinsB: 0.0001,
+        use: 'Rewards for influencers during the presale.',
+        color: '#0ea5e9'
+    },
+    {
+        name: 'Presale Financial Quiz Pot',
+        allocation: 0.00001,
+        coinsB: 0.00008,
+        use: 'Rewards for the financial awareness quiz during the presale.',
+        color: '#f43f5e'
+    },
 ];
 
-// New fund distribution model based on user image
 export const fundDistributionModel: FundDistribution[] = [
   { category: 'International', percentage: 12 },
   { category: 'National', percentage: 10 },
@@ -154,4 +170,3 @@ export const fundDistributionModel: FundDistribution[] = [
   { category: 'Team', percentage: 3 },
   { category: 'Interest', percentage: 3 },
 ];
-
