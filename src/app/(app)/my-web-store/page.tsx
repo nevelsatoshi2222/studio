@@ -2,19 +2,14 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ShoppingCart, User, Share2, Youtube, Instagram, Star, Palette, Banknote, QrCode, Mail, Phone } from 'lucide-react';
+import { CheckCircle, ShoppingCart, User, Share2, Youtube, Instagram, Star, Palette, Banknote, QrCode, Mail, Phone, BookOpen, Utensils, Wheat, Leaf, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-
+import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const features = [
   { icon: User, title: "About Me & Contact", description: "Share your story and make it easy for people to reach you." },
@@ -25,100 +20,58 @@ const features = [
   { icon: Banknote, title: "Payment Details", description: "Display your bank account, NEFT/IMPS details, and payment QR codes." },
 ];
 
-const themePreviews = [
-  { 
-    id: 1, 
-    name: 'Sleek Product Sales', 
-    purpose: 'Products',
-    bg: 'bg-gray-900',
-    primary: 'text-white',
-    secondary: 'text-gray-400',
-    accent: 'bg-indigo-600',
-    buttonText: 'text-white'
-  },
-  { 
-    id: 2, 
-    name: 'Minimal Service Booking', 
-    purpose: 'Services',
-    bg: 'bg-white',
-    primary: 'text-gray-800',
-    secondary: 'text-gray-500',
-    accent: 'bg-gray-800',
-    buttonText: 'text-white'
-  },
-  { 
-    id: 3, 
-    name: 'Creative Portfolio', 
-    purpose: 'Portfolio',
-    bg: 'bg-gradient-to-br from-purple-600 to-indigo-600',
-    primary: 'text-white',
-    secondary: 'text-purple-200',
-    accent: 'bg-white',
-    buttonText: 'text-indigo-600'
-  },
-  { 
-    id: 4, 
-    name: 'Corporate Professional', 
-    purpose: 'Services',
-    bg: 'bg-blue-50',
-    primary: 'text-blue-900',
-    secondary: 'text-blue-700',
-    accent: 'bg-blue-700',
-    buttonText: 'text-white'
-  },
-  { 
-    id: 5, 
-    name: 'Luxury Goods', 
-    purpose: 'Products',
-    bg: 'bg-gray-800',
-    primary: 'text-yellow-400',
-    secondary: 'text-gray-300',
-    accent: 'bg-yellow-400',
-    buttonText: 'text-gray-900'
-  },
-  { 
-    id: 6, 
-    name: 'Health & Wellness', 
-    purpose: 'Booking',
-    bg: 'bg-green-50',
-    primary: 'text-green-900',
-    secondary: 'text-green-700',
-    accent: 'bg-green-600',
-    buttonText: 'text-white'
-  },
+const colorPalettes = [
+  { id: 'slate', name: 'Slate', bg: 'bg-slate-900', primary: 'text-white', secondary: 'text-slate-400', accent: 'bg-blue-600', buttonText: 'text-white' },
+  { id: 'gold', name: 'Gold', bg: 'bg-gray-800', primary: 'text-yellow-400', secondary: 'text-gray-300', accent: 'bg-yellow-400', buttonText: 'text-gray-900' },
+  { id: 'forest', name: 'Forest', bg: 'bg-green-900', primary: 'text-white', secondary: 'text-green-200', accent: 'bg-green-500', buttonText: 'text-white' },
+  { id: 'rose', name: 'Rose', bg: 'bg-rose-100', primary: 'text-rose-900', secondary: 'text-rose-700', accent: 'bg-rose-600', buttonText: 'text-white' },
+  { id: 'ocean', name: 'Ocean', bg: 'bg-white', primary: 'text-blue-800', secondary: 'text-gray-600', accent: 'bg-blue-600', buttonText: 'text-white' },
 ];
 
-const VCardPreview = ({ theme }: { theme: typeof themePreviews[0] }) => (
-    <div className={`${theme.bg} w-full h-full rounded-lg shadow-lg p-4 flex flex-col text-xs`}>
-        <div className="flex-shrink-0 text-center mb-3">
-            <Avatar className="w-16 h-16 mx-auto border-2 border-white/50">
-                <AvatarImage src={`https://picsum.photos/seed/${theme.id}/96/96`} />
-                <AvatarFallback>U</AvatarFallback>
+const businessCategories = {
+  vegetables: { name: 'Vegetables', icon: Leaf, purpose: 'Retail', mock: { title: 'Fresh Organic Produce', products: ['Tomatoes', 'Spinach', 'Carrots', 'Cucumbers'] } },
+  grains: { name: 'Grains', icon: Wheat, purpose: 'Retail', mock: { title: 'Authentic Grains & Flour', products: ['Basmati Rice', 'Whole Wheat', 'Millet', 'Lentils'] } },
+  food: { name: 'Food', icon: Utensils, purpose: 'Service', mock: { title: 'Gourmet Catering Co.', products: ['Wedding Package', 'Corporate Lunch', 'Party Platters', 'Dessert Bar'] } },
+  services: { name: 'Services', icon: Wrench, purpose: 'Booking', mock: { title: 'Expert Plumbing Solutions', products: ['Leak Repair', 'Pipe Installation', 'Drain Cleaning', 'Emergency Call-out'] } },
+  education: { name: 'Education', icon: BookOpen, purpose: 'Booking', mock: { title: 'Math & Science Tutoring', products: ['Algebra I', 'Physics Help', 'Chemistry Prep', 'Calculus'] } },
+  online: { name: 'Online Retail', icon: ShoppingCart, purpose: 'Retail', mock: { title: 'Modern Fashion Store', products: ['Summer Dress', 'Leather Jacket', 'Classic T-Shirt', 'Running Shoes'] } },
+};
+
+type BusinessCategory = keyof typeof businessCategories;
+
+const VCardPreview = ({ theme, category }: { theme: typeof colorPalettes[0], category: typeof businessCategories[BusinessCategory] }) => (
+    <div className={cn("w-full h-[550px] rounded-lg shadow-lg p-4 flex flex-col text-sm", theme.bg)}>
+        <div className="flex-shrink-0 text-center mb-4">
+            <Avatar className="w-20 h-20 mx-auto border-4 border-white/50 shadow-md">
+                <AvatarImage src={`https://picsum.photos/seed/${category.name}/128/128`} />
+                <AvatarFallback>{category.mock.title.charAt(0)}</AvatarFallback>
             </Avatar>
-            <h3 className={`font-bold mt-2 text-lg ${theme.primary}`}>Username</h3>
-            <p className={theme.secondary}>Digital Creator | Consultant</p>
+            <h3 className={cn("font-bold mt-2 text-xl", theme.primary)}>{category.mock.title}</h3>
+            <p className={cn("text-base", theme.secondary)}>{category.purpose === 'Retail' ? 'High-Quality Products' : 'Professional Services'}</p>
         </div>
         
-        <div className="flex justify-center gap-2 mb-3">
-            <div className={`${theme.accent} ${theme.buttonText} p-1.5 rounded-full`}><Phone className="h-3 w-3" /></div>
-            <div className={`${theme.accent} ${theme.buttonText} p-1.5 rounded-full`}><Mail className="h-3 w-3" /></div>
-            <div className={`${theme.accent} ${theme.buttonText} p-1.5 rounded-full`}><Instagram className="h-3 w-3" /></div>
-            <div className={`${theme.accent} ${theme.buttonText} p-1.5 rounded-full`}><Youtube className="h-3 w-3" /></div>
+        <div className="flex justify-center gap-3 mb-4">
+            <div className={cn("p-2 rounded-full", theme.accent, theme.buttonText)}><Phone className="h-4 w-4" /></div>
+            <div className={cn("p-2 rounded-full", theme.accent, theme.buttonText)}><Mail className="h-4 w-4" /></div>
+            <div className={cn("p-2 rounded-full", theme.accent, theme.buttonText)}><Instagram className="h-4 w-4" /></div>
+            <div className={cn("p-2 rounded-full", theme.accent, theme.buttonText)}><Youtube className="h-4 w-4" /></div>
         </div>
 
-        <div className="space-y-2 mb-3">
-            <button className={`w-full text-center p-1.5 rounded-md ${theme.accent} ${theme.buttonText} font-semibold`}>
-                {theme.purpose === 'Booking' ? 'Book a Consultation' : 'Contact Me'}
+        <div className="space-y-3 mb-4">
+            <button className={cn("w-full text-center py-2 rounded-md font-semibold", theme.accent, theme.buttonText)}>
+                {category.purpose === 'Booking' ? 'Book an Appointment' : 'View All Products'}
             </button>
         </div>
         
-        <div className="flex-grow overflow-y-auto space-y-3">
-            <h4 className={`font-bold ${theme.primary}`}>Products & Services</h4>
-            <div className="grid grid-cols-2 gap-2">
-                {[1, 2].map((i) => (
-                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-md p-1.5">
-                        <div className="aspect-square bg-gray-500/50 rounded-sm mb-1"></div>
-                        <p className={`font-semibold ${theme.secondary}`}>Product {i}</p>
+        <div className="flex-grow overflow-y-auto space-y-3 pr-2">
+            <h4 className={cn("font-bold text-lg", theme.primary)}>Featured {category.purpose === 'Retail' ? 'Products' : 'Services'}</h4>
+            <div className="grid grid-cols-2 gap-3">
+                {category.mock.products.map((item, i) => (
+                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                        <div className="aspect-square bg-gray-500/50 rounded-md mb-2">
+                          <Image src={`https://picsum.photos/seed/${item}/150/150`} alt={item} width={150} height={150} className="w-full h-full object-cover rounded-md" />
+                        </div>
+                        <p className={cn("font-semibold truncate", theme.secondary)}>{item}</p>
                     </div>
                 ))}
             </div>
@@ -128,8 +81,11 @@ const VCardPreview = ({ theme }: { theme: typeof themePreviews[0] }) => (
 
 
 export default function MyWebStorePage() {
+  const [activeCategory, setActiveCategory] = useState<BusinessCategory>('online');
+  const [activePalette, setActivePalette] = useState<typeof colorPalettes[0]>(colorPalettes[0]);
+
   return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-8 max-w-7xl mx-auto">
       <Card className="text-center bg-gradient-to-br from-primary/10 via-background to-background">
         <CardHeader>
           <Star className="mx-auto h-12 w-12 text-primary" />
@@ -139,78 +95,77 @@ export default function MyWebStorePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-             <p className="text-2xl font-bold text-primary">Just $10 USD</p>
+             <p className="text-2xl font-bold text-primary">Just $25 USD</p>
              <p className="text-muted-foreground">(Payable in USDT)</p>
         </CardContent>
         <CardFooter className="justify-center">
             <Button asChild size="lg">
-                <Link href="/presale">Get Your Web Store Now</Link>
+                <Link href="/register">Get Your Web Store Now</Link>
             </Button>
         </CardFooter>
       </Card>
 
       <Card>
         <CardHeader>
-            <CardTitle>Powerful Features Included</CardTitle>
-            <CardDescription>Everything you need to build your online presence.</CardDescription>
+            <CardTitle>Interactive Theme Previewer</CardTitle>
+            <CardDescription>See how your "My Web Store" page could look. Select a business type and color palette.</CardDescription>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                     <div key={index} className="flex items-start gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
-                            <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h4 className="font-semibold">{feature.title}</h4>
-                            <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        </div>
+        <CardContent className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-3">1. Select a Business Type</h3>
+                   <Tabs defaultValue={activeCategory} onValueChange={(value) => setActiveCategory(value as BusinessCategory)} className="w-full">
+                      <TabsList className="grid w-full grid-cols-3 h-auto flex-wrap">
+                        {Object.entries(businessCategories).map(([key, { name, icon: Icon }]) => (
+                            <TabsTrigger key={key} value={key} className="flex flex-col gap-1.5 h-16">
+                                <Icon className="h-5 w-5" />
+                                <span className="text-xs">{name}</span>
+                            </TabsTrigger>
+                        ))}
+                      </TabsList>
+                   </Tabs>
+                </div>
+                <div>
+                    <h3 className="font-semibold mb-3">2. Choose a Color Palette</h3>
+                    <div className="flex flex-wrap gap-3">
+                        {colorPalettes.map(palette => (
+                            <button key={palette.id} onClick={() => setActivePalette(palette)} className={cn("h-10 w-10 rounded-full border-2 transition-transform hover:scale-110", activePalette.id === palette.id ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-muted')}>
+                                <div className={cn("h-full w-full rounded-full", palette.bg)} />
+                            </button>
+                        ))}
                     </div>
-                );
-            })}
-        </CardContent>
-      </Card>
-
-       <Card>
-        <CardHeader>
-            <CardTitle>Choose Your Style</CardTitle>
-            <CardDescription>Select from over 30 themes to find the perfect look for your brand.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <Carousel
-                opts={{
-                    align: "start",
-                    loop: true,
-                }}
-                className="w-full max-w-4xl mx-auto"
-            >
-                <CarouselContent>
-                    {themePreviews.map((theme) => (
-                        <CarouselItem key={theme.id} className="md:basis-1/2 lg:basis-1/3">
-                            <div className="p-1">
-                                <Card className="overflow-hidden">
-                                    <CardContent className="p-0 aspect-[9/16]">
-                                        <VCardPreview theme={theme} />
-                                    </CardContent>
-                                    <CardFooter className="p-2 bg-muted/50">
-                                        <div className="text-center w-full">
-                                            <p className="font-semibold text-sm">{theme.name}</p>
-                                            <Badge variant="outline" className="mt-1">{theme.purpose}</Badge>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex" />
-                <CarouselNext className="hidden sm:flex" />
-            </Carousel>
+                </div>
+                 <div className="pt-4">
+                    <h3 className="font-semibold mb-3">Powerful Features Included</h3>
+                    <div className="space-y-4">
+                        {features.slice(0, 3).map((feature, index) => {
+                            const Icon = feature.icon;
+                            return (
+                                <div key={index} className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary mt-1 flex-shrink-0">
+                                        <Icon className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-sm">{feature.title}</h4>
+                                        <p className="text-xs text-muted-foreground">{feature.description}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+            <div className="lg:col-span-2">
+                <Card className="overflow-hidden">
+                    <CardContent className="p-2 bg-muted/20">
+                        <div className="max-w-sm mx-auto">
+                           <VCardPreview theme={activePalette} category={businessCategories[activeCategory]} />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-  
