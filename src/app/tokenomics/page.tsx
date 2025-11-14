@@ -7,52 +7,24 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   tokenStages,
-  lockDurations,
-  stakedPositions,
   incomingFundAllocations,
-  geographicAllocations,
-  publicDemandAllocations,
-  worldInitiativeAllocations,
 } from '@/lib/data';
 import {
   Lock,
-  Unlock,
   Zap,
   Coins,
   Globe,
-  Heart,
-  Users as UsersIcon,
-  Landmark,
-  CircleDollarSign,
-  Share2,
-  Leaf,
-  Brain,
-  MessageSquare,
-  Shield,
-  Trophy,
+  Vote,
   Briefcase,
   Building2,
-  Palette,
-  Handshake,
-  Award,
-  Scale,
-  Settings,
+  Trophy,
   UserCog,
-  Vote,
   Network,
-  Key,
-  UserCheck,
-  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
@@ -217,46 +189,7 @@ export default function TokenomicsPage() {
                 <FundAllocationCard allocations={incomingFundAllocations} />
             </CardContent>
         </Card>
-
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Breakdown: Geographic Allocation (40%)</CardTitle>
-                    <CardDescription>
-                    How the 40% of funds dedicated to geographic development are split.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <FundAllocationCard allocations={geographicAllocations} />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Breakdown: Public Demand (40%)</CardTitle>
-                    <CardDescription>
-                    This entire fund is controlled by community voting.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <FundAllocationCard allocations={publicDemandAllocations} />
-                </CardContent>
-            </Card>
-        </div>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle>Breakdown: World Initiatives (20%)</CardTitle>
-                <CardDescription>
-                    How the 20% of funds for fixed-purpose global initiatives are allocated.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <FundAllocationCard allocations={worldInitiativeAllocations} />
-            </CardContent>
-        </Card>
-
-
       </div>
   );
 }
+
