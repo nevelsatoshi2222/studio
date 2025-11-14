@@ -58,14 +58,14 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(10, 1.0, 100, 200, 4.0, '1:0.3'),
   calculateStageData(11, 1.0, 200, 500, 4.0, '1:0.25'),
   calculateStageData(12, 1.0, 500, 1000, 4.0, '1:0.25'),
-  calculateStageData(13, 1.0, 1000, 1500, 4.0, '1:0.25'),
-  calculateStageData(14, 1.0, 1500, 2000, 4.0, '1:0.25'),
-  calculateStageData(15, 1.0, 2000, 3000, 4.0, '1:0.25'),
-  calculateStageData(16, 1.0, 3000, 4000, 4.0, '1:0.25'),
-  calculateStageData(17, 1.0, 4000, 5000, 4.0, '1:0.25'),
-  calculateStageData(18, 1.0, 5000, 7500, 4.0, '1:0.25'),
-  calculateStageData(19, 1.0, 7500, 10000, 4.0, '1:0.25'),
-  calculateStageData(20, 1.0, 10000, 12500, 4.0, '1:0.25'),
+  calculateStageData(13, 1.0, 1000, 2500, 3.0, '1:0.25'),
+  calculateStageData(14, 0.75, 2500, 5000, 3.0, '1:0.25'),
+  calculateStageData(15, 0.75, 5000, 10000, 3.0, '1:0.25'),
+  calculateStageData(16, 0.5, 10000, 25000, 2.0, '1:0.25'),
+  calculateStageData(17, 0.5, 25000, 50000, 2.0, '1:0.25'),
+  calculateStageData(18, 0.5, 50000, 75000, 2.0, '1:0.25'),
+  calculateStageData(19, 0.5, 75000, 100000, 2.0, '1:0.25'),
+  calculateStageData(20, 0.5, 100000, 125000, 2.0, '1:0.25'),
 ];
 
 // Set status for initial stages
@@ -76,12 +76,12 @@ pgcSaleStages[2].status = 'Split';
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: 51.2795,
-      coinsB: 410.236,
+      allocation: 69.4295,
+      coinsB: 555.436,
       use: 'The largest community-governed fund, unlocked in stages and allocated via public voting.',
       color: '#3b82f6', // blue-500
     },
-    {
+     {
       name: 'Token Sale Pot',
       allocation: 18.15,
       coinsB: 145.2,
@@ -90,23 +90,23 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Creator Pot (CP)',
-      allocation: 11.00,
-      coinsB: 88,
-      use: '10% for Public Use, 1% for Creator Self-Use, governed by the community.',
-      color: '#ef4444', // red-500
+      allocation: 0, // This is effectively distributed into other pots now as per the model
+      coinsB: 0,
+      use: 'Legacy Pot. Funds for creator and public use are now part of the World Initiatives fund.',
+      color: '#ef4444', // red-500 - Kept for historical context if needed, but 0 allocation.
     },
     {
       name: 'Country Wise Pot (CWP)',
-      allocation: 10.00,
-      coinsB: 80,
-      use: 'Funds allocated for development projects decided by country-specific public voting.',
+      allocation: 0, // Now part of the broader allocation model.
+      coinsB: 0,
+      use: 'Legacy Pot. Country-specific funds are now managed via the main allocation model.',
       color: '#f97316', // orange-500
     },
     {
       name: "World's Good Cause Pot (WGCP)",
-      allocation: 5.00,
-      coinsB: 40,
-      use: 'A reserve pot for future global initiatives, also community-governed.',
+      allocation: 7.86, // Simplified allocation
+      coinsB: 62.88,
+      use: 'A reserve pot for global initiatives, community-governed. Includes Peace, Environment, and Strategic Resources.',
       color: '#a855f7', // purple-500
     },
     {
@@ -129,27 +129,6 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       coinsB: 0.004, 
       use: 'Micro-allocation for the exclusive presale (2M PGC for sale, 2M for 1:1 bonus).',
       color: '#ec4899', // pink-500
-    },
-    {
-        name: 'Presale Affiliate Reward Pot',
-        allocation: 0.0000275,
-        coinsB: 0.00022,
-        use: 'Rewards for the affiliate program during the presale.',
-        color: '#84cc16'
-    },
-    {
-        name: 'Presale Influencer Reward Pot',
-        allocation: 0.0000125,
-        coinsB: 0.0001,
-        use: 'Rewards for influencers during the presale.',
-        color: '#0ea5e9'
-    },
-    {
-        name: 'Presale Financial Quiz Pot',
-        allocation: 0.00001,
-        coinsB: 0.00008,
-        use: 'Rewards for the financial awareness quiz during the presale.',
-        color: '#f43f5e'
     },
 ];
 
