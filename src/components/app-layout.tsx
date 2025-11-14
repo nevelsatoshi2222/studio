@@ -58,6 +58,7 @@ import {
   RefreshCcw,
   Award, // ADD THIS IMPORT
   Crown, // ADD THIS IMPORT
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -104,6 +105,11 @@ const programNavItems = [
   { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
   { href: '/franchisee', icon: Building2, label: 'Franchisee Program' },
   { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
+];
+
+const eCommerceSubItems = [
+  { href: '/ecommerce', icon: ShoppingCart, label: 'Products Marketplace' },
+  { href: '/my-web-store', icon: Star, label: 'My Web Store' },
 ];
 
 
@@ -268,16 +274,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
 
         <SidebarMenu>
-          {programNavItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton asChild>
-                <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
+            {/* Standard Program Items */}
+            {programNavItems.filter(item => item.href !== '/ecommerce').map((item) => (
+                <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton asChild>
+                        <Link href={item.href}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            ))}
+
+            {/* E-commerce Collapsible Menu */}
+            <SidebarMenuItem>
+                <Collapsible>
+                    <CollapsibleTrigger asChild className="w-full">
+                        <SidebarMenuButton>
+                            <ShoppingCart />
+                            <span>E-commerce</span>
+                            <ChevronDown className="h-4 w-4 ml-auto" />
+                        </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            {eCommerceSubItems.map((item) => (
+                                <SidebarMenuSubItem key={item.label}>
+                                    <SidebarMenuSubButton asChild>
+                                        <Link href={item.href}>
+                                            <item.icon className="h-3.5 w-3.5 mr-2" />
+                                            {item.label}
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                            ))}
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
             </SidebarMenuItem>
-          ))}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

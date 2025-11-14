@@ -18,7 +18,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { EcommProduct } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
@@ -325,6 +325,20 @@ export default function EcommercePage() {
             <aside className="md:col-span-1 space-y-8">
                 <Card>
                     <CardHeader>
+                        <CardTitle>My Web Store</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">Create your own digital v-card and web store to showcase your products and services.</p>
+                        <Button asChild className="w-full">
+                            <Link href="/my-web-store">
+                                <Star className="mr-2 h-4 w-4" />
+                                Create Your Web Store
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
                         <CardTitle>Categories</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -403,7 +417,7 @@ export default function EcommercePage() {
                     <CardContent>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredProducts.length > 0 ? (
-                                filteredProducts.map((product) => {
+                                featuredProducts.map((product) => {
                                     const productImage = placeholderImages.find(p => p.id === product.imageId);
                                     if (!productImage) return null;
                                     
