@@ -1,5 +1,5 @@
 
-import { PgcSaleStage, PgcPotAllocation } from './types';
+import { PgcSaleStage, PgcPotAllocation, FundDistribution } from './types';
 
 const formatCurrency = (value: number) => {
     if (value >= 1e12) {
@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
-const PDP_TOTAL_COINS = 800_000_000_000 * 0.713995; // Approx 571.196 Billion PGC
+const PDP_TOTAL_COINS = 800_000_000_000 * (69.4295 / 100); // Approx 555.436 Billion PGC
 
 const calculateStageData = (
     stage: number,
@@ -24,19 +24,21 @@ const calculateStageData = (
     pdpReleasePercent: number,
     bonusRatio: string
 ): PgcSaleStage => {
-    const coinsSoldB = 800 * (percentOfTs / 100);
+    const coinsForSale = 800_000_000_000 * (percentOfTs / 100);
     const avgPrice = (priceLow + priceHigh) / 2;
-    const incomingFundValue = coinsSoldB * 1e9 * avgPrice;
+    const incomingFundValue = coinsForSale * avgPrice;
     
     const pdpCoinsReleased = PDP_TOTAL_COINS * (pdpReleasePercent / 100);
-    const pdpFundValue = pdpCoinsReleased * priceHigh; // Value at the end price of the stage
+    const pdpFundValue = pdpCoinsReleased * priceHigh;
 
     return {
         stage,
         percentOfTs: `${percentOfTs}%`,
         priceRange: `$${priceLow.toLocaleString()}-${priceHigh.toLocaleString()}`,
+        incomingFundValue,
         incomingFund: formatCurrency(incomingFundValue),
         pdpReleasePercent: `${pdpReleasePercent}%`,
+        pdpFundValue,
         pdpFundReleased: formatCurrency(pdpFundValue),
         bonusRatio,
         status: 'Locked',
@@ -45,11 +47,9 @@ const calculateStageData = (
 
 export const pgcSaleStages: PgcSaleStage[] = [
   // Presale and Early Stages
-  { stage: 1, percentOfTs: '0.02%', priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '0.1%', pdpFundReleased: formatCurrency(PDP_TOTAL_COINS * (0.1/100) * 2), bonusRatio: '1:1', status: 'Split' },
-  { stage: 2, percentOfTs: '0.02%', priceRange: '$1-2', incomingFund: '$240M', pdpReleasePercent: '0.1%', pdpFundReleased: formatCurrency(PDP_TOTAL_COINS * (0.1/100) * 2), bonusRatio: '1:1', status: 'Split' },
-  { stage: 3, percentOfTs: '0.05%', priceRange: '$1-2', incomingFund: '$600M', pdpReleasePercent: '0.2%', pdpFundReleased: formatCurrency(PDP_TOTAL_COINS * (0.2/100) * 2), bonusRatio: '1:1', status: 'Split' },
-  
-  // Mid-Stages with initial bonus
+  calculateStageData(1, 0.02, 1, 2, 0.1, '1:1'),
+  calculateStageData(2, 0.02, 1, 2, 0.1, '1:1'),
+  calculateStageData(3, 0.05, 1, 2, 0.2, '1:1'),
   calculateStageData(4, 0.1, 1, 2.5, 0.5, '1:0.7'),
   calculateStageData(5, 0.2, 2.5, 5, 1.0, '1:0.6'),
   calculateStageData(6, 0.5, 5, 10, 2.5, '1:0.5'),
@@ -71,83 +71,87 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(20, 1.0, 10000, 12500, 4.0, '1:0.25'),
 ];
 
+// Set status for initial stages
+pgcSaleStages[0].status = 'Split';
+pgcSaleStages[1].status = 'Split';
+pgcSaleStages[2].status = 'Split';
+
 
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: 71.3995,
-      coinsB: 571.196,
-      use: 'Decided by Public Governance voting. Also funds public good initiatives upon stage completions.',
+      allocation: 51.2795,
+      coinsB: 410.236,
+      use: 'The largest community-governed fund, unlocked in stages and allocated via public voting.',
       color: '#3b82f6', // blue-500
+    },
+    {
+      name: 'Token Sale Pot',
+      allocation: 18.15,
+      coinsB: 145.2,
+      use: 'Holds all PGC designated for the 20-stage public sale.',
+      color: '#10b981', // green-500
     },
     {
       name: 'Creator Pot (CP)',
       allocation: 11.00,
       coinsB: 88,
-      valueT: '8.8',
-      use: '10% for Public Use, 1% for Creator Self-Use.',
+      use: '10% for Public Use, 1% for Creator Self-Use, governed by the community.',
       color: '#ef4444', // red-500
     },
     {
       name: 'Country Wise Pot (CWP)',
       allocation: 10.00,
       coinsB: 80,
-      valueT: '8.0',
-      use: 'Decided by country-specific public voting.',
-      color: '#22c55e', // green-500
+      use: 'Funds allocated for development projects decided by country-specific public voting.',
+      color: '#f97316', // orange-500
     },
     {
       name: "World's Good Cause Pot (WGCP)",
       allocation: 5.00,
       coinsB: 40,
-      valueT: '4.0',
-      use: 'A reserve pot for future global initiatives, governed by the community.',
-      color: '#f97316', // orange-500
+      use: 'A reserve pot for future global initiatives, also community-governed.',
+      color: '#a855f7', // purple-500
     },
     {
       name: 'Reward Pot (RP)',
-      allocation: 2.58,
-      coinsB: 20.64,
-      valueT: '2.06',
-      use: 'A dedicated reserve for all bonus distributions during the 9-stage sale, including compounding split rewards.',
-      color: '#a855f7', // purple-500
+      allocation: 4.55,
+      coinsB: 36.4,
+      use: 'A dedicated reserve for all bonus distributions during the 20-stage sale.',
+      color: '#fde047', // yellow-400
     },
-     {
-      name: 'India Anti-Corruption Reward Pot',
+    {
+      name: 'India Anti-Corruption Pot',
       allocation: 0.01,
       coinsB: 0.08,
-      valueT: '0.008',
-      use: 'A donation-based fund for rewarding anti-corruption efforts in India. The public and organizations can contribute in USDT and other top 10 cryptocurrencies.',
+      use: 'A donation-based fund for rewarding anti-corruption efforts in India.',
       color: '#64748b', // slate-500
     },
     {
       name: 'Presale Fund',
       allocation: 0.0005,
-      coinsB: 0.004, // 4 Million PGC (2M for sale, 2M for bonus)
-      use: 'A micro-allocation for the exclusive presale (0.00025% for sale, 0.00025% for 1:1 bonus). Proceeds go to the Creator.',
-      color: '#fde047', // yellow-300
-    },
-    {
-      name: 'Presale Affiliate Reward Pot',
-      allocation: 0.0000275,
-      coinsB: 0.00022, // 220,000 PGC
-      use: '11% of the 2M presale coins, reserved for the presale affiliate reward program.',
+      coinsB: 0.004, 
+      use: 'Micro-allocation for the exclusive presale (2M PGC for sale, 2M for 1:1 bonus).',
       color: '#ec4899', // pink-500
     },
-    {
-      name: 'Presale Influencer Reward Pot',
-      allocation: 0.0000125,
-      coinsB: 0.0001, // 100,000 PGC
-      use: '5% of the 2M presale coins, reserved for the presale influencer reward program.',
-      color: '#d946ef', // fuchsia-500
-    },
-    {
-      name: 'Presale Financial Quiz Pot',
-      allocation: 0.00001,
-      coinsB: 0.00008, // 80,000 PGC
-      use: '4% of the 2M presale coins, reserved for the presale financial quiz rewards.',
-      color: '#84cc16', // lime-500
-    }
-  ];
+];
 
+// New fund distribution model based on user image
+export const fundDistributionModel: FundDistribution[] = [
+  { category: 'International', percentage: 12 },
+  { category: 'National', percentage: 10 },
+  { category: 'State', percentage: 10 },
+  { category: 'District', percentage: 4 },
+  { category: 'Taluka', percentage: 4 },
+  { category: 'Kasaba/Block', percentage: 4 },
+  { category: 'Village', percentage: 6 },
+  { category: 'Street', percentage: 15 },
+  { category: 'Family', percentage: 20 },
+  { category: 'Entertainment', percentage: 3 },
+  { category: 'Community', percentage: 3 },
+  { category: 'Health', percentage: 3 },
+  { category: 'Environment', percentage: 3 },
+  { category: 'Team', percentage: 3 },
+  { category: 'Interest', percentage: 3 },
+];
 

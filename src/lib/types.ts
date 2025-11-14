@@ -1,4 +1,5 @@
 
+
 import { LucideIcon } from 'lucide-react';
 
 export type Transaction = {
@@ -218,12 +219,13 @@ export type FundAllocation = {
 export type PgcSaleStage = {
   stage: number;
   percentOfTs: string;
-  coinsSoldB: number;
   priceRange: string;
-  bonusRatio: string;
+  incomingFundValue: number;
   incomingFund: string;
   pdpReleasePercent: string;
+  pdpFundValue: number;
   pdpFundReleased: string;
+  bonusRatio: string;
   status: string;
 };
 
@@ -251,4 +253,9 @@ export type SubmittedContent = {
   submittedAt: Date;
   status: 'Pending' | 'Approved' | 'Rejected';
   views?: number;
+};
+
+export type FundDistribution = {
+    category: string;
+    percentage: number;
 };

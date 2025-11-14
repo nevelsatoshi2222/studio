@@ -20,6 +20,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Lock, Vote } from 'lucide-react';
+import { FundDistributionBreakdown } from './FundDistributionBreakdown';
 
 export function PgcDisplay() {
     
@@ -98,7 +99,7 @@ export function PgcDisplay() {
         <CardHeader>
             <CardTitle>Total Supply Allocation (800 Billion PGC)</CardTitle>
             <CardDescription>
-                98.88% of the total supply is reserved in isolated smart contract pots, governed by the community and predefined rules.
+                The total PGC supply is distributed across several community-governed smart contract pots.
             </CardDescription>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-8 items-start">
@@ -131,13 +132,16 @@ export function PgcDisplay() {
                         <div>
                             <h4 className="font-semibold">{pot.name} ({pot.allocation}%)</h4>
                             <p className="text-sm text-muted-foreground">{pot.use}</p>
-                            {pot.valueT && <p className="text-xs font-mono text-primary/80">{pot.coinsB.toLocaleString()}B PGC = ~${pot.valueT}T at target price</p>}
+                            {pot.coinsB && <p className="text-xs font-mono text-primary/80">{pot.coinsB.toLocaleString()}B PGC</p>}
                         </div>
                     </div>
                 ))}
             </div>
         </CardContent>
       </Card>
+      
+      <FundDistributionBreakdown />
+
     </div>
   );
 }
