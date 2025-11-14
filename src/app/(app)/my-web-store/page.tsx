@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { placeholderImages } from '@/lib/placeholder-images.json';
 
 const features = [
   { icon: User, title: "About Me & Contact", description: "Share your story and make it easy for people to reach you." },
@@ -29,21 +30,24 @@ const colorPalettes = [
 ];
 
 const businessCategories = {
-  vegetables: { name: 'Vegetables', icon: Leaf, purpose: 'Retail', mock: { title: 'Fresh Organic Produce', products: ['Tomatoes', 'Spinach', 'Carrots', 'Cucumbers'] } },
-  grains: { name: 'Grains', icon: Wheat, purpose: 'Retail', mock: { title: 'Authentic Grains & Flour', products: ['Basmati Rice', 'Whole Wheat', 'Millet', 'Lentils'] } },
-  food: { name: 'Food', icon: Utensils, purpose: 'Service', mock: { title: 'Gourmet Catering Co.', products: ['Wedding Package', 'Corporate Lunch', 'Party Platters', 'Dessert Bar'] } },
-  services: { name: 'Services', icon: Wrench, purpose: 'Booking', mock: { title: 'Expert Plumbing Solutions', products: ['Leak Repair', 'Pipe Installation', 'Drain Cleaning', 'Emergency Call-out'] } },
-  education: { name: 'Education', icon: BookOpen, purpose: 'Booking', mock: { title: 'Math & Science Tutoring', products: ['Algebra I', 'Physics Help', 'Chemistry Prep', 'Calculus'] } },
-  online: { name: 'Online Retail', icon: ShoppingCart, purpose: 'Retail', mock: { title: 'Modern Fashion Store', products: ['Summer Dress', 'Leather Jacket', 'Classic T-Shirt', 'Running Shoes'] } },
+  vegetables: { name: 'Vegetables', icon: Leaf, purpose: 'Retail', mock: { title: 'Fresh Organic Produce', avatarId: 'avatar-veg', products: ['prod-tomatoes', 'prod-spinach', 'prod-carrots', 'prod-cucumbers'] } },
+  grains: { name: 'Grains', icon: Wheat, purpose: 'Retail', mock: { title: 'Authentic Grains & Flour', avatarId: 'avatar-grains', products: ['prod-rice', 'prod-wheat', 'prod-millet', 'prod-lentils'] } },
+  food: { name: 'Food', icon: Utensils, purpose: 'Service', mock: { title: 'Gourmet Catering Co.', avatarId: 'avatar-food', products: ['prod-wedding-pkg', 'prod-corp-lunch', 'prod-party-platter', 'prod-dessert-bar'] } },
+  services: { name: 'Services', icon: Wrench, purpose: 'Booking', mock: { title: 'Expert Plumbing Solutions', avatarId: 'avatar-services', products: ['prod-leak-repair', 'prod-pipe-install', 'prod-drain-clean', 'prod-emergency-callout'] } },
+  education: { name: 'Education', icon: BookOpen, purpose: 'Booking', mock: { title: 'Math & Science Tutoring', avatarId: 'avatar-education', products: ['prod-algebra', 'prod-physics', 'prod-chemistry', 'prod-calculus'] } },
+  online: { name: 'Online Retail', icon: ShoppingCart, purpose: 'Retail', mock: { title: 'Modern Fashion Store', avatarId: 'avatar-online', products: ['prod-summer-dress', 'prod-leather-jacket', 'prod-tshirt', 'prod-running-shoes'] } },
 };
 
 type BusinessCategory = keyof typeof businessCategories;
 
-const VCardPreview = ({ theme, category }: { theme: typeof colorPalettes[0], category: typeof businessCategories[BusinessCategory] }) => (
+const VCardPreview = ({ theme, category }: { theme: typeof colorPalettes[0], category: typeof businessCategories[BusinessCategory] }) => {
+    const avatar = placeholderImages.find(p => p.id === category.mock.avatarId);
+
+    return (
     <div className={cn("w-full h-[550px] rounded-lg shadow-lg p-4 flex flex-col text-sm", theme.bg)}>
         <div className="flex-shrink-0 text-center mb-4">
             <Avatar className="w-20 h-20 mx-auto border-4 border-white/50 shadow-md">
-                <AvatarImage src={`https://picsum.photos/seed/${category.name}/128/128`} />
+                {avatar && <AvatarImage src={avatar.imageUrl} data-ai-hint={avatar.imageHint} />}
                 <AvatarFallback>{category.mock.title.charAt(0)}</AvatarFallback>
             </Avatar>
             <h3 className={cn("font-bold mt-2 text-xl", theme.primary)}>{category.mock.title}</h3>
@@ -66,18 +70,23 @@ const VCardPreview = ({ theme, category }: { theme: typeof colorPalettes[0], cat
         <div className="flex-grow overflow-y-auto space-y-3 pr-2">
             <h4 className={cn("font-bold text-lg", theme.primary)}>Featured {category.purpose === 'Retail' ? 'Products' : 'Services'}</h4>
             <div className="grid grid-cols-2 gap-3">
-                {category.mock.products.map((item, i) => (
-                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
-                        <div className="aspect-square bg-gray-500/50 rounded-md mb-2">
-                          <Image src={`https://picsum.photos/seed/${item}/150/150`} alt={item} width={150} height={150} className="w-full h-full object-cover rounded-md" />
+                {category.mock.products.map((productId, i) => {
+                    const product = placeholderImages.find(p => p.id === productId);
+                    if (!product) return null;
+                    return (
+                        <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                            <div className="aspect-square bg-gray-500/50 rounded-md mb-2">
+                                <Image src={product.imageUrl} alt={product.description} width={150} height={150} className="w-full h-full object-cover rounded-md" data-ai-hint={product.imageHint} />
+                            </div>
+                            <p className={cn("font-semibold truncate", theme.secondary)}>{product.description}</p>
                         </div>
-                        <p className={cn("font-semibold truncate", theme.secondary)}>{item}</p>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     </div>
-);
+    );
+};
 
 
 export default function MyWebStorePage() {
