@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
 };
 
-const PDP_TOTAL_COINS = 800_000_000_000 * (69.4295 / 100);
+const PDP_TOTAL_COINS = 800_000_000_000 * (51.2795 / 100);
 
 const calculateStageData = (
     stage: number,
@@ -58,14 +58,24 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(10, 1.0, 100, 200, 4.0, '1:0.3'),
   calculateStageData(11, 1.0, 200, 500, 4.0, '1:0.25'),
   calculateStageData(12, 1.0, 500, 1000, 4.0, '1:0.25'),
-  calculateStageData(13, 1.0, 1000, 2500, 3.0, '1:0.25'),
+  calculateStageData(13, 0.75, 1000, 2500, 3.0, '1:0.25'),
   calculateStageData(14, 0.75, 2500, 5000, 3.0, '1:0.25'),
   calculateStageData(15, 0.75, 5000, 10000, 3.0, '1:0.25'),
   calculateStageData(16, 0.5, 10000, 25000, 2.0, '1:0.25'),
   calculateStageData(17, 0.5, 25000, 50000, 2.0, '1:0.25'),
   calculateStageData(18, 0.5, 50000, 75000, 2.0, '1:0.25'),
   calculateStageData(19, 0.5, 75000, 100000, 2.0, '1:0.25'),
-  calculateStageData(20, 0.5, 100000, 125000, 2.0, '1:0.25'),
+  calculateStageData(20, 0.5, 100000, 100000, 2.0, '1:0.25'),
+  calculateStageData(21, 0.25, 100000, 190000, 1.0, '1:0.25'),
+  calculateStageData(22, 0.25, 190000, 280000, 1.0, '1:0.25'),
+  calculateStageData(23, 0.25, 280000, 370000, 1.0, '1:0.25'),
+  calculateStageData(24, 0.25, 370000, 460000, 1.0, '1:0.25'),
+  calculateStageData(25, 0.25, 460000, 550000, 1.0, '1:0.25'),
+  calculateStageData(26, 0.25, 550000, 640000, 1.0, '1:0.25'),
+  calculateStageData(27, 0.25, 640000, 730000, 1.0, '1:0.25'),
+  calculateStageData(28, 0.25, 730000, 820000, 1.0, '1:0.25'),
+  calculateStageData(29, 0.25, 820000, 910000, 1.0, '1:0.25'),
+  calculateStageData(30, 0.25, 910000, 1000000, 1.0, '1:0.25'),
 ];
 
 // Set status for initial stages
@@ -76,12 +86,12 @@ pgcSaleStages[2].status = 'Split';
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
       name: 'Public Demand Pot (PDP)',
-      allocation: 69.4295,
-      coinsB: 555.436,
+      allocation: 51.2795,
+      coinsB: 410.236,
       use: 'The largest community-governed fund, unlocked in stages and allocated via public voting.',
       color: '#3b82f6', // blue-500
     },
-     {
+    {
       name: 'Token Sale Pot',
       allocation: 18.15,
       coinsB: 145.2,
@@ -90,22 +100,22 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
     },
     {
       name: 'Creator Pot (CP)',
-      allocation: 0, // This is effectively distributed into other pots now as per the model
-      coinsB: 0,
-      use: 'Legacy Pot. Funds for creator and public use are now part of the World Initiatives fund.',
-      color: '#ef4444', // red-500 - Kept for historical context if needed, but 0 allocation.
+      allocation: 11.0,
+      coinsB: 88.0,
+      use: 'Funds reserved for the original creators and ongoing development of the platform.',
+      color: '#ef4444', // red-500
     },
     {
       name: 'Country Wise Pot (CWP)',
-      allocation: 0, // Now part of the broader allocation model.
-      coinsB: 0,
-      use: 'Legacy Pot. Country-specific funds are now managed via the main allocation model.',
+      allocation: 10.0,
+      coinsB: 80.0,
+      use: 'Funds distributed to countries based on their user base and economic need.',
       color: '#f97316', // orange-500
     },
     {
       name: "World's Good Cause Pot (WGCP)",
-      allocation: 7.86, // Simplified allocation
-      coinsB: 62.88,
+      allocation: 5.0,
+      coinsB: 40.0,
       use: 'A reserve pot for global initiatives, community-governed. Includes Peace, Environment, and Strategic Resources.',
       color: '#a855f7', // purple-500
     },
@@ -149,3 +159,4 @@ export const fundDistributionModel: FundDistribution[] = [
   { category: 'Team', percentage: 3 },
   { category: 'Interest', percentage: 3 },
 ];
+
