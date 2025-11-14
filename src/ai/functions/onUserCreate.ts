@@ -96,34 +96,39 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             finalRole = 'Super Admin';
         }
         
+        const investmentAmount = customClaims?.investmentTier || 25;
+        const pgcCredited = investmentAmount * 2;
+
         const userDocumentData = {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
             email: email,
-            phone: user.phoneNumber || null,
-            street: '',
-            village: '',
-            block: '',
-            taluka: '',
-            district: '',
-            area: '',
-            state: '',
+            phone: customClaims?.phone || user.phoneNumber || null,
+            street: customClaims?.street || '',
+            village: customClaims?.village || '',
+            block: customClaims?.block || '',
+            taluka: customClaims?.taluka || '',
+            district: customClaims?.district || '',
+            state: customClaims?.state || '',
             country: customClaims?.country || '',
-            pgcBalance: 0,
+            pgcBalance: pgcCredited,
             referredBy: referrerUid || 'ADMIN_ROOT_USER', 
             referralCode: referralCode,
             walletPublicKey: null,
             isVerified: false,
-            status: 'Active', // Set status to Active by default for ALL users.
+            status: 'Active',
             role: finalRole,
+            primaryRole: customClaims?.primaryRole || 'User',
+            businessType: customClaims?.businessType || 'N/A',
+            investmentTier: investmentAmount,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
-            directReferrals: [], // Initialize with an empty array for the new user
-            totalTeamSize: 0, // Initialize team size
+            directReferrals: [],
+            totalTeamSize: 0,
             paidTeamSize: 0,
             freeRank: 'None',
             paidRank: 'None',
-            isPaid: customClaims?.isPaid || false // Track if user made a purchase on registration
+            isPaid: customClaims?.isPaid || false
         };
 
         transaction.set(userDocRef, userDocumentData);
@@ -133,13 +138,17 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         // After successfully creating the user, check if a purchase was made during registration.
         // If so, create the presale document which will trigger commission distribution.
         const isPaid = customClaims?.isPaid as boolean | undefined;
-        if (isPaid) {
-            functions.logger.log(`User ${uid} registered with a package. Creating presale document.`);
+        const investmentAmount = customClaims?.investmentTier as number | undefined;
+        
+        if (isPaid && investmentAmount && investmentAmount >= 100) {
+            functions.logger.log(`User ${uid} registered with a paid package. Creating presale document.`);
             const presaleCollection = db.collection('presales');
+            const pgcCredited = investmentAmount * 2;
+
             return presaleCollection.add({
                 userId: uid,
-                amountUSDT: 100, // This is the fixed test amount
-                pgcCredited: 200, // 100 base + 100 bonus
+                amountUSDT: investmentAmount,
+                pgcCredited: pgcCredited,
                 status: 'PENDING_VERIFICATION', // This status will be updated by the commission function
                 purchaseDate: admin.firestore.FieldValue.serverTimestamp(),
                 registeredWithPurchase: true,

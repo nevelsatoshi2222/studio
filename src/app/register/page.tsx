@@ -1,3 +1,4 @@
+
 'use client';
 import { Suspense, useState, useEffect } from 'react';
 import {
@@ -17,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { UserPlus, Crown, Gift, Phone, Building, Briefcase, Handshake, ConciergeBell } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,10 +34,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, useFirestore } from '@/firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, getDoc, increment, runTransaction } from 'firebase/firestore';
-import { CommissionCalculator } from '@/lib/commission-calculator';
+import { useAuth } from '@/firebase';
+import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { businessRoles, businessTypes } from '@/lib/business-data';
 
 // Country data with codes and names - 195 countries
@@ -248,7 +249,6 @@ const franchiseTiers = [
     { value: "2500", label: "District Franchisee ($2500)", description: "Lead franchise activities for a whole district", role: 'District Franchisee' }
 ];
 
-// Registration schema with business and franchise fields
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -268,25 +268,13 @@ const registrationSchema = z.object({
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-// Generate UNIQUE referral code
-const generateReferralCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `PGC-${code}`;
-};
-
 function RegistrationForm() {
   const auth = useAuth();
-  const firestore = useFirestore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const referredByCode = searchParams.get('ref') || '';
   const [selectedCountry, setSelectedCountry] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
-
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -313,83 +301,81 @@ function RegistrationForm() {
   const handleCountryChange = (value: string) => {
     setSelectedCountry(value);
     form.setValue('country', value);
-    const country = countries.find(c => c.code === value);
+    const country = countries.find(c => c.name === value);
     if (country) {
       setPhoneCode(country.phoneCode);
     }
   };
 
   const onSubmit = async (data: RegistrationFormValues) => {
+    if (!auth) {
+        toast({ variant: 'destructive', title: 'Auth service not available.' });
+        return;
+    }
     setIsSubmitting(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const authUser = userCredential.user;
-      await updateProfile(authUser, { displayName: data.name });
+        const selectedTier = franchiseTiers.find(t => t.value === data.investmentTier);
+        const investmentAmount = parseInt(data.investmentTier);
+        const isPaidTier = investmentAmount >= 100;
 
-      const newReferralCode = generateReferralCode();
-      let referrerUserId = null;
+        const functions = getFunctions(auth.app);
+        const setCustomClaims = httpsCallable(functions, 'setCustomClaims');
+        
+        // IMPORTANT: We create the user on the client, but DO NOT sign them in.
+        // We will call a function to set claims, then let onUserCreate handle doc creation.
+        const tempAuth = getAuth(); // Create a temporary instance if needed, or re-use
+        const userCredential = await createUserWithEmailAndPassword(tempAuth, data.email, data.password);
+        const user = userCredential.user;
 
-      if (data.referredBy && data.referredBy.trim() !== '') {
-        const usersRef = collection(firestore, 'users');
-        const q = query(usersRef, where('referralCode', '==', data.referredBy.trim()));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          referrerUserId = querySnapshot.docs[0].id;
-        }
-      }
+        // Update profile display name immediately
+        await updateProfile(user, { displayName: data.name });
 
-      const selectedTier = franchiseTiers.find(t => t.value === data.investmentTier);
-      const investmentAmount = parseInt(data.investmentTier);
+        // Call the Cloud Function to set all necessary custom claims BEFORE the onUserCreate trigger fires.
+        await setCustomClaims({ 
+            uid: user.uid, 
+            claims: { 
+              role: selectedTier?.role || 'User',
+              country: data.country,
+              referredByCode: data.referredBy,
+              isPaid: isPaidTier,
+              investmentTier: investmentAmount,
+              primaryRole: data.primaryRole,
+              businessType: data.businessType,
+              phone: phoneCode + data.phone,
+              state: data.state,
+              district: data.district,
+              taluka: data.taluka,
+              village: data.village,
+              street: data.street,
+            } 
+        });
 
-      const userDocData = {
-        email: data.email,
-        name: data.name,
-        phone: phoneCode + data.phone,
-        country: data.country,
-        state: data.state,
-        district: data.district,
-        taluka: data.taluka,
-        village: data.village,
-        street: data.street,
-        referralCode: newReferralCode,
-        referredByUserId: referrerUserId,
-        role: selectedTier?.role || 'User',
-        status: 'Active',
-        investmentTier: investmentAmount,
-        primaryRole: data.primaryRole,
-        businessType: data.businessType,
-        registeredAt: new Date(),
-        pgcBalance: investmentAmount * 2, // 1 USD = 2 PGC
-        totalCommission: 0,
-        direct_team: [],
-      };
+        // The user is created. Now sign them out of this temporary session.
+        await signOut(tempAuth);
+        
+        // Optionally send a verification email from the main auth instance
+        // await sendEmailVerification(user);
 
-      await setDoc(doc(firestore, 'users', authUser.uid), userDocData);
-      
-      if (referrerUserId) {
-        await CommissionCalculator.calculateAndDistributeCommissions(authUser.uid, investmentAmount);
-      }
-
-      await sendEmailVerification(authUser);
-      await signOut(auth);
-
-      toast({
-        title: 'Registration Successful! 🎉',
-        description: `You've applied as a ${selectedTier?.role}. Please check your email to verify your account.`,
-      });
-      router.push('/login');
+        toast({
+            title: 'Registration Initiated! Please Verify Your Email.',
+            description: `We've sent a verification link to ${data.email}. After verifying, you can log in.`,
+        });
+        
+        // Redirect to the login page
+        router.push('/login');
 
     } catch (error: any) {
-      console.error('❌ REGISTRATION ERROR:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: error.message || 'An unknown error occurred.',
-      });
+        console.error('❌ REGISTRATION ERROR:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Registration Failed',
+            description: error.message || 'An unknown error occurred.',
+        });
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
-  };
+};
+
 
   return (
     <Card className="w-full max-w-4xl mx-auto">

@@ -1,4 +1,5 @@
 
+
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
@@ -31,10 +32,11 @@ export const distributeCommission = functions.firestore
         }
         
         const buyerId: string = presaleData.userId;
-        const purchaseAmount: number = presaleData.pgcCredited; // Commission is on total PGC credited
+        // THE FIX: Use `amountUSDT` for commission calculation, not `pgcCredited`
+        const purchaseAmount: number = presaleData.amountUSDT; 
         const presaleRef = snapshot.ref;
         
-        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmount} PGC.`);
+        functions.logger.log(`Processing commission for new presale ${presaleRef.id} from buyer ${buyerId} for ${purchaseAmount} USDT.`);
 
         // 1. Get the buyer's referrer (Level 1 Upline)
         const buyerDoc = await db.collection('users').doc(buyerId).get();
@@ -69,9 +71,9 @@ export const distributeCommission = functions.firestore
             // Reference to the current upline user
             const uplineRef = db.collection('users').doc(currentUplineId);
             
-            // 2. Add balance update to the batch
+            // 2. Add balance update to the batch - Commission is paid in USDT, not PGC
             batch.update(uplineRef, {
-                pgcBalance: admin.firestore.FieldValue.increment(commissionAmount)
+                usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
             });
             
             // 3. Add transaction log to the batch
@@ -80,6 +82,7 @@ export const distributeCommission = functions.firestore
                 userId: currentUplineId,
                 type: 'COMMISSION',
                 amount: commissionAmount,
+                currency: 'USDT', // Log currency as USDT
                 level: level,
                 purchaseRef: presaleRef.path, // Store the path to the presale document
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
