@@ -2,7 +2,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ShoppingCart, User, Share2, Youtube, Instagram, Star, Palette, Banknote, QrCode, Mail, Phone, BookOpen, Utensils, Wheat, Leaf, Wrench } from 'lucide-react';
+import { ShoppingCart, User, Share2, Youtube, Instagram, Star, Palette, Banknote, QrCode, Mail, Phone, BookOpen, Utensils, Wheat, Leaf, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
