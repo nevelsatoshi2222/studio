@@ -46,10 +46,10 @@ const calculateStageData = (
 };
 
 export const pgcSaleStages: PgcSaleStage[] = [
-  calculateStageData(1, 0.1, 1, 2, 0.1, '1:1'),
-  calculateStageData(2, 0.1, 2, 3, 0.1, '1:1'),
-  calculateStageData(3, 0.2, 3, 5, 0.2, '1:1'),
-  calculateStageData(4, 0.5, 5, 10, 0.5, '1:0.7'),
+  calculateStageData(1, 0.02, 1, 2, 0.1, '1:1'),
+  calculateStageData(2, 0.02, 2, 3, 0.1, '1:1'),
+  calculateStageData(3, 0.05, 3, 5, 0.2, '1:1'),
+  calculateStageData(4, 0.1, 5, 10, 0.4, '1:0.7'),
   calculateStageData(5, 1.0, 10, 20, 1.0, '1:0.6'),
   calculateStageData(6, 2.5, 20, 50, 2.5, '1:0.5'),
   calculateStageData(7, 0.75, 50, 100, 3.0, '1:0.45'),
@@ -75,13 +75,14 @@ export const pgcSaleStages: PgcSaleStage[] = [
   calculateStageData(27, 0.25, 700000, 800000, 1.0, '1:0.25'),
   calculateStageData(28, 0.25, 800000, 900000, 1.0, '1:0.25'),
   calculateStageData(29, 0.25, 900000, 1000000, 1.0, '1:0.25'),
-  calculateStageData(30, 0.25, 1000000, 1000000, 1.0, '1:0.25'), // Final stage ends at 1M
+  calculateStageData(30, 0.25, 1000000, 1000000, 1.0, '1:0.25'),
 ];
 
 // Set status for initial stages
 pgcSaleStages[0].status = 'Split';
 pgcSaleStages[1].status = 'Split';
 pgcSaleStages[2].status = 'Split';
+
 
 export const pgcPotAllocations: PgcPotAllocation[] = [
     {
@@ -159,4 +160,3 @@ export const fundDistributionModel: FundDistribution[] = [
   { category: 'Team', percentage: 3 },
   { category: 'Interest', percentage: 3 },
 ];
-
