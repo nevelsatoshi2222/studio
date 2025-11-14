@@ -1,4 +1,3 @@
-
 // components/LanguageSwitcher.tsx
 'use client';
 
@@ -16,22 +15,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const indianLanguages: (keyof typeof supportedLanguages)[] = ['hi', 'bn', 'mr', 'gu', 'ta'];
-const internationalLanguages: (keyof typeof supportedLanguages)[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ar', 'ru', 'pt'];
+const indianLanguages: (keyof ReturnType<typeof useLanguage>['supportedLanguages'])[] = ['hi', 'bn', 'mr', 'gu', 'ta', 'te', 'kn', 'ml', 'pa'];
+const internationalLanguages: (keyof ReturnType<typeof useLanguage>['supportedLanguages'])[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ar', 'ru', 'pt'];
 
 
 export function LanguageSwitcher() {
   const { currentLanguage, setLanguage, supportedLanguages, isLoading } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-
-  if (isLoading) {
-    return (
-      <Button variant="outline" disabled>
-        <Globe className="h-4 w-4 mr-2" />
-        Loading...
-      </Button>
-    );
-  }
 
   const currentLang = supportedLanguages[currentLanguage];
 
@@ -39,6 +29,15 @@ export function LanguageSwitcher() {
     setLanguage(languageCode);
     setIsOpen(false);
   };
+  
+  if (isLoading || !currentLang) {
+    return (
+      <Button variant="outline" disabled>
+        <Globe className="h-4 w-4 mr-2" />
+        Loading...
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -63,6 +62,7 @@ export function LanguageSwitcher() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {indianLanguages.map(code => {
                     const language = supportedLanguages[code];
+                    if (!language) return null;
                     return (
                        <button
                         key={code}
@@ -89,6 +89,7 @@ export function LanguageSwitcher() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {internationalLanguages.map(code => {
                     const language = supportedLanguages[code];
+                    if (!language) return null;
                     return (
                        <button
                         key={code}
