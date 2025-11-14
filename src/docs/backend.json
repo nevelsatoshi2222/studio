@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -14,7 +13,10 @@
         "isVerified": { "type": "boolean", "description": "KYC/KYL status" },
         "name": { "type": "string", "description": "User's full name." },
         "email": { "type": "string", "description": "User's email address.", "format": "email" },
-        "role": { "type": "string", "description": "The role of the user on the platform." },
+        "role": { "type": "string", "description": "The role of the user on the platform (e.g., Village Franchisee)." },
+        "primaryRole": { "type": "string", "description": "The user's self-selected primary role (Franchisee, Manufacturer, etc.)." },
+        "businessType": { "type": "string", "description": "The specific business the user is operating (e.g., Jeans Shop)." },
+        "investmentTier": { "type": "number", "description": "The USD amount of the user's initial investment package." },
         "street": { "type": "string", "description": "User's street address." },
         "village": { "type": "string", "description": "User's village or ward." },
         "block": { "type": "string", "description": "User's block or kasba." },
