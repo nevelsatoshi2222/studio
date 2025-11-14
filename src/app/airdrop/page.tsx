@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -206,12 +207,12 @@ const AIRDROP_DATA = {
 
 // Working Links Configuration
 const WORKING_LINKS = {
-  airdrop: '/airdrop/register',
-  financialQuiz: '/quiz/start',
-  influencer: '/influencer/signup',
-  affiliate: '/affiliate/dashboard',
+  airdrop: '/register',
+  financialQuiz: '/quiz-opinion',
+  influencer: '/influencer-rewards',
+  affiliate: '/affiliate',
   presale: '/presale',
-  dashboard: '/dashboard',
+  dashboard: '/',
   documentation: '/docs',
   support: '/support'
 };
@@ -320,13 +321,13 @@ export default function AirdropsRewardsPage() {
           </div>
           <div className="flex flex-wrap justify-center items-center gap-2">
             <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
-              1M PGC SUPPLY
+              1M PGC PRESALE REWARD POOL
             </Badge>
             <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
               3-STAGE GROWTH
             </Badge>
             <Badge className="bg-yellow-600 text-white border-yellow-500 text-xs py-1 px-3 font-medium">
-              NO STAKING
+              NO STAKING REQUIRED
             </Badge>
           </div>
         </div>
@@ -508,7 +509,7 @@ export default function AirdropsRewardsPage() {
                   FINANCIAL QUIZ REWARDS
                 </CardTitle>
                 <CardDescription className="text-blue-100 text-sm">
-                  TEST YOUR FINANCIAL KNOWLEDGE AND WIN PGC COINS!
+                  TEST YOUR FINANCIAL KNOWLEDGE AND WIN PGC COINS! TOTAL POOL: 130,000 PGC
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
@@ -592,7 +593,7 @@ export default function AirdropsRewardsPage() {
                   INFLUENCER REWARDS PROGRAM
                 </CardTitle>
                 <CardDescription className="text-purple-100 text-sm">
-                  CREATE CONTENT AND EARN PGC REWARDS BASED ON YOUR REACH AND ENGAGEMENT
+                  CREATE CONTENT AND EARN PGC REWARDS. TOTAL POOL: 250,000 PGC
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
@@ -682,89 +683,6 @@ export default function AirdropsRewardsPage() {
                       </Table>
                     </div>
                   </div>
-
-                  {/* Offer to Admin Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-purple-400 border-b border-purple-500/30 pb-2 flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5" />
-                      YOUR OFFER TO ADMIN REQUEST
-                    </h3>
-                    <Card className="bg-slate-700/50 border-purple-500/20">
-                      <CardContent className="p-6">
-                        <form onSubmit={handleOfferSubmission} className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">OFFER TYPE</label>
-                            <Select value={offerType} onValueChange={setOfferType}>
-                              <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
-                                <SelectValue placeholder="SELECT OFFER TYPE" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="influencer">INFLUENCER COLLABORATION</SelectItem>
-                                <SelectItem value="affiliate">AFFILIATE PARTNERSHIP</SelectItem>
-                                <SelectItem value="custom">CUSTOM OFFER</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">YOUR OFFER DETAILS</label>
-                            <Textarea
-                              placeholder="DESCRIBE YOUR OFFER, YOUR REACH, AND WHAT YOU CAN BRING TO THE PGC COMMUNITY..."
-                              value={offerDetails}
-                              onChange={(e) => setOfferDetails(e.target.value)}
-                              className="bg-slate-600 border-slate-500 text-white placeholder:text-gray-400 min-h-[120px]"
-                              required
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-gray-300">YOUR NAME</label>
-                              <Input
-                                type="text"
-                                placeholder="ENTER YOUR NAME"
-                                value={contactName}
-                                onChange={(e) => setContactName(e.target.value)}
-                                className="bg-slate-600 border-slate-500 text-white"
-                                required
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-gray-300">EMAIL</label>
-                              <Input
-                                type="email"
-                                placeholder="ENTER YOUR EMAIL"
-                                value={contactEmail}
-                                onChange={(e) => setContactEmail(e.target.value)}
-                                className="bg-slate-600 border-slate-500 text-white"
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">PHONE NUMBER</label>
-                            <Input
-                              type="tel"
-                              placeholder="ENTER YOUR PHONE NUMBER"
-                              value={contactPhone}
-                              onChange={(e) => setContactPhone(e.target.value)}
-                              className="bg-slate-600 border-slate-500 text-white"
-                              required
-                            />
-                          </div>
-
-                          <Button 
-                            type="submit" 
-                            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3"
-                          >
-                            <Send className="h-4 w-4 mr-2" />
-                            SUBMIT OFFER TO ADMIN
-                          </Button>
-                        </form>
-                      </CardContent>
-                    </Card>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -781,7 +699,7 @@ export default function AirdropsRewardsPage() {
                   AFFILIATE REWARDS PROGRAM
                 </CardTitle>
                 <CardDescription className="text-green-100 text-sm">
-                  REFER USERS AND EARN PGC THROUGH OUR MULTI-LEVEL AFFILIATE SYSTEM
+                  REFER USERS AND EARN PGC. TOTAL POOL: 322,812.5 PGC
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
@@ -891,111 +809,115 @@ export default function AirdropsRewardsPage() {
                       </Table>
                     </div>
                   )}
-
-                  {/* Offer to Admin Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-green-400 border-b border-green-500/30 pb-2 flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5" />
-                      YOUR OFFER TO ADMIN REQUEST
-                    </h3>
-                    <Card className="bg-slate-700/50 border-green-500/20">
-                      <CardContent className="p-6">
-                        <form onSubmit={handleOfferSubmission} className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">OFFER TYPE</label>
-                            <Select value={offerType} onValueChange={setOfferType}>
-                              <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
-                                <SelectValue placeholder="SELECT OFFER TYPE" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="affiliate">AFFILIATE PARTNERSHIP</SelectItem>
-                                <SelectItem value="influencer">INFLUENCER COLLABORATION</SelectItem>
-                                <SelectItem value="custom">CUSTOM OFFER</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">YOUR OFFER DETAILS</label>
-                            <Textarea
-                              placeholder="DESCRIBE YOUR AFFILIATE NETWORK, YOUR MARKETING STRATEGIES, AND HOW YOU CAN HELP GROW PGC COMMUNITY..."
-                              value={offerDetails}
-                              onChange={(e) => setOfferDetails(e.target.value)}
-                              className="bg-slate-600 border-slate-500 text-white placeholder:text-gray-400 min-h-[120px]"
-                              required
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-gray-300">YOUR NAME</label>
-                              <Input
-                                type="text"
-                                placeholder="ENTER YOUR NAME"
-                                value={contactName}
-                                onChange={(e) => setContactName(e.target.value)}
-                                className="bg-slate-600 border-slate-500 text-white"
-                                required
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-gray-300">EMAIL</label>
-                              <Input
-                                type="email"
-                                placeholder="ENTER YOUR EMAIL"
-                                value={contactEmail}
-                                onChange={(e) => setContactEmail(e.target.value)}
-                                className="bg-slate-600 border-slate-500 text-white"
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-300">PHONE NUMBER</label>
-                            <Input
-                              type="tel"
-                              placeholder="ENTER YOUR PHONE NUMBER"
-                              value={contactPhone}
-                              onChange={(e) => setContactPhone(e.target.value)}
-                              className="bg-slate-600 border-slate-500 text-white"
-                              required
-                            />
-                          </div>
-
-                          <Button 
-                            type="submit" 
-                            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3"
-                          >
-                            <Send className="h-4 w-4 mr-2" />
-                            SUBMIT OFFER TO ADMIN
-                          </Button>
-                        </form>
-                      </CardContent>
-                    </Card>
-                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
+        {/* Offer to Admin Section */}
+        <Card className="border border-slate-700 bg-gradient-to-br from-slate-800 to-slate-900">
+            <CardHeader className="bg-slate-700/50">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-white">
+                    <MessageCircle className="h-5 w-5" />
+                    Admin & User Direct Offers
+                </CardTitle>
+                <CardDescription className="text-slate-300 text-sm">
+                    Submit your proposals for partnerships or custom offers directly to our admin team. Total Pool: 277,187.5 PGC
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+                <form onSubmit={handleOfferSubmission} className="space-y-4">
+                    <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-300">OFFER TYPE</label>
+                    <Select value={offerType} onValueChange={setOfferType}>
+                        <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
+                        <SelectValue placeholder="SELECT OFFER TYPE" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="affiliate">AFFILIATE PARTNERSHIP</SelectItem>
+                        <SelectItem value="influencer">INFLUENCER COLLABORATION</SelectItem>
+                        <SelectItem value="custom">CUSTOM OFFER</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-300">YOUR OFFER DETAILS</label>
+                    <Textarea
+                        placeholder="Describe your offer, your network, your marketing strategies, and how you can help grow the PGC community..."
+                        value={offerDetails}
+                        onChange={(e) => setOfferDetails(e.target.value)}
+                        className="bg-slate-600 border-slate-500 text-white placeholder:text-gray-400 min-h-[120px]"
+                        required
+                    />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-300">YOUR NAME</label>
+                        <Input
+                        type="text"
+                        placeholder="ENTER YOUR NAME"
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        className="bg-slate-600 border-slate-500 text-white"
+                        required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-300">EMAIL</label>
+                        <Input
+                        type="email"
+                        placeholder="ENTER YOUR EMAIL"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        className="bg-slate-600 border-slate-500 text-white"
+                        required
+                        />
+                    </div>
+                    </div>
+
+                    <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-300">PHONE NUMBER</label>
+                    <Input
+                        type="tel"
+                        placeholder="ENTER YOUR PHONE NUMBER"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        className="bg-slate-600 border-slate-500 text-white"
+                        required
+                    />
+                    </div>
+
+                    <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white font-bold py-3"
+                    >
+                    <Send className="h-4 w-4 mr-2" />
+                    SUBMIT OFFER TO ADMIN
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
+
+
         {/* Summary Card */}
         <Card className="bg-slate-800 border-yellow-500/30 text-white">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-xl font-bold">
               <TrendingUp className="h-5 w-5 text-yellow-400" />
-              TOTAL REWARDS BUDGET SUMMARY
+              TOTAL REWARDS BUDGET SUMMARY (1,000,000 PGC)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
               <div>
                 <div className="text-xl font-bold text-yellow-400">20,000 PGC</div>
                 <div className="text-yellow-300 text-xs">AIRDROP PROGRAM</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-blue-400">{FINANCIAL_QUIZ_REWARDS.reduce((total, reward) => total + (reward.rewardSlots * reward.reward), 0).toLocaleString()} PGC</div>
+                <div className="text-xl font-bold text-blue-400">130,000 PGC</div>
                 <div className="text-blue-300 text-xs">FINANCIAL QUIZ</div>
               </div>
               <div>
@@ -1003,11 +925,12 @@ export default function AirdropsRewardsPage() {
                 <div className="text-purple-300 text-xs">INFLUENCER PROGRAM</div>
               </div>
               <div>
-                <div className="text-xl font-bold text-green-400">{
-                  (AFFILIATE_FREE_REWARDS.reduce((total, level) => total + (level.rewardSlots * level.reward), 0) +
-                  AFFILIATE_PAID_REWARDS.reduce((total, level) => total + (level.rewardSlots * level.reward), 0)).toLocaleString()
-                } PGC</div>
+                <div className="text-xl font-bold text-green-400">322,812.5 PGC</div>
                 <div className="text-green-300 text-xs">AFFILIATE PROGRAM</div>
+              </div>
+               <div>
+                <div className="text-xl font-bold text-slate-400">277,187.5 PGC</div>
+                <div className="text-slate-300 text-xs">ADMIN & USER OFFERS</div>
               </div>
             </div>
           </CardContent>
