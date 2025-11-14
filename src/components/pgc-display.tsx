@@ -57,7 +57,7 @@ export function PgcDisplay() {
             <TableHeader>
               <TableRow>
                 <TableHead>Stage</TableHead>
-                <TableHead>Coins Sold (B)</TableHead>
+                <TableHead>Sale Allocation (% of TS)</TableHead>
                 <TableHead>Price Range (USD)</TableHead>
                 <TableHead>Bonus Ratio</TableHead>
                 <TableHead>Incoming Fund from Sale</TableHead>
@@ -74,7 +74,7 @@ export function PgcDisplay() {
                     stage.stage > 6 && 'bg-purple-500/10'
                 )}>
                   <TableCell className="font-bold">{stage.stage}</TableCell>
-                  <TableCell>{stage.coinsSoldB.toFixed(stage.coinsSoldB < 1 ? 4 : 2)}</TableCell>
+                  <TableCell>{stage.percentOfTs}</TableCell>
                   <TableCell>{stage.priceRange}</TableCell>
                   <TableCell>{stage.bonusRatio}</TableCell>
                   <TableCell className="font-semibold text-primary">{stage.incomingFund}</TableCell>

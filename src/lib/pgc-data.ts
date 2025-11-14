@@ -34,8 +34,8 @@ const calculateStageData = (
     return {
         stage,
         percentOfTs: `${percentOfTs}%`,
-        coinsSoldB,
-        priceRange: `$${priceLow.toLocaleString()}-$${priceHigh.toLocaleString()}`,
+        coinsSoldB: coinsSoldB, // Kept for calculation, but won't be displayed
+        priceRange: `$${priceLow.toLocaleString()}-${priceHigh.toLocaleString()}`,
         incomingFund: formatCurrency(incomingFundValue),
         pdpReleasePercent: `${pdpReleasePercent}%`,
         pdpFundReleased: formatCurrency(pdpFundValue),
@@ -150,4 +150,3 @@ export const pgcPotAllocations: PgcPotAllocation[] = [
       color: '#84cc16', // lime-500
     }
   ];
-
