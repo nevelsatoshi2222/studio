@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -185,8 +186,11 @@ export default function TeamPage() {
     direct_team: string[];
     currentFreeRank: string;
     currentPaidRank: string;
-    freeAchievers?: { bronze: number };
-    paidAchievers?: { bronzeStar: number };
+    freeAchievers?: { bronze: number; silver: number; gold: number; };
+    paidAchievers?: { bronzeStar: number; silverStar: number; goldStar: number; };
+    isPaid?: boolean;
+    paidTeamSize?: number;
+    totalTeamSize?: number;
   }>(userDocRef);
 
   // Fetch commission data
@@ -195,27 +199,14 @@ export default function TeamPage() {
       if (!user) return;
       
       try {
-        // Get commissions - try both formats
         let commissionsData = [];
         
-        // Try new format (userId)
         try {
           const commQuery = query(collection(firestore, 'commissions'), where('userId', '==', user.uid));
           const commSnapshot = await getDocs(commQuery);
           commissionsData = commSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
           console.log('No commissions with userId field');
-        }
-        
-        // If no commissions, try old format (toUserId)
-        if (commissionsData.length === 0) {
-          try {
-            const oldCommQuery = query(collection(firestore, 'commissions'), where('toUserId', '==', user.uid));
-            const oldCommSnapshot = await getDocs(oldCommQuery);
-            commissionsData = oldCommSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          } catch (error) {
-            console.log('No commissions with toUserId field');
-          }
         }
 
         const totalCommission = commissionsData.reduce((sum, comm) => sum + (comm.amount || comm.commissionAmount || 0), 0);
@@ -239,10 +230,8 @@ export default function TeamPage() {
   const directMemberIds = userProfile?.direct_team || [];
   const currentFreeRank = userProfile?.currentFreeRank || 'None';
   const currentPaidRank = userProfile?.currentPaidRank || 'None';
-  const bronzeAchievers = userProfile?.freeAchievers?.bronze || 0;
-  const bronzeStarAchievers = userProfile?.paidAchievers?.bronzeStar || 0;
 
-  // Calculate level-wise earnings
+  // Level-wise earnings calculation
   const levelEarnings = {};
   commissionData.commissions.forEach(commission => {
     const level = commission.level || 1;
@@ -262,8 +251,74 @@ export default function TeamPage() {
       count: data.count
     }))
     .sort((a, b) => a.level - b.level);
+  
+  const RewardsDashboard = () => {
+    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
+    const nextFreeRank = freeTrackRewards[freeRankIndex + 1];
 
-  const EarningTable = () => {
+    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
+    const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
+    
+    const getProgressForRank = (rank, isPaidTrack) => {
+        if (!rank) return 0;
+        if (isPaidTrack) {
+            if(rank.name === 'Bronze Star') return userProfile?.paidTeamSize || 0;
+            return userProfile?.paidAchievers?.bronzeStar || 0;
+        } else {
+            if(rank.name === 'Bronze') return userProfile?.direct_team?.length || 0;
+            return userProfile?.freeAchievers?.bronze || 0;
+        }
+    };
+
+    return (
+      <div className="grid md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Free User Track</CardTitle>
+            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {nextFreeRank ? (
+              <RewardTierCard 
+                tier={nextFreeRank} 
+                progress={getProgressForRank(nextFreeRank, false)} 
+                goal={5} 
+              />
+            ) : (
+                <Alert>
+                    <Crown className="h-4 w-4" />
+                    <AlertTitle>Congratulations!</AlertTitle>
+                    <AlertDescription>You have achieved the highest rank in the Free User Track!</AlertDescription>
+                </Alert>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Paid User (Star) Track</CardTitle>
+            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             {nextPaidRank ? (
+              <RewardTierCard 
+                tier={nextPaidRank} 
+                progress={getProgressForRank(nextPaidRank, true)} 
+                goal={5} 
+              />
+            ) : (
+                <Alert>
+                    <Crown className="h-4 w-4" />
+                    <AlertTitle>Congratulations!</AlertTitle>
+                    <AlertDescription>You have achieved the highest rank in the Paid User Track!</AlertDescription>
+                </Alert>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+  
+    const EarningTable = () => {
     if (commissionData.isLoading) {
       return (
         <Card>
@@ -284,7 +339,6 @@ export default function TeamPage() {
 
     return (
       <div className="space-y-6">
-        {/* Commission Summary */}
         <Card>
           <CardHeader>
             <CardTitle>Commission Earnings</CardTitle>
@@ -308,7 +362,6 @@ export default function TeamPage() {
               </div>
             </div>
 
-            {/* Level-wise Earnings */}
             <div className="mb-6">
               <h4 className="text-lg font-semibold mb-3">Earnings by Level</h4>
               {levelEarningsArray.length > 0 ? (
@@ -329,8 +382,7 @@ export default function TeamPage() {
                 </div>
               )}
             </div>
-
-            {/* Commission Structure Info */}
+            
             <div className="p-4 rounded-lg border bg-blue-50">
               <h4 className="font-semibold text-blue-800 mb-2">Commission Structure</h4>
               <p className="text-sm text-blue-700">
@@ -340,109 +392,11 @@ export default function TeamPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Commission History */}
-        {commissionData.commissions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Commission History</CardTitle>
-              <CardDescription>Recent commission transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {commissionData.commissions
-                  .sort((a, b) => {
-                    const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.createdAt?.toDate || 0);
-                    const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.createdAt?.toDate || 0);
-                    return dateB - dateA;
-                  })
-                  .slice(0, 10) // Show only recent 10
-                  .map(commission => (
-                    <div key={commission.id} className="flex justify-between items-center p-3 border rounded-lg bg-yellow-50">
-                      <div>
-                        <p className="font-medium">Level {commission.level || 1} Commission</p>
-                        <p className="text-sm text-gray-600">
-                          From: {commission.fromUserName || 'Team Member'} • 
-                          {commission.timestamp?.toDate 
-                            ? new Date(commission.timestamp.toDate()).toLocaleDateString()
-                            : commission.createdAt?.toDate
-                            ? new Date(commission.createdAt.toDate()).toLocaleDateString()
-                            : 'Recent'
-                          }
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">
-                          +${(commission.amount || commission.commissionAmount || 0).toFixed(2)}
-                        </p>
-                        <p className="text-xs text-gray-500">Commission</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  };
-  
-  const RewardsDashboard = () => {
-    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
-    const nextFreeRank = freeTrackRewards[freeRankIndex + 1];
-
-    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
-    const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
-
-    return (
-      <div className="grid md:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Free User Track</CardTitle>
-            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {nextFreeRank ? (
-              <RewardTierCard 
-                tier={nextFreeRank} 
-                progress={bronzeAchievers} 
-                goal={5} 
-              />
-            ) : (
-                <Alert>
-                    <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have achieved the highest rank in the Free User Track!</AlertDescription>
-                </Alert>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Paid User (Star) Track</CardTitle>
-            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             {nextPaidRank ? (
-              <RewardTierCard 
-                tier={nextPaidRank} 
-                progress={bronzeStarAchievers} 
-                goal={5} 
-              />
-            ) : (
-                <Alert>
-                    <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have achieved the highest rank in the Paid User Track!</AlertDescription>
-                </Alert>
-            )}
-          </CardContent>
-        </Card>
       </div>
     );
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isProfileLoading) {
     return (
         <div className="flex justify-center items-center h-full">
             <p>Loading your team...</p>
@@ -505,12 +459,12 @@ export default function TeamPage() {
                   <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
               </div>
                <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Bronze Achievers</div>
-                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeAchievers}</div>
+                  <div className="text-sm text-muted-foreground">Total Team Size</div>
+                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : userProfile?.totalTeamSize || 0}</div>
               </div>
               <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Bronze Star Achievers</div>
-                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : bronzeStarAchievers}</div>
+                  <div className="text-sm text-muted-foreground">Paid Team Members</div>
+                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : userProfile?.paidTeamSize || 0}</div>
               </div>
             </CardContent>
             <CardFooter>

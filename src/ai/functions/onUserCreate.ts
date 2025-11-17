@@ -139,5 +139,3 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         throw new functions.https.HttpsError('internal', 'Failed to complete user creation process.');
     });
 });
-
-    
