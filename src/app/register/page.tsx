@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -38,7 +37,8 @@ import { useFirebaseApp } from '@/firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { countries, businessRoles, businessTypes, businessMappings } from '@/lib/data';
+import { countries } from '@/lib/data';
+import { businessRoles, businessMappings } from '@/lib/business-data';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
