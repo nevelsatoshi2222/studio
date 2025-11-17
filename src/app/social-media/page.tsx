@@ -26,12 +26,10 @@ import {
   Loader2,
   Vote,
 } from 'lucide-react';
-import { users } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
-import { placeholderImages } from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore';
@@ -291,12 +289,14 @@ function PostSkeleton() {
 }
 
 export default function SocialMediaPage() {
+    const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
 
     const postsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        // **FIX:** Only create the query if the user is authenticated.
+        if (!firestore || !user) return null;
         return query(collection(firestore, 'social_posts'), orderBy('timestamp', 'desc'));
-    }, [firestore]);
+    }, [firestore, user]);
 
     const { data: socialPosts, isLoading } = useCollection<SocialPost>(postsQuery);
 
@@ -313,7 +313,7 @@ export default function SocialMediaPage() {
             <main className="lg:col-span-2 space-y-6">
                 <CreatePostCard />
                 <div className="space-y-6">
-                    {isLoading && (
+                    {(isLoading || isUserLoading) && (
                         <>
                             <PostSkeleton />
                             <PostSkeleton />
@@ -323,7 +323,7 @@ export default function SocialMediaPage() {
                         socialPosts.map((post) => (
                             <PostCard key={post.id} post={post} />
                         ))
-                    ) : !isLoading && (
+                    ) : !isLoading && !isUserLoading && (
                         <Card>
                             <CardContent className="p-10 text-center">
                                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
