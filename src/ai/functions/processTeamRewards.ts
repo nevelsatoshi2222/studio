@@ -152,3 +152,5 @@ async function checkAndApplyRank(
       functions.logger.log(`User ${userRef.id} achieved rank ${bestNewRank.name} and will be awarded ${rewardAmount} PGC.`);
     }
 }
+
+    

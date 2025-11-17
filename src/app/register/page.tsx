@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { UserPlus, Crown, MapPin, Home, Building, Globe, AlertCircle, Star, Zap, Rocket, TrendingUp, Loader2 } from 'lucide-react';
+import { UserPlus, Crown, MapPin, Home, Building, Globe, AlertCircle, Star, Zap, Rocket, TrendingUp, Loader2, Copy } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,11 +34,35 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebaseApp } from '@/firebase';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useAuth, useFirestore, useFirebaseApp } from '@/firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
+import { doc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, getDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { CommissionCalculator } from '@/lib/commission-calculator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { countries, businessRoles, businessTypes, businessMappings } from '@/lib/data';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { countries } from '@/lib/data';
+import { businessRoles, businessTypes } from '@/lib/business-data';
+
+// Updated Payment Tiers
+const PAYMENT_TIERS = {
+  free: { 
+    usd: 0, 
+    instantPgc: 1, 
+    totalPgc: 1,
+    label: 'Free Account',
+    description: 'Get started and earn rewards.',
+    bonus: 'First 20,000 users get 1 PGC bonus',
+  },
+  paid: { 
+    usd: 100, 
+    instantPgc: 200, 
+    totalPgc: 1600,
+    label: 'Paid Account - $100 USD',
+    description: 'Unlock full earning potential.',
+    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
+  },
+};
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -49,21 +74,23 @@ const registrationSchema = z.object({
   taluka: z.string().min(2, { message: 'Please enter your taluka/block' }),
   village: z.string().min(2, { message: 'Please enter your village/ward' }),
   street: z.string().optional(),
-  primaryRole: z.string().optional(),
-  businessType: z.string().optional(),
   referredByCode: z.string().optional(),
-  isPaid: z.boolean().default(false),
+  accountType: z.enum(['free', 'paid']).default('free'),
   walletAddress: z.string().optional(),
+  primaryRole: z.string().min(1, "Please select a primary role."),
+  businessType: z.string().min(1, "Please select a business type."),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 function RegistrationForm() {
-  const firebaseApp = useFirebaseApp();
+  const auth = useAuth();
+  const firestore = useFirestore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successData, setSuccessData] = useState<{referralCode: string; email: string; accountType: string; pgcReward: number} | null>(null);
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
@@ -77,77 +104,128 @@ function RegistrationForm() {
       taluka: '',
       village: '',
       street: '',
+      referredByCode: searchParams.get('ref') || '',
+      accountType: 'free',
+      walletAddress: '',
       primaryRole: '',
       businessType: '',
-      referredByCode: searchParams.get('ref') || '',
-      isPaid: false,
-      walletAddress: '',
     },
   });
-
-  const selectedPrimaryRole = form.watch('primaryRole');
-  const availableBusinessTypes = selectedPrimaryRole ? businessMappings[selectedPrimaryRole as keyof typeof businessMappings] || [] : businessTypes;
-
-  useEffect(() => {
-    form.resetField('businessType');
-  }, [selectedPrimaryRole, form]);
+  
+  const selectedAccountType = form.watch('accountType');
 
   const onSubmit = async (data: RegistrationFormValues) => {
     setIsSubmitting(true);
-    if (!firebaseApp) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Firebase services not available.' });
-      setIsSubmitting(false);
-      return;
-    }
 
     try {
-      const functions = getFunctions(firebaseApp);
-      const createUser = httpsCallable(functions, 'createUser');
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const authUser = userCredential.user;
+
+      await updateProfile(authUser, { displayName: data.name });
+
+      const newReferralCode = `PGC-${authUser.uid.substring(0, 8).toUpperCase()}`;
       
-      const result = await createUser({
-        email: data.email,
-        password: data.password,
-        displayName: data.name,
-        claims: { 
-          role: data.primaryRole || 'User',
-          country: data.country,
-          state: data.state,
-          district: data.district,
-          taluka: data.taluka,
-          village: data.village,
-          street: data.street,
-          referredByCode: data.referredByCode || null,
-          isPaid: data.isPaid,
-          walletAddress: data.walletAddress || null,
-          primaryRole: data.primaryRole || null,
-          businessType: data.businessType || null,
+      let referrerUserId: string | null = null;
+      if (data.referredByCode) {
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('referralCode', '==', data.referredByCode));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          referrerUserId = querySnapshot.docs[0].id;
         }
-      });
-
-      const resultData = result.data as { success: boolean, message: string, userId?: string };
-
-      if (resultData.success && resultData.userId) {
-        toast({
-          title: 'Registration Initiated!',
-          description: "Your account is being set up. You can now log in.",
-        });
-        router.push('/login');
-      } else {
-        throw new Error(resultData.message || 'An unknown error occurred during user creation.');
       }
+
+      const tier = PAYMENT_TIERS[data.accountType];
+      let pgcBalance = (data.accountType === 'paid') ? tier.instantPgc : 1;
+
+      const userDocData = {
+        name: data.name,
+        email: data.email,
+        referralCode: newReferralCode,
+        referredByUserId: referrerUserId,
+        role: 'User',
+        status: 'Active',
+        accountType: data.accountType,
+        pgcBalance: pgcBalance,
+        usdBalance: 0,
+        totalCommission: 0,
+        country: data.country,
+        state: data.state,
+        district: data.district,
+        taluka: data.taluka,
+        village: data.village,
+        street: data.street || '',
+        primaryRole: data.primaryRole,
+        businessType: data.businessType,
+        walletAddress: data.walletAddress || '',
+        registeredAt: serverTimestamp(),
+        direct_team: [],
+        totalTeamSize: 0,
+        paidTeamSize: 0,
+        freeRank: 'None',
+        paidRank: 'None',
+        isPaid: data.accountType === 'paid',
+        freeAchievers: { bronze: 0, silver: 0, gold: 0 },
+        paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
+      };
+
+      await setDoc(doc(firestore, 'users', authUser.uid), userDocData);
+
+      if (referrerUserId) {
+        const referrerRef = doc(firestore, 'users', referrerUserId);
+        await updateDoc(referrerRef, { direct_team: arrayUnion(authUser.uid) });
+
+        if (data.accountType === 'paid') {
+           await CommissionCalculator.calculateRegistrationCommissions(authUser.uid, data.name, referrerUserId, tier.usd);
+        }
+      }
+
+      await sendEmailVerification(authUser);
+
+      setSuccessData({
+        referralCode: newReferralCode,
+        email: data.email,
+        accountType: data.accountType,
+        pgcReward: pgcBalance
+      });
+      
+      await signOut(auth);
+
     } catch (error: any) {
-      console.error('REGISTRATION ERROR:', error);
       toast({
         variant: 'destructive',
         title: 'Registration Failed',
-        description: error.code === 'functions/already-exists' 
-          ? 'This email address is already in use.' 
-          : error.message || 'An unexpected error occurred.',
+        description: error.message || 'An unknown error occurred.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  if (successData) {
+    return (
+        <Card className="w-full max-w-lg mx-auto">
+            <CardHeader className="text-center">
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
+                <CardTitle className="text-2xl">Registration Successful!</CardTitle>
+                <CardDescription>A verification link has been sent to {successData.email}.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+                <p>Your unique referral code is:</p>
+                <div className="flex items-center justify-center gap-2">
+                    <Badge variant="secondary" className="text-lg font-mono p-2">{successData.referralCode}</Badge>
+                    <Button variant="outline" size="icon" onClick={() => navigator.clipboard.writeText(successData.referralCode)}>
+                        <Copy className="h-4 w-4" />
+                    </Button>
+                </div>
+                <p className="text-green-600 font-semibold">You've been awarded {successData.pgcReward} PGC!</p>
+            </CardContent>
+            <CardFooter>
+                <Button asChild className="w-full"><Link href="/login">Go to Login</Link></Button>
+            </CardFooter>
+        </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -158,99 +236,53 @@ function RegistrationForm() {
             </div>
             <div>
                 <CardTitle className="text-2xl font-headline">Create Your Account</CardTitle>
-                <CardDescription>Join the Public Governance platform</CardDescription>
+                <CardDescription>Join to participate in voting, earn rewards, and more.</CardDescription>
             </div>
         </div>
       </CardHeader>
-      
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <CardContent className="space-y-6">
-             <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">1. Personal & Account Information</h3>
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Fill your complete geographical details to participate in voting at all 8 levels.
+              </AlertDescription>
+            </Alert>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField name="name" render={({ field }) => (<FormItem><FormLabel>Full Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField name="password" render={({ field }) => (<FormItem><FormLabel>Password *</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField name="referredByCode" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            </div>
+            <Separator />
+             <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2"><MapPin className="h-5 w-5" /> Geographical Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="inline mr-1 h-4 w-4"/>Country *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select Country" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{countries.map(c => <SelectItem key={c.value} value={c.label}>{c.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                    <FormField name="state" render={({ field }) => (<FormItem><FormLabel>State *</FormLabel><FormControl><Input placeholder="e.g., California" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Los Angeles" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Hollywood" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField name="village" render={({ field }) => (<FormItem><FormLabel>Village/Ward *</FormLabel><FormControl><Input placeholder="e.g., Central Hollywood" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField name="street" render={({ field }) => (<FormItem><FormLabel>Street (Optional)</FormLabel><FormControl><Input placeholder="e.g., Hollywood Blvd" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+            </div>
+            <Separator />
+            <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Business & Role</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Full Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="password" render={({ field }) => (<FormItem><FormLabel>Password *</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormDescription>Min. 6 characters.</FormDescription><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="walletAddress" render={({ field }) => (<FormItem><FormLabel>Wallet Address (Optional)</FormLabel><FormControl><Input placeholder="For receiving PGC and rewards" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="referredByCode" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="primaryRole" render={({ field }) => (<FormItem><FormLabel>Primary Role *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your primary role" /></SelectTrigger></FormControl><SelectContent>{businessRoles.map(role => <SelectItem key={role} value={role}>{role}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="businessType" render={({ field }) => (<FormItem><FormLabel>Business Type *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{businessTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
                 </div>
             </div>
-
-            <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">2. Business & Role (Optional)</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="primaryRole" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Primary Role</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Select your primary role" /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    {businessRoles.map(role => (<SelectItem key={role} value={role}>{role}</SelectItem>))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                    <FormField control={form.control} name="businessType" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Specific Business Type</FormLabel>
-                             <Select onValueChange={field.onChange} value={field.value} disabled={!selectedPrimaryRole}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Select your business type" /></SelectTrigger></FormControl>
-                                <SelectContent className="max-h-60">
-                                    {availableBusinessTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                </div>
-            </div>
-
-            <div className="space-y-4 p-4 border rounded-lg">
-              <h3 className="font-semibold text-lg flex items-center gap-2"><MapPin className="h-5 w-5" /> 3. Geographical Area (for Voting)</h3>
-              <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>This is crucial for enabling your voting rights at local levels.</AlertDescription></Alert>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="h-4 w-4 inline mr-1" />Country *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{countries.map((c) => (<SelectItem key={c.value} value={c.label}>{c.label}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State *</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="village" render={({ field }) => (<FormItem><FormLabel><Home className="h-4 w-4 inline mr-1" />Village/Ward *</FormLabel><FormControl><Input placeholder="e.g., Juhu" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>Street (Optional)</FormLabel><FormControl><Input placeholder="e.g., Main Street" {...field} /></FormControl><FormMessage /></FormItem>)} />
-              </div>
-            </div>
-
-             <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">4. Account Type</h3>
-                 <FormField
-                    control={form.control}
-                    name="isPaid"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                            <FormControl>
-                                <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                            <div className="space-y-1 leading-none">
-                                <FormLabel className="text-base">Register with $100 Paid Package?</FormLabel>
-                                <FormDescription>
-                                    Select this to get a 200 PGC bonus and activate commissions for your referrer. This is required for the "Paid User Track" in the affiliate program.
-                                </FormDescription>
-                            </div>
-                        </FormItem>
-                    )}
-                />
-            </div>
+             <Separator />
+            <FormField control={form.control} name="accountType" render={({ field }) => (<FormItem className="space-y-3"><FormLabel className="text-lg font-semibold">Choose Your Account Tier</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(PAYMENT_TIERS).map(([key, tier]) => (<FormItem key={key} className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value={key} /></FormControl><FormLabel className="font-normal flex-1 cursor-pointer"><div className="p-4 border rounded-lg hover:border-primary peer-data-[state=checked]:border-primary"><span className="font-bold">{tier.label}</span><p className="text-sm text-muted-foreground">{tier.description}</p><p className="text-xs font-semibold text-green-600">{tier.bonus}</p></div></FormLabel></FormItem>))}</RadioGroup></FormControl><FormMessage /></FormItem>)} />
           </CardContent>
-
-          <CardFooter className="flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting} size="lg">
-              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-              {isSubmitting ? 'Creating Account...' : 'Create Account & Start Voting'}
-            </Button>
-            <p className="text-xs text-center text-muted-foreground">By creating an account, you agree to our Terms of Service and Privacy Policy.</p>
+          <CardFooter className="flex flex-col gap-4">
+             <Button type="submit" className="w-full" disabled={isSubmitting} size="lg">
+                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Processing...</> : 'Create Account & Continue'}
+             </Button>
+             <p className="text-sm text-muted-foreground">Already have an account? <Link href="/login" className="text-primary hover:underline">Log in</Link></p>
           </CardFooter>
         </form>
       </Form>
@@ -265,3 +297,5 @@ export default function RegisterPage() {
     </Suspense>
   );
 }
+
+    
