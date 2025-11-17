@@ -29,29 +29,18 @@ import {
   ExternalLink,
   Send,
   MessageCircle,
-  Video
+  Video,
+  Star,
+  Award
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 
-// Financial Quiz Rewards Data
-const FINANCIAL_QUIZ_REWARDS = [
-  { rewardSlots: 50000, reward: 1, stage: 'ROUND 1 - GENERAL QUIZ' },
-  { rewardSlots: 20000, reward: 2, stage: 'ROUND 1 - GENERAL QUIZ' },
-  { rewardSlots: 5000, reward: 3, stage: 'ROUND 1 - GENERAL QUIZ' },
-  { rewardSlots: 2000, reward: 5, stage: 'ROUND 1 - QUALIFIERS' },
-  { rewardSlots: 200, reward: 20, stage: 'SEMI-FINAL - QUALIFIERS' },
-  { rewardSlots: 20, reward: 100, stage: 'FINAL - QUALIFIERS' },
-  { rewardSlots: 4, reward: 1000, stage: 'FINAL - RUNNERS UP' },
-  { rewardSlots: 1, reward: 5000, stage: 'FINAL - WINNER' },
-];
-
-// Quiz Scoring System
-const QUIZ_SCORING_SYSTEM = [
-  { score: '100% CORRECT', reward: '5 PGC COIN' },
-  { score: '51-80% CORRECT', reward: '3 PGC COIN' },
-  { score: '36-50% CORRECT', reward: '2 PGC COIN' },
-  { score: 'BELOW 35%', reward: '1 PGC COIN' },
+// Updated Airdrop Rewards Data
+const AIRDROP_REWARDS = [
+  { tier: 'PIONEER', slots: 1000, reward: 5, color: 'text-yellow-400' },
+  { tier: 'EXPLORER', slots: 2000, reward: 2.5, color: 'text-blue-400' },
+  { tier: 'FOUNDER', slots: 25000, reward: 1, color: 'text-green-400' }
 ];
 
 // Updated Affiliate Rewards Data - FREE ENTRY REWARDS
@@ -166,7 +155,7 @@ export default function AirdropsRewardsPage() {
     e.preventDefault();
     toast({
       title: "REGISTRATION SUCCESSFUL!",
-      description: "YOU'VE BEEN REGISTERED FOR THE PGC AIRDROP. 1 PGC WILL BE CREDITED AFTER PRESALE.",
+      description: "YOU'VE BEEN REGISTERED FOR THE PGC AIRDROP. YOUR PGC WILL BE CREDITED AFTER PRESALE BASED ON YOUR JOINING ORDER.",
     });
     setEmail('');
     window.location.href = WORKING_LINKS.airdrop;
@@ -274,23 +263,27 @@ export default function AirdropsRewardsPage() {
                   EARLY REGISTRATION AIRDROP
                 </CardTitle>
                 <CardDescription className="text-yellow-100 text-sm">
-                  GET 1 PGC FREE FOR EARLY REGISTRATION - LIMITED TO FIRST 20,000 USERS!
+                  BECOME AN EARLY SUPPORTER & GET FREE PGC. REWARDS ARE TIERED FOR THE FIRST 28,000 USERS!
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    {AIRDROP_REWARDS.map(tier => (
+                        <div key={tier.tier} className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
+                            <div className={`text-3xl font-bold ${tier.color}`}>{tier.reward} PGC</div>
+                            <div className="text-sm font-semibold text-yellow-300">FOR FIRST {tier.slots.toLocaleString()} USERS</div>
+                            <div className="text-xs text-yellow-400 mt-1">{tier.tier} TIER</div>
+                        </div>
+                    ))}
+                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-yellow-400 mb-2">1 PGC</div>
-                      <div className="text-base font-semibold text-yellow-300">FREE PER REGISTRATION</div>
-                      <div className="text-xs text-yellow-400 mt-1">LIMITED TO FIRST 20,000 USERS</div>
-                    </div>
                     <form onSubmit={handleAirdropRegistration} className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-gray-300">EMAIL ADDRESS</label>
                         <Input
                           type="email"
-                          placeholder="ENTER YOUR EMAIL"
+                          placeholder="ENTER YOUR EMAIL TO REGISTER"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 focus:border-yellow-500"
@@ -302,24 +295,24 @@ export default function AirdropsRewardsPage() {
                         className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-bold py-3 text-base transition-all duration-200"
                       >
                         <UserPlus className="h-4 w-4 mr-2" />
-                        CLAIM MY 1 PGC AIRDROP
+                        REGISTER FOR AIRDROP
                       </Button>
                     </form>
                   </div>
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
-                        <div className="text-2xl font-bold text-yellow-400">20,000</div>
+                        <div className="text-2xl font-bold text-yellow-400">28,000</div>
                         <div className="text-xs text-yellow-300">TOTAL SLOTS</div>
                       </div>
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
-                        <div className="text-2xl font-bold text-yellow-400">1 PGC</div>
-                        <div className="text-xs text-yellow-300">PER USER</div>
+                        <div className="text-2xl font-bold text-yellow-400">32,500</div>
+                        <div className="text-xs text-yellow-300">TOTAL PGC REWARD</div>
                       </div>
                     </div>
                     <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 p-4 rounded-lg text-white text-center border border-yellow-500/30">
-                      <div className="text-sm font-bold mb-1">TOTAL AIRDROP BUDGET</div>
-                      <div className="text-2xl font-black">20,000 PGC</div>
+                      <div className="text-sm font-bold mb-1">FREE FOR ALL EARLY USERS</div>
+                      <div className="text-2xl font-black">NO PURCHASE NECESSARY</div>
                     </div>
                   </div>
                 </div>
@@ -328,7 +321,7 @@ export default function AirdropsRewardsPage() {
           </div>
         )}
 
-        {/* Financial Quiz Tab */}
+        {/* Financial Quiz & Affiliate Tabs (remain unchanged) */}
         {activeTab === 'financial' && (
           <div className="space-y-6">
             <Card className="border border-blue-500/30 shadow-2xl bg-gradient-to-br from-slate-800 to-slate-900">
@@ -354,38 +347,12 @@ export default function AirdropsRewardsPage() {
                     <Trophy className="h-4 w-4 mr-2" />
                     START FINANCIAL QUIZ
                   </Button>
-
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-blue-500/30">
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[200px]">STAGE</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[120px]">REWARD SLOTS</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[100px]">REWARD (PGC)</TableHead>
-                          <TableHead className="text-blue-300 font-semibold text-xs w-[80px]">ACTION</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {FINANCIAL_QUIZ_REWARDS.map((reward, index) => (
-                          <TableRow key={index} className="border-blue-500/10 text-xs">
-                            <TableCell className="text-gray-300 font-medium">{reward.stage}</TableCell>
-                            <TableCell className="text-gray-300">{reward.rewardSlots.toLocaleString()}</TableCell>
-                            <TableCell className="text-blue-400 font-semibold">{reward.reward}</TableCell>
-                            <TableCell>
-                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-7 px-3">JOIN</Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Affiliate Tab */}
         {activeTab === 'affiliate' && (
           <div className="space-y-6">
             <Card className="border border-green-500/30 shadow-2xl bg-gradient-to-br from-slate-800 to-slate-900">
@@ -471,5 +438,3 @@ export default function AirdropsRewardsPage() {
     </div>
   );
 }
-
-    

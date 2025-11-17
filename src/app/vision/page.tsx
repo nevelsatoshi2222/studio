@@ -98,8 +98,7 @@ const roadmapStages = [
     timeframe: "November 21, 2025",
     description: "Launching the exclusive airdrop program and reward systems for our foundational community members.",
     features: [
-      "Early Bird Airdrop Program",
-      "First 20,000 Users Bonus",
+      "Tiered Airdrop for Early Users",
       "Community Building Initiative",
       "Affiliate & Influencer Rewards Live"
     ],
@@ -128,7 +127,7 @@ const roadmapStages = [
     icon: <GraduationCap className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q1 2026",
-    description: "Transforming global education with accessible, decentralized learning systems for all",
+    description: "Transforming global education with accessible, decentralized learning systems for all.",
     features: [
       "Decentralized Learning Platform",
       "Free Educational Resources",
@@ -145,7 +144,7 @@ const roadmapStages = [
     icon: <Shield className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q2 2026",
-    description: "Implementing transparent governance systems to eliminate corruption through blockchain technology",
+    description: "Implementing transparent governance systems to eliminate corruption through blockchain technology.",
     features: [
       "Transparent Governance Protocol",
       "Public Fund Tracking System",
@@ -162,7 +161,7 @@ const roadmapStages = [
     icon: <Trophy className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q3 2026",
-    description: "Creating global platforms for sports, arts, and talent competitions with fair reward systems",
+    description: "Creating global platforms for sports, arts, and talent competitions with fair reward systems.",
     features: [
       "Global Talent Competitions",
       "Sports Tournament Platform",
@@ -179,7 +178,7 @@ const roadmapStages = [
     icon: <Coins className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q4 2026",
-    description: "Expanding our ecosystem with specialized tokens for governance, trade, and innovation",
+    description: "Expanding our ecosystem with specialized tokens for governance, trade, and innovation.",
     features: [
       "Idea Governance Coin (IDC) Launch",
       "International Trade Coin (ITC)",
@@ -196,7 +195,7 @@ const roadmapStages = [
     icon: <ShoppingCart className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q1 2027",
-    description: "Creating new economic opportunities through decentralized commerce and employment solutions",
+    description: "Creating new economic opportunities through decentralized commerce and employment solutions.",
     features: [
       "Global E-Commerce Platform",
       "Home Employment Solutions",
@@ -213,7 +212,7 @@ const roadmapStages = [
     icon: <Users className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q2 2027",
-    description: "Direct assistance programs starting with street communities and expanding globally",
+    description: "Direct assistance programs starting with street communities and expanding globally.",
     features: [
       "Street Community Support",
       "Basic Needs Provision",
@@ -230,7 +229,7 @@ const roadmapStages = [
     icon: <Building2 className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q3 2027",
-    description: "Full-scale implementation of Public Governance system in pioneer countries",
+    description: "Full-scale implementation of Public Governance system in pioneer countries.",
     features: [
       "First Country Implementation",
       "Government Partnership",
@@ -247,7 +246,7 @@ const roadmapStages = [
     icon: <Globe className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "2027-2030",
-    description: "Worldwide expansion helping people and governments complete projects through employment circles",
+    description: "Worldwide expansion helping people and governments complete projects through employment circles.",
     features: [
       "Multi-Country Expansion",
       "Government Project Support",
@@ -261,7 +260,7 @@ const roadmapStages = [
 ];
 
 const milestones = [
-  { number: "20K+", label: "Early Users" },
+  { number: "28K+", label: "Early Users" },
   { number: "100+", label: "Countries" },
   { number: "1M+", label: "Jobs Created" },
   { number: "$100M+", label: "Economic Impact" }
@@ -412,7 +411,7 @@ export default function VisionRoadmapPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-lg text-white mb-6">
                     {roadmapStages[activeStage].description}
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -467,7 +466,7 @@ export default function VisionRoadmapPage() {
                               </div>
                             )}
                           </div>
-                          <p className="text-gray-600">{stage.description}</p>
+                          <p className="text-white">{stage.description}</p>
                         </CardHeader>
                         <CardContent>
                           <div className="grid gap-2">
