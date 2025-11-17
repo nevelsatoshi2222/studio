@@ -36,36 +36,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp } from '@/firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { countries, businessRoles, businessTypes } from '@/lib/business-data';
-import { Label } from '@/components/ui/label';
-
-const PAYMENT_TIERS = {
-  free: { 
-    usd: 0, 
-    instantPgc: 1, 
-    totalPgc: 1,
-    label: 'Free Account',
-    description: 'Perfect for getting started',
-    bonus: 'First 20,000 users get 1 PGC bonus',
-  },
-  basic: { 
-    usd: 10, 
-    instantPgc: 20, 
-    totalPgc: 160,
-    label: 'Basic - $10 USD',
-    description: 'Great start with 20 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-  premium: { 
-    usd: 100, 
-    instantPgc: 200, 
-    totalPgc: 1600,
-    label: 'Premium - $100 USD',
-    description: 'Best value with 200 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-};
+import { Checkbox } from '@/components/ui/checkbox';
+import { countries } from '@/lib/data';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -80,8 +52,6 @@ const registrationSchema = z.object({
   referredByCode: z.string().optional(),
   isPaid: z.boolean().default(false),
   walletAddress: z.string().optional(),
-  primaryRole: z.string().optional(),
-  businessType: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -108,8 +78,6 @@ function RegistrationForm() {
       referredByCode: searchParams.get('ref') || '',
       isPaid: false,
       walletAddress: '',
-      primaryRole: searchParams.get('role') || '',
-      businessType: searchParams.get('title') || '',
     },
   });
 
@@ -140,8 +108,8 @@ function RegistrationForm() {
           referredByCode: data.referredByCode || null,
           isPaid: data.isPaid,
           walletAddress: data.walletAddress || null,
-          primaryRole: data.primaryRole || null,
-          businessType: data.businessType || null,
+          primaryRole: null, // Removed
+          businessType: null, // Removed
         }
       });
 
@@ -170,8 +138,6 @@ function RegistrationForm() {
     }
   };
   
-  const primaryRole = form.watch('primaryRole');
-
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader className="text-center">
@@ -214,15 +180,7 @@ function RegistrationForm() {
             </div>
 
              <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">3. Business & Role (Optional)</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <FormField control={form.control} name="primaryRole" render={({ field }) => (<FormItem><FormLabel>Primary Role</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your primary role" /></SelectTrigger></FormControl><SelectContent>{businessRoles.map(role => <SelectItem key={role} value={role}>{role}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                     <FormField control={form.control} name="businessType" render={({ field }) => (<FormItem><FormLabel>Business Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled={!primaryRole}><FormControl><SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{businessTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                 </div>
-            </div>
-
-             <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">4. Account Type</h3>
+                <h3 className="font-semibold text-lg">3. Account Type</h3>
                  <FormField
                     control={form.control}
                     name="isPaid"

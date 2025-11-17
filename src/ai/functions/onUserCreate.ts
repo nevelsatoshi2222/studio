@@ -71,7 +71,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
         
         const isPaid = customClaims?.isPaid as boolean || false;
-        const investmentAmount = isPaid ? 100 : 0; // Simplified for now
         const pgcCredited = isPaid ? 200 : 1; // 1 PGC for free, 200 for paid
 
         const userDocumentData = {
@@ -82,7 +81,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             
             street: customClaims?.street || '',
             village: customClaims?.village || '',
-            block: customClaims?.block || '',
             taluka: customClaims?.taluka || '',
             district: customClaims?.district || '',
             state: customClaims?.state || '',
@@ -98,8 +96,8 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             isVerified: false,
             status: 'Active',
             role: customClaims?.role || 'User',
-            primaryRole: customClaims?.primaryRole || null,
-            businessType: customClaims?.businessType || null,
+            primaryRole: null, // Removed
+            businessType: null, // Removed
             
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
             direct_team: [], 
