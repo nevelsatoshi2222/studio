@@ -38,6 +38,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { businessRoles, businessMappings } from '@/lib/business-data';
+import { Label } from "@/components/ui/label";
 
 // Payment tiers remain the same
 const PAYMENT_TIERS = {
