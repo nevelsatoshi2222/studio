@@ -44,6 +44,7 @@ import { Badge } from '@/components/ui/badge';
 import { countries } from '@/lib/data';
 import { businessRoles, businessTypes } from '@/lib/business-data';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 // Updated Payment Tiers
 const PAYMENT_TIERS = {
