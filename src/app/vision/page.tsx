@@ -91,28 +91,43 @@ const visionSections = [
 
 const roadmapStages = [
   {
-    stage: "Presale & Airdrop Launch",
+    stage: "Airdrop & Rewards Launch",
     phase: "Current Phase",
     icon: <Rocket className="h-8 w-8" />,
     status: "active",
-    timeframe: "Q1 2024",
-    description: "Launching Public Governance Coin (PGC) presale with exclusive airdrop program for early supporters",
+    timeframe: "November 21, 2025",
+    description: "Launching the exclusive airdrop program and reward systems for our foundational community members.",
     features: [
-      "PGC Token Presale Launch",
       "Early Bird Airdrop Program",
       "First 20,000 Users Bonus",
       "Community Building Initiative",
-      "Referral Reward System"
+      "Affiliate & Influencer Rewards Live"
     ],
     color: "bg-blue-500",
     textColor: "text-blue-500"
+  },
+  {
+    stage: "PGC Token Presale",
+    phase: "Upcoming",
+    icon: <Coins className="h-8 w-8" />,
+    status: "upcoming",
+    timeframe: "November 30, 2025",
+    description: "The official start of the Public Governance Coin (PGC) presale, offering exclusive bonuses for early investors.",
+    features: [
+      "PGC Token Presale Launch",
+      "1:1 Instant Bonus Packages",
+      "3-Stage Doubling System",
+      "Secure USDT Investment"
+    ],
+    color: "bg-green-500",
+    textColor: "text-green-500"
   },
   {
     stage: "Global Education Revolution",
     phase: "Stage 1",
     icon: <GraduationCap className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q2-Q3 2024",
+    timeframe: "Q1 2026",
     description: "Transforming global education with accessible, decentralized learning systems for all",
     features: [
       "Decentralized Learning Platform",
@@ -121,15 +136,15 @@ const roadmapStages = [
       "Global Teacher Network",
       "Blockchain Certification"
     ],
-    color: "bg-green-500",
-    textColor: "text-green-500"
+    color: "bg-purple-500",
+    textColor: "text-purple-500"
   },
   {
     stage: "Anti-Corruption Framework",
     phase: "Stage 2",
     icon: <Shield className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q4 2024",
+    timeframe: "Q2 2026",
     description: "Implementing transparent governance systems to eliminate corruption through blockchain technology",
     features: [
       "Transparent Governance Protocol",
@@ -138,15 +153,15 @@ const roadmapStages = [
       "Whistleblower Protection",
       "Community Oversight Platform"
     ],
-    color: "bg-purple-500",
-    textColor: "text-purple-500"
+    color: "bg-yellow-500",
+    textColor: "text-yellow-500"
   },
   {
     stage: "Talent & Competition Platform",
     phase: "Stage 3",
     icon: <Trophy className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q1 2025",
+    timeframe: "Q3 2026",
     description: "Creating global platforms for sports, arts, and talent competitions with fair reward systems",
     features: [
       "Global Talent Competitions",
@@ -155,15 +170,15 @@ const roadmapStages = [
       "Digital Performance Stages",
       "Fair Reward Distribution"
     ],
-    color: "bg-yellow-500",
-    textColor: "text-yellow-500"
+    color: "bg-orange-500",
+    textColor: "text-orange-500"
   },
   {
     stage: "Multi-Coin Ecosystem Launch",
     phase: "Stage 4",
     icon: <Coins className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q2 2025",
+    timeframe: "Q4 2026",
     description: "Expanding our ecosystem with specialized tokens for governance, trade, and innovation",
     features: [
       "Idea Governance Coin (IDC) Launch",
@@ -172,15 +187,15 @@ const roadmapStages = [
       "Franchise Coin Ecosystem",
       "Job & Work Coin Integration"
     ],
-    color: "bg-orange-500",
-    textColor: "text-orange-500"
+    color: "bg-red-500",
+    textColor: "text-red-500"
   },
   {
     stage: "E-Commerce & Employment Revolution",
     phase: "Stage 5",
     icon: <ShoppingCart className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q3 2025",
+    timeframe: "Q1 2027",
     description: "Creating new economic opportunities through decentralized commerce and employment solutions",
     features: [
       "Global E-Commerce Platform",
@@ -189,15 +204,15 @@ const roadmapStages = [
       "Franchise Opportunities",
       "Job Creation Initiatives"
     ],
-    color: "bg-red-500",
-    textColor: "text-red-500"
+    color: "bg-indigo-500",
+    textColor: "text-indigo-500"
   },
   {
     stage: "Community Support Initiative",
     phase: "Stage 6",
     icon: <Users className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q4 2025",
+    timeframe: "Q2 2027",
     description: "Direct assistance programs starting with street communities and expanding globally",
     features: [
       "Street Community Support",
@@ -206,15 +221,15 @@ const roadmapStages = [
       "Healthcare Access Initiatives",
       "Housing Support Systems"
     ],
-    color: "bg-indigo-500",
-    textColor: "text-indigo-500"
+    color: "bg-teal-500",
+    textColor: "text-teal-500"
   },
   {
     stage: "National Implementation",
     phase: "Stage 7",
     icon: <Building2 className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q1 2026",
+    timeframe: "Q3 2027",
     description: "Full-scale implementation of Public Governance system in pioneer countries",
     features: [
       "First Country Implementation",
@@ -223,15 +238,15 @@ const roadmapStages = [
       "Public Service Integration",
       "Policy Framework Adoption"
     ],
-    color: "bg-teal-500",
-    textColor: "text-teal-500"
+    color: "bg-cyan-500",
+    textColor: "text-cyan-500"
   },
   {
     stage: "Global Expansion (Stages 8-20)",
     phase: "Growth Phase",
     icon: <Globe className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "2026-2030",
+    timeframe: "2027-2030",
     description: "Worldwide expansion helping people and governments complete projects through employment circles",
     features: [
       "Multi-Country Expansion",
@@ -240,8 +255,8 @@ const roadmapStages = [
       "Infrastructure Development",
       "Global Economic Integration"
     ],
-    color: "bg-cyan-500",
-    textColor: "text-cyan-500"
+    color: "bg-gray-500",
+    textColor: "text-gray-500"
   }
 ];
 
@@ -387,7 +402,7 @@ export default function VisionRoadmapPage() {
                     {roadmapStages[activeStage].icon}
                     <div>
                       <Badge variant="secondary" className="mb-2">
-                        {roadmapStages[activeStage].status === "active" ? "Live Now" : "Coming Soon"}
+                        {roadmapStages[activeStage].status === "active" ? "Live Now" : "Upcoming"}
                       </Badge>
                       <CardTitle className="text-2xl">{roadmapStages[activeStage].stage}</CardTitle>
                       <CardDescription className="text-white/90">
