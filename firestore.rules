@@ -1,128 +1,133 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ===== HELPER FUNCTIONS =====
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
+    }
+    
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    function getUserData(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data;
+    function isInDirectTeam(userId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().direct_team != null &&
+        userId in getUserData().direct_team;
     }
 
-    function getMyData() {
-      return getUserData(request.auth.uid);
-    }
-    
-    function isAdmin(role) {
-      return isAuthenticated() && getMyData().role == role;
-    }
-    
-    function isAnyAdmin() {
-       return isAuthenticated() && getMyData().role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
+    function canVoteInPoll(poll) {
+      // Geographical voting eligibility
+      let userData = getUserData();
+      return userData.country == poll.country &&
+             userData.state == poll.state &&
+             userData.district == poll.district &&
+             userData.taluka == poll.taluka &&
+             userData.village == poll.village &&
+             userData.street == poll.street;
     }
 
-    // ===== USER MANAGEMENT =====
-    // Most secure: only backend functions can create user docs.
-    // Users can read/write their own data. Admins can manage users.
+    // ==================== USER MANAGEMENT ====================
     match /users/{userId} {
-      allow create: if false; // IMPORTANT: Only backend functions (onUserCreate) can create users.
-      allow read, update, delete: if isOwner(userId) || isAdmin('User Management Admin') || isAdmin('Super Admin');
-      allow list: if isAdmin('User Management Admin') || isAdmin('Super Admin');
-    }
-
-    // ===== FINANCIAL & SENSITIVE DATA =====
-    // These collections should NEVER be written to by clients. Only by backend functions.
-    // Users can read their own records.
-    match /transactions/{transactionId} {
-      allow read: if isOwner(resource.data.userId) || isAnyAdmin();
-      allow list: if isAnyAdmin();
-      allow create, update, delete: if false;
-    }
-
-    match /presales/{presaleId} {
-      allow read: if isOwner(resource.data.userId) || isAnyAdmin();
-      allow list: if isAnyAdmin();
-      allow create, update, delete: if false;
-    }
-    
-    match /commissions/{commissionId} {
-      allow read: if isOwner(resource.data.userId) || isAnyAdmin();
-      allow list: if isAnyAdmin();
-      allow create, update, delete: if false;
-    }
-
-    // ===== APPLICATIONS (Franchisee, etc.) =====
-    match /applications/{applicationId} {
-      // Users can create their own application.
-      allow create: if isOwner(request.resource.data.userId);
-      // Users can read their own applications. Admins can read any.
-      allow read: if isOwner(resource.data.userId) || isAdmin('Franchisee Management Admin') || isAdmin('Super Admin');
-      // Admins can update any application (to approve/reject). Users cannot.
-      allow update: if isAdmin('Franchisee Management Admin') || isAdmin('Super Admin');
-      allow delete: if isAnyAdmin();
-      allow list: if isAnyAdmin();
-    }
-
-    // ===== VOTING SYSTEM =====
-    match /polls/{pollId} {
-      // Anyone authenticated can read polls to see what to vote on.
-      allow read: if isAuthenticated();
-      // Only admins can create or manage polls.
-      allow write: if isAnyAdmin();
-    }
-
-    match /votes/{voteId} {
-      // Allow a user to create a vote for themselves.
-      allow create: if isOwner(request.resource.data.userId);
-      // A user can only read their own vote.
-      allow read: if isOwner(resource.data.userId);
-      allow update, delete: if false; // Votes should be immutable.
-    }
-    
-    // ===== E-COMMERCE =====
-    match /products/{productId} {
-      // Anyone can see products.
-      allow read: if true;
-      // Only admins can create/update/delete products for now.
-      allow write: if isAnyAdmin();
-    }
-    
-    match /carts/{userId} {
-      // Users can only manage their own cart.
       allow read, write: if isOwner(userId);
+      allow read: if isInDirectTeam(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow read, write: if isAdmin();
+    }
+    
+    // ==================== COMMISSION SYSTEM ====================
+    match /commissions/{commissionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow read, write: if isAdmin();
+    }
+    
+    // ==================== AFFILIATE REWARDS ====================
+    match /affiliate_rewards/{rewardId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow read, write: if isAdmin();
+    }
+    
+    // ==================== VOTING SYSTEM ====================
+    match /polls/{pollId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /votes/{voteId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated() && canVoteInPoll(resource.data.poll);
+      allow read: if isAdmin();
+    }
+    
+    // ==================== FRANCHISEE SYSTEM ====================
+    match /franchise_applications/{applicationId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated();
+      allow read, write: if isAdmin();
+    }
+    
+    match /franchise_territories/{territoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /business_types/{typeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // ==================== E-COMMERCE SYSTEM ====================
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
     
     match /orders/{orderId} {
-      // Users can only create and read their own orders.
-      allow create: if isOwner(request.resource.data.userId);
-      allow read: if isOwner(resource.data.userId) || isAnyAdmin();
-      // Only admins can update orders (e.g., to 'Shipped').
-      allow update: if isAnyAdmin();
-    }
-
-    // ===== QUIZ & COMPETITIONS =====
-    match /quiz_results/{resultId} {
-      allow read, write: if isOwner(request.resource.data.userId);
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated();
+      allow read, write: if isAdmin();
     }
     
-    // ===== SOCIAL MEDIA =====
-    match /social_posts/{postId} {
+    match /web_stores/{storeId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
       allow read: if isAuthenticated();
-      allow create: if isOwner(request.resource.data.authorId);
-      allow update, delete: if isOwner(resource.data.authorId);
     }
     
-    // ===== GENERAL FALLBACK (Secure by default) =====
-    // Any other collection path that doesn't match the rules above is denied.
+    match /cart/{cartId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    // ==================== QUIZ & COMPETITIONS ====================
+    match /quiz_attempts/{attemptId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    match /quiz_results/{resultId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow read: if isAdmin();
+    }
+    
+    match /competitions/{competitionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // ==================== SECURE FALLBACK ====================
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if false; // ❌ REPLACED THE DANGEROUS RULE!
     }
   }
 }

@@ -35,7 +35,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp } from '@/firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { countries } from '@/lib/data';
 import { businessRoles, businessTypes, businessMappings } from '@/lib/business-data';
 
@@ -134,7 +134,7 @@ function RegistrationForm() {
       if (resultData.success && resultData.userId) {
         toast({
           title: 'Registration Initiated!',
-          description: "Your account is being set up. Please check your email for verification before logging in.",
+          description: "Your account is being set up. You will be redirected to the login page.",
           duration: 7000,
         });
         router.push('/login');
@@ -169,11 +169,11 @@ function RegistrationForm() {
              <div className="space-y-4 p-4 border rounded-lg bg-card">
                 <h3 className="font-semibold text-lg">1. Personal & Account Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField name="name" render={({ field }) => (<FormItem><FormLabel>Full Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField name="password" render={({ field }) => (<FormItem><FormLabel>Password *</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormDescription>Min. 6 characters.</FormDescription><FormMessage /></FormItem>)} />
-                  <FormField name="walletAddress" render={({ field }) => (<FormItem><FormLabel>Wallet Address (Optional)</FormLabel><FormControl><Input placeholder="For receiving PGC and rewards" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField name="referredByCode" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Full Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="password" render={({ field }) => (<FormItem><FormLabel>Password *</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormDescription>Min. 6 characters.</FormDescription><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="walletAddress" render={({ field }) => (<FormItem><FormLabel>Wallet Address (Optional)</FormLabel><FormControl><Input placeholder="For receiving PGC and rewards" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="referredByCode" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
             </div>
 
@@ -182,11 +182,11 @@ function RegistrationForm() {
               <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>This information is required to determine your eligibility for local, state, and national voting.</AlertDescription></Alert>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="h-4 w-4 inline mr-1" />Country *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{countries.map((c) => (<SelectItem key={c.value} value={c.label}>{c.label}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                <FormField name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State *</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="village" render={({ field }) => (<FormItem><FormLabel><Home className="h-4 w-4 inline mr-1" />Village/Ward *</FormLabel><FormControl><Input placeholder="e.g., Juhu" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="street" render={({ field }) => (<FormItem><FormLabel>Street (Optional)</FormLabel><FormControl><Input placeholder="e.g., Main Street" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State *</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="village" render={({ field }) => (<FormItem><FormLabel><Home className="h-4 w-4 inline mr-1" />Village/Ward *</FormLabel><FormControl><Input placeholder="e.g., Juhu" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>Street (Optional)</FormLabel><FormControl><Input placeholder="e.g., Main Street" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
             </div>
 
