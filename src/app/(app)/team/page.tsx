@@ -22,7 +22,7 @@ import { Users, UserPlus, DollarSign, Award, Crown, Shield } from 'lucide-react'
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
@@ -259,7 +259,7 @@ export default function TeamPage() {
   const currentPaidRank = userProfile?.currentPaidRank || 'None';
 
   // Level-wise earnings calculation
-  const levelEarnings = {};
+  const levelEarnings: Record<number, { total: number, count: number }> = {};
   commissionData.commissions.forEach(commission => {
     const level = commission.level || 1;
     const amount = commission.amount || commission.commissionAmount || 0;
@@ -295,7 +295,7 @@ export default function TeamPage() {
                 return directTeamMembers.filter(m => m.isPaid).length;
             }
             // For subsequent paid ranks, it depends on the achievements of the team.
-            const dependsOnKey = rank.dependsOn as keyof typeof userProfile.paidAchievers;
+            const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.paidAchievers>;
             return userProfile.paidAchievers?.[dependsOnKey] || 0;
         } else {
             // For Bronze, the requirement is direct members (free or paid).
@@ -303,7 +303,7 @@ export default function TeamPage() {
                 return userProfile.direct_team?.length || 0;
             }
             // For subsequent free ranks, it depends on the achievements of the team.
-            const dependsOnKey = rank.dependsOn as keyof typeof userProfile.freeAchievers;
+            const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.freeAchievers>;
             return userProfile.freeAchievers?.[dependsOnKey] || 0;
         }
     };
@@ -434,7 +434,7 @@ export default function TeamPage() {
     );
   };
 
-  if (isUserLoading || isProfileLoading) {
+  if (isUserLoading || (user && isProfileLoading)) {
     return (
         <div className="flex justify-center items-center h-full">
             <p>Loading your team...</p>
@@ -564,3 +564,4 @@ export default function TeamPage() {
     </div>
   );
 }
+
