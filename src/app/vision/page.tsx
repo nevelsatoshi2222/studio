@@ -158,36 +158,20 @@ const roadmapStages = [
     phase: "Stage 3",
     icon: <ShoppingCart className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q3 2026",
-    description: "Based on the niches discovered in Stage 2, we will create new economic opportunities through decentralized commerce and employment solutions.",
+    timeframe: "Q3-Q4 2026",
+    description: "Launching specialized coins (Franchise, Work, Job) to power a new decentralized economy. This stage creates new opportunities through e-commerce and employment solutions based on the niches discovered in Stage 2.",
     features: [
       "Global E-Commerce Platform",
       "Home Employment Solutions",
-      "Niche-Specific Marketplaces",
-      "Job Creation Initiatives"
+      "Franchise Coin Ecosystem",
+      "Job & Work Coin Integration"
     ],
     color: "bg-indigo-500",
     textColor: "text-indigo-500"
   },
   {
-    stage: "Multi-Coin Ecosystem Launch",
-    phase: "Stage 4",
-    icon: <Coins className="h-8 w-8" />,
-    status: "upcoming",
-    timeframe: "Q4 2026",
-    description: "Expanding our ecosystem with specialized tokens for governance, trade, and innovation.",
-    features: [
-      "Idea Governance Coin (IGC) Launch",
-      "International Trade Coin (ITC)",
-      "Franchise Coin Ecosystem",
-      "Job & Work Coin Integration"
-    ],
-    color: "bg-red-500",
-    textColor: "text-red-500"
-  },
-  {
     stage: "Community Support Initiative",
-    phase: "Stage 5",
+    phase: "Stage 4",
     icon: <Users className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q1 2027",
@@ -203,7 +187,7 @@ const roadmapStages = [
   },
   {
     stage: "National Implementation",
-    phase: "Stage 6",
+    phase: "Stage 5",
     icon: <Building2 className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q2 2027",
@@ -218,7 +202,7 @@ const roadmapStages = [
     textColor: "text-cyan-500"
   },
   {
-    stage: "Global Expansion (Stages 7+)",
+    stage: "Global Expansion (Stages 6+)",
     phase: "Growth Phase",
     icon: <Globe className="h-8 w-8" />,
     status: "upcoming",
