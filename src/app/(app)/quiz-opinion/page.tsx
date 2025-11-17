@@ -479,11 +479,104 @@ export default function FinancialAwarenessQuiz() {
           </CardContent>
         </Card>
 
-        {/* Rest of your results component remains the same */}
-        {/* ... (keep your existing detailed results section) */}
+        {/* Detailed Results Section */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Detailed Answers</CardTitle>
+                <CardDescription>Review your answers and the explanations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {financialQuizQuestions.map(question => {
+                    const userAnswer = answers[question.id];
+                    const isCorrect = question.noPenalty || userAnswer === question.correctAnswer;
+                    return (
+                        <div key={question.id} className={`p-4 border rounded-lg ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                            <h4 className="font-semibold">{question.question}</h4>
+                            <p className="text-sm mt-2">Your answer: <span className="font-medium">{userAnswer}</span></p>
+                            {!isCorrect && <p className="text-sm">Correct answer: <span className="font-medium">{question.correctAnswer}</span></p>}
+                            <div className={`mt-3 pt-3 border-t ${isCorrect ? 'border-green-200' : 'border-red-200'}`}>
+                                <p className="text-xs text-gray-600">{question.explanation}</p>
+                            </div>
+                        </div>
+                    )
+                })}
+            </CardContent>
+        </Card>
+
       </div>
     );
   }
 
-  // ... (keep your existing quiz component JSX)
+  return (
+    <div className="max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-xl">Question {currentQuestionIndex + 1}/{financialQuizQuestions.length}</CardTitle>
+              <CardDescription>Select the best answer</CardDescription>
+            </div>
+            <Badge variant="secondary" className="text-base">{progress.toFixed(0)}%</Badge>
+          </div>
+          <Progress value={progress} className="mt-4" />
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <p className="text-lg font-semibold min-h-[60px]">{currentQuestion.question}</p>
+          
+          <RadioGroup 
+            value={answers[currentQuestion.id]} 
+            onValueChange={(value) => handleAnswerSelect(currentQuestion.id, value)}
+          >
+            {currentQuestion.options.map((option, index) => (
+              <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-200">
+                <RadioGroupItem value={option} id={`q${currentQuestion.id}-opt${index}`} />
+                <Label htmlFor={`q${currentQuestion.id}-opt${index}`} className="flex-1 cursor-pointer">
+                  {option}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </CardContent>
+
+        <CardContent>
+          {currentQuestion.requiresAgreement && (
+            <div className="mt-4 space-y-2">
+              <Label>How much do you agree with this policy?</Label>
+              <RadioGroup
+                value={agreementLevel[currentQuestion.id]}
+                onValueChange={(value) => handleAgreementSelect(currentQuestion.id, value)}
+                className="flex flex-wrap gap-2"
+              >
+                {['0%', '25%', '50%', '75%', '100%'].map(level => (
+                  <div key={level}>
+                    <RadioGroupItem value={level} id={`agree-${level}`} className="sr-only" />
+                    <Label
+                      htmlFor={`agree-${level}`}
+                      className={`px-3 py-1.5 border rounded-full cursor-pointer ${
+                        agreementLevel[currentQuestion.id] === level
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      {level}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="flex justify-between">
+          <Button onClick={handlePrevious} disabled={currentQuestionIndex === 0} variant="outline">
+            Previous
+          </Button>
+          <Button onClick={handleNext}>
+            {currentQuestionIndex === financialQuizQuestions.length - 1 ? 'Finish & See Results' : 'Next'}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 }
