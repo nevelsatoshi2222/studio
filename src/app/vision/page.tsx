@@ -122,55 +122,52 @@ const roadmapStages = [
     textColor: "text-green-500"
   },
   {
-    stage: "Global Education Revolution",
+    stage: "Education & Anti-Corruption Framework",
     phase: "Stage 1",
-    icon: <GraduationCap className="h-8 w-8" />,
+    icon: <Shield className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q1 2026",
-    description: "Transforming global education with accessible, decentralized learning systems for all.",
+    description: "Funds from the first token sale stage will be allocated: 10% to Global Education, 50% to Anti-Corruption Rewards, and 40% to street-level governance for community development.",
     features: [
-      "Decentralized Learning Platform",
-      "Free Educational Resources",
-      "Skill Development Programs",
-      "Global Teacher Network",
-      "Blockchain Certification"
+      "Decentralized Learning Resources",
+      "Transparent Anti-Corruption System",
+      "Community-Voted Local Funding",
+      "Whistleblower Protection Program",
     ],
     color: "bg-purple-500",
     textColor: "text-purple-500"
   },
   {
-    stage: "Anti-Corruption Framework",
+    stage: "Talent & Quiz Competition Platform",
     phase: "Stage 2",
-    icon: <Shield className="h-8 w-8" />,
-    status: "upcoming",
-    timeframe: "Q2 2026",
-    description: "Implementing transparent governance systems to eliminate corruption through blockchain technology.",
-    features: [
-      "Transparent Governance Protocol",
-      "Public Fund Tracking System",
-      "Anti-Corruption Dashboard",
-      "Whistleblower Protection",
-      "Community Oversight Platform"
-    ],
-    color: "bg-yellow-500",
-    textColor: "text-yellow-500"
-  },
-  {
-    stage: "Talent & Competition Platform",
-    phase: "Stage 3",
     icon: <Trophy className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q3 2026",
-    description: "Creating global platforms for sports, arts, and talent competitions with fair reward systems.",
+    timeframe: "Q2 2026",
+    description: "Purpose: Niche Find. Creating global platforms for sports, arts, and knowledge competitions with fair, community-voted reward systems to discover talent.",
     features: [
       "Global Talent Competitions",
       "Sports Tournament Platform",
       "Arts & Culture Festivals",
-      "Digital Performance Stages",
       "Fair Reward Distribution"
     ],
     color: "bg-orange-500",
     textColor: "text-orange-500"
+  },
+  {
+    stage: "E-Commerce & Employment Revolution",
+    phase: "Stage 3",
+    icon: <ShoppingCart className="h-8 w-8" />,
+    status: "upcoming",
+    timeframe: "Q3 2026",
+    description: "Based on the niches discovered in Stage 2, we will create new economic opportunities through decentralized commerce and employment solutions.",
+    features: [
+      "Global E-Commerce Platform",
+      "Home Employment Solutions",
+      "Niche-Specific Marketplaces",
+      "Job Creation Initiatives"
+    ],
+    color: "bg-indigo-500",
+    textColor: "text-indigo-500"
   },
   {
     stage: "Multi-Coin Ecosystem Launch",
@@ -180,9 +177,8 @@ const roadmapStages = [
     timeframe: "Q4 2026",
     description: "Expanding our ecosystem with specialized tokens for governance, trade, and innovation.",
     features: [
-      "Idea Governance Coin (IDC) Launch",
+      "Idea Governance Coin (IGC) Launch",
       "International Trade Coin (ITC)",
-      "International Trade Exchange (ITE)",
       "Franchise Coin Ecosystem",
       "Job & Work Coin Integration"
     ],
@@ -190,58 +186,39 @@ const roadmapStages = [
     textColor: "text-red-500"
   },
   {
-    stage: "E-Commerce & Employment Revolution",
-    phase: "Stage 5",
-    icon: <ShoppingCart className="h-8 w-8" />,
-    status: "upcoming",
-    timeframe: "Q1 2027",
-    description: "Creating new economic opportunities through decentralized commerce and employment solutions.",
-    features: [
-      "Global E-Commerce Platform",
-      "Home Employment Solutions",
-      "Customer Discount Programs",
-      "Franchise Opportunities",
-      "Job Creation Initiatives"
-    ],
-    color: "bg-indigo-500",
-    textColor: "text-indigo-500"
-  },
-  {
     stage: "Community Support Initiative",
-    phase: "Stage 6",
+    phase: "Stage 5",
     icon: <Users className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q2 2027",
+    timeframe: "Q1 2027",
     description: "Direct assistance programs starting with street communities and expanding globally.",
     features: [
       "Street Community Support",
       "Basic Needs Provision",
       "Skill Training Programs",
-      "Healthcare Access Initiatives",
-      "Housing Support Systems"
+      "Healthcare Access Initiatives"
     ],
     color: "bg-teal-500",
     textColor: "text-teal-500"
   },
   {
     stage: "National Implementation",
-    phase: "Stage 7",
+    phase: "Stage 6",
     icon: <Building2 className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q3 2027",
+    timeframe: "Q2 2027",
     description: "Full-scale implementation of Public Governance system in pioneer countries.",
     features: [
       "First Country Implementation",
       "Government Partnership",
       "National Scale Deployment",
-      "Public Service Integration",
-      "Policy Framework Adoption"
+      "Public Service Integration"
     ],
     color: "bg-cyan-500",
     textColor: "text-cyan-500"
   },
   {
-    stage: "Global Expansion (Stages 8-20)",
+    stage: "Global Expansion (Stages 7+)",
     phase: "Growth Phase",
     icon: <Globe className="h-8 w-8" />,
     status: "upcoming",
@@ -251,7 +228,6 @@ const roadmapStages = [
       "Multi-Country Expansion",
       "Government Project Support",
       "Employment Circle Networks",
-      "Infrastructure Development",
       "Global Economic Integration"
     ],
     color: "bg-gray-500",
@@ -410,15 +386,15 @@ export default function VisionRoadmapPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-gray-800">
                   <p className="text-lg text-white mb-6">
                     {roadmapStages[activeStage].description}
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     {roadmapStages[activeStage].features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span className="text-gray-700">{feature}</span>
+                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                        <Star className="h-4 w-4 text-yellow-400" />
+                        <span className="text-gray-200">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -435,7 +411,7 @@ export default function VisionRoadmapPage() {
                   {roadmapStages.map((stage, index) => (
                     <div key={index} className="flex gap-8 items-start">
                       {/* Timeline Dot */}
-                      <div className={`flex-shrink-0 w-16 h-16 rounded-full border-4 border-white ${stage.color} shadow-lg flex items-center justify-center z-20`}>
+                      <div className={`flex-shrink-0 w-16 h-16 rounded-full border-4 border-white ${stage.color} text-white shadow-lg flex items-center justify-center z-20`}>
                         {stage.icon}
                       </div>
                       
@@ -471,7 +447,7 @@ export default function VisionRoadmapPage() {
                         <CardContent>
                           <div className="grid gap-2">
                             {stage.features.slice(0, 3).map((feature, featureIndex) => (
-                              <div key={featureIndex} className="flex items-center gap-2 text-sm">
+                              <div key={featureIndex} className="flex items-center gap-2 text-sm text-gray-300">
                                 <Target className="h-3 w-3 text-blue-500" />
                                 <span>{feature}</span>
                               </div>
@@ -552,3 +528,4 @@ export default function VisionRoadmapPage() {
       </div>
   );
 }
+
