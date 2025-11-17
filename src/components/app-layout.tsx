@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import Link from 'next/link';
@@ -101,7 +102,7 @@ const programNavItems = [
   { href: '/sports', icon: Trophy, label: 'Sports Competition'},
   { href: '/arts', icon: Paintbrush, label: 'Arts Competition'},
   { href: '/affiliate-marketing', icon: Share2, label: 'Affiliate Marketing'},
-  { href: '/influencer', icon: Megaphone, label: 'Influencer'},
+  { href: '/influencer-rewards', icon: Megaphone, label: 'Influencer Rewards'},
   { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
   { href: '/franchisee', icon: Building2, label: 'Franchisee Program' },
   { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
