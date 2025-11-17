@@ -1,4 +1,3 @@
-
 // This file needs to be the first to initialize the admin SDK
 import * as admin from 'firebase-admin';
 if (!admin.apps.length) {

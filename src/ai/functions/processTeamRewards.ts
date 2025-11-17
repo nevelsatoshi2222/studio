@@ -136,8 +136,4 @@ async function checkRank(userRef: admin.firestore.DocumentReference, userData: a
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
 
-            functions.logger.log(`User ${userRef.id} achieved rank ${rank.name} and will be awarded ${rewardAmount} PGC.`);
-            break; // Award only the highest applicable rank and stop
-        }
-    }
-}
+            functions.logger.log(`User ${userRef.id} achieved rank ${rank.name} and will be awarded ${rewardAmount} P

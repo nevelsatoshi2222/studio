@@ -114,8 +114,4 @@ export const distributeCommission = functions.firestore
                 // In a production system, you might add retry logic or a dead-letter queue here.
             }
         } else {
-            functions.logger.log(`No commissions were batched for presale ${presaleRef.id}.`);
-        }
-
-        return null;
-    });
+            functions.logger.log(`No commissions

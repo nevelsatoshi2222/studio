@@ -27,17 +27,6 @@ service cloud.firestore {
         userId in getUserData().direct_team;
     }
 
-    function canVoteInPoll(poll) {
-      // Geographical voting eligibility
-      let userData = getUserData();
-      return userData.country == poll.country &&
-             userData.state == poll.state &&
-             userData.district == poll.district &&
-             userData.taluka == poll.taluka &&
-             userData.village == poll.village &&
-             userData.street == poll.street;
-    }
-
     // ==================== USER MANAGEMENT ====================
     match /users/{userId} {
       allow read, write: if isOwner(userId);
@@ -60,74 +49,9 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
-    // ==================== VOTING SYSTEM ====================
-    match /polls/{pollId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    match /votes/{voteId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthenticated() && canVoteInPoll(resource.data.poll);
-      allow read: if isAdmin();
-    }
-    
-    // ==================== FRANCHISEE SYSTEM ====================
-    match /franchise_applications/{applicationId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthenticated();
-      allow read, write: if isAdmin();
-    }
-    
-    match /franchise_territories/{territoryId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    match /business_types/{typeId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    // ==================== E-COMMERCE SYSTEM ====================
-    match /products/{productId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    match /orders/{orderId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthenticated();
-      allow read, write: if isAdmin();
-    }
-    
-    match /web_stores/{storeId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow read: if isAuthenticated();
-    }
-    
-    match /cart/{cartId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-    }
-    
-    // ==================== QUIZ & COMPETITIONS ====================
-    match /quiz_attempts/{attemptId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-    }
-    
-    match /quiz_results/{resultId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == resource.data.userId;
-      allow read: if isAdmin();
-    }
-    
-    match /competitions/{competitionId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    
-    // ==================== SECURE FALLBACK ====================
+    // ==================== ALL OTHER COLLECTIONS ====================
     match /{document=**} {
-      allow read, write: if false; // ❌ REPLACED THE DANGEROUS RULE!
+      allow read, write: if isAuthenticated();
     }
   }
 }

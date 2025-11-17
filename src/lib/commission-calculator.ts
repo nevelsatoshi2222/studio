@@ -164,7 +164,7 @@ export class CommissionCalculator {
       // Convert Set to count
       Object.keys(levelSummary).forEach(level => {
         const levelNum = parseInt(level);
-        levelSummary[levelNum].membersCount = levelSummary[levelNum].members.size;
+        (levelSummary as any)[levelNum].membersCount = levelSummary[levelNum].members.size;
       });
 
       return {
