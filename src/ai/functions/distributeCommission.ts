@@ -49,6 +49,8 @@ export const distributeCommission = functions.firestore
         // If no referrer, there's no commission to pay out.
         if (!referrerId) {
             functions.logger.log(`Purchase by ${buyerId} has no valid referrer. Exiting commission payout.`);
+            // Even if no commission, mark presale as completed to avoid reprocessing
+            await presaleRef.update({ status: 'COMPLETED' });
             return null;
         }
 
@@ -106,12 +108,16 @@ export const distributeCommission = functions.firestore
                 await batch.commit();
                 functions.logger.log(`Successfully paid commissions for ${presaleRef.id} up to ${transactionCount} levels.`);
 
-                // 6. Update the presale status to 'COMPLETED' after successful commission payout
-                await presaleRef.update({ status: 'COMPLETED' });
-
             } catch (error) {
                 functions.logger.error(`Error committing commission batch for presale ${presaleRef.id}:`, error);
                 // In a production system, you might add retry logic or a dead-letter queue here.
             }
         } else {
-            functions.logger.log(`No commissions
+            functions.logger.log(`No commissions were calculated for presale ${presaleRef.id}.`);
+        }
+        
+        // 6. Update the presale status to 'COMPLETED' after successful commission payout
+        await presaleRef.update({ status: 'COMPLETED' });
+        
+        return null;
+    });

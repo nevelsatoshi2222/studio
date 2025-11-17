@@ -1,7 +1,10 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ==================== HELPER FUNCTIONS ====================
+
+    // Helper Functions for secure and reusable logic
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -10,126 +13,119 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function getUserRole() {
-      // Safely get the user's role from their document.
-      // NOTE: For higher security, this should be read from custom claims (request.auth.token.role)
-      // which can only be set by the backend. For now, we read from the user's document.
+    function getRole() {
+      // Safely access user's role from their own document
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
     function isAdmin() {
-      return isAuthenticated() && getUserRole() in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
+      return isAuthenticated() && getRole() in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
     }
 
-    function canVote(poll) {
-        // A user can vote if the poll's geographical scope matches their own data.
-        let userGeo = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-        
-        if (poll.geographyScope == "International") {
-            return true;
-        }
-        if (poll.geographyScope == "National") {
-            return userGeo.country == poll.country;
-        }
-        if (poll.geographyScope == "State") {
-            return userGeo.country == poll.country && userGeo.state == poll.state;
-        }
-        if (poll.geographyScope == "District") {
-            return userGeo.country == poll.country && userGeo.state == poll.state && userGeo.district == poll.district;
-        }
-        // ... and so on for Taluka, Village, Street
-        return false;
+    function isSuperAdmin() {
+      return isAuthenticated() && getRole() == 'Super Admin';
     }
 
-    // ==================== USERS COLLECTION ====================
+    function isUserManagementAdmin() {
+      return isAuthenticated() && getRole() in ['Super Admin', 'User Management Admin'];
+    }
+
+    function isFranchiseeManagementAdmin() {
+      return isAuthenticated() && getRole() in ['Super Admin', 'Franchisee Management Admin'];
+    }
+    
+    // --- USER DATA RULES ---
     match /users/{userId} {
-      // A user can create their own document during registration.
-      allow create: if isOwner(userId);
-      
-      // A user can read or update their OWN document.
-      allow read, update: if isOwner(userId);
+      // A user can always read and write their own data. This is essential for profile updates.
+      allow read, write: if isOwner(userId);
 
-      // Admins can read any user document.
-      allow get, list: if isAdmin();
+      // Admins can read or write to any user document for management purposes.
+      allow read, write: if isUserManagementAdmin();
       
-      // Nobody can delete user documents from the client.
-      allow delete: if false;
-    }
-    
-    // ==================== FINANCIAL & SENSITIVE COLLECTIONS ====================
-    // Only allow clients to read their own data.
-    // Writes should ideally be handled by secure backend functions.
-    match /transactions/{transactionId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow write: if isAuthenticated(); // Temporarily open for client-side logic
-    }
-    
-    match /presales/{presaleId} {
-       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-       allow write: if isAuthenticated(); // Temporarily open for client-side logic
-    }
-    
-    match /commissions/{commissionId} {
-       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-       allow write: if isAuthenticated(); // Temporarily open for client-side logic
+      // Any authenticated user can READ a user's document.
+      // This is necessary for fetching referrer info, team member names, etc.
+      // Restrict fields later if needed (e.g., can't read 'email' or 'balance').
+      allow get, list: if isAuthenticated();
     }
 
-    // ==================== APPLICATIONS (Franchisee, etc.) ====================
-    match /applications/{applicationId} {
-      // A user can create their own application.
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      
-      // A user can read their own application status.
+    // --- FINANCIAL COLLECTIONS (Commissions, Presales, Transactions) ---
+    // CRITICAL: These collections should ONLY be written to by backend Cloud Functions.
+    // This prevents users from creating fake commission records for themselves.
+    match /commissions/{docId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create, update, delete: if false; // Deny all client-side writes.
+    }
+    match /presales/{docId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create, update, delete: if false; // Deny all client-side writes.
+    }
+    match /transactions/{docId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create, update, delete: if false; // Deny all client-side writes.
+    }
+
+    // --- APPLICATION & VOTING SYSTEMS ---
+    match /applications/{appId} {
+      // Users can create and read their own applications.
+      allow create: if isOwner(request.resource.data.userId);
       allow read: if isOwner(resource.data.userId);
-      
-      // Admins can manage all applications.
-      allow read, write: if isAdmin();
+      // Only admins can update/delete (e.g., to approve/reject).
+      allow update, delete: if isFranchiseeManagementAdmin();
     }
 
-    // ==================== VOTING SYSTEM ====================
     match /polls/{pollId} {
-      // Any logged-in user can read polls.
+      // Anyone can read polls to see what there is to vote on.
       allow read: if isAuthenticated();
-      // Only admins can create or change polls.
-      allow write: if isAdmin();
+      // Only admins can create/update/delete polls.
+      allow write: if isSuperAdmin();
     }
     
     match /votes/{voteId} {
-      // A user can create a vote if they are authenticated and meet geo requirements.
-      allow create: if isAuthenticated() && canVote(get(/databases/$(database)/documents/polls/$(request.resource.data.pollId)).data);
-      // A user can read their own vote.
-      allow read: if isOwner(resource.data.userId);
+      // A user can only create/read/update their own vote.
+      allow read, write: if isOwner(request.resource.data.userId);
     }
     
-    // ==================== E-COMMERCE ====================
+    // --- E-COMMERCE RULES ---
     match /products/{productId} {
-      allow read: if true; // Publicly readable products
-      allow create, update, delete: if isAdmin();
-    }
-    
-    match /carts/{userId} {
-      allow read, write: if isOwner(userId);
-    }
-    
-    match /orders/{orderId} {
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow read: if isOwner(resource.data.userId);
-      allow update: if isAdmin(); // For order status updates
-    }
-    
-    // ==================== GENERAL CONTENT (Social, Quizzes) ====================
-    match /social_posts/{postId} {
-        allow read: if isAuthenticated();
-        allow create, update, delete: if isOwner(request.resource.data.authorId);
-    }
-    
-    match /quiz_results/{resultId} {
-       allow read, write: if isOwner(resource.data.userId);
+      // Anyone can see products.
+      allow read: if true;
+      // Only admins can add/edit products for now.
+      allow write: if isSuperAdmin(); 
     }
 
-    // Fallback: Default to denying all access to other collections
-    match /{document=**} {
-      allow read, write: if false;
+    match /carts/{userId} {
+      // Users can only manage their own shopping cart.
+      allow read, write: if isOwner(userId);
+    }
+
+    match /orders/{orderId} {
+      // Users can create their own orders and read them.
+      allow create: if isOwner(request.resource.data.userId);
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      // Only admins can update orders (e.g., to 'shipped').
+      allow update: if isSuperAdmin();
+    }
+
+    // --- QUIZ & SOCIAL ---
+    match /quiz_results/{resultId} {
+      // Users can manage their own quiz results.
+      allow read, write: if isOwner(request.resource.data.userId);
+    }
+
+    match /social_posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(request.resource.data.authorId);
+      allow update, delete: if isOwner(resource.data.authorId) || isSuperAdmin();
+    }
+    
+    // --- WITHDRAWAL REQUESTS ---
+    match /withdrawalRequests/{reqId} {
+      // Users can create their own withdrawal requests.
+      allow create: if isOwner(request.resource.data.userId);
+      // Users can read their own, admins can read all.
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      // Only admins can update (to approve/deny).
+      allow update: if isSuperAdmin();
     }
   }
 }

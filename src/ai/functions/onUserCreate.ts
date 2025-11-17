@@ -1,3 +1,4 @@
+
 'use server';
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
@@ -89,6 +90,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
 
             pgcBalance: pgcCredited,
             usdBalance: 0,
+            totalCommission: 0,
 
             referredByUserId: referrerUid || null, 
             referralCode: referralCode,
