@@ -1,30 +1,33 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // USER MANAGEMENT
+    // Allow any authenticated user to create their own user document.
+    // This is required for the onUserCreate function to work correctly.
+    // Once created, only the user themselves or an admin can modify it.
     match /users/{userId} {
-      // Allow users to read and write THEIR OWN document.
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      // Allow admins to read any user document.
-      allow list, get: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      // Admins have broader access
+      allow get, list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
     }
 
     // COMMISSIONS, PRESALES, TRANSACTIONS
-    // These should only be created by backend functions for security.
+    // These should only be created by backend functions.
     // Users can read their own records.
     match /commissions/{docId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create, update, delete: if false;
+      allow create, update, delete: if false; // Only backend can write
     }
     match /presales/{docId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create, update, delete: if false;
+      allow create, update, delete: if false; // Only backend can write
     }
     match /transactions/{docId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create, update, delete: if false;
+      allow create, update, delete: if false; // Only backend can write
     }
 
     // SOCIAL, VOTING, ETC.
@@ -38,14 +41,10 @@ service cloud.firestore {
     }
 
     // ADMIN ACCESS
+    // Admins can access a dedicated 'admin' collection.
     match /admin/{document=**} {
       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
     }
-
-    // FALLBACK (optional, but good for development)
-    // Be careful with this in production. It allows any authenticated user to read/write to any other collection.
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
+    
   }
 }

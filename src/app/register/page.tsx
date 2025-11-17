@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -38,21 +38,23 @@ import { useFirebaseApp } from '@/firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { countries } from '@/lib/data';
+import { countries, businessRoles, businessTypes, businessMappings } from '@/lib/data';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
   country: z.string().min(1, { message: 'Please select your country' }),
-  state: z.string().min(2, { message: 'Please enter your state/province' }),
-  district: z.string().min(2, { message: 'Please enter your district' }),
-  taluka: z.string().min(2, { message: 'Please enter your taluka/block' }),
-  village: z.string().min(2, { message: 'Please enter your village/ward' }),
+  state: z.string().optional(),
+  district: z.string().optional(),
+  taluka: z.string().optional(),
+  village: z.string().optional(),
   street: z.string().optional(),
   referredByCode: z.string().optional(),
   isPaid: z.boolean().default(false),
   walletAddress: z.string().optional(),
+  primaryRole: z.string().optional(),
+  businessType: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -79,6 +81,8 @@ function RegistrationForm() {
       referredByCode: searchParams.get('ref') || '',
       isPaid: false,
       walletAddress: '',
+      primaryRole: '',
+      businessType: '',
     },
   });
 
@@ -108,7 +112,9 @@ function RegistrationForm() {
           street: data.street,
           referredByCode: data.referredByCode || null,
           isPaid: data.isPaid,
-          walletAddress: data.walletAddress || null
+          walletAddress: data.walletAddress || null,
+          primaryRole: data.primaryRole,
+          businessType: data.businessType
         }
       });
 
@@ -136,6 +142,14 @@ function RegistrationForm() {
       setIsSubmitting(false);
     }
   };
+  
+  const primaryRole = form.watch('primaryRole');
+  const availableBusinessTypes = primaryRole ? businessMappings[primaryRole as keyof typeof businessMappings] || [] : [];
+
+  useEffect(() => {
+    form.resetField('businessType');
+  }, [primaryRole, form]);
+
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -169,16 +183,24 @@ function RegistrationForm() {
               <h3 className="font-semibold text-lg flex items-center gap-2"><MapPin className="h-5 w-5" /> 2. Geographical Area (for Voting)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="h-4 w-4 inline mr-1" />Country *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{countries.map((c) => (<SelectItem key={c.value} value={c.label}>{c.label}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                <FormField name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State *</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="village" render={({ field }) => (<FormItem><FormLabel><Home className="h-4 w-4 inline mr-1" />Village/Ward *</FormLabel><FormControl><Input placeholder="e.g., Juhu" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="district" render={({ field }) => (<FormItem><FormLabel>District</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="village" render={({ field }) => (<FormItem><FormLabel><Home className="h-4 w-4 inline mr-1" />Village/Ward</FormLabel><FormControl><Input placeholder="e.g., Juhu" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="street" render={({ field }) => (<FormItem><FormLabel>Street (Optional)</FormLabel><FormControl><Input placeholder="e.g., Main Street" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
             </div>
 
              <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">3. Account Type</h3>
+                <h3 className="font-semibold text-lg">3. Business Information (Optional)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <FormField control={form.control} name="primaryRole" render={({ field }) => (<FormItem><FormLabel>Primary Role</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your primary role" /></SelectTrigger></FormControl><SelectContent>{businessRoles.map((role) => (<SelectItem key={role} value={role}>{role}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                     <FormField control={form.control} name="businessType" render={({ field }) => (<FormItem><FormLabel>Business Type</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={!primaryRole}><FormControl><SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger></FormControl><SelectContent>{availableBusinessTypes.map((type) => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                </div>
+            </div>
+
+             <div className="space-y-4 p-4 border rounded-lg">
+                <h3 className="font-semibold text-lg">4. Account Type</h3>
                  <FormField
                     control={form.control}
                     name="isPaid"

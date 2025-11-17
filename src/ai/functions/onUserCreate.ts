@@ -97,6 +97,8 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             isVerified: false,
             status: 'Active',
             role: customClaims?.role || 'User',
+            primaryRole: customClaims?.primaryRole || null,
+            businessType: customClaims?.businessType || null,
             
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
             direct_team: [], 
