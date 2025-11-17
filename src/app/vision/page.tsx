@@ -538,5 +538,3 @@ export default function VisionRoadmapPage() {
       </div>
   );
 }
-
-    
