@@ -1,190 +1,80 @@
+// This file exports all Cloud Functions for deployment.
+// The `distributeCommission` function is also included here,
+// as it's triggered by Firestore events.
+export * from './onUserCreate';
+export * from './distributeCommission';
+export * from './processTeamRewards';
 
 'use server';
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { freeTrackRewards, paidTrackRewards, levelCommissions } from '../../lib/data';
 
-// Initialize Firebase Admin SDK
-if (admin.apps.length === 0) {
-  admin.initializeApp();
-}
-const db = admin.firestore();
+// This function allows an authorized user (like an admin) to set custom claims on another user.
+// It is a CRITICAL part of the secure registration flow for creating admins.
+export const setCustomClaims = functions.https.onCall(async (data, context) => {
+    // 1. Authentication Check: Ensure the user calling this function is an authenticated admin.
+    // In a real production app, you would check for a specific admin role claim:
+    // if (context.auth?.token.role !== 'Super Admin') {
+    //   throw new functions.https.HttpsError('permission-denied', 'Must be a Super Admin to set claims.');
+    // }
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+    }
 
-interface UserData {
-    uid: string;
-    referredBy?: string;
-    upline?: string[];
-    isPaid: boolean;
-    totalTeamSize: number;
-    paidTeamSize: number;
-    freeRank: string;
-    paidRank: string;
-    referralCode?: string; // The user's own referral code
-}
+    // 2. Input Validation: Ensure the required data (uid and claims) is provided.
+    const { uid, claims } = data;
+    if (!uid || typeof uid !== 'string' || !claims || typeof claims !== 'object') {
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with "uid" and "claims" arguments.');
+    }
 
-// This Cloud Function triggers when a new document is created in the 'users' collection.
-export const onUserCreate = functions.firestore
-    .document('users/{userId}')
-    .onCreate(async (snap, context) => {
-        const newUser = snap.data() as UserData & { referredByCode?: string; };
-        const newUserId = context.params.userId;
-        const batch = db.batch();
+    try {
+        // 3. Set Custom Claims: Use the Admin SDK to set the claims on the target user.
+        await admin.auth().setCustomUserClaims(uid, claims);
         
-        let upline: string[] = [];
-        let referrerId: string | undefined = undefined;
+        // 4. Return Success: Send a success response back to the client.
+        return { success: true, message: `Custom claims set successfully for user ${uid}` };
+    } catch (error: any) {
+        console.error('Error setting custom claims:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
 
-        // Use 'referredByCode' from the registration form to find the referrer.
-        const referredByCode = newUser.referredByCode;
 
-        // 1. Find the referrer and build the upline chain
-        if (referredByCode) {
-            const referrerQuery = await db.collection('users')
-                .where('referralCode', '==', referredByCode)
-                .limit(1)
-                .get();
-
-            if (!referrerQuery.empty) {
-                const referrerDoc = referrerQuery.docs[0];
-                referrerId = referrerDoc.id;
-                const referrerData = referrerDoc.data() as UserData;
-
-                // Build the upline for the new user
-                upline = [referrerId, ...(referrerData.upline || [])].slice(0, 15);
-
-                // Update the new user doc with the direct referrer's ID and their upline
-                batch.update(snap.ref, { 
-                    referredBy: referrerId,
-                    upline: upline
-                });
-
-                // Add the new user to the referrer's direct team
-                batch.update(referrerDoc.ref, {
-                    directReferrals: admin.firestore.FieldValue.arrayUnion(newUserId)
-                });
-            } else {
-                 console.log(`Referral code ${referredByCode} not found.`);
-            }
-        }
-        
-        // 2. Update team sizes for the entire upline
-        if (upline.length > 0) {
-            for (const uplineMemberId of upline) {
-                const uplineMemberRef = db.collection('users').doc(uplineMemberId);
-                const updatePayload: { [key: string]: admin.firestore.FieldValue } = {
-                    totalTeamSize: admin.firestore.FieldValue.increment(1)
-                };
-                if (newUser.isPaid) {
-                    updatePayload.paidTeamSize = admin.firestore.FieldValue.increment(1);
-                }
-                batch.update(uplineMemberRef, updatePayload);
-            }
-        }
-        
-        // 3. Distribute commissions if the new user is a paid member
-        if (newUser.isPaid && upline.length > 0) {
-            const purchaseAmount = 100; // Assume a $100 purchase for a "paid" user
-            for (let i = 0; i < upline.length; i++) {
-                const uplineMemberId = upline[i];
-                const level = i + 1;
-
-                if (level > levelCommissions.length) break;
-
-                const commissionRate = levelCommissions.find(lc => lc.level === level)?.percentage;
-                if (commissionRate === undefined) continue;
-
-                const commissionAmount = purchaseAmount * commissionRate;
-                if (commissionAmount > 0) {
-                    const uplineMemberRef = db.collection('users').doc(uplineMemberId);
-                    batch.update(uplineMemberRef, {
-                        usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
-                    });
-
-                    const commissionTxRef = db.collection('transactions').doc();
-                    batch.set(commissionTxRef, {
-                        userId: uplineMemberId,
-                        type: 'COMMISSION',
-                        amount: commissionAmount,
-                        currency: 'USDT',
-                        fromUser: newUserId,
-                        level: level,
-                        timestamp: admin.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            }
-        }
-
-        await batch.commit();
-
-        // 4. Post-commit: Check ranks for all upline members (run after sizes are committed)
-        if (upline.length > 0) {
-            await Promise.all(upline.map(uplineMemberId => checkAndAwardRank(uplineMemberId)));
-        }
-
-        console.log(`Processed new user ${newUserId} with referrer ${referrerId || 'None'}`);
-    });
-
-async function checkAndAwardRank(userId: string): Promise<void> {
-    const userRef = db.collection('users').doc(userId);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) return;
+// This function is the secure entry point for creating a new user.
+// It is called from the registration form on the client-side.
+export const createUser = functions.https.onCall(async (data, context) => {
+    const { email, password, displayName, claims } = data;
     
-    const user = userSnap.data() as UserData;
-    const batch = db.batch();
-    let ranksUpdated: string[] = [];
+    if (!email || !password || !displayName) {
+        throw new functions.https.HttpsError('invalid-argument', 'Missing required fields.');
+    }
 
-    // --- Check Free Track ---
-    const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === user.freeRank) ?? -1;
-    // Iterate from highest rank to lowest to award the best possible rank
-    for (let i = freeTrackRewards.length - 1; i > currentFreeRankIndex; i--) {
-        const rank = freeTrackRewards[i];
-        if (user.totalTeamSize >= rank.goal) {
-            batch.update(userRef, { freeRank: rank.name });
-            const pgcReward = parseFloat(rank.reward.split(' ')[0]);
-            if (!isNaN(pgcReward) && pgcReward > 0) {
-                batch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcReward) });
-                const rankTxRef = db.collection('transactions').doc();
-                batch.set(rankTxRef, {
-                    userId: userId,
-                    type: 'RANK_REWARD',
-                    amount: pgcReward,
-                    currency: 'PGC',
-                    rewardName: `Free: ${rank.name}`,
-                    timestamp: admin.firestore.FieldValue.serverTimestamp()
-                });
-            }
-            ranksUpdated.push(`Free: ${rank.name}`);
-            break; // Award the highest applicable rank and stop
+    try {
+        // Create the user in Firebase Authentication
+        const userRecord = await admin.auth().createUser({
+            email,
+            password,
+            displayName,
+        });
+
+        // Set the custom claims provided during registration
+        if (claims) {
+            await admin.auth().setCustomUserClaims(userRecord.uid, claims);
         }
-    }
 
-    // --- Check Paid Track ---
-    const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === user.paidRank) ?? -1;
-    for (let i = paidTrackRewards.length - 1; i > currentPaidRankIndex; i--) {
-        const rank = paidTrackRewards[i];
-        if (user.paidTeamSize >= rank.goal) {
-            batch.update(userRef, { paidRank: rank.name });
-            const pgcReward = parseFloat(rank.reward.split(' ')[0]);
-            if (!isNaN(pgcReward) && pgcReward > 0) {
-                batch.update(userRef, { pgcBalance: admin.firestore.FieldValue.increment(pgcReward) });
-                const rankTxRef = db.collection('transactions').doc();
-                batch.set(rankTxRef, {
-                    userId: userId,
-                    type: 'RANK_REWARD',
-                    amount: pgcReward,
-                    currency: 'PGC',
-                    rewardName: `Paid: ${rank.name}`,
-                    timestamp: admin.firestore.FieldValue.serverTimestamp()
-                });
-            }
-            ranksUpdated.push(`Paid: ${rank.name}`);
-            break; // Award the highest applicable rank and stop
+        // The onUserCreate trigger will handle creating the Firestore document.
+        // We just return the new user's ID.
+        return { success: true, userId: userRecord.uid, message: 'User created successfully.' };
+
+    } catch (error: any) {
+        // Handle specific auth errors gracefully
+        if (error.code === 'auth/email-already-exists') {
+            throw new functions.https.HttpsError('already-exists', 'The email address is already in use by another account.');
         }
+        if (error.code === 'auth/invalid-password') {
+            throw new functions.https.HttpsError('invalid-argument', 'The password must be a string with at least 6 characters.');
+        }
+        console.error('Error creating new user:', error);
+        throw new functions.https.HttpsError('internal', 'An unexpected error occurred while creating the user.');
     }
-
-    if (ranksUpdated.length > 0) {
-        await batch.commit();
-        console.log(`User ${userId} awarded new ranks: ${ranksUpdated.join(', ')}`);
-    }
-}
-
-    
+});

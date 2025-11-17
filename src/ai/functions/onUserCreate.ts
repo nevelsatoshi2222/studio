@@ -46,11 +46,10 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
     
     // The client may pass custom claims during registration, including a referrer code.
-    const customClaims = (await admin.auth().getUser(uid)).customClaims;
+    const customClaims = user.customClaims;
     const referredByCode = customClaims?.referredByCode as string | undefined;
 
     functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, customClaims);
-
 
     const userDocRef = db.collection('users').doc(uid);
 
@@ -83,7 +82,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
         // If a valid referrer was found, add the new user's UID to the referrer's directReferrals array.
         if (referrerDocRef) {
             transaction.update(referrerDocRef, {
-                directReferrals: admin.firestore.FieldValue.arrayUnion(uid)
+                direct_team: admin.firestore.FieldValue.arrayUnion(uid)
             });
              functions.logger.log(`Scheduled update for referrer ${referrerUid} to add new user ${uid}.`);
         }
@@ -96,14 +95,16 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             finalRole = 'Super Admin';
         }
         
-        const investmentAmount = customClaims?.investmentTier || 25;
-        const pgcCredited = investmentAmount * 2;
+        const investmentAmount = customClaims?.investmentTier || 0;
+        const pgcCredited = investmentAmount === 0 ? 1 : investmentAmount * 2; // 1 PGC for free, 2x for paid
 
         const userDocumentData = {
             uid: uid,
             name: displayName || email?.split('@')[0] || 'New User',
             email: email,
             phone: customClaims?.phone || user.phoneNumber || null,
+            
+            // Geographic Data
             street: customClaims?.street || '',
             village: customClaims?.village || '',
             block: customClaims?.block || '',
@@ -111,10 +112,13 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             district: customClaims?.district || '',
             state: customClaims?.state || '',
             country: customClaims?.country || '',
+
             pgcBalance: pgcCredited,
-            referredBy: referrerUid || 'ADMIN_ROOT_USER', 
+            usdBalance: investmentAmount,
+
+            referredByUserId: referrerUid || null, 
             referralCode: referralCode,
-            walletPublicKey: null,
+            walletAddress: customClaims?.walletAddress || '',
             isVerified: false,
             status: 'Active',
             role: finalRole,
@@ -123,16 +127,20 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             investmentTier: investmentAmount,
             avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
             registeredAt: admin.firestore.FieldValue.serverTimestamp(),
-            directReferrals: [],
+            direct_team: [], // Initialize direct team
+            
+            // Team & Rank Stats
             totalTeamSize: 0,
             paidTeamSize: 0,
             freeRank: 'None',
             paidRank: 'None',
-            isPaid: customClaims?.isPaid || false
+            isPaid: customClaims?.isPaid || false,
+            freeAchievers: { bronze: 0, silver: 0, gold: 0 },
+            paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
         };
 
         transaction.set(userDocRef, userDocumentData);
-        functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'ADMIN_ROOT_USER'}.`);
+        functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'None'}.`);
         
     }).then(() => {
         // After successfully creating the user, check if a purchase was made during registration.

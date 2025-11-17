@@ -44,10 +44,10 @@ export const distributeCommission = functions.firestore
             functions.logger.error(`Buyer document for ${buyerId} not found.`);
             return null;
         }
-        const referrerId: string | undefined = buyerDoc.data()?.referredBy;
+        const referrerId: string | undefined = buyerDoc.data()?.referredByUserId;
 
-        // If no referrer or the referrer is the root admin, there's no commission to pay out.
-        if (!referrerId || referrerId === 'ADMIN_ROOT_USER') {
+        // If no referrer, there's no commission to pay out.
+        if (!referrerId) {
             functions.logger.log(`Purchase by ${buyerId} has no valid referrer. Exiting commission payout.`);
             return null;
         }
@@ -59,7 +59,7 @@ export const distributeCommission = functions.firestore
         let transactionCount = 0;
 
         for (let level = 1; level <= maxLevels; level++) {
-            if (!currentUplineId || currentUplineId === 'ADMIN_ROOT_USER') {
+            if (!currentUplineId) {
                 functions.logger.log(`Reached top of the referral chain at level ${level-1}.`);
                 break;
             }
@@ -73,7 +73,8 @@ export const distributeCommission = functions.firestore
             
             // 2. Add balance update to the batch - Commission is paid in USDT, not PGC
             batch.update(uplineRef, {
-                usdtBalance: admin.firestore.FieldValue.increment(commissionAmount)
+                usdBalance: admin.firestore.FieldValue.increment(commissionAmount),
+                totalCommission: admin.firestore.FieldValue.increment(commissionAmount)
             });
             
             // 3. Add transaction log to the batch
@@ -85,6 +86,7 @@ export const distributeCommission = functions.firestore
                 currency: 'USDT', // Log currency as USDT
                 level: level,
                 purchaseRef: presaleRef.path, // Store the path to the presale document
+                fromUserId: buyerId,
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
             transactionCount += 1;
@@ -95,7 +97,7 @@ export const distributeCommission = functions.firestore
                 functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
                 break;
             }
-            currentUplineId = uplineDoc.data()?.referredBy;
+            currentUplineId = uplineDoc.data()?.referredByUserId;
         }
         
         // 5. Commit all updates atomically

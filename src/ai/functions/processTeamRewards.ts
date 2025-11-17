@@ -8,30 +8,26 @@ if (!admin.apps.length) {
 }
 const db = admin.firestore();
 
+// These reward tiers should match what's in your frontend `lib/data.ts`
 const freeTrackRewards = [
-    { name: 'Bronze', requirement: 5 },
-    { name: 'Silver', requirement: 25 }, // 5 users who have 5 users
-    { name: 'Gold', requirement: 125 },
-    { name: 'Emerald', requirement: 625 },
-    { name: 'Platinum', requirement: 3125 },
-    { name: 'Diamond', requirement: 15625 },
-    { name: 'Crown', requirement: 78125 },
+  { name: 'Bronze', requirement: 5, reward: 1 },
+  { name: 'Silver', requirement: 25, reward: 2 },
+  { name: 'Gold', requirement: 125, reward: 4 },
+  { name: 'Emerald', requirement: 625, reward: 10 },
+  { name: 'Platinum', requirement: 3125, reward: 20 },
+  { name: 'Diamond', requirement: 15625, reward: 250 },
+  { name: 'Crown', requirement: 78125, reward: 1000 },
 ];
 
 const paidTrackRewards = [
-    { name: 'Bronze Star', requirement: 5 },
-    { name: 'Silver Star', requirement: 25 },
-    { name: 'Gold Star', requirement: 125 },
-    { name: 'Emerald Star', requirement: 625 },
-    { name: 'Platinum Star', requirement: 3125 },
-    { name: 'Diamond Star', requirement: 15625 },
-    { name: 'Crown Star', requirement: 78125 },
+  { name: 'Bronze Star', requirement: 5, reward: 2.5 },
+  { name: 'Silver Star', requirement: 25, reward: 5 },
+  { name: 'Gold Star', requirement: 125, reward: 10 },
+  { name: 'Emerald Star', requirement: 625, reward: 20 },
+  { name: 'Platinum Star', requirement: 3125, reward: 125 },
+  { name: 'Diamond Star', requirement: 15625, reward: 1250 },
+  { name: 'Crown Star', requirement: 78125, reward: 6250 },
 ];
-
-const REWARD_COINS: { [key: string]: number } = {
-    'Bronze': 1, 'Silver': 2, 'Gold': 4, 'Emerald': 10, 'Platinum': 20, 'Diamond': 250, 'Crown': 1000,
-    'Bronze Star': 2.5, 'Silver Star': 5, 'Gold Star': 10, 'Emerald Star': 20, 'Platinum Star': 125, 'Diamond Star': 1250, 'Crown Star': 6250
-};
 
 /**
  * This function processes team counts and rank achievements.
@@ -53,95 +49,95 @@ export const processTeamRewards = functions.tasks.taskQueue().onDispatch(async (
     }
     const newUser = newUserDoc.data()!;
     const isNewUserPaid = newUser.isPaid || false;
-    let currentUplineId = newUser.referredBy;
+    let currentUplineId = newUser.referredByUserId;
 
-    if (!currentUplineId || currentUplineId === 'ADMIN_ROOT_USER') {
+    if (!currentUplineId) {
         functions.logger.log(`New user ${newUserId} has no upline. Exiting.`);
         return;
     }
 
-    const batch = db.batch();
     const maxLevels = 15;
+    const processedUplines = new Set(); // To prevent duplicate processing in complex chains
 
     for (let level = 1; level <= maxLevels; level++) {
-        if (!currentUplineId || currentUplineId === 'ADMIN_ROOT_USER') {
+        if (!currentUplineId || processedUplines.has(currentUplineId)) {
             break;
         }
 
+        processedUplines.add(currentUplineId);
         const uplineRef = db.collection('users').doc(currentUplineId);
-        const uplineDoc = await uplineRef.get();
         
-        // THIS IS THE CRITICAL FIX:
-        // Ensure the upline user document exists before trying to update it.
-        if (!uplineDoc.exists) {
-            functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
-            break;
+        try {
+          const uplineDoc = await uplineRef.get();
+          
+          if (!uplineDoc.exists) {
+              functions.logger.warn(`Upline user ${currentUplineId} not found at level ${level}. Stopping chain.`);
+              break;
+          }
+
+          const uplineData = uplineDoc.data()!;
+          const batch = db.batch();
+          let rankUpdated = false;
+
+          // --- 1. Increment Team Sizes ---
+          const newTotalTeamSize = (uplineData.totalTeamSize || 0) + 1;
+          batch.update(uplineRef, { totalTeamSize: admin.firestore.FieldValue.increment(1) });
+          
+          if (isNewUserPaid) {
+              const newPaidTeamSize = (uplineData.paidTeamSize || 0) + 1;
+              batch.update(uplineRef, { paidTeamSize: admin.firestore.FieldValue.increment(1) });
+              await checkRank(uplineRef, uplineData, newPaidTeamSize, paidTrackRewards, 'paidRank', batch);
+          }
+          
+          await checkRank(uplineRef, uplineData, newTotalTeamSize, freeTrackRewards, 'freeRank', batch);
+          
+          await batch.commit();
+
+          // Move to the next upline
+          currentUplineId = uplineData.referredByUserId;
+
+        } catch (error) {
+           functions.logger.error(`Error processing upline ${currentUplineId} at level ${level}:`, error);
+           break; // Stop processing this chain on error
         }
+    }
 
-        const uplineData = uplineDoc.data()!;
-        
-        // --- 1. Increment Total Team Size ---
-        batch.update(uplineRef, { totalTeamSize: admin.firestore.FieldValue.increment(1) });
-        const newTotalTeamSize = (uplineData.totalTeamSize || 0) + 1;
+    functions.logger.log(`Successfully processed team updates for new user ${newUserId}.`);
+});
 
-        // --- 2. Check and Award Free Rank ---
-        const currentFreeRankIndex = freeTrackRewards.findIndex(r => r.name === uplineData.freeRank);
-        const nextFreeRank = freeTrackRewards[currentFreeRankIndex + 1];
 
-        if (nextFreeRank && newTotalTeamSize >= nextFreeRank.requirement) {
-            const rewardAmount = REWARD_COINS[nextFreeRank.name as keyof typeof REWARD_COINS];
-            batch.update(uplineRef, {
-                freeRank: nextFreeRank.name,
+/**
+ * Checks if a user qualifies for a new rank and adds updates to the batch.
+ */
+async function checkRank(userRef: admin.firestore.DocumentReference, userData: any, newTeamSize: number, rewardTiers: any[], rankField: 'freeRank' | 'paidRank', batch: admin.firestore.WriteBatch) {
+    const currentRankName = userData[rankField] || 'None';
+    const currentRankIndex = rewardTiers.findIndex(r => r.name === currentRankName);
+    
+    // Iterate from highest rank to lowest to award the best possible rank
+    for (let i = rewardTiers.length - 1; i > currentRankIndex; i--) {
+        const rank = rewardTiers[i];
+        if (newTeamSize >= rank.requirement) {
+            const rewardAmount = rank.reward;
+            
+            // Update user's rank and balance
+            batch.update(userRef, {
+                [rankField]: rank.name,
                 pgcBalance: admin.firestore.FieldValue.increment(rewardAmount)
             });
 
             // Log the rank reward transaction
             const transactionRef = db.collection('transactions').doc();
             batch.set(transactionRef, {
-                userId: currentUplineId,
+                userId: userRef.id,
                 type: 'RANK_REWARD',
                 amount: rewardAmount,
-                rewardName: nextFreeRank.name,
+                currency: 'PGC',
+                rewardName: `${rankField === 'paidRank' ? 'Paid: ' : 'Free: '}${rank.name}`,
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
-            functions.logger.log(`User ${currentUplineId} achieved rank ${nextFreeRank.name} and was awarded ${rewardAmount} PGC.`);
+
+            functions.logger.log(`User ${userRef.id} achieved rank ${rank.name} and will be awarded ${rewardAmount} PGC.`);
+            break; // Award only the highest applicable rank and stop
         }
-
-        // --- 3. Check and Award Paid Rank (if new user made a purchase) ---
-        if (isNewUserPaid) {
-            const newPaidTeamSize = (uplineData.paidTeamSize || 0) + 1;
-            batch.update(uplineRef, { paidTeamSize: admin.firestore.FieldValue.increment(1) });
-
-            const currentPaidRankIndex = paidTrackRewards.findIndex(r => r.name === uplineData.paidRank);
-            const nextPaidRank = paidTrackRewards[currentPaidRankIndex + 1];
-
-            if (nextPaidRank && newPaidTeamSize >= nextPaidRank.requirement) {
-                const rewardAmount = REWARD_COINS[nextPaidRank.name as keyof typeof REWARD_COINS];
-                batch.update(uplineRef, {
-                    paidRank: nextPaidRank.name,
-                    pgcBalance: admin.firestore.FieldValue.increment(rewardAmount)
-                });
-                
-                const transactionRef = db.collection('transactions').doc();
-                batch.set(transactionRef, {
-                    userId: currentUplineId,
-                    type: 'RANK_REWARD',
-                    amount: rewardAmount,
-                    rewardName: nextPaidRank.name,
-                    timestamp: admin.firestore.FieldValue.serverTimestamp()
-                });
-                functions.logger.log(`User ${currentUplineId} achieved PAID rank ${nextPaidRank.name} and was awarded ${rewardAmount} PGC.`);
-            }
-        }
-        
-        // Move to the next upline
-        currentUplineId = uplineData.referredBy;
     }
-
-    try {
-        await batch.commit();
-        functions.logger.log(`Successfully processed team updates for new user ${newUserId}.`);
-    } catch (error) {
-        functions.logger.error(`Error committing batch for team rewards processing:`, error);
-    }
-});
+}
