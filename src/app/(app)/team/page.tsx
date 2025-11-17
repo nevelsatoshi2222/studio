@@ -437,7 +437,7 @@ export default function TeamPage() {
   if (isUserLoading || (user && isProfileLoading)) {
     return (
         <div className="flex justify-center items-center h-full">
-            <p>Loading your team...</p>
+            <p>{t('common.loading')}</p>
         </div>
     );
   }
@@ -564,3 +564,5 @@ export default function TeamPage() {
     </div>
   );
 }
+
+    

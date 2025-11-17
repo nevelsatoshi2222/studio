@@ -1,3 +1,4 @@
+
 // lib/i18n/translations.ts
 export const translations = {
     en: {
@@ -316,3 +317,5 @@ export const translations = {
       navigation: { worldPerspective: "ਵਿਸ਼ਵ ਦ੍ਰਿਸ਼ਟੀਕੋਣ", newIndia: "ਨਵੇਂ ਭਾਰਤ ਦਾ ਦ੍ਰਿਸ਼ਟੀਕੋਣ", quiz: "ਸ਼ਾਸਨ ਕੁਇਜ਼", polls: "ਰਾਏ ਪੋਲ", conclusion: "ਸਿੱਟਾ" }
     }
   } as const;
+
+    

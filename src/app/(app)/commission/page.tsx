@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -175,7 +176,7 @@ export default function CommissionPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {Object.entries(commissionData?.levelSummary || {}).map(([level, data]) => (
                 <div key={level} className="text-center p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-purple-50">
-                  <div className="font-semibold text-lg mb-1">Level {level}</div>
+                  <div className="font-semibold text-lg">Level {level}</div>
                   <div className="text-green-600 font-bold text-xl">${data.total.toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">
                     {data.membersCount || 0} {t('commission.members')}
@@ -288,6 +289,7 @@ export default function CommissionPage() {
 }
 
 function CommissionLoadingSkeleton() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-center">
@@ -328,3 +330,5 @@ function CommissionLoadingSkeleton() {
     </div>
   );
 }
+
+    
