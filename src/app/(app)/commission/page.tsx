@@ -1,208 +1,158 @@
 'use client';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DollarSign, TrendingUp, Users, Award, Calendar } from 'lucide-react';
-import { useUser, useFirestore } from '@/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useUser } from '@/firebase';
+import { CommissionCalculator } from '@/lib/commission-calculator';
+import { DollarSign, Users, TrendingUp, Calendar, Zap, Target, Award, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+interface CommissionSummary {
+  totalCommission: number;
+  levelSummary: Record<number, { total: number; count: number; membersCount: number; rate: number }>;
+  recentCommissions: any[];
+  allCommissions: any[];
+}
 
 export default function CommissionPage() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
-  const [commissionData, setCommissionData] = useState({
-    totalCommission: 0,
-    commissions: [] as any[],
-    isLoading: true
-  });
+  const { user } = useUser();
+  const [commissionData, setCommissionData] = useState<CommissionSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch commission data
+  const loadCommissionData = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
+      const data = await CommissionCalculator.getUserCommissionSummary(user.uid);
+      setCommissionData(data);
+    } catch (error) {
+      console.error('Error loading commission data:', error);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCommissionData = async () => {
-      if (!user) return;
-      
-      try {
-        let commissionsData = [];
-        
-        // Try both commission field formats
-        try {
-          const commQuery = query(collection(firestore, 'commissions'), where('userId', '==', user.uid));
-          const commSnapshot = await getDocs(commQuery);
-          commissionsData = commSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-          console.log('No commissions with userId field');
-        }
-        
-        if (commissionsData.length === 0) {
-          try {
-            const oldCommQuery = query(collection(firestore, 'commissions'), where('toUserId', '==', user.uid));
-            const oldCommSnapshot = await getDocs(oldCommQuery);
-            commissionsData = oldCommSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          } catch (error) {
-            console.log('No commissions with toUserId field');
-          }
-        }
+    loadCommissionData();
+  }, [user]);
 
-        const totalCommission = commissionsData.reduce((sum, comm) => sum + (comm.amount || comm.commissionAmount || 0), 0);
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadCommissionData();
+  };
 
-        setCommissionData({
-          totalCommission,
-          commissions: commissionsData,
-          isLoading: false
-        });
-      } catch (error) {
-        console.error('Error fetching commissions:', error);
-        setCommissionData(prev => ({ ...prev, isLoading: false }));
-      }
-    };
-
-    if (user) {
-      fetchCommissionData();
-    }
-  }, [user, firestore]);
-
-  // Calculate level-wise earnings
-  const levelEarnings: { [key: number]: { total: number; count: number } } = {};
-  commissionData.commissions.forEach(commission => {
-    const level = commission.level || 1;
-    const amount = commission.amount || commission.commissionAmount || 0;
-    
-    if (!levelEarnings[level]) {
-      levelEarnings[level] = { total: 0, count: 0 };
-    }
-    levelEarnings[level].total += amount;
-    levelEarnings[level].count += 1;
-  });
-
-  const levelEarningsArray = Object.entries(levelEarnings)
-    .map(([level, data]) => ({
-      level: parseInt(level),
-      earnings: data.total,
-      count: data.count
-    }))
-    .sort((a, b) => a.level - b.level);
-
-  // Calculate monthly earnings
-  const monthlyEarnings: { [key: string]: number } = {};
-  commissionData.commissions.forEach(commission => {
-    const date = commission.timestamp?.toDate ? commission.timestamp.toDate() : new Date();
-    const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-    const amount = commission.amount || commission.commissionAmount || 0;
-    
-    if (!monthlyEarnings[monthYear]) {
-      monthlyEarnings[monthYear] = 0;
-    }
-    monthlyEarnings[monthYear] += amount;
-  });
-
-  if (isUserLoading || commissionData.isLoading) {
-    return (
-      <div className="flex flex-col gap-8 p-6">
-        <div>
-          <h1 className="font-headline text-3xl font-bold">Commission Earnings</h1>
-          <p className="text-muted-foreground">Loading your commission data...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+  if (isLoading) {
+    return <CommissionLoadingSkeleton />;
   }
 
   if (!user) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Access Commission Dashboard</CardTitle>
-            <CardDescription>Please log in to view your commission earnings.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Access Denied</CardTitle>
+          <CardDescription>Please log in to view your commissions.</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button asChild>
+            <Link href="/login">Login</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8 p-6">
-      <div>
-        <h1 className="font-headline text-3xl font-bold">Commission Earnings</h1>
-        <p className="text-muted-foreground">
-          Track your real commission earnings from your team's purchases.
-        </p>
+    <div className="flex flex-col gap-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="font-headline text-3xl font-bold">Commission Earnings</h1>
+          <p className="text-muted-foreground">
+            Track your real USDT commissions from team purchases and activities
+          </p>
+        </div>
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline" 
+          disabled={refreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Commission Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <DollarSign className="h-4 w-4 text-green-500" />
+              Total Commission
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${commissionData.totalCommission.toFixed(2)}
+              ${commissionData?.totalCommission.toFixed(2) || '0.00'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Lifetime commissions
-            </p>
+            <p className="text-xs text-muted-foreground">Lifetime earnings in USDT</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-blue-500" />
+              Commission Sources
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {commissionData.commissions.length}
+            <div className="text-2xl font-bold">
+              {commissionData?.allCommissions.length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total commission events
-            </p>
+            <p className="text-xs text-muted-foreground">Total transactions</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Levels</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <TrendingUp className="h-4 w-4 text-purple-500" />
+              Active Levels
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {levelEarningsArray.length}
+            <div className="text-2xl font-bold">
+              {Object.keys(commissionData?.levelSummary || {}).length}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Levels generating income
-            </p>
+            <p className="text-xs text-muted-foreground">Earning levels</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Avg</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Zap className="h-4 w-4 text-orange-500" />
+              Team Members
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              ${Object.keys(monthlyEarnings).length > 0 
-                ? (commissionData.totalCommission / Object.keys(monthlyEarnings).length).toFixed(2)
-                : '0.00'
-              }
+            <div className="text-2xl font-bold">
+              {Object.values(commissionData?.levelSummary || {}).reduce((total, level) => total + (level.membersCount || 0), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Average per month
-            </p>
+            <p className="text-xs text-muted-foreground">Total earning members</p>
           </CardContent>
         </Card>
       </div>
@@ -210,100 +160,77 @@ export default function CommissionPage() {
       {/* Level-wise Earnings */}
       <Card>
         <CardHeader>
-          <CardTitle>Earnings by Level</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Earnings by Level
+          </CardTitle>
           <CardDescription>
-            Commission breakdown across different levels in your team
+            See how much you earn from each level of your team network
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {levelEarningsArray.length > 0 ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {levelEarningsArray.map((level) => (
-                  <div key={level.level} className="text-center p-4 rounded-lg bg-gradient-to-br from-green-50 to-blue-50 border border-green-200">
-                    <div className="font-semibold text-lg mb-2">Level {level.level}</div>
-                    <div className="text-green-600 font-bold text-2xl">${level.earnings.toFixed(2)}</div>
-                    <div className="text-xs text-gray-500 mt-1">{level.count} transactions</div>
+          {Object.keys(commissionData?.levelSummary || {}).length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {Object.entries(commissionData?.levelSummary || {}).map(([level, data]) => (
+                <div key={level} className="text-center p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-purple-50">
+                  <div className="font-semibold text-lg mb-1">Level {level}</div>
+                  <div className="text-green-600 font-bold text-xl">${data.total.toFixed(2)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {data.membersCount || 0} members
                   </div>
-                ))}
-              </div>
-              
-              {/* Progress visualization */}
-              <div className="mt-6">
-                <h4 className="font-semibold mb-3">Commission Distribution Across Levels</h4>
-                <div className="space-y-2">
-                  {levelEarningsArray.map((level) => {
-                    const percentage = commissionData.totalCommission > 0 
-                      ? (level.earnings / commissionData.totalCommission) * 100 
-                      : 0;
-                    return (
-                      <div key={level.level} className="flex items-center gap-4">
-                        <div className="w-16 text-sm font-medium">Level {level.level}</div>
-                        <Progress value={percentage} className="flex-1 h-3" />
-                        <div className="w-20 text-right text-sm font-semibold">
-                          {percentage.toFixed(1)}%
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <div className="text-xs text-blue-600 font-semibold mt-1">
+                    {data.rate}% rate
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <DollarSign className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold mb-2">No Commissions Yet</h3>
-              <p className="text-muted-foreground mb-4">
-                You haven't earned any commissions yet. Commissions will appear when your team members make purchases.
-              </p>
+            <div className="text-center py-8 text-muted-foreground">
+              <Award className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No commission earnings yet</p>
+              <p className="text-sm">Earnings will appear when your team makes purchases</p>
+              <Button asChild className="mt-4">
+                <Link href="/team">Build Your Team</Link>
+              </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Commission History */}
-      {commissionData.commissions.length > 0 && (
+      {/* Recent Commissions */}
+      {commissionData?.recentCommissions && commissionData.recentCommissions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Recent Commission History</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Recent Commission History
+            </CardTitle>
             <CardDescription>Latest commission transactions from your team</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {commissionData.commissions
-                .sort((a, b) => {
-                  const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.createdAt?.toDate || 0);
-                  const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.createdAt?.toDate || 0);
-                  return dateB - dateA;
-                })
-                .slice(0, 10)
-                .map(commission => (
-                  <div key={commission.id} className="flex justify-between items-center p-4 border rounded-lg bg-gradient-to-r from-yellow-50 to-green-50 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                        <Award className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Level {commission.level || 1} Commission</p>
-                        <p className="text-sm text-gray-600">
-                          From: {commission.fromUserName || 'Team Member'} • 
-                          {commission.timestamp?.toDate 
-                            ? new Date(commission.timestamp.toDate()).toLocaleDateString()
-                            : commission.createdAt?.toDate
-                            ? new Date(commission.createdAt.toDate()).toLocaleDateString()
-                            : 'Recent'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-green-600">
-                        +${(commission.amount || commission.commissionAmount || 0).toFixed(2)}
-                      </p>
-                      <p className="text-sm text-gray-500">Commission</p>
-                    </div>
+              {commissionData.recentCommissions.map((commission, index) => (
+                <div key={index} className="flex justify-between items-center p-3 border rounded-lg bg-green-50">
+                  <div>
+                    <p className="font-medium">Level {commission.level} Commission</p>
+                    <p className="text-sm text-gray-600">
+                      From: {commission.fromUserName} • 
+                      {commission.timestamp?.toDate 
+                        ? new Date(commission.timestamp.toDate()).toLocaleDateString()
+                        : commission.timestamp 
+                        ? new Date(commission.timestamp).toLocaleDateString()
+                        : 'Recent'
+                      }
+                    </p>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-green-600">
+                      +${commission.commissionAmount?.toFixed(2) || '0.00'}
+                    </p>
+                    <p className="text-xs text-gray-500">USDT Commission</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -316,33 +243,84 @@ export default function CommissionPage() {
           <CardDescription>How your commission earnings are calculated</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-4 rounded-lg border bg-blue-50">
-              <h4 className="font-semibold text-blue-800 mb-3">Commission Rates</h4>
-              <ul className="text-sm text-blue-700 space-y-2">
-                <li className="flex justify-between">
-                  <span>Levels 1-5:</span>
-                  <span className="font-semibold">0.2% each</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Levels 6-15:</span>
-                  <span className="font-semibold">0.1% each</span>
-                </li>
-                <li className="flex justify-between border-t pt-2">
-                  <span className="font-semibold">Total Pool:</span>
-                  <span className="font-semibold">2% distributed</span>
-                </li>
-              </ul>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-green-600 mb-2">Level 1 (Direct)</h4>
+                <p className="text-sm">0.2% of all purchases</p>
+                <p className="text-sm font-semibold">$0.20 per $100</p>
+                <Badge variant="secondary" className="mt-2">Direct Referrer</Badge>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-blue-600 mb-2">Levels 2-5</h4>
+                <p className="text-sm">0.2% of all purchases</p>
+                <p className="text-sm font-semibold">$0.20 per $100</p>
+                <Badge variant="secondary" className="mt-2">Levels 2-5</Badge>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-purple-600 mb-2">Levels 6-15</h4>
+                <p className="text-sm">0.1% of all purchases</p>
+                <p className="text-sm font-semibold">$0.10 per $100</p>
+                <Badge variant="secondary" className="mt-2">Levels 6-15</Badge>
+              </div>
             </div>
-            <div className="p-4 rounded-lg border bg-green-50">
-              <h4 className="font-semibold text-green-800 mb-3">How It Works</h4>
-              <ul className="text-sm text-green-700 space-y-2">
-                <li>• Commissions are earned when team members make purchases</li>
-                <li>• Earnings are calculated based on your level in the referral chain</li>
-                <li>• Real-time updates when new commissions are generated</li>
-                <li>• Track performance across different levels of your team</li>
-              </ul>
+            
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">Commission Calculation Example</h4>
+              <p className="text-sm text-blue-700">
+                For a $100 paid registration: Level 1 earns $0.20, Levels 2-5 earn $0.20 each, 
+                Levels 6-15 earn $0.10 each. Total distributed: ~$2.00 across all levels.
+              </p>
             </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button asChild variant="outline">
+            <Link href="/affiliate-marketing">View Affiliate Rewards</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
+
+function CommissionLoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-10 w-24" />
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-3">
+              <Skeleton className="h-4 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-24 mb-2" />
+              <Skeleton className="h-3 w-20" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-lg" />
+            ))}
           </div>
         </CardContent>
       </Card>

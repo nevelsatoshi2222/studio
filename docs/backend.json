@@ -1,65 +1,187 @@
-
 {
   "entities": {
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a registered user of the platform.",
+      "description": "Represents a registered user of the platform, including their profile, referral, and geographical data.",
       "properties": {
-        "uid": { "type": "string", "description": "Firebase Auth UID (The Doc ID)" },
-        "referredBy": { "type": "string", "description": "The uid of the referrer (Level 1 Upline)" },
-        "walletPublicKey": { "type": "string", "description": "The connected Solana Public Key" },
-        "pgcBalance": { "type": "number", "description": "Current token balance (The single source of truth)" },
-        "isVerified": { "type": "boolean", "description": "KYC/KYL status" },
+        "uid": { "type": "string", "description": "Firebase Auth UID, serving as the document ID." },
         "name": { "type": "string", "description": "User's full name." },
         "email": { "type": "string", "description": "User's email address.", "format": "email" },
-        "role": { "type": "string", "description": "The role of the user on the platform." },
-        "street": { "type": "string", "description": "User's street address." },
-        "village": { "type": "string", "description": "User's village or ward." },
-        "block": { "type": "string", "description": "User's block or kasba." },
-        "taluka": { "type": "string", "description": "User's taluka." },
-        "district": { "type": "string", "description": "User's district." },
-        "state": { "type": "string", "description": "User's state or province." },
-        "country": { "type": "string", "description": "User's country." },
-        "registeredAt": { "type": "string", "format": "date-time", "description": "The timestamp when the user registered." }
+        "role": { "type": "string", "enum": ["User", "Super Admin", "User Management Admin", "Franchisee Management Admin"], "description": "The administrative or user role on the platform." },
+        "status": { "type": "string", "enum": ["Active", "Pending", "Banned"], "default": "Active" },
+        "isPaid": { "type": "boolean", "default": false, "description": "Indicates if the user has made an initial purchase." },
+        "registeredAt": { "type": "string", "format": "date-time", "description": "Timestamp of registration." },
+        
+        "pgcBalance": { "type": "number", "default": 0, "description": "Current PGC token balance." },
+        "usdBalance": { "type": "number", "default": 0, "description": "Current real USDT commission balance." },
+        "totalCommission": { "type": "number", "default": 0, "description": "Lifetime commission earnings in USDT." },
+
+        "referredByUserId": { "type": "string", "description": "The UID of the user who referred this user." },
+        "referralCode": { "type": "string", "description": "This user's unique code to refer others." },
+        "direct_team": { "type": "array", "items": { "type": "string" }, "description": "An array of UIDs of directly referred users." },
+        "totalTeamSize": { "type": "number", "default": 0 },
+        "paidTeamSize": { "type": "number", "default": 0 },
+        "freeRank": { "type": "string", "default": "None" },
+        "paidRank": { "type": "string", "default": "None" },
+        
+        "walletAddress": { "type": "string", "description": "The user's connected Solana wallet address." },
+
+        "country": { "type": "string", "description": "User's country (normalized, lowercase)." },
+        "state": { "type": "string", "description": "User's state/province (normalized, lowercase)." },
+        "district": { "type": "string", "description": "User's district (normalized, lowercase)." },
+        "taluka": { "type": "string", "description": "User's taluka/block (normalized, lowercase)." },
+        "village": { "type": "string", "description": "User's village/ward (normalized, lowercase)." },
+        "street": { "type": "string", "description": "User's street (normalized, lowercase)." }
       },
-      "required": ["uid", "name", "email", "pgcBalance", "isVerified"]
+      "required": ["uid", "name", "email", "role", "status", "pgcBalance", "registeredAt"]
     },
     "Transaction": {
         "title": "Transaction",
         "type": "object",
-        "description": "Logs every crypto financial event for auditing.",
+        "description": "Logs every financial event for auditing. CRITICAL: Should only be created by backend functions.",
         "properties": {
-            "userId": { "type": "string", "description": "User who is receiving the funds." },
-            "type": { "type": "string", "enum": ["PURCHASE", "COMMISSION", "WITHDRAWAL", "RANK_REWARD"], "description": "The type of transaction." },
-            "amount": { "type": "number", "description": "Amount of PGC tokens." },
-            "purchaseRef": { "type": "string", "description": "Link to the original presales document (if type is COMMISSION)." },
-            "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
+            "userId": { "type": "string", "description": "User who is involved in the transaction (e.g., recipient of commission)." },
+            "type": { "type": "string", "enum": ["COMMISSION", "RANK_REWARD", "WITHDRAWAL", "PRESALE_PURCHASE"], "description": "The type of transaction." },
+            "amount": { "type": "number", "description": "Amount of currency." },
+            "currency": { "type": "string", "enum": ["PGC", "USDT"], "description": "The currency of the transaction." },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "details": {
+                "type": "object",
+                "properties": {
+                    "fromUserId": { "type": "string" },
+                    "fromUserName": { "type": "string" },
+                    "level": { "type": "number" },
+                    "rewardName": { "type": "string" },
+                    "purchaseRef": { "type": "string" }
+                }
+            }
         },
-        "required": ["userId", "type", "amount", "timestamp"]
+        "required": ["userId", "type", "amount", "currency", "timestamp"]
     },
-    "Presale": {
-        "title": "Presale",
+    "Application": {
+        "title": "Application",
         "type": "object",
-        "description": "Represents a presale purchase awaiting admin verification.",
+        "description": "Represents a user's application for a specific role, like a franchisee.",
         "properties": {
-            "userId": { "type": "string", "description": "User who made the Presale purchase." },
-            "amountUSDT": { "type": "number", "description": "Purchase amount in USDT." },
-            "pgcCredited": { "type": "number", "description": "Total PGC to be issued to the buyer (incl. bonus)." },
-            "status": { "type": "string", "enum": ["COMPLETED", "PENDING_VERIFICATION"], "description": "Status of the purchase verification." }
+            "userId": { "type": "string" },
+            "userName": { "type": "string" },
+            "roleAppliedFor": { "type": "string", "description": "e.g., 'Franchisee'" },
+            "businessType": { "type": "string", "description": "The specific business from the list of 134 types." },
+            "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected"], "default": "Pending" },
+            "submittedAt": { "type": "string", "format": "date-time" },
+            "reviewedAt": { "type": "string", "format": "date-time" },
+            "adminNotes": { "type": "string" }
         },
-        "required": ["userId", "amountUSDT", "pgcCredited", "status"]
+        "required": ["userId", "roleAppliedFor", "status", "submittedAt"]
+    },
+    "Poll": {
+      "title": "Poll",
+      "type": "object",
+      "description": "A poll for community voting, scoped to a geographical level.",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "geographyScope": { "type": "string", "enum": ["International", "National", "State", "District", "Taluka", "Village", "Street"] },
+        "country": { "type": "string", "description": "Required if scope is not International." },
+        "state": { "type": "string", "description": "Required for State level and below." },
+        "district": { "type": "string" },
+        "taluka": { "type": "string" },
+        "village": { "type": "string" },
+        "street": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["title", "geographyScope", "options", "createdAt", "createdBy"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "type": "object",
+      "description": "A user's vote on a specific poll.",
+      "properties": {
+        "pollId": { "type": "string" },
+        "userId": { "type": "string" },
+        "selectedOption": { "type": "string" },
+        "agreementLevel": { "type": "number", "minimum": 0, "maximum": 100 },
+        "votedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["pollId", "userId", "selectedOption", "votedAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "type": "object",
+      "description": "A product in the e-commerce marketplace.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "enum": ["PGC", "USDT"] },
+        "category": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["name", "price", "currency", "sellerId"]
+    },
+    "Cart": {
+      "title": "Cart",
+      "description": "A user's shopping cart.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "items": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "quantity": { "type": "number" }
+            }
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "type": "object",
+      "description": "An e-commerce order.",
+      "properties": {
+        "userId": { "type": "string" },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "items", "totalAmount", "status", "createdAt"]
+    },
+    "QuizResult": {
+      "title": "QuizResult",
+      "type": "object",
+      "description": "Record of a user's attempt at a quiz.",
+      "properties": {
+        "quizId": { "type": "string" },
+        "userId": { "type": "string" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["quizId", "userId", "score", "completedAt"]
     }
-  },
-  "auth": {
-    "providers": ["password", "anonymous"]
   },
   "firestore": {
     "structure": [
       { "path": "/users/{userId}", "definition": { "schema": { "$ref": "#/entities/User" } } },
       { "path": "/transactions/{transactionId}", "definition": { "schema": { "$ref": "#/entities/Transaction" } } },
-      { "path": "/presales/{presaleId}", "definition": { "schema": { "$ref": "#/entities/Presale" } } }
+      { "path": "/applications/{applicationId}", "definition": { "schema": { "$ref": "#/entities/Application" } } },
+      { "path": "/polls/{pollId}", "definition": { "schema": { "$ref": "#/entities/Poll" } } },
+      { "path": "/votes/{voteId}", "definition": { "schema": { "$ref": "#/entities/Vote" } } },
+      { "path": "/products/{productId}", "definition": { "schema": { "$ref": "#/entities/Product" } } },
+      { "path": "/carts/{userId}", "definition": { "schema": { "$ref": "#/entities/Cart" } } },
+      { "path": "/orders/{orderId}", "definition": { "schema": { "$ref": "#/entities/Order" } } },
+      { "path": "/quiz_results/{resultId}", "definition": { "schema": { "$ref": "#/entities/QuizResult" } } }
     ]
   }
 }

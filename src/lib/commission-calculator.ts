@@ -1,5 +1,5 @@
 import { doc, updateDoc, getDoc, collection, addDoc, getDocs, query, where, writeBatch, increment } from 'firebase/firestore';
-import { db } from '@/lib/config';  // ✅ FIXED PATH
+import { db } from '@/lib/config';
 
 export interface Commission {
   id?: string;
@@ -50,7 +50,7 @@ export class CommissionCalculator {
 
         const uplineData = uplineDoc.data();
         
-        // Calculate commission based on level
+        // Calculate commission based on level - 0.2% for levels 1-5, 0.1% for levels 6-15
         const commissionRate = level <= 5 ? this.LEVEL_1_5_RATE : this.LEVEL_6_15_RATE;
         const commissionAmount = purchaseAmount * commissionRate;
 
@@ -90,7 +90,7 @@ export class CommissionCalculator {
       }
 
       await batch.commit();
-      console.log('✅ REAL COMMISSIONS DISTRIBUTED IN USDT:', commissions);
+      console.log('✅ COMMISSIONS DISTRIBUTED:', commissions);
 
     } catch (error) {
       console.error('Error calculating commissions:', error);
@@ -110,7 +110,7 @@ export class CommissionCalculator {
 
     console.log('💰 CALCULATING REGISTRATION COMMISSIONS FOR PAID ACCOUNT...');
     
-    // $100 registration fee for paid accounts
+    // $100 registration treated as purchase for commission calculation
     const registrationAmount = 100; // USDT
     
     await this.calculateAndDistributeCommissions(
@@ -121,7 +121,7 @@ export class CommissionCalculator {
   }
 
   /**
-   * Get user's REAL commission summary from actual transactions (IN USDT)
+   * Get user's commission summary from actual transactions (IN USDT)
    */
   static async getUserCommissionSummary(userId: string) {
     try {
@@ -144,7 +144,7 @@ export class CommissionCalculator {
         totalCommission += data.commissionAmount;
       });
 
-      // Group by level to show REAL earnings per level
+      // Group by level to show earnings per level
       const levelSummary = commissions.reduce((acc, commission) => {
         const level = commission.level;
         if (!acc[level]) {
@@ -187,7 +187,7 @@ export class CommissionCalculator {
   }
 
   /**
-   * Get team structure with REAL member counts at each level
+   * Get team structure with member counts at each level
    */
   static async getUserTeamStructure(userId: string) {
     try {
@@ -205,7 +205,7 @@ export class CommissionCalculator {
         level: 1
       }));
 
-      // Get deeper levels (this is simplified - in production you'd want more efficient queries)
+      // Get deeper levels
       for (let level = 2; level <= 15; level++) {
         teamByLevel[level] = [];
         const previousLevel = level - 1;
@@ -228,7 +228,7 @@ export class CommissionCalculator {
       const allTeamMembers = Object.values(teamByLevel).flat();
       const stats = {
         totalMembers: allTeamMembers.length,
-        paidMembers: allTeamMembers.filter(m => m.accountType === 'paid').length,
+        paidMembers: allTeamMembers.filter(m => m.accountType !== 'free').length,
         freeMembers: allTeamMembers.filter(m => m.accountType === 'free').length,
         levelCounts: Object.keys(teamByLevel).reduce((acc, level) => {
           acc[parseInt(level)] = teamByLevel[parseInt(level)].length;
