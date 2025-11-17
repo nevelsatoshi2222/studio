@@ -56,6 +56,7 @@ type TeamMember = {
   registeredAt: any;
   currentFreeRank?: string;
   currentPaidRank?: string;
+  isPaid?: boolean;
 };
 
 const UserRowSkeleton = () => (
@@ -159,6 +160,7 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
             </TableCell>
             <TableCell>
                 <div className="flex gap-2">
+                     {member.isPaid && <Badge variant="default" className="bg-green-100 text-green-800">Paid</Badge>}
                     {member.currentFreeRank && member.currentFreeRank !== 'None' && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
                             {member.currentFreeRank}
@@ -183,9 +185,10 @@ export default function TeamPage() {
     commissions: [] as any[],
     isLoading: true
   });
+  const [directTeamMembers, setDirectTeamMembers] = useState<TeamMember[]>([]);
 
   const userDocRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null; // FIX: Return null if user or firestore is not ready
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
 
@@ -206,15 +209,9 @@ export default function TeamPage() {
       if (!user) return;
       
       try {
-        let commissionsData = [];
-        
-        try {
-          const commQuery = query(collection(firestore, 'commissions'), where('userId', '==', user.uid));
-          const commSnapshot = await getDocs(commQuery);
-          commissionsData = commSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-          console.log('No commissions with userId field');
-        }
+        const commQuery = query(collection(firestore, 'commissions'), where('userId', '==', user.uid));
+        const commSnapshot = await getDocs(commQuery);
+        const commissionsData = commSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         const totalCommission = commissionsData.reduce((sum, comm) => sum + (comm.amount || comm.commissionAmount || 0), 0);
 
@@ -233,6 +230,29 @@ export default function TeamPage() {
       fetchCommissionData();
     }
   }, [user, firestore]);
+  
+  // Fetch direct team member details
+  useEffect(() => {
+    const fetchDirectTeam = async () => {
+        if (!userProfile?.direct_team || userProfile.direct_team.length === 0 || !firestore) {
+            setDirectTeamMembers([]);
+            return;
+        }
+
+        const memberPromises = userProfile.direct_team.map(memberId => 
+            getDoc(doc(firestore, 'users', memberId))
+        );
+
+        const memberDocs = await Promise.all(memberPromises);
+        const membersData = memberDocs
+            .filter(doc => doc.exists())
+            .map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+        
+        setDirectTeamMembers(membersData);
+    };
+
+    fetchDirectTeam();
+}, [userProfile?.direct_team, firestore]);
 
   const directMemberIds = userProfile?.direct_team || [];
   const currentFreeRank = userProfile?.currentFreeRank || 'None';
@@ -272,9 +292,7 @@ export default function TeamPage() {
         if (isPaidTrack) {
             // For Bronze Star, the requirement is direct paid members.
             if (rank.key === 'bronzeStar') {
-                // This will need a query in a real app, for now we estimate from total paid.
-                // Assuming paidTeamSize is the count of direct paid members for simplicity.
-                return userProfile.paidTeamSize || 0;
+                return directTeamMembers.filter(m => m.isPaid).length;
             }
             // For subsequent paid ranks, it depends on the achievements of the team.
             const dependsOnKey = rank.dependsOn as keyof typeof userProfile.paidAchievers;
@@ -509,7 +527,7 @@ export default function TeamPage() {
                   <TableRow>
                     <TableHead>Member</TableHead>
                     <TableHead>Join Date</TableHead>
-                    <TableHead>Rank</TableHead>
+                    <TableHead>Status & Rank</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
