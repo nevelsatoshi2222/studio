@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, UserPlus, DollarSign, Award, Crown, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -30,23 +30,23 @@ import { useState, useEffect } from 'react';
 
 // Reward data structure
 const freeTrackRewards = [
-  { name: 'Bronze', reward: '1 Coin', requirement: '5 direct free referrals', limit: 'First 78,125 Achievers' },
-  { name: 'Silver', reward: '2 Coins', requirement: '5 team members achieve Bronze', limit: 'First 15,625 Achievers' },
-  { name: 'Gold', reward: '4 Coins', requirement: '5 team members achieve Silver', limit: 'First 3,125 Achievers' },
-  { name: 'Emerald', reward: '10 Coins', requirement: '5 team members achieve Gold', limit: 'First 625 Achievers' },
-  { name: 'Platinum', reward: '20 Coins', requirement: '5 team members achieve Emerald', limit: 'First 125 Achievers' },
-  { name: 'Diamond', reward: '250 Coins', requirement: '5 team members achieve Platinum', limit: 'First 25 Achievers' },
-  { name: 'Crown', reward: '1000 Coins', requirement: '5 team members achieve Diamond', limit: 'First 5 Achievers' },
+  { name: 'Bronze', reward: '1 Coin', requirement: '5 direct free referrals', limit: 'First 78,125 Achievers', key: 'bronze' },
+  { name: 'Silver', reward: '2 Coins', requirement: '5 team members achieve Bronze', limit: 'First 15,625 Achievers', key: 'silver', dependsOn: 'bronze' },
+  { name: 'Gold', reward: '4 Coins', requirement: '5 team members achieve Silver', limit: 'First 3,125 Achievers', key: 'gold', dependsOn: 'silver' },
+  { name: 'Emerald', reward: '10 Coins', requirement: '5 team members achieve Gold', limit: 'First 625 Achievers', key: 'emerald', dependsOn: 'gold' },
+  { name: 'Platinum', reward: '20 Coins', requirement: '5 team members achieve Emerald', limit: 'First 125 Achievers', key: 'platinum', dependsOn: 'emerald' },
+  { name: 'Diamond', reward: '250 Coins', requirement: '5 team members achieve Platinum', limit: 'First 25 Achievers', key: 'diamond', dependsOn: 'platinum' },
+  { name: 'Crown', reward: '1000 Coins', requirement: '5 team members achieve Diamond', limit: 'First 5 Achievers', key: 'crown', dependsOn: 'diamond' },
 ];
 
 const paidTrackRewards = [
-  { name: 'Bronze Star', reward: '2.5 Coins', requirement: '5 direct paid members', limit: 'First 15,625 Achievers' },
-  { name: 'Silver Star', reward: '5 Coins', requirement: '5 team members achieve Bronze Star', limit: 'First 3,125 Achievers' },
-  { name: 'Gold Star', reward: '10 Coins', requirement: '5 team members achieve Silver Star', limit: 'First 625 Achievers' },
-  { name: 'Emerald Star', reward: '20 Coins', requirement: '5 team members achieve Gold Star', limit: 'First 125 Achievers' },
-  { name: 'Platinum Star', reward: '125 Coins', requirement: '5 team members achieve Emerald Star', limit: 'First 25 Achievers' },
-  { name: 'Diamond Star', reward: '1250 Coins', requirement: '5 team members achieve Platinum Star', limit: 'First 5 Achievers' },
-  { name: 'Crown Star', reward: '6250 Coins', requirement: '5 team members achieve Diamond Star', limit: 'First 1 Achiever' },
+  { name: 'Bronze Star', reward: '2.5 Coins', requirement: '5 direct paid members', limit: 'First 15,625 Achievers', key: 'bronzeStar' },
+  { name: 'Silver Star', reward: '5 Coins', requirement: '5 team members achieve Bronze Star', limit: 'First 3,125 Achievers', key: 'silverStar', dependsOn: 'bronzeStar' },
+  { name: 'Gold Star', reward: '10 Coins', requirement: '5 team members achieve Silver Star', limit: 'First 625 Achievers', key: 'goldStar', dependsOn: 'silverStar' },
+  { name: 'Emerald Star', reward: '20 Coins', requirement: '5 team members achieve Gold Star', limit: 'First 125 Achievers', key: 'emeraldStar', dependsOn: 'goldStar' },
+  { name: 'Platinum Star', reward: '125 Coins', requirement: '5 team members achieve Emerald Star', limit: 'First 25 Achievers', key: 'platinumStar', dependsOn: 'emeraldStar' },
+  { name: 'Diamond Star', reward: '1250 Coins', requirement: '5 team members achieve Platinum Star', limit: 'First 5 Achievers', key: 'diamondStar', dependsOn: 'platinumStar' },
+  { name: 'Crown Star', reward: '6250 Coins', requirement: '5 team members achieve Diamond Star', limit: 'First 1 Achiever', key: 'crownStar', dependsOn: 'diamondStar' },
 ];
 
 type TeamMember = {
@@ -122,7 +122,11 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number;
 // This component fetches data for a single member
 function TeamMemberRow({ memberId }: { memberId: string }) {
     const firestore = useFirestore();
-    const memberDocRef = doc(firestore, 'users', memberId);
+    const memberDocRef = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return doc(firestore, 'users', memberId);
+    }, [firestore, memberId]);
+
     const { data: member, isLoading } = useDoc<TeamMember>(memberDocRef);
 
     if (isLoading) {
@@ -180,8 +184,11 @@ export default function TeamPage() {
     isLoading: true
   });
 
-  // Fetch the current user's document
-  const userDocRef = doc(firestore, 'users', user?.uid || 'temp');
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null; // FIX: Return null if user or firestore is not ready
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ 
     direct_team: string[];
     currentFreeRank: string;
@@ -259,14 +266,27 @@ export default function TeamPage() {
     const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
     const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
     
-    const getProgressForRank = (rank, isPaidTrack) => {
-        if (!rank) return 0;
+    const getProgressForRank = (rank: any, isPaidTrack: boolean) => {
+        if (!rank || !userProfile) return 0;
+    
         if (isPaidTrack) {
-            if(rank.name === 'Bronze Star') return userProfile?.paidTeamSize || 0;
-            return userProfile?.paidAchievers?.bronzeStar || 0;
+            // For Bronze Star, the requirement is direct paid members.
+            if (rank.key === 'bronzeStar') {
+                // This will need a query in a real app, for now we estimate from total paid.
+                // Assuming paidTeamSize is the count of direct paid members for simplicity.
+                return userProfile.paidTeamSize || 0;
+            }
+            // For subsequent paid ranks, it depends on the achievements of the team.
+            const dependsOnKey = rank.dependsOn as keyof typeof userProfile.paidAchievers;
+            return userProfile.paidAchievers?.[dependsOnKey] || 0;
         } else {
-            if(rank.name === 'Bronze') return userProfile?.direct_team?.length || 0;
-            return userProfile?.freeAchievers?.bronze || 0;
+            // For Bronze, the requirement is direct members (free or paid).
+            if (rank.key === 'bronze') {
+                return userProfile.direct_team?.length || 0;
+            }
+            // For subsequent free ranks, it depends on the achievements of the team.
+            const dependsOnKey = rank.dependsOn as keyof typeof userProfile.freeAchievers;
+            return userProfile.freeAchievers?.[dependsOnKey] || 0;
         }
     };
 
