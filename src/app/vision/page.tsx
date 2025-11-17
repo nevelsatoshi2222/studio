@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import {
@@ -37,7 +38,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 // Your PGC Coin Image - replace with your actual image path
-const PGC_LOGO = '/images/pgc-coin.png'; // Update this path to your actual image
+const PGC_LOGO = '/imag_20251111_165229(1).png'; // UPDATE: Using your new image
 
 const visionSections = [
   {
@@ -266,16 +267,7 @@ export default function VisionRoadmapPage() {
           <CardHeader className="relative z-10">
             <div className="flex justify-center items-center gap-6 mb-6">
               {/* PGC Coin Image */}
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl border-4 border-white">
-                <div className="text-white text-center">
-                  <div className="text-xs md:text-sm font-bold">PUBLIC</div>
-                  <div className="text-xs md:text-sm font-bold">GOVERNANCE</div>
-                  <div className="text-xs md:text-sm font-bold">COIN</div>
-                  <div className="text-xs font-semibold mt-1">( PGC )</div>
-                </div>
-              </div>
-              {/* If you have the actual image, use this instead: */}
-              {/* <div className="w-24 h-24 md:w-32 md:h-32 relative">
+              <div className="w-24 h-24 md:w-32 md:h-32 relative">
                 <Image
                   src={PGC_LOGO}
                   alt="Public Governance Coin"
@@ -283,7 +275,7 @@ export default function VisionRoadmapPage() {
                   className="object-contain"
                   priority
                 />
-              </div> */}
+              </div>
             </div>
             <Rocket className="mx-auto h-16 w-16 text-primary" />
             <h1 className="font-headline text-4xl font-bold mt-4">
@@ -545,3 +537,5 @@ export default function VisionRoadmapPage() {
       </div>
   );
 }
+
+    

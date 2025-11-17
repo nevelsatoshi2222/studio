@@ -28,7 +28,8 @@ import {
   UserPlus,
   ExternalLink,
   Send,
-  MessageCircle
+  MessageCircle,
+  Video
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -135,7 +136,7 @@ const AFFILIATE_PAID_REWARDS = [
     level: 'DIAMOND STAR', 
     rewardSlots: 5, 
     reward: 1000, 
-    requirement: 'MAKE 5 PLATINUM STAR'
+    requirement: 'MAKE 5 DIAMOND STAR'
   },
   { 
     level: 'CROWN STAR', 
@@ -150,7 +151,6 @@ const AFFILIATE_PAID_REWARDS = [
 const WORKING_LINKS = {
   airdrop: '/register',
   financialQuiz: '/quiz-opinion',
-  influencer: '/influencer-rewards',
   affiliate: '/affiliate-marketing',
   presale: '/presale',
   dashboard: '/',
@@ -471,3 +471,5 @@ export default function AirdropsRewardsPage() {
     </div>
   );
 }
+
+    
