@@ -1,9 +1,11 @@
+
 'use client';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useUser } from '@/firebase';
 
 // Main dashboard content sections
 const sections = [
@@ -16,6 +18,7 @@ const sections = [
 
 export default function Dashboard() {
   const { t, currentLanguage } = useTranslation();
+  const { user } = useUser();
 
   return (
     <div className="space-y-8">
@@ -23,7 +26,7 @@ export default function Dashboard() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>{t('common.welcome')}</CardTitle>
+              <CardTitle>{t('common.welcome')}, {user?.displayName || user?.email || 'Guest'}!</CardTitle>
               <CardDescription>Explore the platform in your preferred language.</CardDescription>
             </div>
             <LanguageSwitcher />
