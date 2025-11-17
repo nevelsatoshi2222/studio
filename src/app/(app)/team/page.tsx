@@ -27,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 // Reward data structure
 const freeTrackRewards = [
@@ -178,6 +179,7 @@ function TeamMemberRow({ memberId }: { memberId: string }) {
 }
 
 export default function TeamPage() {
+  const { t } = useTranslation();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [commissionData, setCommissionData] = useState({
@@ -312,8 +314,8 @@ export default function TeamPage() {
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Free User Track</CardTitle>
-            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
+            <CardTitle>{t('team.free_track')}</CardTitle>
+            <CardDescription>{t('team.current_rank')} <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {nextFreeRank ? (
@@ -325,16 +327,16 @@ export default function TeamPage() {
             ) : (
                 <Alert>
                     <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have achieved the highest rank in the Free User Track!</AlertDescription>
+                    <AlertTitle>{t('team.congrats')}</AlertTitle>
+                    <AlertDescription>{t('team.highest_rank_free')}</AlertDescription>
                 </Alert>
             )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Paid User (Star) Track</CardTitle>
-            <CardDescription>Your current rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
+            <CardTitle>{t('team.paid_track')}</CardTitle>
+            <CardDescription>{t('team.current_rank')} <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              {nextPaidRank ? (
@@ -346,8 +348,8 @@ export default function TeamPage() {
             ) : (
                 <Alert>
                     <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have achieved the highest rank in the Paid User Track!</AlertDescription>
+                    <AlertTitle>{t('team.congrats')}</AlertTitle>
+                    <AlertDescription>{t('team.highest_rank_paid')}</AlertDescription>
                 </Alert>
             )}
           </CardContent>
@@ -361,7 +363,7 @@ export default function TeamPage() {
       return (
         <Card>
           <CardHeader>
-            <CardTitle>Commission Earnings</CardTitle>
+            <CardTitle>{t('team.commission_earnings')}</CardTitle>
             <CardDescription>Loading your commission data...</CardDescription>
           </CardHeader>
           <CardContent>
@@ -379,9 +381,9 @@ export default function TeamPage() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Commission Earnings</CardTitle>
+            <CardTitle>{t('team.commission_earnings')}</CardTitle>
             <CardDescription>
-              Real commissions earned from your team's purchases
+              {t('team.commission_desc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -390,42 +392,40 @@ export default function TeamPage() {
                 <div className="text-2xl font-bold text-green-600">
                   ${commissionData.totalCommission.toFixed(2)}
                 </div>
-                <p className="text-sm text-green-800">Total Earned</p>
+                <p className="text-sm text-green-800">{t('team.total_earned')}</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
                 <div className="text-2xl font-bold text-blue-600">
                   {commissionData.commissions.length}
                 </div>
-                <p className="text-sm text-blue-800">Transactions</p>
+                <p className="text-sm text-blue-800">{t('team.transactions')}</p>
               </div>
             </div>
 
             <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-3">Earnings by Level</h4>
+              <h4 className="text-lg font-semibold mb-3">{t('team.earnings_by_level')}</h4>
               {levelEarningsArray.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {levelEarningsArray.map((level) => (
                     <div key={level.level} className="text-center p-3 rounded-lg bg-gray-50 border border-green-200">
                       <div className="font-semibold text-lg">Level {level.level}</div>
                       <div className="text-green-600 font-bold text-xl">${level.earnings.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">{level.count} transactions</div>
+                      <div className="text-xs text-gray-500">{level.count} {t('team.transactions')}</div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No commission earnings yet</p>
-                  <p className="text-sm">Earnings will appear when your team makes purchases</p>
+                  <p>{t('team.no_earnings_prompt')}</p>
                 </div>
               )}
             </div>
             
             <div className="p-4 rounded-lg border bg-blue-50">
-              <h4 className="font-semibold text-blue-800 mb-2">Commission Structure</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">{t('team.commission_structure')}</h4>
               <p className="text-sm text-blue-700">
-                You earn 0.2% from levels 1-5 and 0.1% from levels 6-15 of your team's purchases.
-                Total commission pool: 2% distributed across all levels.
+                {t('team.commission_structure_desc')}
               </p>
             </div>
           </CardContent>
@@ -461,53 +461,53 @@ export default function TeamPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="font-headline text-3xl font-bold">My Team</h1>
+        <h1 className="font-headline text-3xl font-bold">{t('team.title')}</h1>
         <p className="text-muted-foreground">
-          Manage your affiliate team, track earnings, and view your network's growth.
+          {t('team.description')}
         </p>
       </div>
 
       <Tabs defaultValue="team-summary" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
            <TabsTrigger value="team-summary">
-            <Users className="mr-2 h-4 w-4" /> Team Summary
+            <Users className="mr-2 h-4 w-4" /> {t('team.team_summary')}
           </TabsTrigger>
           <TabsTrigger value="direct-members">
-            <UserPlus className="mr-2 h-4 w-4" /> Direct Members
+            <UserPlus className="mr-2 h-4 w-4" /> {t('team.direct_members')}
           </TabsTrigger>
            <TabsTrigger value="rewards">
-            <Award className="mr-2 h-4 w-4" /> Rewards
+            <Award className="mr-2 h-4 w-4" /> {t('team.rewards')}
           </TabsTrigger>
           <TabsTrigger value="earnings">
-            <DollarSign className="mr-2 h-4 w-4" /> Commission
+            <DollarSign className="mr-2 h-4 w-4" /> {t('team.commission')}
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="team-summary" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Team Summary</CardTitle>
+              <CardTitle>{t('team.team_summary')}</CardTitle>
               <CardDescription>
-                An overview of your network. This data updates automatically when new members join.
+                {t('team.summary_desc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Direct Referrals</div>
+                  <div className="text-sm text-muted-foreground">{t('team.direct_referrals')}</div>
                   <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
               </div>
                <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Total Team Size</div>
+                  <div className="text-sm text-muted-foreground">{t('team.total_team_size')}</div>
                   <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : userProfile?.totalTeamSize || 0}</div>
               </div>
               <div className="p-4 rounded-lg bg-muted">
-                  <div className="text-sm text-muted-foreground">Paid Team Members</div>
+                  <div className="text-sm text-muted-foreground">{t('team.paid_team_members')}</div>
                   <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : userProfile?.paidTeamSize || 0}</div>
               </div>
             </CardContent>
             <CardFooter>
               <Button asChild>
-                <Link href="/profile">Get Your Referral Link</Link>
+                <Link href="/profile">{t('team.get_referral_link')}</Link>
               </Button>
             </CardFooter>
           </Card>
@@ -516,18 +516,18 @@ export default function TeamPage() {
         <TabsContent value="direct-members" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Direct Members ({directMemberIds.length})</CardTitle>
+              <CardTitle>{t('team.direct_members')} ({directMemberIds.length})</CardTitle>
               <CardDescription>
-                Users you have personally referred to the platform.
+                {t('team.direct_members_desc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Join Date</TableHead>
-                    <TableHead>Status & Rank</TableHead>
+                    <TableHead>{t('team.member')}</TableHead>
+                    <TableHead>{t('team.join_date')}</TableHead>
+                    <TableHead>{t('team.status_rank')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -543,7 +543,7 @@ export default function TeamPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={3} className="h-24 text-center">
-                        You haven't referred any members yet. Share your referral link from your profile!
+                        {t('team.no_members_prompt')}
                       </TableCell>
                     </TableRow>
                   )}
@@ -564,4 +564,3 @@ export default function TeamPage() {
     </div>
   );
 }
-

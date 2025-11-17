@@ -17,7 +17,7 @@ const sections = [
 ];
 
 export default function Dashboard() {
-  const { t, currentLanguage } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useUser();
 
   return (
@@ -26,8 +26,8 @@ export default function Dashboard() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>{t('common.welcome')}, {user?.displayName || user?.email || 'Guest'}!</CardTitle>
-              <CardDescription>Explore the platform in your preferred language.</CardDescription>
+              <CardTitle>{t('dashboard.welcome_user', { name: user?.displayName || user?.email || 'Guest' })}</CardTitle>
+              <CardDescription>{t('dashboard.explore_language')}</CardDescription>
             </div>
             <LanguageSwitcher />
           </div>
@@ -49,7 +49,7 @@ export default function Dashboard() {
             <CardFooter>
               <Button asChild variant="outline">
                 <Link href={`/governance/${section.replace(/([A-Z])/g, "-$1").toLowerCase()}`}>
-                  Go to {t(`navigation.${section}`)}
+                  {t('common.go_to')} {t(`navigation.${section}`)}
                 </Link>
               </Button>
             </CardFooter>

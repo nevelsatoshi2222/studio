@@ -1,33 +1,35 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="font-headline text-3xl font-bold">Settings</h1>
+        <h1 className="font-headline text-3xl font-bold">{t('settings.title')}</h1>
         <p className="text-muted-foreground">
-          Manage your account and platform preferences.
+          {t('settings.description')}
         </p>
       </div>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
               <Settings className="h-6 w-6" />
-              Page Under Construction
+              {t('common.under_construction')}
           </CardTitle>
           <CardDescription>
-              This settings page is currently in development. More options will be available soon.
+              {t('common.coming_soon')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Future settings could include:</p>
+          <p>{t('settings.future_settings')}</p>
           <ul className="list-disc pl-5 mt-2 text-muted-foreground">
-              <li>Notification Preferences</li>
-              <li>Theme (Light/Dark Mode)</li>
-              <li>Language Selection</li>
-              <li>Data Privacy Controls</li>
+              <li>{t('settings.notification_prefs')}</li>
+              <li>{t('settings.theme')}</li>
+              <li>{t('settings.language_selection')}</li>
+              <li>{t('settings.privacy_controls')}</li>
           </ul>
         </CardContent>
       </Card>
