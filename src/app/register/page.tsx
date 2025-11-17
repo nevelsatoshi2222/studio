@@ -43,6 +43,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { countries } from '@/lib/data';
 import { businessRoles, businessTypes } from '@/lib/business-data';
+import { Separator } from '@/components/ui/separator';
 
 // Updated Payment Tiers
 const PAYMENT_TIERS = {
@@ -297,5 +298,3 @@ export default function RegisterPage() {
     </Suspense>
   );
 }
-
-    
