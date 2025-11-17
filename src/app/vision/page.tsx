@@ -37,8 +37,8 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 
-// Your PGC Coin Image - replace with your actual image path
-const PGC_LOGO = '/imag_20251111_165229(1).png'; // UPDATE: Using your new image
+const PGC_LOGO_URL = "https://storage.googleapis.com/public-governance-859029-c316e.firebasestorage.app/IMG_20251111_165229.png";
+
 
 const visionSections = [
   {
@@ -268,10 +268,11 @@ export default function VisionRoadmapPage() {
             <div className="flex justify-center items-center gap-6 mb-6">
               {/* PGC Coin Image */}
               <div className="w-24 h-24 md:w-32 md:h-32 relative">
-                <Image
-                  src={PGC_LOGO}
+                 <Image
+                  src={PGC_LOGO_URL}
                   alt="Public Governance Coin"
-                  fill
+                  width={100}
+                  height={100}
                   className="object-contain"
                   priority
                 />

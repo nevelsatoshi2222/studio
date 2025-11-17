@@ -44,6 +44,9 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 
+const PGC_LOGO_URL = "https://storage.googleapis.com/public-governance-859029-c316e.firebasestorage.app/IMG_20251111_165229.png";
+
+
 const profileSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   walletPublicKey: z.string().optional(),
@@ -343,7 +346,7 @@ export default function ProfilePage() {
                     <div>
                         <p className="text-sm text-muted-foreground">In-App PGC Balance</p>
                         <div className="flex items-baseline gap-2">
-                            <Image src="/pgc-logo.png" alt="PGC Coin" width={28} height={28} />
+                             <Image src={PGC_LOGO_URL} alt="PGC Coin" width={28} height={28} />
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
