@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { UserPlus, Crown, MapPin, Home, Building, Globe, AlertCircle, Star, Zap, Rocket, TrendingUp, Loader2, Copy } from 'lucide-react';
+import { UserPlus, Crown, MapPin, Home, Building, Globe, AlertCircle, Star, Zap, Rocket, TrendingUp, Loader2, Copy, CheckCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
