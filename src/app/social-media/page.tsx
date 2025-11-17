@@ -25,13 +25,14 @@ import {
   Hash,
   Loader2,
   Vote,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -59,9 +60,10 @@ function CreatePostCard() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [postContent, setPostContent] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [showImageInput, setShowImageInput] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!user) {
         return (
@@ -81,6 +83,26 @@ function CreatePostCard() {
         )
     }
 
+    const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const clearImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        if(fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }
+
     const handlePost = async () => {
         if (!firestore || !user) {
             toast({ variant: 'destructive', title: 'You must be logged in to post.'});
@@ -93,12 +115,14 @@ function CreatePostCard() {
 
         setIsSubmitting(true);
         try {
+            // Note: In a real app, you would upload `imageFile` to Firebase Storage
+            // and get a URL. For this prototype, we'll use the local preview URL.
             await addDoc(collection(firestore, 'social_posts'), {
                 authorId: user.uid,
                 authorName: user.displayName || user.email,
                 authorAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
                 content: postContent,
-                imageUrl: imageUrl,
+                imageUrl: imagePreview, // Using the Data URL for preview purposes
                 mentionsPgc: postContent.includes('$PGC'),
                 mentionsIgc: postContent.includes('$IGC'),
                 likes: 0,
@@ -107,8 +131,7 @@ function CreatePostCard() {
             });
 
             setPostContent('');
-            setImageUrl('');
-            setShowImageInput(false);
+            clearImage();
             toast({ title: 'Post created successfully!'});
         } catch (error) {
             console.error("Error creating post:", error);
@@ -133,21 +156,26 @@ function CreatePostCard() {
             onChange={(e) => setPostContent(e.target.value)}
           />
         </div>
-        {showImageInput && (
-            <div className="flex items-center gap-2 pl-14">
-                <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                <Input 
-                    placeholder="Paste image URL here..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                />
+        {imagePreview && (
+            <div className="pl-14 relative">
+                <Image src={imagePreview} alt="Image preview" width={500} height={300} className="rounded-lg border max-h-80 w-auto object-contain" />
+                <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white hover:text-white" onClick={clearImage}>
+                    <X className="h-4 w-4" />
+                </Button>
             </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 border-t">
         <div className="flex gap-1 text-muted-foreground">
-          <Button variant="ghost" size="icon" aria-label="Upload Image" onClick={() => setShowImageInput(!showImageInput)}>
-            <ImageIcon className={cn("h-5 w-5", showImageInput && "text-primary")} />
+          <input 
+              type="file" 
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageSelect}
+          />
+          <Button variant="ghost" size="icon" aria-label="Upload Image" onClick={() => fileInputRef.current?.click()}>
+            <ImageIcon className={cn("h-5 w-5", imagePreview && "text-primary")} />
           </Button>
            <Button variant="ghost" size="icon" aria-label="Upload Video" disabled>
             <Video className="h-5 w-5" />
@@ -378,3 +406,4 @@ export default function SocialMediaPage() {
       </div>
   );
 }
+
