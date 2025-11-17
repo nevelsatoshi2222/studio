@@ -1,6 +1,6 @@
 
 'use client';
-import { Suspense, useState, useEffect, useMemo } from 'react';
+import { Suspense, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { UserPlus, Crown, MapPin, Home, Building, Globe, AlertCircle, Star, Zap, Rocket, TrendingUp, Loader2 } from 'lucide-react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
@@ -37,77 +38,21 @@ import { useFirebaseApp } from '@/firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { businessRoles, businessMappings } from '@/lib/business-data';
-import { Label } from "@/components/ui/label";
-
-// Payment tiers remain the same
-const PAYMENT_TIERS = {
-  free: { 
-    usd: 0, 
-    instantPgc: 1, 
-    totalPgc: 1,
-    label: 'Free Account',
-    description: 'Perfect for getting started',
-    bonus: 'First 20,000 users get 1 PGC bonus',
-  },
-  basic: { 
-    usd: 10, 
-    instantPgc: 20, 
-    totalPgc: 160,
-    label: 'Basic - $10 USD',
-    description: 'Great start with 20 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-  starter: { 
-    usd: 50, 
-    instantPgc: 100, 
-    totalPgc: 800,
-    label: 'Starter - $50 USD', 
-    description: 'Good value with 100 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-  premium: { 
-    usd: 100, 
-    instantPgc: 200, 
-    totalPgc: 1600,
-    label: 'Premium - $100 USD',
-    description: 'Best value with 200 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-  advanced: { 
-    usd: 250, 
-    instantPgc: 500, 
-    totalPgc: 4000,
-    label: 'Advanced - $250 USD',
-    description: 'Serious earning with 500 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  },
-  elite: { 
-    usd: 1000, 
-    instantPgc: 2000, 
-    totalPgc: 16000,
-    label: 'Elite - $1000 USD',
-    description: 'Maximum benefits with 2000 PGC instantly',
-    bonus: '1:1 Instant Bonus + 3 Stage Doubling',
-  }
-};
+import { countries } from '@/lib/data';
 
 const registrationSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters long.' }),
-  country: z.string().min(2, { message: 'Please enter your country' }),
+  country: z.string().min(1, { message: 'Please select your country' }),
   state: z.string().min(2, { message: 'Please enter your state/province' }),
   district: z.string().min(2, { message: 'Please enter your district' }),
   taluka: z.string().min(2, { message: 'Please enter your taluka/block' }),
   village: z.string().min(2, { message: 'Please enter your village/ward' }),
   street: z.string().optional(),
-  referredBy: z.string().optional(),
-  accountType: z.enum(['free', 'basic', 'starter', 'premium', 'advanced', 'elite']),
+  referredByCode: z.string().optional(),
+  isPaid: z.boolean().default(false),
   walletAddress: z.string().optional(),
-  primaryRole: z.string().min(1, { message: 'Please select a primary role' }),
-  businessType: z.string().min(1, { message: 'Please select a business type' }),
-  specificCrop: z.string().optional(),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -123,7 +68,6 @@ function RegistrationForm() {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: '',
-      referredBy: searchParams.get('ref') || '',
       email: '',
       password: '',
       country: '',
@@ -132,26 +76,11 @@ function RegistrationForm() {
       taluka: '',
       village: '',
       street: '',
-      accountType: 'free',
+      referredByCode: searchParams.get('ref') || '',
+      isPaid: false,
       walletAddress: '',
-      primaryRole: '',
-      businessType: '',
-      specificCrop: '',
     },
   });
-
-  const selectedAccountType = form.watch('accountType');
-  const selectedPrimaryRole = useWatch({ control: form.control, name: 'primaryRole' });
-  const selectedBusinessType = useWatch({ control: form.control, name: 'businessType' });
-  
-  const businessTypesForRole = useMemo(() => {
-    if (!selectedPrimaryRole) return [];
-    return businessMappings[selectedPrimaryRole as keyof typeof businessMappings] || [];
-  }, [selectedPrimaryRole]);
-
-  useEffect(() => {
-    form.resetField('businessType', { defaultValue: '' });
-  }, [selectedPrimaryRole, form]);
 
   const onSubmit = async (data: RegistrationFormValues) => {
     setIsSubmitting(true);
@@ -165,12 +94,6 @@ function RegistrationForm() {
       const functions = getFunctions(firebaseApp);
       const createUser = httpsCallable(functions, 'createUser');
       
-      const investmentTier = PAYMENT_TIERS[data.accountType].usd;
-      const isPaid = investmentTier >= 100;
-      const finalBusinessType = data.businessType === 'Vegetable Farming' && data.specificCrop 
-        ? `Vegetable Farming: ${data.specificCrop}`
-        : data.businessType;
-
       const result = await createUser({
         email: data.email,
         password: data.password,
@@ -183,15 +106,12 @@ function RegistrationForm() {
           taluka: data.taluka,
           village: data.village,
           street: data.street,
-          referredByCode: data.referredBy || null,
-          isPaid: isPaid,
-          investmentTier: investmentTier,
-          primaryRole: data.primaryRole,
-          businessType: finalBusinessType,
+          referredByCode: data.referredByCode || null,
+          isPaid: data.isPaid,
           walletAddress: data.walletAddress || null
         }
       });
-      
+
       const resultData = result.data as { success: boolean, message: string, userId?: string };
 
       if (resultData.success && resultData.userId) {
@@ -217,18 +137,6 @@ function RegistrationForm() {
     }
   };
 
-  const getTierIcon = (tier: string) => {
-    switch (tier) {
-      case 'free': return <UserPlus className="h-4 w-4" />;
-      case 'basic': return <Star className="h-4 w-4 text-blue-500" />;
-      case 'starter': return <Zap className="h-4 w-4 text-green-500" />;
-      case 'premium': return <Crown className="h-4 w-4 text-yellow-500" />;
-      case 'advanced': return <Rocket className="h-4 w-4 text-purple-500" />;
-      case 'elite': return <Rocket className="h-4 w-4 text-red-500" />;
-      default: return <UserPlus className="h-4 w-4" />;
-    }
-  };
-
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader className="text-center">
@@ -238,7 +146,7 @@ function RegistrationForm() {
             </div>
             <div>
                 <CardTitle className="text-2xl font-headline">Create Your Account</CardTitle>
-                <CardDescription>Join the Public Governance platform - Choose your investment level</CardDescription>
+                <CardDescription>Join the Public Governance platform</CardDescription>
             </div>
         </div>
       </CardHeader>
@@ -253,14 +161,14 @@ function RegistrationForm() {
                   <FormField name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField name="password" render={({ field }) => (<FormItem><FormLabel>Password *</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormDescription>Min. 6 characters.</FormDescription><FormMessage /></FormItem>)} />
                   <FormField name="walletAddress" render={({ field }) => (<FormItem><FormLabel>Wallet Address (Optional)</FormLabel><FormControl><Input placeholder="For receiving PGC and rewards" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField name="referredBy" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField name="referredByCode" render={({ field }) => (<FormItem><FormLabel>Referral Code (Optional)</FormLabel><FormControl><Input placeholder="Enter referral code" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
             </div>
 
             <div className="space-y-4 p-4 border rounded-lg">
               <h3 className="font-semibold text-lg flex items-center gap-2"><MapPin className="h-5 w-5" /> 2. Geographical Area (for Voting)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="h-4 w-4 inline mr-1" />Country *</FormLabel><FormControl><Input placeholder="e.g., India" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel><Globe className="h-4 w-4 inline mr-1" />Country *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent className="max-h-60">{countries.map((c) => (<SelectItem key={c.value} value={c.label}>{c.label}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                 <FormField name="state" render={({ field }) => (<FormItem><FormLabel><Building className="h-4 w-4 inline mr-1" />State *</FormLabel><FormControl><Input placeholder="e.g., Maharashtra" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="district" render={({ field }) => (<FormItem><FormLabel>District *</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="taluka" render={({ field }) => (<FormItem><FormLabel>Taluka/Block *</FormLabel><FormControl><Input placeholder="e.g., Andheri" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -270,41 +178,30 @@ function RegistrationForm() {
             </div>
 
              <div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-semibold text-lg">3. Business & Role</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="primaryRole" render={({ field }) => (<FormItem><FormLabel>Primary Role *</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your primary role" /></SelectTrigger></FormControl><SelectContent>{businessRoles.map(role => (<SelectItem key={role} value={role}>{role}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="businessType" render={({ field }) => (<FormItem><FormLabel>Business Type *</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select business type" /></SelectTrigger></FormControl><SelectContent>{businessTypesForRole.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                 </div>
-                 {selectedBusinessType === 'Vegetable Farming' && (
-                    <FormField control={form.control} name="specificCrop" render={({ field }) => (<FormItem><FormLabel>Specific Crop/Vegetable</FormLabel><FormControl><Input placeholder="e.g., Tomato, Onion, etc." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  )}
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="accountType"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-lg font-semibold">4. Choose Your Account Tier</FormLabel>
-                  <FormControl>
-                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {Object.entries(PAYMENT_TIERS).map(([key, tier]) => (
-                        <FormItem key={key}>
-                          <FormControl>
-                            <RadioGroupItem value={key} id={key} className="peer sr-only" />
-                          </FormControl>
-                          <Label htmlFor={key} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                            <div className="flex items-center gap-2 mb-2"> {getTierIcon(key)} <span className="font-semibold">{tier.label}</span></div>
-                            <div className="text-center"><p className="text-lg font-bold">${tier.usd} USD</p><p className="text-sm text-green-600 font-semibold">Instant: {tier.instantPgc} PGC</p><p className="text-xs text-blue-600 font-semibold">Total: {tier.totalPgc} PGC</p><p className="text-xs text-muted-foreground mt-1">{tier.bonus}</p></div>
-                          </Label>
+                <h3 className="font-semibold text-lg">3. Account Type</h3>
+                 <FormField
+                    control={form.control}
+                    name="isPaid"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                            <FormControl>
+                                <Input 
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={e => field.onChange(e.target.checked)}
+                                    className="h-6 w-6 mt-1"
+                                />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel className="text-base">Register with $100 Paid Package?</FormLabel>
+                                <FormDescription>
+                                    Select this to get a 200 PGC bonus and activate commissions for your referrer.
+                                </FormDescription>
+                            </div>
                         </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    )}
+                />
+            </div>
           </CardContent>
 
           <CardFooter className="flex-col space-y-4">

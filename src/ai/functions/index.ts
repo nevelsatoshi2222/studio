@@ -1,25 +1,27 @@
-// This file exports all Cloud Functions for deployment.
-// The `distributeCommission` function is also included here,
-// as it's triggered by Firestore events.
+// This file needs to be the first to initialize the admin SDK
+import * as admin from 'firebase-admin';
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
+
+// Now that admin is initialized, we can import other functions that use it.
 export * from './onUserCreate';
 export * from './distributeCommission';
 export * from './processTeamRewards';
 
-'use server';
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
 
 // This function allows an authorized user (like an admin) to set custom claims on another user.
 // It is a CRITICAL part of the secure registration flow for creating admins.
 export const setCustomClaims = functions.https.onCall(async (data, context) => {
     // 1. Authentication Check: Ensure the user calling this function is an authenticated admin.
-    // In a real production app, you would check for a specific admin role claim:
-    // if (context.auth?.token.role !== 'Super Admin') {
-    //   throw new functions.https.HttpsError('permission-denied', 'Must be a Super Admin to set claims.');
-    // }
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
     }
+    // In a real production app, you would also check for an admin role claim:
+    // if (context.auth?.token.role !== 'Super Admin') {
+    //   throw new functions.https.HttpsError('permission-denied', 'Must be a Super Admin to set claims.');
+    // }
 
     // 2. Input Validation: Ensure the required data (uid and claims) is provided.
     const { uid, claims } = data;
@@ -58,13 +60,13 @@ export const createUser = functions.https.onCall(async (data, context) => {
         });
 
         // Set the custom claims provided during registration
+        // The onUserCreate trigger will use these claims to create the Firestore doc.
         if (claims) {
             await admin.auth().setCustomUserClaims(userRecord.uid, claims);
         }
 
-        // The onUserCreate trigger will handle creating the Firestore document.
-        // We just return the new user's ID.
-        return { success: true, userId: userRecord.uid, message: 'User created successfully.' };
+        // We just return the new user's ID. The onUserCreate trigger handles the rest.
+        return { success: true, userId: userRecord.uid, message: 'User account initiated successfully.' };
 
     } catch (error: any) {
         // Handle specific auth errors gracefully

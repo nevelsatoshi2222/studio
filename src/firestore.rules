@@ -1,38 +1,49 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read and write their own document.
+
+    // USER MANAGEMENT
     match /users/{userId} {
+      // Allow users to read and write THEIR OWN document.
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Admins can read any user document.
-      allow get, list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
+
+      // Allow admins to read any user document.
+      allow list, get: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin'];
     }
 
-    // Commissions can be read by the user who earned them.
-    // Creation is handled by backend functions.
-    match /commissions/{commissionId} {
+    // COMMISSIONS, PRESALES, TRANSACTIONS
+    // These should only be created by backend functions for security.
+    // Users can read their own records.
+    match /commissions/{docId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if false; // Disallow client creation
+      allow create, update, delete: if false;
     }
-
-    // Presale documents are created by backend functions.
-    // Users can read their own presale documents.
-    match /presales/{presaleId} {
+    match /presales/{docId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if false; // Disallow client creation
+      allow create, update, delete: if false;
+    }
+    match /transactions/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
     }
 
-    // Transactions can be read by the user involved.
-    // Creation is handled by backend functions.
-    match /transactions/{transactionId} {
-        allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-        allow create: if false; // Disallow client creation
+    // SOCIAL, VOTING, ETC.
+    // Generally, allow authenticated users to read/write, with ownership checks.
+    match /social_posts/{postId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == request.resource.data.authorId;
+    }
+    match /poll_responses/{respId} {
+        allow read, write: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
-    // General rule for other collections (social posts, polls, etc.)
-    // Allow authenticated users to read and write.
-    // This provides a baseline, and you can add more specific rules as needed.
+    // ADMIN ACCESS
+    match /admin/{document=**} {
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Super Admin', 'User Management Admin', 'Franchisee Management Admin'];
+    }
+
+    // FALLBACK (optional, but good for development)
+    // Be careful with this in production. It allows any authenticated user to read/write to any other collection.
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

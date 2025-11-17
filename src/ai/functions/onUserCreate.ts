@@ -6,13 +6,7 @@ import { getFunctions } from 'firebase-admin/functions';
 
 // This Cloud Function is the primary and ONLY method for creating a user document.
 // It is a secure, server-side trigger that runs after a user is created in Firebase Auth.
-// It is designed to be robust and prevent the race conditions and permission errors
-// that occurred with client-side document creation attempts.
 
-// Ensure admin is initialized only once
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
 const db = admin.firestore();
 
 /**
@@ -25,15 +19,12 @@ async function findUserByReferralCode(referralCode: string): Promise<admin.fires
         return null;
     }
     const usersRef = db.collection('users');
-    // We query for the referral code. An index must exist on the 'referralCode' field in Firestore.
     const snapshot = await usersRef.where('referralCode', '==', referralCode).limit(1).get();
 
     if (snapshot.empty) {
         functions.logger.warn(`Referral code ${referralCode} not found.`);
         return null;
     }
-
-    // Return the full document snapshot of the found user.
     return snapshot.docs[0];
 }
 
@@ -45,58 +36,43 @@ async function findUserByReferralCode(referralCode: string): Promise<admin.fires
 export const onUserCreate = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName } = user;
     
-    // The client may pass custom claims during registration, including a referrer code.
     const customClaims = user.customClaims;
     const referredByCode = customClaims?.referredByCode as string | undefined;
 
-    functions.logger.log(`New user created: ${uid}, email: ${email}. Custom claims:`, customClaims);
+    functions.logger.log(`New user created: ${uid}. Claims:`, customClaims);
 
     const userDocRef = db.collection('users').doc(uid);
 
     return db.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userDocRef);
         if (userDoc.exists) {
-            functions.logger.log(`User document for ${uid} already exists. Fallback function exiting.`);
+            functions.logger.log(`User document for ${uid} already exists. Exiting.`);
             return;
         }
-
-        functions.logger.log(`Creating new user document for ${uid}.`);
 
         let referrerUid: string | null = null;
         let referrerDocRef: admin.firestore.DocumentReference | null = null;
 
         if (referredByCode) {
-            functions.logger.log(`User ${uid} was referred by code: ${referredByCode}. Searching for referrer.`);
             const referrerDoc = await findUserByReferralCode(referredByCode);
             if (referrerDoc) {
                 referrerUid = referrerDoc.id;
                 referrerDocRef = referrerDoc.ref;
                 functions.logger.log(`Found referrer ${referrerUid} for new user ${uid}.`);
-            } else {
-                functions.logger.warn(`Referrer with code ${referredByCode} was not found.`);
             }
-        } else {
-            functions.logger.log(`User ${uid} has no referrer code.`);
         }
         
-        // If a valid referrer was found, add the new user's UID to the referrer's directReferrals array.
         if (referrerDocRef) {
             transaction.update(referrerDocRef, {
                 direct_team: admin.firestore.FieldValue.arrayUnion(uid)
             });
-             functions.logger.log(`Scheduled update for referrer ${referrerUid} to add new user ${uid}.`);
         }
 
         const referralCode = `PGC-${uid.substring(0, 8).toUpperCase()}`;
         
-        let finalRole = customClaims?.role as string || 'User';
-        // Special case for the root admin user
-        if (email && email.toLowerCase() === 'admin@publicgovernance.com') {
-            finalRole = 'Super Admin';
-        }
-        
-        const investmentAmount = customClaims?.investmentTier || 0;
-        const pgcCredited = investmentAmount === 0 ? 1 : investmentAmount * 2; // 1 PGC for free, 2x for paid
+        const isPaid = customClaims?.isPaid as boolean || false;
+        const investmentAmount = isPaid ? 100 : 0; // Simplified for now
+        const pgcCredited = isPaid ? 200 : 1; // 1 PGC for free, 200 for paid
 
         const userDocumentData = {
             uid: uid,
@@ -104,7 +80,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             email: email,
             phone: customClaims?.phone || user.phoneNumber || null,
             
-            // Geographic Data
             street: customClaims?.street || '',
             village: customClaims?.village || '',
             block: customClaims?.block || '',
@@ -114,64 +89,52 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
             country: customClaims?.country || '',
 
             pgcBalance: pgcCredited,
-            usdBalance: investmentAmount,
+            usdBalance: 0,
 
             referredByUserId: referrerUid || null, 
             referralCode: referralCode,
             walletAddress: customClaims?.walletAddress || '',
             isVerified: false,
             status: 'Active',
-            role: finalRole,
-            primaryRole: customClaims?.primaryRole || 'User',
-            businessType: customClaims?.businessType || 'N/A',
-            investmentTier: investmentAmount,
-            avatarId: `avatar-${Math.ceil(Math.random() * 4)}`,
-            registeredAt: admin.firestore.FieldValue.serverTimestamp(),
-            direct_team: [], // Initialize direct team
+            role: customClaims?.role || 'User',
             
-            // Team & Rank Stats
+            registeredAt: admin.firestore.FieldValue.serverTimestamp(),
+            direct_team: [], 
+            
             totalTeamSize: 0,
             paidTeamSize: 0,
             freeRank: 'None',
             paidRank: 'None',
-            isPaid: customClaims?.isPaid || false,
+            isPaid: isPaid,
             freeAchievers: { bronze: 0, silver: 0, gold: 0 },
             paidAchievers: { bronzeStar: 0, silverStar: 0, goldStar: 0 },
         };
 
         transaction.set(userDocRef, userDocumentData);
-        functions.logger.log(`Successfully created user document for ${uid} with referrer ${referrerUid || 'None'}.`);
+        functions.logger.log(`Successfully created user document for ${uid}.`);
         
     }).then(() => {
-        // After successfully creating the user, check if a purchase was made during registration.
-        // If so, create the presale document which will trigger commission distribution.
-        const isPaid = customClaims?.isPaid as boolean | undefined;
-        const investmentAmount = customClaims?.investmentTier as number | undefined;
-        
-        if (isPaid && investmentAmount && investmentAmount >= 100) {
+        if (customClaims?.isPaid) {
             functions.logger.log(`User ${uid} registered with a paid package. Creating presale document.`);
-            const presaleCollection = db.collection('presales');
-            const pgcCredited = investmentAmount * 2;
+            const investmentAmount = 100;
+            const pgcCredited = 200;
 
-            return presaleCollection.add({
+            return db.collection('presales').add({
                 userId: uid,
                 amountUSDT: investmentAmount,
                 pgcCredited: pgcCredited,
-                status: 'PENDING_VERIFICATION', // This status will be updated by the commission function
+                status: 'PENDING_VERIFICATION',
                 purchaseDate: admin.firestore.FieldValue.serverTimestamp(),
                 registeredWithPurchase: true,
             });
         }
         return Promise.resolve();
     }).then(() => {
-        // Now, enqueue a task to process team rewards. This happens regardless of purchase.
-        // This is a non-blocking call.
         functions.logger.log(`Enqueuing team reward processing for new user ${uid}.`);
         const queue = getFunctions().taskQueue('processTeamRewards');
         return queue.enqueue({ newUserId: uid });
     }).catch(error => {
         functions.logger.error("Error in onUserCreate transaction or follow-up tasks:", error);
-        // Throwing the error ensures that Firebase knows the function failed
         throw new functions.https.HttpsError('internal', 'Failed to complete user creation process.');
     });
 });
