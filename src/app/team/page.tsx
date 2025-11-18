@@ -185,8 +185,7 @@ export default function TeamPage() {
     commissions: [] as any[],
     isLoading: true
   });
-  const [directTeamMembers, setDirectTeamMembers] = useState<TeamMember[]>([]);
-
+  
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
@@ -194,10 +193,11 @@ export default function TeamPage() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<{ 
     direct_team: string[];
+    paid_direct_team_size: number;
     currentFreeRank: string;
     currentPaidRank: string;
-    freeAchievers?: { bronze: number; silver: number; gold: number; emerald: number; platinum: number; diamond: number; crown: number; };
-    paidAchievers?: { bronzeStar: number; silverStar: number; goldStar: number; emeraldStar: number; platinumStar: number; diamondStar: number; crownStar: number; };
+    freeAchievers?: { [key: string]: number };
+    paidAchievers?: { [key: string]: number };
     isPaid?: boolean;
     paidTeamSize?: number;
     totalTeamSize?: number;
@@ -206,7 +206,7 @@ export default function TeamPage() {
   // Fetch commission data
   useEffect(() => {
     const fetchCommissionData = async () => {
-      if (!user) return;
+      if (!user || !firestore) return;
       
       try {
         const commQuery = query(collection(firestore, 'commissions'), where('userId', '==', user.uid));
@@ -231,53 +231,36 @@ export default function TeamPage() {
     }
   }, [user, firestore]);
   
-  // Fetch direct team member details
-  useEffect(() => {
-    const fetchDirectTeam = async () => {
-        if (!userProfile?.direct_team || userProfile.direct_team.length === 0 || !firestore) {
-            setDirectTeamMembers([]);
-            return;
-        }
-
-        const memberPromises = userProfile.direct_team.map(memberId => 
-            getDoc(doc(firestore, 'users', memberId))
-        );
-
-        const memberDocs = await Promise.all(memberPromises);
-        const membersData = memberDocs
-            .filter(doc => doc.exists())
-            .map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
-        
-        setDirectTeamMembers(membersData);
-    };
-
-    fetchDirectTeam();
-}, [userProfile?.direct_team, firestore]);
-
   const directMemberIds = userProfile?.direct_team || [];
   
-  const RewardsDashboard = () => {
+    const RewardsDashboard = () => {
+    if (isProfileLoading) {
+        return <Skeleton className="h-96 w-full" />
+    }
+
     const getProgressForRank = (rank: any, isPaidTrack: boolean) => {
         if (!rank || !userProfile) return 0;
+        
+        const achieverField = isPaidTrack ? userProfile.paidAchievers : userProfile.freeAchievers;
 
+        if (rank.dependsOn) {
+            const dependsOnKey = rank.dependsOn as keyof typeof achieverField;
+            return achieverField?.[dependsOnKey] || 0;
+        }
+        
+        // Base ranks (Bronze and Bronze Star)
         if (isPaidTrack) {
-            if (rank.key === 'bronzeStar') {
-                return directTeamMembers.filter(m => m.isPaid).length;
-            }
-            const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.paidAchievers>;
-            return userProfile.paidAchievers?.[dependsOnKey] || 0;
+            return userProfile.paid_direct_team_size || 0;
         } else {
-            if (rank.key === 'bronze') {
-                return userProfile.direct_team?.length || 0;
-            }
-            const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.freeAchievers>;
-            return userProfile.freeAchievers?.[dependsOnKey] || 0;
+            return userProfile.direct_team?.length || 0;
         }
     };
 
     const hasAchievedRank = (rankName: string, isPaidTrack: boolean) => {
+        if (!userProfile) return false;
         const rankList = isPaidTrack ? paidTrackRewards : freeTrackRewards;
-        const currentRank = isPaidTrack ? userProfile?.currentPaidRank : userProfile?.currentFreeRank;
+        const currentRank = isPaidTrack ? userProfile.currentPaidRank : userProfile.currentFreeRank;
+        if (!currentRank) return false;
         
         const currentRankIndex = rankList.findIndex(r => r.name === currentRank);
         const targetRankIndex = rankList.findIndex(r => r.name === rankName);
@@ -552,3 +535,4 @@ export default function TeamPage() {
     </div>
   );
 }
+
