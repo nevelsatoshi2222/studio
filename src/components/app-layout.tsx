@@ -80,6 +80,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SafeWalletButton } from './safe-wallet-button';
+import { GlobalFooter } from './GlobalFooter';
 
 const mainNavItems = [
   { href: '/', label: 'Dashboard', icon: Home },
