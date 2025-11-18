@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -16,12 +17,24 @@ const AffiliateRewardCard = ({ tier, isPaid = false }: { tier: any; isPaid?: boo
   const getIcon = (level: string) => {
     switch (level) {
       case 'Bronze Star': return <Star className="h-5 w-5 text-amber-500" />;
-      case 'Silver': return <Award className="h-5 w-5 text-gray-400" />;
-      case 'Gold': return <Award className="h-5 w-5 text-yellow-500" />;
-      case 'Emerald': return <Gem className="h-5 w-5 text-emerald-500" />;
-      case 'Platinum': return <Shield className="h-5 w-5 text-blue-400" />;
-      case 'Diamond': return <Gem className="h-5 w-5 text-cyan-400" />;
-      case 'Crown': return <Crown className="h-5 w-5 text-purple-500" />;
+      case 'Silver':
+      case 'Silver Star': 
+        return <Award className="h-5 w-5 text-gray-400" />;
+      case 'Gold':
+      case 'Gold Star': 
+        return <Award className="h-5 w-5 text-yellow-500" />;
+      case 'Emerald':
+      case 'Emerald Star': 
+        return <Gem className="h-5 w-5 text-emerald-500" />;
+      case 'Platinum':
+      case 'Platinum Star': 
+        return <Shield className="h-5 w-5 text-blue-400" />;
+      case 'Diamond':
+      case 'Diamond Star': 
+        return <Gem className="h-5 w-5 text-cyan-400" />;
+      case 'Crown':
+      case 'Crown Star': 
+        return <Crown className="h-5 w-5 text-purple-500" />;
       default: return <Users className="h-5 w-5" />;
     }
   };
@@ -50,15 +63,11 @@ const AffiliateRewardCard = ({ tier, isPaid = false }: { tier: any; isPaid?: boo
   );
 };
 
-// Reward tiers configuration
+// Reward tiers configuration - CORRECTED VALUES
 const REWARD_TIERS = {
-  BRONZE_STAR: { level: 'Bronze Star', pgc: 1, requirement: '5 direct paid users', color: 'bg-amber-500', icon: '⭐', users: 5 },
-  SILVER: { level: 'Silver', pgc: 2.5, requirement: '5 Bronze Star in team', color: 'bg-gray-400', icon: '🔹', users: 25 },
-  GOLD: { level: 'Gold', pgc: 10, requirement: '5 Silver in team', color: 'bg-yellow-500', icon: '🔶', users: 125 },
-  EMERALD: { level: 'Emerald', pgc: 20, requirement: '5 Gold in team', color: 'bg-emerald-500', icon: '💚', users: 625 },
-  PLATINUM: { level: 'Platinum', pgc: 50, requirement: '5 Emerald in team', color: 'bg-blue-400', icon: '🔷', users: 3125 },
-  DIAMOND: { level: 'Diamond', pgc: 250, requirement: '5 Platinum in team', color: 'bg-cyan-400', icon: '💎', users: 15625 },
-  CROWN: { level: 'Crown', pgc: 1000, requirement: '5 Diamond in team', color: 'bg-purple-500', icon: '👑', users: 78125 }
+  BRONZE_STAR: { level: 'Bronze Star', pgc: 2.5, requirement: '5 direct paid members', color: 'bg-amber-500', icon: '⭐', users: 5 },
+  SILVER_STAR: { level: 'Silver Star', pgc: 5, requirement: '5 Bronze Star in team', color: 'bg-gray-400', icon: '🔹', users: 5 },
+  GOLD_STAR: { level: 'Gold Star', pgc: 10, requirement: '5 Silver Star in team', color: 'bg-yellow-500', icon: '🔶', users: 5 },
 };
 
 export default function AffiliateMarketingPage() {
