@@ -32,7 +32,8 @@ import {
   Trophy,
   Shield,
   GraduationCap,
-  HeartHandshake
+  HeartHandshake,
+  Landmark,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
