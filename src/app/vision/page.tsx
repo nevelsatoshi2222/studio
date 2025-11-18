@@ -170,11 +170,27 @@ const roadmapStages = [
     textColor: "text-indigo-500"
   },
   {
-    stage: "Community Support Initiative",
+    stage: "Decentralized Incubation & Exchange",
     phase: "Stage 4",
-    icon: <Users className="h-8 w-8" />,
+    icon: <Building2 className="h-8 w-8" />,
     status: "upcoming",
     timeframe: "Q1 2027",
+    description: "Empowering entrepreneurs to build new companies within the ecosystem. Launch your own token, raise capital from the community, and get listed on the International Trade Exchange (ITE) with the full support of the PGC platform.",
+    features: [
+      "Decentralized Project Launchpad",
+      "Community-Funded Investments",
+      "Token Issuance Platform",
+      "Integration with ITE Exchange"
+    ],
+    color: "bg-pink-500",
+    textColor: "text-pink-500"
+  },
+  {
+    stage: "Community Support Initiative",
+    phase: "Stage 5",
+    icon: <Users className="h-8 w-8" />,
+    status: "upcoming",
+    timeframe: "Q2 2027",
     description: "Direct assistance programs starting with street communities and expanding globally.",
     features: [
       "Street Community Support",
@@ -187,10 +203,10 @@ const roadmapStages = [
   },
   {
     stage: "National Implementation",
-    phase: "Stage 5",
-    icon: <Building2 className="h-8 w-8" />,
+    phase: "Stage 6",
+    icon: <Landmark className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "Q2 2027",
+    timeframe: "Q3 2027",
     description: "Full-scale implementation of Public Governance system in pioneer countries.",
     features: [
       "First Country Implementation",
@@ -202,11 +218,11 @@ const roadmapStages = [
     textColor: "text-cyan-500"
   },
   {
-    stage: "Global Expansion (Stages 6+)",
+    stage: "Global Expansion (Stages 7+)",
     phase: "Growth Phase",
     icon: <Globe className="h-8 w-8" />,
     status: "upcoming",
-    timeframe: "2027-2030",
+    timeframe: "2028-2030",
     description: "Worldwide expansion helping people and governments complete projects through employment circles.",
     features: [
       "Multi-Country Expansion",
@@ -513,3 +529,6 @@ export default function VisionRoadmapPage() {
   );
 }
 
+
+
+    
