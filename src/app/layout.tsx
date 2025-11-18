@@ -1,3 +1,4 @@
+
 'use client';
 
 import './globals.css';
@@ -6,6 +7,7 @@ import { ClientWalletProvider } from '@/components/client-wallet-provider';
 import React, { Suspense } from 'react';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Toaster } from '@/components/ui/toaster';
+import AppLayout from '@/components/app-layout'; // Import the main AppLayout
 
 // Initialize Firebase services ONCE
 const { firebaseApp, auth, firestore } = initializeFirebase();
@@ -80,12 +82,14 @@ export default function RootLayout({
         />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body>
+      <body className="min-h-screen flex flex-col">
         <Suspense fallback={<div>Loading...</div>}>
             <ClientWalletProvider>
                 <FirebaseProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
                     <LanguageProvider>
-                        {children}
+                        <AppLayout>
+                          {children}
+                        </AppLayout>
                     </LanguageProvider>
                 </FirebaseProvider>
             </ClientWalletProvider>

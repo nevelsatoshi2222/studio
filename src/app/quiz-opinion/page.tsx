@@ -1,15 +1,33 @@
-
-// app/quiz-opinion/page.tsx - UPDATED WITH ONE-TIME ATTEMPT & ACHIEVERS TRACKING
+// src/app/quiz-opinion/page.tsx - COMPREHENSIVE QUIZ SYSTEM
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, TrendingUp, Users, Calculator, Award, BookOpen, Trophy, Star, Lock, UserCheck } from 'lucide-react';
+import { 
+  BookOpen,
+  Target,
+  Award,
+  Trophy,
+  Star,
+  Users,
+  Calculator,
+  TrendingUp,
+  Shield,
+  Heart,
+  Globe,
+  IndianRupee,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Lock,
+  Home
+} from 'lucide-react';
 
 interface Question {
   id: number;
@@ -17,182 +35,284 @@ interface Question {
   explanation: string;
   options: string[];
   correctAnswer: string;
+  category: string;
   requiresAgreement?: boolean;
   noPenalty?: boolean;
 }
 
-// Achievement tiers with limited spots
-const achievementTiers = [
-  { id: 1, achievers: 2000, pgc: 5, rank: "🥇 Gold Tier", color: "from-yellow-400 to-orange-400", completed: 0 },
-  { id: 2, achievers: 5000, pgc: 3, rank: "🥈 Silver Tier", color: "from-gray-400 to-gray-600", completed: 0 },
-  { id: 3, achievers: 20000, pgc: 2, rank: "🥉 Bronze Tier", color: "from-amber-600 to-amber-800", completed: 0 },
-  { id: 4, achievers: 50000, pgc: 1, rank: "🎯 Participant Tier", color: "from-blue-500 to-blue-700", completed: 0 }
-];
-
-const financialQuizQuestions: Question[] = [
-  // 12 Mandatory Questions
+// 30 Comprehensive Questions
+const comprehensiveQuizQuestions: Question[] = [
+  // Budget & Economy (6 questions)
   {
     id: 1,
     question: "What is India's approximate Union budget for the fiscal year 2024-2025?",
     explanation: "India's interim budget for 2024-25 estimates total expenditure at ₹47.66 lakh crore, making ₹50 Lakh Crore the closest approximation.",
     options: ["₹5 Lakh Crore", "₹50 Lakh Crore", "₹20 Lakh Crore", "₹50 Crore"],
-    correctAnswer: "₹50 Lakh Crore"
+    correctAnswer: "₹50 Lakh Crore",
+    category: "Budget & Economy"
   },
   {
     id: 2,
-    question: "What is the approximate combined budget of all Indian states for 2024-2025?",
-    explanation: "The combined budget expenditure of all states is projected to be around ₹50-55 Lakh Crore, making ₹50 Lakh Crore a reasonable estimate.",
-    options: ["₹10 Lakh Crore", "₹25 Lakh Crore", "₹50 Lakh Crore", "₹100 Lakh Crore"],
-    correctAnswer: "₹50 Lakh Crore"
+    question: "How does India's GDP compare with other major economies?",
+    explanation: "India is the 5th largest economy globally with GDP of $4.1 trillion, showing rapid growth from being the 10th largest a decade ago.",
+    options: ["10th largest economy", "5th largest economy", "3rd largest economy", "7th largest economy"],
+    correctAnswer: "5th largest economy",
+    category: "Budget & Economy"
   },
   {
     id: 3,
-    question: "What is India's approximate total revenue (Centre + States) for a fiscal year?",
-    explanation: "With both Centre and States having budgets around ₹50 Lakh Crore each, the total combined expenditure (and targeted revenue) is approximately ₹100 Lakh Crore.",
-    options: ["₹20 Lakh Crore", "₹50 Lakh Crore", "₹100 Lakh Crore", "₹200 Lakh Crore"],
-    correctAnswer: "₹100 Lakh Crore"
+    question: "What percentage of GDP is India's tax collection?",
+    explanation: "India's tax-to-GDP ratio is around 11.7%, which is lower than many developing economies and indicates potential for increased revenue mobilization.",
+    options: ["8% of GDP", "11.7% of GDP", "15% of GDP", "20% of GDP"],
+    correctAnswer: "11.7% of GDP",
+    category: "Budget & Economy"
   },
   {
     id: 4,
-    question: "Approximately how many families are there in India?",
-    explanation: "With a population of about 140 crores and an average family size of 4-5, the number of families is estimated to be around 30-35 crores.",
-    options: ["10 Crore", "20 Crore", "35 Crore", "50 Crore"],
-    correctAnswer: "35 Crore"
+    question: "What is India's fiscal deficit target for 2024-25?",
+    explanation: "The government aims to reduce fiscal deficit to 5.1% of GDP in 2024-25, down from 5.8% in previous year, showing fiscal consolidation.",
+    options: ["4.5% of GDP", "5.1% of GDP", "6.2% of GDP", "7.0% of GDP"],
+    correctAnswer: "5.1% of GDP",
+    category: "Budget & Economy"
   },
   {
     id: 5,
-    question: "What is the approximate population of India?",
-    explanation: "As of 2024, India's population has surpassed 140 crores (1.4 billion).",
-    options: ["100 Crore", "120 Crore", "140 Crore", "160 Crore"],
-    correctAnswer: "140 Crore"
+    question: "How much is allocated for education in Union Budget 2024-25?",
+    explanation: "Education sector received ₹1.25 lakh crore, focusing on digital education, research, and infrastructure development.",
+    options: ["₹85,000 crore", "₹1.25 lakh crore", "₹1.75 lakh crore", "₹2.25 lakh crore"],
+    correctAnswer: "₹1.25 lakh crore",
+    category: "Budget & Economy"
   },
   {
     id: 6,
-    question: "Approximately how many families in India live below the poverty line?",
-    explanation: "Various estimates suggest that around 20-25% of the population lives below the poverty line, which translates to about 6-8 crore families.",
-    options: ["1 Crore", "3 Crore", "8 Crore", "15 Crore"],
-    correctAnswer: "8 Crore"
+    question: "What is the healthcare budget allocation for 2024-25?",
+    explanation: "Health Ministry received ₹90,659 crore, with focus on Ayushman Bharat and healthcare infrastructure development.",
+    options: ["₹50,000 crore", "₹90,659 crore", "₹1.2 lakh crore", "₹1.5 lakh crore"],
+    correctAnswer: "₹90,659 crore",
+    category: "Budget & Economy"
   },
+
+  // Defense & Security (4 questions)
   {
     id: 7,
-    question: "Approximately how many people in India live below the poverty line?",
-    explanation: "Based on official figures and World Bank estimates, over 20 crore people in India live in poverty.",
-    options: ["5 Crore", "10 Crore", "20 Crore", "40 Crore"],
-    correctAnswer: "20 Crore"
+    question: "What percentage of India's Union Budget is allocated to Defense?",
+    explanation: "Defense allocation is approximately 13% of the total Union Budget, highlighting national security priorities.",
+    options: ["8% of total budget", "13% of total budget", "18% of total budget", "23% of total budget"],
+    correctAnswer: "13% of total budget",
+    category: "Defense & Security"
   },
   {
     id: 8,
-    question: "What is the approximate annual cost to bring one family out of poverty in India?",
-    explanation: "Based on various economic models and poverty line estimates, it would take roughly ₹1,20,000 per year to provide basic income support to a family.",
-    options: ["₹10,000", "₹50,000", "₹1,20,000", "₹5,00,000"],
-    correctAnswer: "₹1,20,000"
+    question: "India's defense budget ranks in the world as:",
+    explanation: "India has the 3rd largest defense budget globally after USA and China, reflecting its strategic position.",
+    options: ["1st largest", "3rd largest", "5th largest", "7th largest"],
+    correctAnswer: "3rd largest",
+    category: "Defense & Security"
   },
   {
     id: 9,
-    question: "What is the approximate total annual cost to eradicate poverty in India by providing basic income to all poor families?",
-    explanation: "Multiplying the cost per family (₹1,20,000) by the number of poor families (approx. 8 crore) gives a figure around ₹9.6 Lakh Crore.",
-    options: ["₹1 Lakh Crore", "₹5 Lakh Crore", "₹10 Lakh Crore", "₹20 Lakh Crore"],
-    correctAnswer: "₹10 Lakh Crore"
+    question: "What is the approximate allocation for Defense Pensions?",
+    explanation: "Defense pensions account for about ₹1.41 lakh crore, showing significant commitment to armed forces welfare.",
+    options: ["₹50,000 crore", "₹1.41 lakh crore", "₹2.5 lakh crore", "₹3.2 lakh crore"],
+    correctAnswer: "₹1.41 lakh crore",
+    category: "Defense & Security"
   },
   {
     id: 10,
-    question: "What is India's approximate GDP in USD?",
-    explanation: "India's Gross Domestic Product (GDP) is projected to be around $3.7 to $4 trillion, making it one of the world's largest economies.",
-    options: ["$1 Trillion", "$2 Trillion", "$4 Trillion", "$10 Trillion"],
-    correctAnswer: "$4 Trillion"
+    question: "What is India's defense budget as percentage of GDP?",
+    explanation: "India spends about 2.0-2.1% of its GDP on defense, which is moderate compared to global standards.",
+    options: ["1.5% of GDP", "2.1% of GDP", "3.5% of GDP", "4.2% of GDP"],
+    correctAnswer: "2.1% of GDP",
+    category: "Defense & Security"
   },
+
+  // Infrastructure (4 questions)
   {
     id: 11,
-    question: "What is India's approximate national debt?",
-    explanation: "India's total government debt (Centre and States combined) is approximately 85-90% of its GDP, which is around $3.4 trillion or ₹280 Lakh Crore.",
-    options: ["₹50 Lakh Crore", "₹100 Lakh Crore", "₹150 Lakh Crore", "₹300 Lakh Crore"],
-    correctAnswer: "₹300 Lakh Crore"
+    question: "What is the total budget allocation for Indian Railways in 2024-25?",
+    explanation: "Indian Railways received ₹2.55 lakh crore, the highest ever allocation for infrastructure development.",
+    options: ["₹1.25 lakh crore", "₹2.55 lakh crore", "₹3.45 lakh crore", "₹4.15 lakh crore"],
+    correctAnswer: "₹2.55 lakh crore",
+    category: "Infrastructure"
   },
   {
     id: 12,
-    question: "If 35% of the central budget were directly transferred to families, what percentage of poverty could be eradicated?",
-    explanation: "35% of the ₹50 Lakh Crore central budget is ₹17.5 Lakh Crore. Since it takes about ₹10 Lakh Crore to eradicate poverty, this amount could theoretically cover 100% of the cost with a surplus.",
-    options: ["25%", "50%", "75%", "100%"],
-    correctAnswer: "100%"
+    question: "How many new trains were announced in Railway Budget 2024-25?",
+    explanation: "The budget announced 3,000 new trains under PM Gati Shakti program for modernizing rail infrastructure.",
+    options: ["1,000 new trains", "3,000 new trains", "5,000 new trains", "10,000 new trains"],
+    correctAnswer: "3,000 new trains",
+    category: "Infrastructure"
   },
-  // 7 Topical Questions
   {
     id: 13,
-    question: "What was the approximate capital outlay for the Indian Railways in the 2024-25 budget?",
-    explanation: "The budget allocated a record capital outlay of ₹2.55 lakh crore for the Indian Railways, focusing on modernization and infrastructure.",
-    options: ["₹1 Lakh Crore", "₹1.5 Lakh Crore", "₹2.5 Lakh Crore", "₹5 Lakh Crore"],
-    correctAnswer: "₹2.5 Lakh Crore"
+    question: "What is the allocation for Road Transport and Highways?",
+    explanation: "Road Transport and Highways ministry received ₹2.78 lakh crore for national highway development and infrastructure.",
+    options: ["₹1.89 lakh crore", "₹2.78 lakh crore", "₹3.45 lakh crore", "₹4.12 lakh crore"],
+    correctAnswer: "₹2.78 lakh crore",
+    category: "Infrastructure"
   },
   {
     id: 14,
-    question: "What is India's approximate defense budget for 2024-25?",
-    explanation: "The defense budget was increased to ₹6.2 Lakh Crore, emphasizing military modernization and self-reliance (Aatmanirbharta).",
-    options: ["₹3 Lakh Crore", "₹4.5 Lakh Crore", "₹6.2 Lakh Crore", "₹8 Lakh Crore"],
-    correctAnswer: "₹6.2 Lakh Crore"
+    question: "How many kilometers of national highways were constructed in 2023-24?",
+    explanation: "India constructed approximately 12,349 km of national highways in 2023-24, setting a record for infrastructure development.",
+    options: ["8,500 km", "12,349 km", "15,200 km", "18,000 km"],
+    correctAnswer: "12,349 km",
+    category: "Infrastructure"
   },
+
+  // Agriculture & Environment (4 questions)
   {
     id: 15,
-    question: "Which country is India's largest trading partner as of 2023-24 data?",
-    explanation: "Surpassing the US, China has emerged as India's largest trading partner with two-way commerce of $118.4 billion.",
-    options: ["USA", "China", "UAE", "Russia"],
-    correctAnswer: "China"
+    question: "What is India's target for renewable energy capacity by 2030?",
+    explanation: "India aims to achieve 500 GW of renewable energy capacity by 2030 as part of its climate commitments.",
+    options: ["250 GW by 2030", "350 GW by 2030", "500 GW by 2030", "650 GW by 2030"],
+    correctAnswer: "500 GW by 2030",
+    category: "Environment"
   },
   {
     id: 16,
-    question: "Which Indian state has the highest GDP?",
-    explanation: "Maharashtra has the largest economy among all Indian states, with a GSDP (Gross State Domestic Product) of over $400 billion.",
-    options: ["Gujarat", "Tamil Nadu", "Maharashtra", "Uttar Pradesh"],
-    correctAnswer: "Maharashtra"
+    question: "How much carbon dioxide can one acre of bamboo absorb annually?",
+    explanation: "One acre of bamboo plantation can absorb approximately 12 tons of CO2 annually, making it excellent for carbon sequestration.",
+    options: ["5 tons CO2 per year", "12 tons CO2 per year", "20 tons CO2 per year", "25 tons CO2 per year"],
+    correctAnswer: "12 tons CO2 per year",
+    category: "Environment"
   },
   {
     id: 17,
-    question: "What does 'UPI' stand for in the context of Indian digital payments?",
-    explanation: "UPI, developed by NPCI, is a real-time payment system that has revolutionized digital transactions in India and is now expanding globally.",
-    options: ["Unified Payment Interface", "Universal Payment ID", "Unique Public Infrastructure", "Unified Public aId"],
-    correctAnswer: "Unified Payment Interface"
+    question: "What is the annual growth rate of global bamboo market?",
+    explanation: "The global bamboo market is growing at 7.5% annually, driven by demand for sustainable materials.",
+    options: ["3% annually", "5% annually", "7.5% annually", "10% annually"],
+    correctAnswer: "7.5% annually",
+    category: "Economy & Resources"
   },
   {
     id: 18,
-    question: "The 'Make in India' initiative primarily aims to:",
-    explanation: "Launched in 2014, the 'Make in India' initiative's main goal is to transform India into a global design and manufacturing hub.",
-    options: ["Boost tourism", "Improve agricultural output", "Develop India into a manufacturing hub", "Enhance IT services exports"],
-    correctAnswer: "Develop India into a manufacturing hub"
+    question: "What percentage of global fish trade does India currently capture?",
+    explanation: "Despite being 3rd in production, India captures only about 6% of global fish trade by value, showing huge growth potential.",
+    options: ["3% of global trade", "6% of global trade", "12% of global trade", "18% of global trade"],
+    correctAnswer: "6% of global trade",
+    category: "Economy & Resources"
   },
+
+  // Science & Technology (3 questions)
   {
     id: 19,
-    question: "What is the primary objective of the 'Swachh Bharat Mission'?",
-    explanation: "The mission aims to achieve a clean and open-defecation-free (ODF) India through construction of toilets and promoting sanitation and hygiene.",
-    options: ["Building highways", "Providing free electricity", "Universal sanitation and cleanliness", "Digital literacy for all"],
-    correctAnswer: "Universal sanitation and cleanliness"
+    question: "What is ISRO's budget allocation for 2024-25?",
+    explanation: "ISRO received ₹13,042 crore for space research, Gaganyaan mission, and satellite development programs.",
+    options: ["₹8,500 crore", "₹13,042 crore", "₹18,000 crore", "₹22,500 crore"],
+    correctAnswer: "₹13,042 crore",
+    category: "Science & Technology"
   },
-  // 1 Final Poll Question
   {
     id: 20,
-    question: "Considering these figures, if 35% of the Centre's budget and 35% of the State's budget were given directly to families, it's estimated each family could get over ₹1,20,000 per year. Would you support such a policy?",
-    explanation: "This is a core question of public governance. It asks whether you believe in direct benefit transfers as a primary model for wealth distribution versus government-managed schemes.",
+    question: "According to physics laws, can permanent magnets create infinite energy for vehicles?",
+    explanation: "No, permanent magnets alone cannot create energy. They can only help in energy efficiency through levitation.",
+    options: ["Yes, magnets create infinite energy", "No, it violates physics laws", "Only for small distances", "Only if magnets are very strong"],
+    correctAnswer: "No, it violates physics laws",
+    category: "Science & Technology"
+  },
+  {
+    id: 21,
+    question: "What percentage of global trade is transported by sea?",
+    explanation: "Approximately 90% of world trade by volume is transported by ships, making oceans the backbone of global commerce.",
+    options: ["50% of global trade", "70% of global trade", "90% of global trade", "95% of global trade"],
+    correctAnswer: "90% of global trade",
+    category: "Economy & Resources"
+  },
+
+  // Global Affairs (3 questions)
+  {
+    id: 22,
+    question: "What is the economic cost of global conflicts annually?",
+    explanation: "Global conflicts cost approximately $14 trillion annually in direct and indirect economic impacts.",
+    options: ["$5 trillion", "$14 trillion", "$25 trillion", "$40 trillion"],
+    correctAnswer: "$14 trillion",
+    category: "Global Affairs"
+  },
+  {
+    id: 23,
+    question: "Which country successfully monetizes its digital governance model?",
+    explanation: "Estonia sells its e-governance technology and consultancy to other countries, creating revenue from digital expertise.",
+    options: ["Japan", "Estonia", "Germany", "Australia"],
+    correctAnswer: "Estonia",
+    category: "Global Affairs"
+  },
+  {
+    id: 24,
+    question: "What is the United Nations peacekeeping budget approximately?",
+    explanation: "UN peacekeeping budget is around $6.5 billion annually, funded by member states based on assessment.",
+    options: ["$2 billion", "$6.5 billion", "$15 billion", "$25 billion"],
+    correctAnswer: "$6.5 billion",
+    category: "Global Affairs"
+  },
+
+  // Governance & Policy (6 questions)
+  {
+    id: 25,
+    question: "Which state asset has the highest untapped revenue potential according to experts?",
+    explanation: "Government buildings and vacant lands offer the highest immediate revenue potential through commercial development.",
+    options: ["Government office buildings", "Forest land", "Public schools", "Roadside spaces"],
+    correctAnswer: "Government office buildings",
+    category: "Governance & Policy"
+  },
+  {
+    id: 26,
+    question: "What is the estimated potential of India's minor forest produce if properly commercialized?",
+    explanation: "Minor forest produce like tendu leaves and medicinal herbs have potential to generate over ₹40,000 crore annually.",
+    options: ["₹10,000 crore", "₹25,000 crore", "₹40,000 crore", "₹60,000 crore"],
+    correctAnswer: "₹40,000 crore",
+    category: "Governance & Policy"
+  },
+  {
+    id: 27,
+    question: "What percentage of government building rooftops are currently generating revenue?",
+    explanation: "Less than 1% of government building rooftops are utilized for revenue generation through solar power or advertising.",
+    options: ["Less than 1%", "About 10%", "Around 25%", "Over 50%"],
+    correctAnswer: "Less than 1%",
+    category: "Governance & Policy"
+  },
+  {
+    id: 28,
+    question: "Approximately how many people are employed in India's fishing sector?",
+    explanation: "The fishing and aquaculture sector provides livelihood to about 2.8 crore people directly and many more indirectly.",
+    options: ["50 lakh people", "1.5 crore people", "2.8 crore people", "5 crore people"],
+    correctAnswer: "2.8 crore people",
+    category: "Employment"
+  },
+  {
+    id: 29,
+    question: "What percentage of GDP does India spend on education?",
+    explanation: "India spends about 2.9% of its GDP on education, lower than the recommended 6% by education policy.",
+    options: ["2.1% of GDP", "2.9% of GDP", "3.8% of GDP", "4.5% of GDP"],
+    correctAnswer: "2.9% of GDP",
+    category: "Education"
+  },
+  {
+    id: 30,
+    question: "Considering these figures, if 35% of Centre's and State's budget were given directly to families, each family could get over ₹1,20,000 per year. Would you support such a policy?",
+    explanation: "This is a core question of public governance. It asks whether you believe in direct benefit transfers as a primary model for wealth distribution.",
     options: ["Yes, of course.", "No, we don't need free money.", "Yes, but it should be less than 25%", "Yes, it should be more than 35%"],
     correctAnswer: "Yes, of course.",
+    category: "Governance & Policy",
     requiresAgreement: true,
     noPenalty: true
   }
 ];
 
 // Storage keys
-const QUIZ_ATTEMPT_KEY = 'financial_quiz_attempted';
-const ACHIEVERS_COUNT_KEY = 'financial_quiz_achievers';
+const QUIZ_ATTEMPT_KEY = 'comprehensive_quiz_attempted';
+const ACHIEVERS_COUNT_KEY = 'comprehensive_quiz_achievers';
 
-export default function FinancialAwarenessQuiz() {
+export default function ComprehensiveQuizSystem() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-  const [agreementLevel, setAgreementLevel] = useState<{ [key: number]: string }>({});
   const [showResults, setShowResults] = useState(false);
   const [showRules, setShowRules] = useState(true);
   const [hasAttempted, setHasAttempted] = useState(false);
   const [totalAchievers, setTotalAchievers] = useState(0);
-  const [updatedTiers, setUpdatedTiers] = useState(achievementTiers);
 
-  const currentQuestion = financialQuizQuestions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / financialQuizQuestions.length) * 100;
+  const currentQuestion = comprehensiveQuizQuestions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / comprehensiveQuizQuestions.length) * 100;
 
   // Check if user has already attempted
   useEffect(() => {
@@ -201,13 +321,6 @@ export default function FinancialAwarenessQuiz() {
     
     setHasAttempted(!!attempted);
     setTotalAchievers(achieversCount);
-    
-    // Update tiers with current completion data
-    const updated = achievementTiers.map(tier => ({
-      ...tier,
-      completed: Math.min(achieversCount, tier.achievers)
-    }));
-    setUpdatedTiers(updated);
   }, []);
 
   const handleAnswerSelect = (questionId: number, answer: string) => {
@@ -217,15 +330,8 @@ export default function FinancialAwarenessQuiz() {
     }));
   };
 
-  const handleAgreementSelect = (questionId: number, level: string) => {
-    setAgreementLevel(prev => ({
-      ...prev,
-      [questionId]: level
-    }));
-  };
-
   const handleNext = () => {
-    if (currentQuestionIndex < financialQuizQuestions.length - 1) {
+    if (currentQuestionIndex < comprehensiveQuizQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       // Mark as attempted and update achievers count
@@ -235,14 +341,6 @@ export default function FinancialAwarenessQuiz() {
       
       setHasAttempted(true);
       setTotalAchievers(newAchieversCount);
-      
-      // Update tiers
-      const updated = achievementTiers.map(tier => ({
-        ...tier,
-        completed: Math.min(newAchieversCount, tier.achievers)
-      }));
-      setUpdatedTiers(updated);
-      
       setShowResults(true);
     }
   };
@@ -255,33 +353,24 @@ export default function FinancialAwarenessQuiz() {
 
   const calculateScore = () => {
     let correct = 0;
-    financialQuizQuestions.forEach(question => {
+    comprehensiveQuizQuestions.forEach(question => {
       if (question.noPenalty || answers[question.id] === question.correctAnswer) {
         correct++;
       }
     });
     return {
       correct,
-      total: financialQuizQuestions.length,
-      percentage: Math.round((correct / financialQuizQuestions.length) * 100)
+      total: comprehensiveQuizQuestions.length,
+      percentage: Math.round((correct / comprehensiveQuizQuestions.length) * 100)
     };
   };
 
   const getPGCReward = (percentage: number) => {
     if (percentage === 100) return 5;
-    if (percentage >= 51) return 3;
-    if (percentage >= 36) return 2;
+    if (percentage >= 80) return 4;
+    if (percentage >= 60) return 3;
+    if (percentage >= 40) return 2;
     return 1;
-  };
-
-  const getAchievementTier = () => {
-    const newCount = totalAchievers + 1;
-    for (let i = 0; i < achievementTiers.length; i++) {
-      if (newCount <= achievementTiers[i].achievers) {
-        return achievementTiers[i];
-      }
-    }
-    return achievementTiers[achievementTiers.length - 1];
   };
 
   const startQuiz = () => {
@@ -292,19 +381,19 @@ export default function FinancialAwarenessQuiz() {
   // If user has already attempted, show completion message
   if (hasAttempted && !showResults) {
     return (
-      <div className="max-w-2xl mx-auto text-center space-y-8 py-12">
+      <div className="max-w-4xl mx-auto text-center space-y-8 py-12">
         <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-2xl p-8">
           <Lock className="h-16 w-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold mb-4">Quiz Already Completed</h1>
           <p className="text-xl opacity-90">
-            You have already attempted this quiz. Each person can only participate once.
+            You have already attempted this comprehensive quiz. Each person can only participate once.
           </p>
         </div>
         
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-center gap-2">
-              <UserCheck className="h-5 w-5" />
+              <Users className="h-5 w-5" />
               Community Progress
             </CardTitle>
           </CardHeader>
@@ -313,182 +402,98 @@ export default function FinancialAwarenessQuiz() {
               {totalAchievers.toLocaleString()}
             </div>
             <div className="text-gray-600">Total Participants</div>
-            
-            <div className="mt-6 space-y-4">
-              <h4 className="font-semibold">Achievement Tiers Progress:</h4>
-              {updatedTiers.map((tier, index) => (
-                <div key={tier.id} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{tier.rank}</span>
-                    <Badge variant="secondary">{tier.pgc} PGC</Badge>
-                  </div>
-                  <Progress 
-                    value={(tier.completed / tier.achievers) * 100} 
-                    className="h-2 mb-1"
-                  />
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{tier.completed.toLocaleString()} / {tier.achievers.toLocaleString()}</span>
-                    <span>
-                      {tier.completed >= tier.achievers ? '✅ Completed' : `${tier.achievers - tier.completed} spots left`}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
 
-        <Button 
-          onClick={() => window.location.reload()}
-          variant="outline"
-        >
-          Check Again
-        </Button>
+        <div className="flex gap-4 justify-center">
+          <Button 
+            onClick={() => window.location.reload()}
+            variant="outline"
+          >
+            Check Again
+          </Button>
+          <Button 
+            onClick={() => window.location.href = '/'}
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (showRules) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 p-4">
         {/* Header */}
         <div className="text-center space-y-4">
           <Badge variant="default" className="text-sm">
-            Financial Literacy Quiz
+            Comprehensive Financial & Governance Quiz
           </Badge>
-          <h1 className="text-4xl font-bold">Financial Awareness Challenge</h1>
+          <h1 className="text-4xl font-bold">Public Governance Awareness Challenge</h1>
           <p className="text-xl text-gray-600">
-            Test your knowledge about India's finances and earn PGC tokens!
+            Test your knowledge about India's finances, governance, and global perspective!
           </p>
         </div>
 
-        {/* One-time Attempt Warning */}
-        <Card className="bg-orange-50 border-orange-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-orange-800">
-              <Lock className="h-5 w-5" />
-              <div>
-                <div className="font-semibold">One-Time Attempt</div>
-                <div className="text-sm">You can only attempt this quiz once. Make it count!</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Quiz Statistics */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <BookOpen className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+              <div className="text-2xl font-bold">{comprehensiveQuizQuestions.length}</div>
+              <div className="text-gray-600">Total Questions</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <Target className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <div className="text-2xl font-bold">7</div>
+              <div className="text-gray-600">Categories Covered</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+              <div className="text-2xl font-bold">{totalAchievers.toLocaleString()}</div>
+              <div className="text-gray-600">Previous Participants</div>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Achievement Tiers Progress */}
+        {/* Categories Covered */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Limited Achievement Tiers
-            </CardTitle>
-            <CardDescription>
-              {totalAchievers.toLocaleString()} people have already completed this quiz
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {updatedTiers.map((tier, index) => (
-              <div key={tier.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{tier.rank}</span>
-                    <Badge variant="secondary">{tier.pgc} PGC</Badge>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {tier.completed >= tier.achievers ? (
-                      <span className="text-green-600">✅ Filled</span>
-                    ) : (
-                      <span>{tier.achievers - tier.completed} spots left</span>
-                    )}
-                  </div>
-                </div>
-                <Progress 
-                  value={(tier.completed / tier.achievers) * 100} 
-                  className="h-2"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>{tier.completed.toLocaleString()} achieved</span>
-                  <span>Limit: {tier.achievers.toLocaleString()}</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* PGC Earning Rules */}
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-900">
-              <Award className="h-6 w-6" />
-              PGC Token Rewards
+              <Globe className="h-5 w-5" />
+              Quiz Categories
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-purple-800 text-center">🎯 Scoring System</h3>
-              <ul className="space-y-2 text-sm text-purple-700">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>100% correct: 5 PGC tokens</span>
-                </li>
-                <li className="flex items-center gap-2">
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                "Budget & Economy",
+                "Defense & Security", 
+                "Infrastructure",
+                "Healthcare & Education",
+                "Environment",
+                "Science & Technology",
+                "Global Affairs",
+                "Governance & Policy"
+              ].map((category, index) => (
+                <div key={index} className="flex items-center gap-2 p-3 bg-blue-50 rounded">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>51-80% correct: 3 PGC tokens</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span>36-50% correct: 2 PGC tokens</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span>Below 35%: 1 PGC tokens</span>
-                </li>
-              </ul>
+                  <span className="text-sm">{category}</span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Quiz Instructions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Quiz Instructions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span>One question displayed at a time - no scrolling needed</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span>Select your answer and click Next</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span>See explanations only after completing the quiz</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span>Only the last question requires agreement level</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span>Last question is opinion-based - no wrong answer</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                <span className="font-semibold text-red-600">One-time attempt only!</span>
-              </div>
-            </div>
-            
-            <Button onClick={startQuiz} className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
-              🚀 Start Financial Quiz
-            </Button>
-          </CardContent>
-        </Card>
+        <Button onClick={startQuiz} className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
+          🚀 Start Comprehensive Quiz
+        </Button>
       </div>
     );
   }
@@ -496,10 +501,9 @@ export default function FinancialAwarenessQuiz() {
   if (showResults) {
     const score = calculateScore();
     const pgcReward = getPGCReward(score.percentage);
-    const achievementTier = getAchievementTier();
     
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 p-4">
         {/* Congratulations Header */}
         <div className="text-center space-y-6">
           <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-2xl p-8 shadow-lg">
@@ -507,10 +511,10 @@ export default function FinancialAwarenessQuiz() {
               <Trophy className="h-16 w-16 text-yellow-300" />
             </div>
             <h1 className="text-4xl font-bold mb-2">Congratulations! 🎉</h1>
-            <p className="text-xl opacity-90">You've completed the Financial Awareness Challenge</p>
+            <p className="text-xl opacity-90">You've completed the Comprehensive Governance Awareness Challenge</p>
             <div className="mt-4 bg-white/20 rounded-lg p-3 inline-block">
               <div className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5" />
+                <Users className="h-5 w-5" />
                 <span>You are achiever #{totalAchievers.toLocaleString()}</span>
               </div>
             </div>
@@ -529,7 +533,7 @@ export default function FinancialAwarenessQuiz() {
                     {score.percentage}%
                   </div>
                   <div className="text-gray-600 text-lg">
-                    Financial Awareness Score
+                    Comprehensive Governance Score
                   </div>
                   <div className="text-sm text-gray-500 mt-1">
                     {score.correct} out of {score.total} questions correct
@@ -547,155 +551,154 @@ export default function FinancialAwarenessQuiz() {
                   {pgcReward} PGC
                 </div>
                 <div className="text-green-100 text-lg">
-                  ✅ Based on your performance score
+                  ✅ Based on your comprehensive knowledge score
                 </div>
               </div>
-
-              {/* Achievement Tier */}
-              <div className={`bg-gradient-to-r ${achievementTier.color} text-white rounded-xl p-6`}>
-                <div className="text-2xl font-bold mb-2">{achievementTier.rank}</div>
-                <div className="text-lg">You secured spot #{totalAchievers.toLocaleString()}</div>
-                <div className="text-sm opacity-90 mt-1">
-                  Limited to {achievementTier.achievers.toLocaleString()} achievers
-                </div>
-              </div>
-
-              {/* Updated Community Progress */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Community Progress Updated
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600 mb-4">
-                    {totalAchievers.toLocaleString()} Achievers
-                  </div>
-                  <div className="space-y-3">
-                    {updatedTiers.map((tier, index) => (
-                      <div key={tier.id} className="border rounded-lg p-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">{tier.rank}</span>
-                          <Badge variant="secondary">{tier.pgc} PGC</Badge>
-                        </div>
-                        <Progress 
-                          value={(tier.completed / tier.achievers) * 100} 
-                          className="h-2 mb-1"
-                        />
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>{tier.completed.toLocaleString()} / {tier.achievers.toLocaleString()}</span>
-                          <span>
-                            {tier.completed >= tier.achievers ? '✅ Completed' : `${tier.achievers - tier.completed} spots left`}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </CardContent>
         </Card>
 
-        {/* Detailed Results Section */}
+        {/* Detailed Results */}
         <Card>
-            <CardHeader>
-                <CardTitle>Detailed Answers</CardTitle>
-                <CardDescription>Review your answers and the explanations</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {financialQuizQuestions.map(question => {
-                    const userAnswer = answers[question.id];
-                    const isCorrect = question.noPenalty || userAnswer === question.correctAnswer;
+          <CardHeader>
+            <CardTitle>Detailed Performance Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Question Review */}
+              <div>
+                <h4 className="font-semibold mb-4">Question Review:</h4>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {comprehensiveQuizQuestions.map((question, index) => {
+                    const isCorrect = answers[question.id] === question.correctAnswer;
                     return (
-                        <div key={question.id} className={`p-4 border rounded-lg ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                            <h4 className="font-semibold">{question.question}</h4>
-                            <p className="text-sm mt-2">Your answer: <span className="font-medium">{userAnswer}</span></p>
-                            {!isCorrect && <p className="text-sm">Correct answer: <span className="font-medium">{question.correctAnswer}</span></p>}
-                            <div className={`mt-3 pt-3 border-t ${isCorrect ? 'border-green-200' : 'border-red-200'}`}>
-                                <p className="text-xs text-gray-600">{question.explanation}</p>
+                      <div key={question.id} className={`p-4 rounded border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                        <div className="flex items-start gap-3">
+                          {isCorrect ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                          ) : (
+                            <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                          )}
+                          <div className="flex-1">
+                            <div className="font-medium mb-2">
+                              Q{index + 1}: {question.question}
                             </div>
+                            <div className="text-sm text-gray-600 mb-2">
+                              Your answer: <span className={isCorrect ? "text-green-600" : "text-red-600"}>
+                                {answers[question.id] || "Not answered"}
+                              </span>
+                            </div>
+                            {!isCorrect && (
+                              <div className="text-sm text-green-600">
+                                Correct answer: {question.correctAnswer}
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-500 mt-2">
+                              Explanation: {question.explanation}
+                            </div>
+                          </div>
                         </div>
-                    )
-                })}
-            </CardContent>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </CardContent>
         </Card>
 
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="flex-1"
+          >
+            Take Again (Practice Mode)
+          </Button>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
       </div>
     );
   }
 
+  // Main Quiz Interface
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-6 p-4">
+      {/* Progress Header */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {comprehensiveQuizQuestions.length}</div>
+              <div className="font-medium">{currentQuestion.category}</div>
+            </div>
+            <Badge variant="secondary">
+              {Math.round(progress)}% Complete
+            </Badge>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </CardContent>
+      </Card>
+
+      {/* Question Card */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-xl">Question {currentQuestionIndex + 1}/{financialQuizQuestions.length}</CardTitle>
-              <CardDescription>Select the best answer</CardDescription>
+          <CardTitle className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-blue-600">{currentQuestionIndex + 1}</span>
             </div>
-            <Badge variant="secondary" className="text-base">{progress.toFixed(0)}%</Badge>
-          </div>
-          <Progress value={progress} className="mt-4" />
+            <span>{currentQuestion.question}</span>
+          </CardTitle>
+          {currentQuestion.requiresAgreement && (
+            <CardDescription className="text-orange-600">
+              💡 This is an opinion-based question - no wrong answer
+            </CardDescription>
+          )}
         </CardHeader>
-
-        <CardContent className="space-y-6">
-          <p className="text-lg font-semibold min-h-[60px]">{currentQuestion.question}</p>
-          
+        <CardContent>
           <RadioGroup 
-            value={answers[currentQuestion.id]} 
+            value={answers[currentQuestion.id] || ''}
             onValueChange={(value) => handleAnswerSelect(currentQuestion.id, value)}
+            className="space-y-3"
           >
             {currentQuestion.options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-200">
-                <RadioGroupItem value={option} id={`q${currentQuestion.id}-opt${index}`} />
-                <Label htmlFor={`q${currentQuestion.id}-opt${index}`} className="flex-1 cursor-pointer">
+              <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
+                <RadioGroupItem value={option} id={`option-${index}`} />
+                <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
                   {option}
                 </Label>
               </div>
             ))}
           </RadioGroup>
         </CardContent>
-
-        <CardContent>
-          {currentQuestion.requiresAgreement && (
-            <div className="mt-4 space-y-2">
-              <Label>How much do you agree with this policy?</Label>
-              <RadioGroup
-                value={agreementLevel[currentQuestion.id]}
-                onValueChange={(value) => handleAgreementSelect(currentQuestion.id, value)}
-                className="flex flex-wrap gap-2"
-              >
-                {['0%', '25%', '50%', '75%', '100%'].map(level => (
-                  <div key={level}>
-                    <RadioGroupItem value={level} id={`agree-${level}`} className="sr-only" />
-                    <Label
-                      htmlFor={`agree-${level}`}
-                      className={`px-3 py-1.5 border rounded-full cursor-pointer ${
-                        agreementLevel[currentQuestion.id] === level
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      {level}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          )}
-        </CardContent>
-
-        <CardFooter className="flex justify-between">
-          <Button onClick={handlePrevious} disabled={currentQuestionIndex === 0} variant="outline">
-            Previous
-          </Button>
-          <Button onClick={handleNext}>
-            {currentQuestionIndex === financialQuizQuestions.length - 1 ? 'Finish & See Results' : 'Next'}
-          </Button>
-        </CardFooter>
       </Card>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between">
+        <Button 
+          onClick={handlePrevious}
+          variant="outline"
+          disabled={currentQuestionIndex === 0}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Previous
+        </Button>
+        
+        <Button 
+          onClick={handleNext}
+          disabled={!answers[currentQuestion.id]}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          {currentQuestionIndex === comprehensiveQuizQuestions.length - 1 ? 'Submit Quiz' : 'Next Question'}
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
     </div>
   );
 }
