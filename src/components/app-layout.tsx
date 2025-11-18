@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import Link from 'next/link';
@@ -57,8 +56,8 @@ import {
   ClipboardList,
   CheckCircle,
   RefreshCcw,
-  Award, // ADD THIS IMPORT
-  Crown, // ADD THIS IMPORT
+  Award,
+  Crown,
   Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -82,7 +81,7 @@ import {
 import { SafeWalletButton } from './safe-wallet-button';
 import { doc } from 'firebase/firestore';
 import { LanguageSwitcher } from './LanguageSwitcher';
-
+import { GlobalFooter } from './GlobalFooter';
 
 const mainNavItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
@@ -113,11 +112,11 @@ const eCommerceSubItems = [
   { href: '/my-web-store', icon: Star, label: 'My Web Store' },
 ];
 
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const userRole = user?.role;
   const isSuperAdmin = userRole === 'Super Admin';
@@ -341,23 +340,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SidebarProvider>
-      <Sidebar>{sidebarContent}</Sidebar>
-      <div className="flex flex-col w-full">
-         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger className="md:hidden" />
+    <div className="min-h-screen flex flex-col">
+      <SidebarProvider>
+        <Sidebar>{sidebarContent}</Sidebar>
+        <div className="flex flex-col w-full flex-1">
+          <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden" />
+              <div className="hidden md:flex items-center">
+                <Scale className="h-6 w-6 text-primary mr-2" />
+                <span className="text-lg font-semibold">Public Governance</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <SafeWalletButton />
+              <UserAccountDropdown />
+            </div>
+          </header>
+          <div className="flex-1 flex flex-col">
+            <SidebarInset className="flex-1 p-4 md:p-6">
+              {children}
+            </SidebarInset>
+            <GlobalFooter />
           </div>
-          <div className="flex items-center gap-4">
-             <SafeWalletButton />
-             <UserAccountDropdown />
-          </div>
-        </header>
-        <SidebarInset className="p-4 md:p-6">
-            {children}
-        </SidebarInset>
-      </div>
-      <Toaster />
-    </SidebarProvider>
+        </div>
+        <Toaster />
+      </SidebarProvider>
+    </div>
   );
 }
