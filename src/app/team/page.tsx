@@ -22,9 +22,8 @@ import { Users, UserPlus, DollarSign, Award, Crown, Shield, Star, Gem } from 'lu
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -152,11 +151,19 @@ export default function TeamPage() {
   // Fetch Team Members
   useEffect(() => {
     const fetchTeamMembers = async () => {
-      if (!user || !firestore || !userProfile || !userProfile.direct_team || userProfile.direct_team.length === 0) {
+      if (!user || !firestore || !userProfile) {
+        setIsTeamLoading(false);
+        return;
+      }
+      
+      // CRITICAL FIX: Only run query if direct_team is not empty.
+      // An empty array in a `where('__name__', 'in', [])` query causes build errors.
+      if (!userProfile.direct_team || userProfile.direct_team.length === 0) {
         setIsTeamLoading(false);
         setTeamMembers([]);
         return;
       }
+
       setIsTeamLoading(true);
       try {
         const teamQuery = query(collection(firestore, 'users'), where('__name__', 'in', userProfile.direct_team));
@@ -169,10 +176,12 @@ export default function TeamPage() {
         setIsTeamLoading(false);
       }
     };
+
     if (userProfile) {
       fetchTeamMembers();
     }
   }, [user, firestore, userProfile]);
+
 
   // Fetch commission data
   useEffect(() => {
@@ -219,8 +228,7 @@ export default function TeamPage() {
         
         // Base ranks (Bronze and Bronze Star)
         if (isPaidTrack) {
-            const paidMembers = teamMembers.filter(m => m.isPaid).length;
-            return paidMembers;
+            return teamMembers.filter(m => m.isPaid).length;
         } else {
             return userProfile.direct_team?.length || 0;
         }
