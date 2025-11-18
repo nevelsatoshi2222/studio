@@ -26,6 +26,10 @@ import {
   Loader2,
   Vote,
   X,
+  Expand,
+  Shrink,
+  RectangleHorizontal,
+  RectangleVertical,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -38,6 +42,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
+type ImageSize = 'small' | 'medium' | 'large' | 'cover';
+
 type SocialPost = {
   id: string;
   authorId: string;
@@ -45,6 +51,7 @@ type SocialPost = {
   authorAvatar: string;
   content: string;
   imageUrl?: string;
+  imageSize?: ImageSize;
   timestamp: {
     seconds: number;
     nanoseconds: number;
@@ -62,6 +69,7 @@ function CreatePostCard() {
     const [postContent, setPostContent] = useState('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageSize, setImageSize] = useState<ImageSize>('cover');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,6 +106,7 @@ function CreatePostCard() {
     const clearImage = () => {
         setImageFile(null);
         setImagePreview(null);
+        setImageSize('cover');
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -123,6 +132,7 @@ function CreatePostCard() {
                 authorAvatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
                 content: postContent,
                 imageUrl: imagePreview, // Using the Data URL for preview purposes
+                imageSize: imagePreview ? imageSize : null,
                 mentionsPgc: postContent.includes('$PGC'),
                 mentionsIgc: postContent.includes('$IGC'),
                 likes: 0,
@@ -141,6 +151,28 @@ function CreatePostCard() {
         }
     }
 
+    const SizingControls = () => (
+      <div className="pl-14 pt-2">
+          <div className="flex items-center gap-2 rounded-lg bg-muted p-1">
+              {(['small', 'medium', 'large', 'cover'] as ImageSize[]).map((size) => (
+                  <Button
+                      key={size}
+                      variant={imageSize === size ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setImageSize(size)}
+                      className="capitalize flex-1"
+                  >
+                      {size === 'small' && <Shrink className="mr-2 h-4 w-4" />}
+                      {size === 'medium' && <RectangleHorizontal className="mr-2 h-4 w-4" />}
+                      {size === 'large' && <RectangleVertical className="mr-2 h-4 w-4" />}
+                      {size === 'cover' && <Expand className="mr-2 h-4 w-4" />}
+                      {size}
+                  </Button>
+              ))}
+          </div>
+      </div>
+  );
+
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
@@ -158,12 +190,18 @@ function CreatePostCard() {
         </div>
         {imagePreview && (
             <div className="pl-14 relative">
-                <Image src={imagePreview} alt="Image preview" width={500} height={300} className="rounded-lg border max-h-80 w-auto object-contain" />
+                <Image src={imagePreview} alt="Image preview" width={500} height={300} className={cn("rounded-lg border object-contain", {
+                    'w-1/3': imageSize === 'small',
+                    'w-2/3': imageSize === 'medium',
+                    'w-full max-h-96': imageSize === 'large',
+                    'w-full aspect-video object-cover': imageSize === 'cover',
+                })} />
                 <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-black/50 hover:bg-black/75 text-white hover:text-white" onClick={clearImage}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>
         )}
+        {imagePreview && <SizingControls />}
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 border-t">
         <div className="flex gap-1 text-muted-foreground">
@@ -214,6 +252,12 @@ const PostContent = ({ text }: { text: string }) => {
   };
 
 function PostCard({ post }: { post: SocialPost }) {
+    const imageSizeClasses = {
+      small: 'w-1/2 rounded-lg',
+      medium: 'w-2/3 rounded-lg',
+      large: 'w-full rounded-lg',
+      cover: 'w-full aspect-video rounded-lg',
+  };
 
   return (
     <Card>
@@ -248,12 +292,16 @@ function PostCard({ post }: { post: SocialPost }) {
       <CardContent className="p-4 pt-0">
         <PostContent text={post.content} />
         {post.imageUrl && (
-          <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
+          <div className="relative mt-4">
             <Image
               src={post.imageUrl}
               alt="Post image"
-              fill
-              style={{ objectFit: 'cover' }}
+              width={800}
+              height={800}
+              className={cn(
+                  "border object-contain",
+                  imageSizeClasses[post.imageSize || 'cover']
+              )}
             />
           </div>
         )}
@@ -406,4 +454,3 @@ export default function SocialMediaPage() {
       </div>
   );
 }
-
