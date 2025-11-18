@@ -17,6 +17,7 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -54,7 +55,7 @@ import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase, AppUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { addDoc, collection, serverTimestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -436,13 +437,13 @@ export default function SocialMediaPage() {
     const firestore = useFirestore();
 
     const postsQuery = useMemoFirebase(() => {
-        if (!firestore) return null; // No query if firestore is not ready
+        if (!firestore || !user) return null; // Only query if user is logged in
         return query(collection(firestore, 'social_posts'), orderBy('timestamp', 'desc'));
-    }, [firestore]);
+    }, [firestore, user]);
 
     const { data: socialPosts, isLoading: arePostsLoading } = useCollection<SocialPost>(postsQuery);
 
-    const isLoading = isUserLoading || (user && arePostsLoading);
+    const isLoading = isUserLoading || arePostsLoading;
 
 
   return (
