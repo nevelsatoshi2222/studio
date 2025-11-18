@@ -11,7 +11,8 @@ const formatCurrency = (value: number) => {
     if (value >= 1e6) {
         return `$${(value / 1e6).toFixed(2)}M`;
     }
-    return `$${value.toLocaleString()}`;
+    // Use a simple non-locale-sensitive formatting for consistency
+    return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 const PDP_TOTAL_COINS = 800_000_000_000 * (54.55946 / 100);
@@ -36,7 +37,7 @@ const calculateStageData = (
     return {
         stage,
         percentOfTs: `${percentOfTs}%`,
-        priceRange: `$${priceLow.toLocaleString()}-${priceHigh.toLocaleString()}`,
+        priceRange: `$${priceLow.toLocaleString('en-US')}-${priceHigh.toLocaleString('en-US')}`,
         incomingFundValue,
         incomingFund: formatCurrency(incomingFundValue),
         pdpReleasePercent: `${pdpReleasePercent.toFixed(2)}%`,
@@ -131,4 +132,3 @@ export const fundDistributionModel: FundDistribution[] = [
   { category: 'Team', percentage: 3 },
   { category: 'Interest', percentage: 3 },
 ];
-
