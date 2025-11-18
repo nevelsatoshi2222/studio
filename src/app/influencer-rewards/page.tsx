@@ -109,7 +109,7 @@ export default function InfluencerRewardsPage() {
                     {INFLUENCER_REWARDS.followerTiers.map((tier, index) => (
                       <TableRow key={index} className="border-purple-500/10 text-xs">
                         <TableCell className="text-purple-300 font-semibold">{tier.tier}</TableCell>
-                        <TableCell className="text-gray-300">{tier.followers.toLocaleString()}+</TableCell>
+                        <TableCell className="text-gray-300">{tier.followers.toLocaleString('en-US')}+</TableCell>
                         <TableCell className="text-gray-300">{tier.videoType}</TableCell>
                         <TableCell className="text-purple-400 font-semibold">{tier.reward}</TableCell>
                         <TableCell className="text-green-400 font-semibold">+{tier.earlyBonus}</TableCell>
@@ -147,7 +147,7 @@ export default function InfluencerRewardsPage() {
                   <TableBody>
                     {INFLUENCER_REWARDS.viewRewards.map((reward, index) => (
                       <TableRow key={index} className="border-purple-500/10 text-xs">
-                        <TableCell className="text-gray-300 font-medium">{reward.views.toLocaleString()}</TableCell>
+                        <TableCell className="text-gray-300 font-medium">{reward.views.toLocaleString('en-US')}</TableCell>
                         <TableCell className="text-gray-300">{reward.rewardSlots}</TableCell>
                         <TableCell className="text-purple-400 font-semibold">{reward.reward}</TableCell>
                         <TableCell>
