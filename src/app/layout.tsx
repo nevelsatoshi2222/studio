@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Public Governance Coin</title>
+        <title>Public Governance</title>
         <meta name="description" content="Comprehensive public governance awareness system with multi-language support" />
         <meta name="keywords" content="governance, public awareness, india, multi-language, education" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
