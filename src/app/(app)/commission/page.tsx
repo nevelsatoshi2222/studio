@@ -16,7 +16,6 @@ import { CommissionCalculator } from '@/lib/commission-calculator';
 import { DollarSign, Users, TrendingUp, Calendar, Zap, Target, Award, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { useTranslation } from '@/hooks/useTranslation';
 
 interface CommissionSummary {
   totalCommission: number;
@@ -26,7 +25,6 @@ interface CommissionSummary {
 }
 
 export default function CommissionPage() {
-  const { t } = useTranslation();
   const { user } = useUser();
   const [commissionData, setCommissionData] = useState<CommissionSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,9 +79,9 @@ export default function CommissionPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-headline text-3xl font-bold">{t('commission.title')}</h1>
+          <h1 className="font-headline text-3xl font-bold">Commission Dashboard</h1>
           <p className="text-muted-foreground">
-            {t('commission.description')}
+            Track your USDT commission earnings from your affiliate team.
           </p>
         </div>
         <Button 
@@ -93,7 +91,7 @@ export default function CommissionPage() {
           className="flex items-center gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          {t('commission.refresh')}
+          Refresh
         </Button>
       </div>
 
@@ -103,14 +101,14 @@ export default function CommissionPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <DollarSign className="h-4 w-4 text-green-500" />
-              {t('commission.total_commission')}
+              Total Commission
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
               ${commissionData?.totalCommission.toFixed(2) || '0.00'}
             </div>
-            <p className="text-xs text-muted-foreground">{t('commission.lifetime_earnings')}</p>
+            <p className="text-xs text-muted-foreground">Lifetime USDT Earnings</p>
           </CardContent>
         </Card>
 
@@ -118,14 +116,14 @@ export default function CommissionPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-blue-500" />
-              {t('commission.commission_sources')}
+              Commission Sources
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {commissionData?.allCommissions.length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">{t('commission.total_transactions')}</p>
+            <p className="text-xs text-muted-foreground">Total Transactions</p>
           </CardContent>
         </Card>
 
@@ -133,14 +131,14 @@ export default function CommissionPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <TrendingUp className="h-4 w-4 text-purple-500" />
-              {t('commission.active_levels')}
+              Active Levels
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {Object.keys(commissionData?.levelSummary || {}).length}
             </div>
-            <p className="text-xs text-muted-foreground">{t('commission.earning_levels')}</p>
+            <p className="text-xs text-muted-foreground">Levels generating earnings</p>
           </CardContent>
         </Card>
 
@@ -148,14 +146,14 @@ export default function CommissionPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Zap className="h-4 w-4 text-orange-500" />
-              {t('commission.team_members')}
+              Earning Team Members
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {Object.values(commissionData?.levelSummary || {}).reduce((total, level) => total + (level.membersCount || 0), 0)}
             </div>
-            <p className="text-xs text-muted-foreground">{t('commission.total_earning_members')}</p>
+            <p className="text-xs text-muted-foreground">Total members generating commissions</p>
           </CardContent>
         </Card>
       </div>
@@ -165,10 +163,10 @@ export default function CommissionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            {t('commission.earnings_by_level')}
+            Earnings by Level
           </CardTitle>
           <CardDescription>
-            {t('commission.earnings_by_level_desc')}
+            A breakdown of your commission earnings from each level in your team.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -179,10 +177,10 @@ export default function CommissionPage() {
                   <div className="font-semibold text-lg">Level {level}</div>
                   <div className="text-green-600 font-bold text-xl">${data.total.toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {data.membersCount || 0} {t('commission.members')}
+                    {data.membersCount || 0} members
                   </div>
                   <div className="text-xs text-blue-600 font-semibold mt-1">
-                    {data.rate}% {t('commission.rate')}
+                    {data.rate}% rate
                   </div>
                 </div>
               ))}
@@ -190,10 +188,10 @@ export default function CommissionPage() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Award className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>{t('commission.no_commission_yet')}</p>
-              <p className="text-sm">{t('commission.no_commission_desc')}</p>
+              <p>No commissions earned yet.</p>
+              <p className="text-sm">Start building your team to earn commissions.</p>
               <Button asChild className="mt-4">
-                <Link href="/team">{t('commission.build_your_team')}</Link>
+                <Link href="/team">Build Your Team</Link>
               </Button>
             </div>
           )}
@@ -206,9 +204,9 @@ export default function CommissionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              {t('commission.recent_history')}
+              Recent Commission History
             </CardTitle>
-            <CardDescription>{t('commission.recent_history_desc')}</CardDescription>
+            <CardDescription>A log of your most recent commission transactions.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -217,12 +215,12 @@ export default function CommissionPage() {
                   <div>
                     <p className="font-medium">Level {commission.level} Commission</p>
                     <p className="text-sm text-gray-600">
-                      {t('commission.from')}: {commission.fromUserName} • 
+                      From: {commission.fromUserName} • 
                       {commission.timestamp?.toDate 
                         ? new Date(commission.timestamp.toDate()).toLocaleDateString()
                         : commission.timestamp 
                         ? new Date(commission.timestamp).toLocaleDateString()
-                        : t('commission.recent')
+                        : 'Recent'
                       }
                     </p>
                   </div>
@@ -230,7 +228,7 @@ export default function CommissionPage() {
                     <p className="text-lg font-bold text-green-600">
                       +${commission.commissionAmount?.toFixed(2) || '0.00'}
                     </p>
-                    <p className="text-xs text-gray-500">{t('commission.usdt_commission')}</p>
+                    <p className="text-xs text-gray-500">USDT Commission</p>
                   </div>
                 </div>
               ))}
@@ -242,45 +240,45 @@ export default function CommissionPage() {
       {/* Commission Structure Info */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('commission.commission_structure')}</CardTitle>
-          <CardDescription>{t('commission.commission_structure_desc')}</CardDescription>
+          <CardTitle>Commission Structure</CardTitle>
+          <CardDescription>Our commission system rewards you for team building across 15 levels.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="grid md:grid-cols-3 gap-4">
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold text-green-600 mb-2">{t('commission.level_1_direct')}</h4>
-                <p className="text-sm">{t('commission.purchase_rate_1')}</p>
-                <p className="text-sm font-semibold">{t('commission.purchase_example_1')}</p>
-                <Badge variant="secondary" className="mt-2">{t('commission.badge_direct')}</Badge>
+                <h4 className="font-semibold text-green-600 mb-2">Level 1 (Direct)</h4>
+                <p className="text-sm">0.2% on purchases</p>
+                <p className="text-sm font-semibold">e.g. $0.20 on a $100 purchase</p>
+                <Badge variant="secondary" className="mt-2">Direct Referrals</Badge>
               </div>
               
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold text-blue-600 mb-2">{t('commission.levels_2_5')}</h4>
-                <p className="text-sm">{t('commission.purchase_rate_1')}</p>
-                <p className="text-sm font-semibold">{t('commission.purchase_example_1')}</p>
-                <Badge variant="secondary" className="mt-2">{t('commission.badge_2_5')}</Badge>
+                <h4 className="font-semibold text-blue-600 mb-2">Levels 2-5</h4>
+                <p className="text-sm">0.2% on purchases</p>
+                <p className="text-sm font-semibold">e.g. $0.20 on a $100 purchase</p>
+                <Badge variant="secondary" className="mt-2">Your Team's Referrals</Badge>
               </div>
               
               <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold text-purple-600 mb-2">{t('commission.levels_6_15')}</h4>
-                <p className="text-sm">{t('commission.purchase_rate_2')}</p>
-                <p className="text-sm font-semibold">{t('commission.purchase_example_2')}</p>
-                <Badge variant="secondary" className="mt-2">{t('commission.badge_6_15')}</Badge>
+                <h4 className="font-semibold text-purple-600 mb-2">Levels 6-15</h4>
+                <p className="text-sm">0.1% on purchases</p>
+                <p className="text-sm font-semibold">e.g. $0.10 on a $100 purchase</p>
+                <Badge variant="secondary" className="mt-2">Deep Network Referrals</Badge>
               </div>
             </div>
             
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">{t('commission.calculation_example_title')}</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">Example Calculation</h4>
               <p className="text-sm text-blue-700">
-                {t('commission.calculation_example_desc')}
+                If a user in your Level 3 makes a $1,000 purchase, you earn a 0.2% commission, which is $2.00 in USDT, credited instantly to your account.
               </p>
             </div>
           </div>
         </CardContent>
         <CardFooter>
           <Button asChild variant="outline">
-            <Link href="/affiliate-marketing">{t('commission.view_affiliate_rewards')}</Link>
+            <Link href="/affiliate-marketing">View Affiliate Rewards</Link>
           </Button>
         </CardFooter>
       </Card>
@@ -289,7 +287,6 @@ export default function CommissionPage() {
 }
 
 function CommissionLoadingSkeleton() {
-  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-center">
@@ -330,5 +327,3 @@ function CommissionLoadingSkeleton() {
     </div>
   );
 }
-
-    

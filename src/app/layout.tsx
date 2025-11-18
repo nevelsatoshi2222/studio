@@ -1,11 +1,12 @@
+
 'use client';
 
 import './globals.css';
 import { FirebaseProvider, initializeFirebase } from '@/firebase';
 import { ClientWalletProvider } from '@/components/client-wallet-provider';
 import React, { Suspense } from 'react';
-import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Toaster } from '@/components/ui/toaster';
+import AppLayout from '@/components/app-layout';
 
 // Initialize Firebase services ONCE
 const { firebaseApp, auth, firestore } = initializeFirebase();
@@ -84,9 +85,9 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
             <ClientWalletProvider>
                 <FirebaseProvider firebaseApp={firebaseApp} auth={auth} firestore={firestore}>
-                    <LanguageProvider>
+                    <AppLayout>
                         {children}
-                    </LanguageProvider>
+                    </AppLayout>
                 </FirebaseProvider>
             </ClientWalletProvider>
         </Suspense>

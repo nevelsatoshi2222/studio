@@ -1,10 +1,8 @@
 
 'use client';
-import { useTranslation } from '@/hooks/useTranslation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useUser } from '@/firebase';
 
 // Main dashboard content sections
@@ -17,7 +15,6 @@ const sections = [
 ];
 
 export default function Dashboard() {
-  const { t } = useTranslation();
   const { user } = useUser();
 
   return (
@@ -26,10 +23,10 @@ export default function Dashboard() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>{t('dashboard.welcome_user', { name: user?.displayName || user?.email || 'Guest' })}</CardTitle>
-              <CardDescription>{t('dashboard.explore_language')}</CardDescription>
+              <CardTitle>Welcome, {user?.displayName || user?.email || 'Guest'}</CardTitle>
+              <CardDescription>Explore governance features in your preferred language</CardDescription>
             </div>
-            <LanguageSwitcher />
+            {/* LanguageSwitcher was here */}
           </div>
         </CardHeader>
       </Card>
@@ -38,18 +35,17 @@ export default function Dashboard() {
         {sections.map(section => (
           <Card key={section} className="flex flex-col">
             <CardHeader>
-              <CardTitle>{t(`navigation.${section}`)}</CardTitle>
+              <CardTitle>{section}</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
               <p className="text-sm text-muted-foreground">
-                {/* Dummy content - you can add specific descriptions here */}
-                Explore the {t(`navigation.${section}`)} section to learn more about our governance model.
+                Explore the {section} section to learn more about our governance model.
               </p>
             </CardContent>
             <CardFooter>
               <Button asChild variant="outline">
                 <Link href={`/governance/${section.replace(/([A-Z])/g, "-$1").toLowerCase()}`}>
-                  {t('common.go_to')} {t(`navigation.${section}`)}
+                  Go to {section}
                 </Link>
               </Button>
             </CardFooter>

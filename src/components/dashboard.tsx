@@ -1,5 +1,5 @@
+
 'use client';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 const governanceSections = [
   {
     id: 'world-perspective',
-    title: 'worldPerspective',
+    title: 'World Perspective',
     description: 'Explore global governance models and international perspectives',
     icon: Globe,
     href: '/governance/world-perspective',
@@ -31,7 +31,7 @@ const governanceSections = [
   },
   {
     id: 'new-india',
-    title: 'newIndia',
+    title: 'New India Vision',
     description: 'Discover the vision for New India and developmental initiatives',
     icon: Rocket,
     href: '/governance/new-india-vision',
@@ -39,7 +39,7 @@ const governanceSections = [
   },
   {
     id: 'voting-system',
-    title: 'votingSystem',
+    title: 'Voting System',
     description: 'Participate in democratic processes at all governance levels',
     icon: Vote,
     href: '/voting',
@@ -47,7 +47,7 @@ const governanceSections = [
   },
   {
     id: 'quiz',
-    title: 'quiz',
+    title: 'Governance Quiz',
     description: 'Test your knowledge and share your opinions on governance',
     icon: Trophy,
     href: '/quiz-opinion',
@@ -55,7 +55,7 @@ const governanceSections = [
   },
   {
     id: 'polls',
-    title: 'polls',
+    title: 'Opinion Polls',
     description: 'Participate in opinion polls and shape public discourse',
     icon: BarChart3,
     href: '/governance/opinion-polls',
@@ -63,7 +63,7 @@ const governanceSections = [
   },
   {
     id: 'community',
-    title: 'community',
+    title: 'Community',
     description: 'Join the community and collaborate with fellow citizens',
     icon: Users,
     href: '/community',
@@ -98,7 +98,6 @@ const getColorClasses = (color: string) => {
 };
 
 export default function Dashboard() {
-  const { t } = useLanguage();
   const { user, isUserLoading } = useUser();
 
   if (isUserLoading) {
@@ -142,10 +141,10 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex-1">
               <CardTitle className="text-2xl md:text-3xl text-gray-900 mb-2">
-                {t('common.welcome')}, {user?.displayName || user?.email?.split('@')[0] || 'Guest'}! 👋
+                Welcome, {user?.displayName || user?.email?.split('@')[0] || 'Guest'}! 👋
               </CardTitle>
               <CardDescription className="text-lg text-gray-700">
-                {t('dashboard.explore_language') || 'Explore governance features in your preferred language'}
+                Explore governance features in your preferred language
               </CardDescription>
               <div className="flex flex-wrap gap-2 mt-4">
                 <Badge variant="secondary" className="bg-white">
@@ -206,7 +205,7 @@ export default function Dashboard() {
                     <div className="p-2 rounded-lg bg-white">
                       <IconComponent className="w-5 h-5" />
                     </div>
-                    <CardTitle className="text-lg">{t(`navigation.${section.title}`)}</CardTitle>
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow pb-3">
@@ -217,7 +216,7 @@ export default function Dashboard() {
                 <CardFooter>
                   <Button asChild variant="outline" className="w-full bg-white hover:bg-gray-50">
                     <Link href={section.href}>
-                      Explore {t(`navigation.${section.title}`)}
+                      Explore {section.title}
                     </Link>
                   </Button>
                 </CardFooter>

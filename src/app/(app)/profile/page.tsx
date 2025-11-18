@@ -43,7 +43,6 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { useTranslation } from '@/hooks/useTranslation';
 
 const PGC_LOGO_URL = "https://storage.googleapis.com/public-governance-859029-c316e.firebasestorage.app/IMG_20251111_165229.png";
 
@@ -81,7 +80,6 @@ function ProfileLoadingSkeleton() {
 }
 
 export default function ProfilePage() {
-  const { t } = useTranslation();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { publicKey } = useWallet();
@@ -112,7 +110,7 @@ export default function ProfilePage() {
   const isNewUser = user && user.metadata.creationTime && (Date.now() - new Date(user.metadata.creationTime).getTime() < 60000);
   
   const optimisticReferralCode = user ? `PGC-${user.uid.substring(0, 8).toUpperCase()}` : null;
-  const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : t('profile.generating'));
+  const displayReferralCode = userProfile?.referralCode || (isNewUser ? optimisticReferralCode : 'Generating...');
 
   useEffect(() => {
     if (userProfile) {
@@ -136,10 +134,10 @@ export default function ProfilePage() {
   }, [publicKey, form]);
 
   useEffect(() => {
-    if (displayReferralCode !== t('profile.generating')) {
+    if (displayReferralCode !== 'Generating...') {
       setReferralLink(`${window.location.origin}/register?ref=${displayReferralCode}`);
     }
-  }, [displayReferralCode, t]);
+  }, [displayReferralCode]);
 
   const handleProfileSubmit = (data: ProfileFormValues) => {
     if (!userDocRef || !user) return;
@@ -256,7 +254,7 @@ export default function ProfilePage() {
     if (!textToCopy) return;
     navigator.clipboard.writeText(textToCopy).then(() => {
         toast({
-          title: t('common.copied'),
+          title: 'Copied!',
           description: toastMessage,
         });
     });
@@ -286,8 +284,8 @@ export default function ProfilePage() {
     <>
       <div className="flex flex-col gap-8 max-w-4xl mx-auto">
         <div>
-          <h1 className="font-headline text-3xl font-bold">{t('profile.title')}</h1>
-          <p className="text-muted-foreground">{t('profile.description')}</p>
+          <h1 className="font-headline text-3xl font-bold">My Profile</h1>
+          <p className="text-muted-foreground">Manage your personal, financial, and geographical information.</p>
         </div>
 
         {/* User Info & Profile Form - 1st */}
@@ -305,7 +303,7 @@ export default function ProfilePage() {
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{t('profile.display_name')}</FormLabel>
+                                <FormLabel>Display Name</FormLabel>
                                 <FormControl>
                                     <Input {...field} className="text-3xl font-bold border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-auto" />
                                 </FormControl>
@@ -315,15 +313,15 @@ export default function ProfilePage() {
                         />
                     <CardDescription className="text-base mt-1">{user?.email}</CardDescription>
                 </div>
-                <Button type="submit"><UserCog className="mr-2 h-4 w-4" /> {t('profile.save_profile')}</Button>
+                <Button type="submit"><UserCog className="mr-2 h-4 w-4" /> Save Profile</Button>
               </CardHeader>
 
               <CardContent className="space-y-6">
                 <Separator />
                 <div className="space-y-4">
-                    <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> {t('profile.wallet_details')}</h3>
+                    <h3 className="font-medium flex items-center gap-2 text-primary"><Wallet className="h-5 w-5"/> Wallet Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="walletPublicKey" render={({ field }) => (<FormItem><FormLabel>{t('profile.solana_wallet')}</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="walletPublicKey" render={({ field }) => (<FormItem><FormLabel>Solana Wallet Address</FormLabel><FormControl><Input placeholder="Enter your Solana wallet address" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     </div>
                 </div>
               </CardContent>
@@ -334,31 +332,31 @@ export default function ProfilePage() {
         {/* Financial Hub Card - 2nd */}
         <Card>
             <CardHeader>
-                <CardTitle>{t('profile.financial_hub')}</CardTitle>
-                <CardDescription>{t('profile.financial_overview')}</CardDescription>
+                <CardTitle>Financial Hub</CardTitle>
+                <CardDescription>An overview of your financial activities on the platform.</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-6">
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
                     <div>
-                        <p className="text-sm text-muted-foreground">{t('profile.pgc_balance')}</p>
+                        <p className="text-sm text-muted-foreground">PGC Balance</p>
                         <div className="flex items-baseline gap-2">
                              <Image src={PGC_LOGO_URL} alt="PGC Coin" width={28} height={28} />
                             <span className="text-4xl font-bold">{userProfile?.pgcBalance?.toLocaleString() || 0}</span>
                             <span className="text-xl text-muted-foreground">PGC</span>
                         </div>
                     </div>
-                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> {t('profile.request_withdrawal')}</Button>
+                    <Button onClick={() => setIsWithdrawModalOpen(true)} disabled={(userProfile?.pgcBalance || 0) === 0}><Send className="mr-2 h-4 w-4"/> Request Withdrawal</Button>
                 </div>
                 <div className="flex flex-col justify-between rounded-lg border p-4 space-y-4">
                     <div>
-                        <p className="text-sm text-muted-foreground">{t('profile.team_and_staking')}</p>
-                        <p className="text-lg">{t('profile.team_earnings_staking')}</p>
+                        <p className="text-sm text-muted-foreground">Team & Staking</p>
+                        <p className="text-lg">Earn more by growing your team and staking your tokens.</p>
                     </div>
                      <Button asChild variant="outline">
-                        <Link href="/team">{t('profile.go_to_my_team')} <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                        <Link href="/team">Go to My Team <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                      <Button asChild variant="outline">
-                        <Link href="/staking">{t('profile.go_to_staking')} <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                        <Link href="/staking">Go to Staking <ChevronRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
             </CardContent>
@@ -367,12 +365,12 @@ export default function ProfilePage() {
         {/* Unique Referral Code - 3rd */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('profile.referral_code_title')}</CardTitle>
-            <CardDescription>{t('profile.referral_code_desc')}</CardDescription>
+            <CardTitle>Your Unique Referral Code</CardTitle>
+            <CardDescription>Share this code with others to invite them to the platform and build your team.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="referral-code-display">{t('profile.referral_code')}</Label>
+              <Label htmlFor="referral-code-display">Your Referral Code</Label>
               <div className="flex items-center space-x-2">
                 <Input
                   id="referral-code-display"
@@ -382,9 +380,9 @@ export default function ProfilePage() {
                 />
                 <Button
                   onClick={() => copyToClipboard(displayReferralCode, 'Your referral code has been copied.')}
-                  disabled={displayReferralCode === t('profile.generating')}
+                  disabled={displayReferralCode === 'Generating...'}
                 >
-                  <Copy className="mr-2 h-4 w-4"/> {t('profile.copy_code')}
+                  <Copy className="mr-2 h-4 w-4"/> Copy Code
                 </Button>
               </div>
             </div>
@@ -394,12 +392,12 @@ export default function ProfilePage() {
         {/* Referral Link - 4th */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('profile.referral_link_title')}</CardTitle>
-            <CardDescription>{t('profile.referral_link_desc')}</CardDescription>
+            <CardTitle>Your Affiliate Link</CardTitle>
+            <CardDescription>Share this single link for easy registration and team building.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="referral-link">{t('profile.affiliate_link')}</Label>
+              <Label htmlFor="referral-link">Your Affiliate Link</Label>
               <div className="flex items-center space-x-2 rounded-md border bg-muted p-3">
                 {referralLink ? (
                   <Link href={referralLink} target="_blank" className="flex-1 text-primary hover:underline font-mono text-sm truncate">
@@ -407,7 +405,7 @@ export default function ProfilePage() {
                   </Link>
                 ) : (
                   <span className="flex-1 text-muted-foreground font-mono text-sm truncate">
-                    {t('profile.link_generation_notice')}
+                    Generating link... please wait.
                   </span>
                 )}
                 <Button onClick={() => copyToClipboard(referralLink, 'Your referral link has been copied.')} size="icon" variant="ghost" disabled={!referralLink}>
@@ -423,16 +421,16 @@ export default function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              {t('profile.geo_info_title')}
+              Geographical Information
             </CardTitle>
             <CardDescription>
-              {t('profile.geo_info_desc')}
+              Complete your geographical details to be eligible for voting on local issues.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="state">{t('profile.state')}</Label>
+                <Label htmlFor="state">State</Label>
                 <Input
                   id="state"
                   value={userProfile?.stateDisplay || userProfile?.state || ''}
@@ -441,7 +439,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="district">{t('profile.district')}</Label>
+                <Label htmlFor="district">District</Label>
                 <Input
                   id="district"
                   value={userProfile?.districtDisplay || userProfile?.district || ''}
@@ -453,7 +451,7 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="taluka">{t('profile.taluka')}</Label>
+                <Label htmlFor="taluka">Taluka/Block</Label>
                 <Input
                   id="taluka"
                   value={userProfile?.talukaDisplay || userProfile?.taluka || ''}
@@ -462,7 +460,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="village">{t('profile.village')}</Label>
+                <Label htmlFor="village">Village/Ward</Label>
                 <Input
                   id="village"
                   value={userProfile?.villageDisplay || userProfile?.village || ''}
@@ -474,7 +472,7 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="street">{t('profile.street')}</Label>
+                <Label htmlFor="street">Street</Label>
                 <Input
                   id="street"
                   value={userProfile?.streetDisplay || userProfile?.street || ''}
@@ -489,7 +487,7 @@ export default function ProfilePage() {
               disabled={isSavingGeoData}
               className="w-full md:w-auto"
             >
-              {isSavingGeoData ? t('profile.saving') : t('profile.save_geo_data')}
+              {isSavingGeoData ? 'Saving...' : 'Save Geographical Data'}
             </Button>
           </CardContent>
         </Card>
@@ -499,10 +497,10 @@ export default function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              {t('profile.voting_status_title')}
+              Voting Eligibility Status
             </CardTitle>
             <CardDescription>
-              {t('profile.voting_status_desc')}
+              Your eligibility to vote at different governance levels.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -510,28 +508,28 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4" />
-                  <span>{t('profile.international_voting')}</span>
+                  <span>International Voting</span>
                 </div>
                 <Badge variant="default" className="bg-green-100 text-green-800">
                   <CheckCircle className="h-3 w-3 mr-1" />
-                  {t('profile.eligible')}
+                  Eligible
                 </Badge>
               </div>
 
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Landmark className="h-4 w-4" />
-                  <span>{t('profile.national_voting')}</span>
+                  <span>National Voting</span>
                 </div>
                 {eligibility.national ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_country')}
+                    Add Country
                   </Badge>
                 )}
               </div>
@@ -539,17 +537,17 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Building className="h-4 w-4" />
-                  <span>{t('profile.state_voting')}</span>
+                  <span>State Voting</span>
                 </div>
                 {eligibility.state ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_state')}
+                    Add State
                   </Badge>
                 )}
               </div>
@@ -557,17 +555,17 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{t('profile.district_voting')}</span>
+                  <span>District Voting</span>
                 </div>
                 {eligibility.district ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_district')}
+                    Add District
                   </Badge>
                 )}
               </div>
@@ -575,17 +573,17 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{t('profile.taluka_voting')}</span>
+                  <span>Taluka Voting</span>
                 </div>
                 {eligibility.taluka ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_taluka')}
+                    Add Taluka
                   </Badge>
                 )}
               </div>
@@ -593,17 +591,17 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
-                  <span>{t('profile.village_voting')}</span>
+                  <span>Village/Ward Voting</span>
                 </div>
                 {eligibility.village ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_village')}
+                    Add Village/Ward
                   </Badge>
                 )}
               </div>
@@ -611,17 +609,17 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4" />
-                  <span>{t('profile.street_voting')}</span>
+                  <span>Street Voting</span>
                 </div>
                 {eligibility.street ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {t('profile.eligible')}
+                    Eligible
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-orange-600">
                     <XCircle className="h-3 w-3 mr-1" />
-                    {t('profile.add_street')}
+                    Add Street
                   </Badge>
                 )}
               </div>
@@ -629,7 +627,7 @@ export default function ProfilePage() {
 
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                {t('profile.voting_note')}
+                To vote on local issues, ensure your geographical data is complete and accurate. Eligibility is based on having data for that level and all levels above it.
               </p>
             </div>
           </CardContent>
@@ -638,35 +636,35 @@ export default function ProfilePage() {
         {/* KYC Card - 7th */}
         <Card>
             <CardHeader>
-              <CardTitle>{t('profile.kyc_title')}</CardTitle>
+              <CardTitle>KYC Verification</CardTitle>
               <CardDescription>
-                {t('profile.kyc_desc')}
-                {userProfile?.isVerified && <Badge variant="default" className="ml-2">{t('profile.verified')}</Badge>}
-                {userProfile?.kycStatus === 'pending' && <Badge variant="secondary" className="ml-2">{t('profile.in_review')}</Badge>}
+                Submit your documents for full platform access and higher withdrawal limits.
+                {userProfile?.isVerified && <Badge variant="default" className="ml-2">Verified</Badge>}
+                {userProfile?.kycStatus === 'pending' && <Badge variant="secondary" className="ml-2">In Review</Badge>}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="id-card">{t('profile.national_id')}</Label>
+                <Label htmlFor="id-card">National ID (Aadhaar, Passport, etc.)</Label>
                 <div className="flex items-center gap-4 rounded-md border p-3">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground flex-1">{nationalIdFile ? nationalIdFile.name : t('profile.upload_prompt')}</span>
-                  <Button variant="outline" size="sm" asChild><Label htmlFor="id-card-file" className="cursor-pointer">{t('profile.browse')}</Label></Button>
+                  <span className="text-sm text-muted-foreground flex-1">{nationalIdFile ? nationalIdFile.name : 'Upload your national ID card...'}</span>
+                  <Button variant="outline" size="sm" asChild><Label htmlFor="id-card-file" className="cursor-pointer">Browse</Label></Button>
                   <Input id="id-card-file" type="file" className="sr-only" onChange={(e) => setNationalIdFile(e.target.files ? e.target.files[0] : null)} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tax-id-card">{t('profile.tax_id')}</Label>
+                <Label htmlFor="tax-id-card">Tax ID (PAN Card, SSN, etc.)</Label>
                  <div className="flex items-center gap-4 rounded-md border p-3">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground flex-1">{taxIdFile ? taxIdFile.name : t('profile.upload_prompt')}</span>
-                  <Button variant="outline" size="sm" asChild><Label htmlFor="tax-id-file" className="cursor-pointer">{t('profile.browse')}</Label></Button>
+                  <span className="text-sm text-muted-foreground flex-1">{taxIdFile ? taxIdFile.name : 'Upload your tax identification document...'}</span>
+                  <Button variant="outline" size="sm" asChild><Label htmlFor="tax-id-file" className="cursor-pointer">Browse</Label></Button>
                   <Input id="tax-id-file" type="file" className="sr-only" onChange={(e) => setTaxIdFile(e.target.files ? e.target.files[0] : null)} />
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.isVerified || userProfile?.kycStatus === 'pending'}>{t('profile.submit_for_verification')}</Button>
+              <Button onClick={handleKycSubmit} disabled={!nationalIdFile || !taxIdFile || userProfile?.isVerified || userProfile?.kycStatus === 'pending'}>Submit for Verification</Button>
             </CardFooter>
         </Card>
       </div>
@@ -675,14 +673,14 @@ export default function ProfilePage() {
         <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{t('profile.withdrawal_modal_title')}</DialogTitle>
+                    <DialogTitle>Request PGC Withdrawal</DialogTitle>
                     <DialogDescription>
-                        {t('profile.withdrawal_modal_desc')} <strong className="font-mono text-xs">{userProfile?.walletPublicKey}</strong>
+                        Your PGC will be sent to your saved wallet address: <strong className="font-mono text-xs">{userProfile?.walletPublicKey}</strong>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="withdraw-amount">{t('profile.amount_to_withdraw')}</Label>
+                        <Label htmlFor="withdraw-amount">Amount to Withdraw</Label>
                         <div className="relative">
                             <Input
                                 id="withdraw-amount"
@@ -691,14 +689,14 @@ export default function ProfilePage() {
                                 onChange={(e) => setWithdrawAmount(Number(e.target.value))}
                                 max={userProfile?.pgcBalance || 0}
                             />
-                            <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7" onClick={() => setWithdrawAmount(userProfile?.pgcBalance || 0)}>{t('profile.max')}</Button>
+                            <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7" onClick={() => setWithdrawAmount(userProfile?.pgcBalance || 0)}>Max</Button>
                         </div>
-                        <p className="text-xs text-muted-foreground">{t('profile.available_balance')}: {(userProfile?.pgcBalance || 0).toLocaleString()} PGC</p>
+                        <p className="text-xs text-muted-foreground">Available Balance: {(userProfile?.pgcBalance || 0).toLocaleString()} PGC</p>
                     </div>
                 </div>
                 <DialogFooter>
-                    <DialogClose asChild><Button variant="outline">{t('common.cancel')}</Button></DialogClose>
-                    <Button onClick={handleWithdrawalRequest}>{t('profile.submit_request')}</Button>
+                    <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                    <Button onClick={handleWithdrawalRequest}>Submit Request</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import Link from 'next/link';
@@ -64,7 +65,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser, useAuth, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { signOut } from 'firebase/auth';
@@ -79,37 +80,33 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SafeWalletButton } from './safe-wallet-button';
-import { doc } from 'firebase/firestore';
-import { LanguageSwitcher } from './LanguageSwitcher';
-import { GlobalFooter } from './GlobalFooter';
 
 const mainNavItems = [
-  { href: '/', icon: Home, label: 'Dashboard' },
-  { href: '/vision', icon: Rocket, label: 'Our Vision' },
-  { href: '/presale', icon: Flame, label: 'Presale' },
-  { href: '/social-media', icon: Rss, label: 'Social Media' },
-  { href: '/exchange', icon: BarChart2, label: 'Crypto Exchange' },
-  { href: '/tokenomics', icon: PieChartIcon, label: 'Coins & Tokenomics' },
-  { href: '/help', icon: HelpCircle, label: 'Help & Support' },
+  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/vision', label: 'Our Vision', icon: Rocket },
+  { href: '/presale', label: 'Presale', icon: Flame },
+  { href: '/social-media', label: 'Social Media', icon: Rss },
+  { href: '/exchange', label: 'Crypto Exchange', icon: BarChart2 },
+  { href: '/tokenomics', label: 'Coins & Tokenomics', icon: PieChartIcon },
+  { href: '/help', label: 'Help & Support', icon: HelpCircle },
 ];
 
 const programNavItems = [
-  { href: '/staking', icon: Lock, label: 'Staking' },
-  { href: '/airdrop', icon: Gift, label: 'Airdrop' },
-  { href: '/voting', icon: Vote, label: 'Voting Hub'},
-  { href: '/quiz', icon: Trophy, label: 'Quiz Competition'},
-  { href: '/sports', icon: Trophy, label: 'Sports Competition'},
-  { href: '/arts', icon: Paintbrush, label: 'Arts Competition'},
-  { href: '/affiliate-marketing', icon: Share2, label: 'Affiliate Marketing'},
-  { href: '/influencer-rewards', icon: Megaphone, label: 'Influencer Rewards'},
-  { href: '/ecommerce', icon: ShoppingCart, label: 'E-commerce'},
-  { href: '/franchisee', icon: Building2, label: 'Franchisee Program' },
-  { href: '/jobs', icon: BookUser, label: 'Jobs & Career'},
+  { href: '/staking', label: 'Staking', icon: Lock },
+  { href: '/airdrop', label: 'Airdrop', icon: Gift },
+  { href: '/voting', label: 'Voting Hub', icon: Vote },
+  { href: '/quiz', label: 'Quiz Competition', icon: Trophy },
+  { href: '/sports', label: 'Sports Competition', icon: Trophy },
+  { href: '/arts', label: 'Arts Competition', icon: Paintbrush },
+  { href: '/affiliate-marketing', label: 'Affiliate Marketing', icon: Share2 },
+  { href: '/influencer-rewards', label: 'Influencer Rewards', icon: Megaphone },
+  { href: '/franchisee', label: 'Franchisee Program', icon: Building2 },
+  { href: '/jobs', label: 'Jobs & Career', icon: BookUser },
 ];
 
 const eCommerceSubItems = [
-  { href: '/ecommerce', icon: ShoppingCart, label: 'Products Marketplace' },
-  { href: '/my-web-store', icon: Star, label: 'My Web Store' },
+  { href: '/ecommerce', label: 'Products Marketplace', icon: ShoppingCart },
+  { href: '/my-web-store', label: 'My Web Store', icon: Star },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -275,7 +272,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <SidebarMenu>
             {/* Standard Program Items */}
-            {programNavItems.filter(item => item.href !== '/ecommerce').map((item) => (
+            {programNavItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild>
                         <Link href={item.href}>
@@ -353,7 +350,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <LanguageSwitcher />
               <SafeWalletButton />
               <UserAccountDropdown />
             </div>
