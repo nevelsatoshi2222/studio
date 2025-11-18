@@ -30,29 +30,147 @@ const achievementTiers = [
 ];
 
 const financialQuizQuestions: Question[] = [
+  // 12 Mandatory Questions
   {
     id: 1,
     question: "What is India's approximate Union budget for the fiscal year 2024-2025?",
     explanation: "India's interim budget for 2024-25 estimates total expenditure at ₹47.66 lakh crore, making ₹50 Lakh Crore the closest approximation.",
-    options: [
-      "₹5 Lakh Crore",
-      "₹50 Lakh Crore", 
-      "₹20 Lakh Crore",
-      "₹50 Crore"
-    ],
+    options: ["₹5 Lakh Crore", "₹50 Lakh Crore", "₹20 Lakh Crore", "₹50 Crore"],
     correctAnswer: "₹50 Lakh Crore"
   },
-  // ... (keep all your existing questions here, I'm shortening for example)
+  {
+    id: 2,
+    question: "What is the approximate combined budget of all Indian states for 2024-2025?",
+    explanation: "The combined budget expenditure of all states is projected to be around ₹50-55 Lakh Crore, making ₹50 Lakh Crore a reasonable estimate.",
+    options: ["₹10 Lakh Crore", "₹25 Lakh Crore", "₹50 Lakh Crore", "₹100 Lakh Crore"],
+    correctAnswer: "₹50 Lakh Crore"
+  },
+  {
+    id: 3,
+    question: "What is India's approximate total revenue (Centre + States) for a fiscal year?",
+    explanation: "With both Centre and States having budgets around ₹50 Lakh Crore each, the total combined expenditure (and targeted revenue) is approximately ₹100 Lakh Crore.",
+    options: ["₹20 Lakh Crore", "₹50 Lakh Crore", "₹100 Lakh Crore", "₹200 Lakh Crore"],
+    correctAnswer: "₹100 Lakh Crore"
+  },
+  {
+    id: 4,
+    question: "Approximately how many families are there in India?",
+    explanation: "With a population of about 140 crores and an average family size of 4-5, the number of families is estimated to be around 30-35 crores.",
+    options: ["10 Crore", "20 Crore", "35 Crore", "50 Crore"],
+    correctAnswer: "35 Crore"
+  },
+  {
+    id: 5,
+    question: "What is the approximate population of India?",
+    explanation: "As of 2024, India's population has surpassed 140 crores (1.4 billion).",
+    options: ["100 Crore", "120 Crore", "140 Crore", "160 Crore"],
+    correctAnswer: "140 Crore"
+  },
+  {
+    id: 6,
+    question: "Approximately how many families in India live below the poverty line?",
+    explanation: "Various estimates suggest that around 20-25% of the population lives below the poverty line, which translates to about 6-8 crore families.",
+    options: ["1 Crore", "3 Crore", "8 Crore", "15 Crore"],
+    correctAnswer: "8 Crore"
+  },
+  {
+    id: 7,
+    question: "Approximately how many people in India live below the poverty line?",
+    explanation: "Based on official figures and World Bank estimates, over 20 crore people in India live in poverty.",
+    options: ["5 Crore", "10 Crore", "20 Crore", "40 Crore"],
+    correctAnswer: "20 Crore"
+  },
+  {
+    id: 8,
+    question: "What is the approximate annual cost to bring one family out of poverty in India?",
+    explanation: "Based on various economic models and poverty line estimates, it would take roughly ₹1,20,000 per year to provide basic income support to a family.",
+    options: ["₹10,000", "₹50,000", "₹1,20,000", "₹5,00,000"],
+    correctAnswer: "₹1,20,000"
+  },
+  {
+    id: 9,
+    question: "What is the approximate total annual cost to eradicate poverty in India by providing basic income to all poor families?",
+    explanation: "Multiplying the cost per family (₹1,20,000) by the number of poor families (approx. 8 crore) gives a figure around ₹9.6 Lakh Crore.",
+    options: ["₹1 Lakh Crore", "₹5 Lakh Crore", "₹10 Lakh Crore", "₹20 Lakh Crore"],
+    correctAnswer: "₹10 Lakh Crore"
+  },
+  {
+    id: 10,
+    question: "What is India's approximate GDP in USD?",
+    explanation: "India's Gross Domestic Product (GDP) is projected to be around $3.7 to $4 trillion, making it one of the world's largest economies.",
+    options: ["$1 Trillion", "$2 Trillion", "$4 Trillion", "$10 Trillion"],
+    correctAnswer: "$4 Trillion"
+  },
+  {
+    id: 11,
+    question: "What is India's approximate national debt?",
+    explanation: "India's total government debt (Centre and States combined) is approximately 85-90% of its GDP, which is around $3.4 trillion or ₹280 Lakh Crore.",
+    options: ["₹50 Lakh Crore", "₹100 Lakh Crore", "₹150 Lakh Crore", "₹300 Lakh Crore"],
+    correctAnswer: "₹300 Lakh Crore"
+  },
+  {
+    id: 12,
+    question: "If 35% of the central budget were directly transferred to families, what percentage of poverty could be eradicated?",
+    explanation: "35% of the ₹50 Lakh Crore central budget is ₹17.5 Lakh Crore. Since it takes about ₹10 Lakh Crore to eradicate poverty, this amount could theoretically cover 100% of the cost with a surplus.",
+    options: ["25%", "50%", "75%", "100%"],
+    correctAnswer: "100%"
+  },
+  // 7 Topical Questions
   {
     id: 13,
+    question: "What was the approximate capital outlay for the Indian Railways in the 2024-25 budget?",
+    explanation: "The budget allocated a record capital outlay of ₹2.55 lakh crore for the Indian Railways, focusing on modernization and infrastructure.",
+    options: ["₹1 Lakh Crore", "₹1.5 Lakh Crore", "₹2.5 Lakh Crore", "₹5 Lakh Crore"],
+    correctAnswer: "₹2.5 Lakh Crore"
+  },
+  {
+    id: 14,
+    question: "What is India's approximate defense budget for 2024-25?",
+    explanation: "The defense budget was increased to ₹6.2 Lakh Crore, emphasizing military modernization and self-reliance (Aatmanirbharta).",
+    options: ["₹3 Lakh Crore", "₹4.5 Lakh Crore", "₹6.2 Lakh Crore", "₹8 Lakh Crore"],
+    correctAnswer: "₹6.2 Lakh Crore"
+  },
+  {
+    id: 15,
+    question: "Which country is India's largest trading partner as of 2023-24 data?",
+    explanation: "Surpassing the US, China has emerged as India's largest trading partner with two-way commerce of $118.4 billion.",
+    options: ["USA", "China", "UAE", "Russia"],
+    correctAnswer: "China"
+  },
+  {
+    id: 16,
+    question: "Which Indian state has the highest GDP?",
+    explanation: "Maharashtra has the largest economy among all Indian states, with a GSDP (Gross State Domestic Product) of over $400 billion.",
+    options: ["Gujarat", "Tamil Nadu", "Maharashtra", "Uttar Pradesh"],
+    correctAnswer: "Maharashtra"
+  },
+  {
+    id: 17,
+    question: "What does 'UPI' stand for in the context of Indian digital payments?",
+    explanation: "UPI, developed by NPCI, is a real-time payment system that has revolutionized digital transactions in India and is now expanding globally.",
+    options: ["Unified Payment Interface", "Universal Payment ID", "Unique Public Infrastructure", "Unified Public aId"],
+    correctAnswer: "Unified Payment Interface"
+  },
+  {
+    id: 18,
+    question: "The 'Make in India' initiative primarily aims to:",
+    explanation: "Launched in 2014, the 'Make in India' initiative's main goal is to transform India into a global design and manufacturing hub.",
+    options: ["Boost tourism", "Improve agricultural output", "Develop India into a manufacturing hub", "Enhance IT services exports"],
+    correctAnswer: "Develop India into a manufacturing hub"
+  },
+  {
+    id: 19,
+    question: "What is the primary objective of the 'Swachh Bharat Mission'?",
+    explanation: "The mission aims to achieve a clean and open-defecation-free (ODF) India through construction of toilets and promoting sanitation and hygiene.",
+    options: ["Building highways", "Providing free electricity", "Universal sanitation and cleanliness", "Digital literacy for all"],
+    correctAnswer: "Universal sanitation and cleanliness"
+  },
+  // 1 Final Poll Question
+  {
+    id: 20,
     question: "Considering these figures, if 35% of the Centre's budget and 35% of the State's budget were given directly to families, it's estimated each family could get over ₹1,20,000 per year. Would you support such a policy?",
-    explanation: "This is a core question of public governance. It asks whether you believe in direct benefit transfers as a primary model for wealth distribution.",
-    options: [
-      "Yes, of course.",
-      "No, we don't need free money.",
-      "Yes, but it should be less than 25%",
-      "Yes, it should be more than 35%"
-    ],
+    explanation: "This is a core question of public governance. It asks whether you believe in direct benefit transfers as a primary model for wealth distribution versus government-managed schemes.",
+    options: ["Yes, of course.", "No, we don't need free money.", "Yes, but it should be less than 25%", "Yes, it should be more than 35%"],
     correctAnswer: "Yes, of course.",
     requiresAgreement: true,
     noPenalty: true
