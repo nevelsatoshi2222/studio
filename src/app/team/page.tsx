@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, DollarSign, Award, Crown, Shield } from 'lucide-react';
+import { Users, UserPlus, DollarSign, Award, Crown, Shield, Star, Gem } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -81,15 +81,15 @@ const rankIcons: { [key: string]: React.FC<any> } = {
     'Silver': Award,
     'Gold': Crown,
     'Emerald': Shield,
-    'Platinum': Crown,
-    'Diamond': Shield,
+    'Platinum': Gem,
+    'Diamond': Star,
     'Crown': Crown,
     'Bronze Star': Award,
     'Silver Star': Award,
     'Gold Star': Crown,
     'Emerald Star': Shield,
-    'Platinum Star': Crown,
-    'Diamond Star': Shield,
+    'Platinum Star': Gem,
+    'Diamond Star': Star,
     'Crown Star': Crown,
 };
 
@@ -120,66 +120,12 @@ const RewardTierCard = ({ tier, progress, goal, isAchieved }: { tier: any; progr
     );
 };
 
-// This component fetches data for a single member
-function TeamMemberRow({ memberId }: { memberId: string }) {
-    const firestore = useFirestore();
-    const memberDocRef = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return doc(firestore, 'users', memberId);
-    }, [firestore, memberId]);
-
-    const { data: member, isLoading } = useDoc<TeamMember>(memberDocRef);
-
-    if (isLoading) {
-        return <UserRowSkeleton />;
-    }
-
-    if (!member) {
-        return (
-            <TableRow>
-                <TableCell colSpan={3} className="text-muted-foreground">Could not load member data</TableCell>
-            </TableRow>
-        );
-    }
-
-    return (
-        <TableRow key={member.id}>
-            <TableCell>
-                <div className="flex items-center gap-3">
-                    <Avatar>
-                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <div className="font-medium">{member.name}</div>
-                        <div className="text-sm text-muted-foreground">{member.email}</div>
-                    </div>
-                </div>
-            </TableCell>
-            <TableCell>
-                {member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
-            </TableCell>
-            <TableCell>
-                <div className="flex gap-2">
-                     {member.isPaid && <Badge variant="default" className="bg-green-100 text-green-800">Paid</Badge>}
-                    {member.currentFreeRank && member.currentFreeRank !== 'None' && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                            {member.currentFreeRank}
-                        </span>
-                    )}
-                    {member.currentPaidRank && member.currentPaidRank !== 'None' && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                            {member.currentPaidRank}
-                        </span>
-                    )}
-                </div>
-            </TableCell>
-        </TableRow>
-    );
-}
-
 export default function TeamPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [isTeamLoading, setIsTeamLoading] = useState(true);
+  
   const [commissionData, setCommissionData] = useState({
     totalCommission: 0,
     commissions: [] as any[],
@@ -202,6 +148,31 @@ export default function TeamPage() {
     paidTeamSize?: number;
     totalTeamSize?: number;
   }>(userDocRef);
+
+  // Fetch Team Members
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      if (!user || !firestore || !userProfile || !userProfile.direct_team || userProfile.direct_team.length === 0) {
+        setIsTeamLoading(false);
+        setTeamMembers([]);
+        return;
+      }
+      setIsTeamLoading(true);
+      try {
+        const teamQuery = query(collection(firestore, 'users'), where('__name__', 'in', userProfile.direct_team));
+        const teamSnapshot = await getDocs(teamQuery);
+        const members = teamSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+        setTeamMembers(members);
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+      } finally {
+        setIsTeamLoading(false);
+      }
+    };
+    if (userProfile) {
+      fetchTeamMembers();
+    }
+  }, [user, firestore, userProfile]);
 
   // Fetch commission data
   useEffect(() => {
@@ -231,9 +202,7 @@ export default function TeamPage() {
     }
   }, [user, firestore]);
   
-  const directMemberIds = userProfile?.direct_team || [];
-  
-    const RewardsDashboard = () => {
+  const RewardsDashboard = () => {
     if (isProfileLoading) {
         return <Skeleton className="h-96 w-full" />
     }
@@ -250,7 +219,8 @@ export default function TeamPage() {
         
         // Base ranks (Bronze and Bronze Star)
         if (isPaidTrack) {
-            return userProfile.paid_direct_team_size || 0;
+            const paidMembers = teamMembers.filter(m => m.isPaid).length;
+            return paidMembers;
         } else {
             return userProfile.direct_team?.length || 0;
         }
@@ -260,10 +230,12 @@ export default function TeamPage() {
         if (!userProfile) return false;
         const rankList = isPaidTrack ? paidTrackRewards : freeTrackRewards;
         const currentRank = isPaidTrack ? userProfile.currentPaidRank : userProfile.currentFreeRank;
-        if (!currentRank) return false;
+        if (!currentRank || currentRank === "None") return false;
         
         const currentRankIndex = rankList.findIndex(r => r.name === currentRank);
         const targetRankIndex = rankList.findIndex(r => r.name === rankName);
+
+        if(currentRankIndex === -1 || targetRankIndex === -1) return false;
 
         return currentRankIndex >= targetRankIndex;
     };
@@ -465,7 +437,7 @@ export default function TeamPage() {
             <CardContent className="grid md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg bg-muted">
                   <div className="text-sm text-muted-foreground">Direct Referrals</div>
-                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : directMemberIds.length}</div>
+                  <div className="text-3xl font-bold">{isProfileLoading ? <Skeleton className="h-8 w-16" /> : userProfile?.direct_team?.length || 0}</div>
               </div>
                <div className="p-4 rounded-lg bg-muted">
                   <div className="text-sm text-muted-foreground">Total Team Size</div>
@@ -487,7 +459,7 @@ export default function TeamPage() {
         <TabsContent value="direct-members" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Direct Members ({directMemberIds.length})</CardTitle>
+              <CardTitle>Direct Members ({teamMembers.length})</CardTitle>
               <CardDescription>
                 These are the users you have personally referred.
               </CardDescription>
@@ -502,14 +474,44 @@ export default function TeamPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isProfileLoading ? (
+                  {isTeamLoading ? (
                     <>
                       <UserRowSkeleton />
                       <UserRowSkeleton />
                     </>
-                  ) : directMemberIds.length > 0 ? (
-                    directMemberIds.map((memberId) => (
-                      <TeamMemberRow key={memberId} memberId={memberId} />
+                  ) : teamMembers.length > 0 ? (
+                    teamMembers.map((member) => (
+                      <TableRow key={member.id}>
+                          <TableCell>
+                              <div className="flex items-center gap-3">
+                                  <Avatar>
+                                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                      <div className="font-medium">{member.name}</div>
+                                      <div className="text-sm text-muted-foreground">{member.email}</div>
+                                  </div>
+                              </div>
+                          </TableCell>
+                          <TableCell>
+                              {member.registeredAt ? new Date(member.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                              <div className="flex gap-2">
+                                  {member.isPaid && <Badge variant="default" className="bg-green-100 text-green-800">Paid</Badge>}
+                                  {member.currentFreeRank && member.currentFreeRank !== 'None' && (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                          {member.currentFreeRank}
+                                      </span>
+                                  )}
+                                  {member.currentPaidRank && member.currentPaidRank !== 'None' && (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                          {member.currentPaidRank}
+                                      </span>
+                                  )}
+                              </div>
+                          </TableCell>
+                      </TableRow>
                     ))
                   ) : (
                     <TableRow>
@@ -535,4 +537,3 @@ export default function TeamPage() {
     </div>
   );
 }
-
