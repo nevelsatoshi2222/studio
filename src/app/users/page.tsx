@@ -89,7 +89,7 @@ export default function UsersPage() {
                               {user.status}
                             </Badge>
                         </TableCell>
-                        <TableCell>{user.pgcBalance.toLocaleString()}</TableCell>
+                        <TableCell>{(user.pgcBalance || 0).toLocaleString()}</TableCell>
                         <TableCell>{user.registeredAt ? new Date(user.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}</TableCell>
                          <TableCell>
                           <DropdownMenu>
