@@ -27,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 // Reward data structure
 const freeTrackRewards = [
@@ -92,10 +93,9 @@ const rankIcons: { [key: string]: React.FC<any> } = {
     'Crown Star': Crown,
 };
 
-const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number; goal: number }) => {
+const RewardTierCard = ({ tier, progress, goal, isAchieved }: { tier: any; progress: number; goal: number; isAchieved: boolean }) => {
     const Icon = rankIcons[tier.name] || Award;
-    const isAchieved = progress >= goal;
-    const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : 0;
+    const progressPercent = goal > 0 ? Math.min((progress / goal) * 100, 100) : (isAchieved ? 100 : 0);
 
     return (
         <div className={`flex items-start gap-4 rounded-lg border p-4 ${isAchieved ? 'bg-green-500/10 border-green-500' : 'bg-muted/30'}`}>
@@ -111,7 +111,7 @@ const RewardTierCard = ({ tier, progress, goal }: { tier: any; progress: number;
                 
                 <div className="mt-2">
                     <Progress value={progressPercent} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">{progress} / {goal} members</p>
+                    <p className="text-xs text-muted-foreground mt-1">{isAchieved ? `Achieved!` : `${progress} / ${goal} members`}</p>
                 </div>
 
                 <div className={`text-xs font-semibold mt-2 ${isAchieved ? 'text-green-700' : 'text-primary/80'}`}>{tier.limit}</div>
@@ -196,8 +196,8 @@ export default function TeamPage() {
     direct_team: string[];
     currentFreeRank: string;
     currentPaidRank: string;
-    freeAchievers?: { bronze: number; silver: number; gold: number; };
-    paidAchievers?: { bronzeStar: number; silverStar: number; goldStar: number; };
+    freeAchievers?: { bronze: number; silver: number; gold: number; emerald: number; platinum: number; diamond: number; crown: number; };
+    paidAchievers?: { bronzeStar: number; silverStar: number; goldStar: number; emeraldStar: number; platinumStar: number; diamondStar: number; crownStar: number; };
     isPaid?: boolean;
     paidTeamSize?: number;
     totalTeamSize?: number;
@@ -255,57 +255,34 @@ export default function TeamPage() {
 }, [userProfile?.direct_team, firestore]);
 
   const directMemberIds = userProfile?.direct_team || [];
-  const currentFreeRank = userProfile?.currentFreeRank || 'None';
-  const currentPaidRank = userProfile?.currentPaidRank || 'None';
-
-  // Level-wise earnings calculation
-  const levelEarnings: Record<number, { total: number, count: number }> = {};
-  commissionData.commissions.forEach(commission => {
-    const level = commission.level || 1;
-    const amount = commission.amount || commission.commissionAmount || 0;
-    
-    if (!levelEarnings[level]) {
-      levelEarnings[level] = { total: 0, count: 0 };
-    }
-    levelEarnings[level].total += amount;
-    levelEarnings[level].count += 1;
-  });
-
-  const levelEarningsArray = Object.entries(levelEarnings)
-    .map(([level, data]) => ({
-      level: parseInt(level),
-      earnings: data.total,
-      count: data.count
-    }))
-    .sort((a, b) => a.level - b.level);
   
   const RewardsDashboard = () => {
-    const freeRankIndex = freeTrackRewards.findIndex(r => r.name === currentFreeRank);
-    const nextFreeRank = freeTrackRewards[freeRankIndex + 1];
-
-    const paidRankIndex = paidTrackRewards.findIndex(r => r.name === currentPaidRank);
-    const nextPaidRank = paidTrackRewards[paidRankIndex + 1];
-    
     const getProgressForRank = (rank: any, isPaidTrack: boolean) => {
         if (!rank || !userProfile) return 0;
-    
+
         if (isPaidTrack) {
-            // For Bronze Star, the requirement is direct paid members.
             if (rank.key === 'bronzeStar') {
                 return directTeamMembers.filter(m => m.isPaid).length;
             }
-            // For subsequent paid ranks, it depends on the achievements of the team.
             const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.paidAchievers>;
             return userProfile.paidAchievers?.[dependsOnKey] || 0;
         } else {
-            // For Bronze, the requirement is direct members (free or paid).
             if (rank.key === 'bronze') {
                 return userProfile.direct_team?.length || 0;
             }
-            // For subsequent free ranks, it depends on the achievements of the team.
             const dependsOnKey = rank.dependsOn as keyof NonNullable<typeof userProfile.freeAchievers>;
             return userProfile.freeAchievers?.[dependsOnKey] || 0;
         }
+    };
+
+    const hasAchievedRank = (rankName: string, isPaidTrack: boolean) => {
+        const rankList = isPaidTrack ? paidTrackRewards : freeTrackRewards;
+        const currentRank = isPaidTrack ? userProfile?.currentPaidRank : userProfile?.currentFreeRank;
+        
+        const currentRankIndex = rankList.findIndex(r => r.name === currentRank);
+        const targetRankIndex = rankList.findIndex(r => r.name === rankName);
+
+        return currentRankIndex >= targetRankIndex;
     };
 
     return (
@@ -313,43 +290,35 @@ export default function TeamPage() {
         <Card>
           <CardHeader>
             <CardTitle>Free Track Rewards</CardTitle>
-            <CardDescription>Current Rank: <span className="font-bold text-primary">{currentFreeRank}</span></CardDescription>
+            <CardDescription>Current Rank: <span className="font-bold text-primary">{userProfile?.currentFreeRank || 'None'}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {nextFreeRank ? (
-              <RewardTierCard 
-                tier={nextFreeRank} 
-                progress={getProgressForRank(nextFreeRank, false)} 
-                goal={5} 
-              />
-            ) : (
-                <Alert>
-                    <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have reached the highest rank in the free track.</AlertDescription>
-                </Alert>
-            )}
+            {freeTrackRewards.map(tier => (
+                <RewardTierCard 
+                    key={tier.key}
+                    tier={tier} 
+                    progress={getProgressForRank(tier, false)} 
+                    goal={5}
+                    isAchieved={hasAchievedRank(tier.name, false)}
+                />
+            ))}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Paid Track Rewards</CardTitle>
-            <CardDescription>Current Rank: <span className="font-bold text-primary">{currentPaidRank}</span></CardDescription>
+            <CardDescription>Current Rank: <span className="font-bold text-primary">{userProfile?.currentPaidRank || 'None'}</span></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             {nextPaidRank ? (
-              <RewardTierCard 
-                tier={nextPaidRank} 
-                progress={getProgressForRank(nextPaidRank, true)} 
-                goal={5} 
-              />
-            ) : (
-                <Alert>
-                    <Crown className="h-4 w-4" />
-                    <AlertTitle>Congratulations!</AlertTitle>
-                    <AlertDescription>You have reached the highest rank in the paid track.</AlertDescription>
-                </Alert>
-            )}
+             {paidTrackRewards.map(tier => (
+                <RewardTierCard 
+                    key={tier.key}
+                    tier={tier} 
+                    progress={getProgressForRank(tier, true)} 
+                    goal={5} 
+                    isAchieved={hasAchievedRank(tier.name, true)}
+                />
+            ))}
           </CardContent>
         </Card>
       </div>
@@ -357,80 +326,101 @@ export default function TeamPage() {
   };
   
     const EarningTable = () => {
-    if (commissionData.isLoading) {
-      return (
-        <Card>
-          <CardHeader>
-            <CardTitle>Commission Earnings</CardTitle>
-            <CardDescription>Loading your commission data...</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Commission Earnings</CardTitle>
-            <CardDescription>
-              A summary of your USDT commissions from your team's purchases.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-                <div className="text-2xl font-bold text-green-600">
-                  ${commissionData.totalCommission.toFixed(2)}
-                </div>
-                <p className="text-sm text-green-800">Total Earned</p>
-              </div>
-              <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
-                <div className="text-2xl font-bold text-blue-600">
-                  {commissionData.commissions.length}
-                </div>
-                <p className="text-sm text-blue-800">Transactions</p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-3">Earnings by Level</h4>
-              {levelEarningsArray.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {levelEarningsArray.map((level) => (
-                    <div key={level.level} className="text-center p-3 rounded-lg bg-gray-50 border border-green-200">
-                      <div className="font-semibold text-lg">Level {level.level}</div>
-                      <div className="text-green-600 font-bold text-xl">${level.earnings.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">{level.count} Transactions</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No commissions earned yet. Start building your team!</p>
-                </div>
-              )}
-            </div>
+        const levelEarnings: Record<number, { total: number, count: number }> = {};
+        commissionData.commissions.forEach(commission => {
+            const level = commission.level || 1;
+            const amount = commission.amount || commission.commissionAmount || 0;
             
-            <div className="p-4 rounded-lg border bg-blue-50">
-              <h4 className="font-semibold text-blue-800 mb-2">Commission Structure</h4>
-              <p className="text-sm text-blue-700">
-                Earn 0.2% on purchases from levels 1-5 and 0.1% from levels 6-15.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  };
+            if (!levelEarnings[level]) {
+            levelEarnings[level] = { total: 0, count: 0 };
+            }
+            levelEarnings[level].total += amount;
+            levelEarnings[level].count += 1;
+        });
+
+        const levelEarningsArray = Object.entries(levelEarnings)
+            .map(([level, data]) => ({
+            level: parseInt(level),
+            earnings: data.total,
+            count: data.count
+            }))
+            .sort((a, b) => a.level - b.level);
+
+
+        if (commissionData.isLoading) {
+        return (
+            <Card>
+            <CardHeader>
+                <CardTitle>Commission Earnings</CardTitle>
+                <CardDescription>Loading your commission data...</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                </div>
+            </CardContent>
+            </Card>
+        );
+        }
+
+        return (
+        <div className="space-y-6">
+            <Card>
+            <CardHeader>
+                <CardTitle>Commission Earnings</CardTitle>
+                <CardDescription>
+                A summary of your USDT commissions from your team's purchases.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+                    <div className="text-2xl font-bold text-green-600">
+                    ${commissionData.totalCommission.toFixed(2)}
+                    </div>
+                    <p className="text-sm text-green-800">Total Earned</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <div className="text-2xl font-bold text-blue-600">
+                    {commissionData.commissions.length}
+                    </div>
+                    <p className="text-sm text-blue-800">Transactions</p>
+                </div>
+                </div>
+
+                <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3">Earnings by Level</h4>
+                {levelEarningsArray.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {levelEarningsArray.map((level) => (
+                        <div key={level.level} className="text-center p-3 rounded-lg bg-gray-50 border border-green-200">
+                        <div className="font-semibold text-lg">Level {level.level}</div>
+                        <div className="text-green-600 font-bold text-xl">${level.earnings.toFixed(2)}</div>
+                        <div className="text-xs text-gray-500">{level.count} Transactions</div>
+                        </div>
+                    ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                    <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No commissions earned yet. Start building your team!</p>
+                    </div>
+                )}
+                </div>
+                
+                <div className="p-4 rounded-lg border bg-blue-50">
+                <h4 className="font-semibold text-blue-800 mb-2">Commission Structure</h4>
+                <p className="text-sm text-blue-700">
+                    Earn 0.2% on purchases from levels 1-5 and 0.1% from levels 6-15.
+                </p>
+                </div>
+            </CardContent>
+            </Card>
+        </div>
+        );
+    };
 
   if (isUserLoading || (user && isProfileLoading)) {
     return (
