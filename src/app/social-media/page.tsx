@@ -12,6 +12,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   ThumbsUp,
   MessageSquare,
   Share2,
@@ -30,14 +46,16 @@ import {
   Shrink,
   RectangleHorizontal,
   RectangleVertical,
+  MoreVertical,
+  Trash2,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, AppUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import React, { useState, useRef } from 'react';
-import { addDoc, collection, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -251,13 +269,31 @@ const PostContent = ({ text }: { text: string }) => {
     );
   };
 
-function PostCard({ post }: { post: SocialPost }) {
+function PostCard({ post, currentUser }: { post: SocialPost; currentUser: AppUser | null }) {
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    
     const imageSizeClasses = {
       small: 'w-1/2 rounded-lg',
       medium: 'w-2/3 rounded-lg',
       large: 'w-full rounded-lg',
       cover: 'w-full aspect-video rounded-lg',
   };
+
+  const isAuthor = currentUser && currentUser.uid === post.authorId;
+  const isAdmin = currentUser && currentUser.role?.includes('Admin');
+
+  const handleDelete = async () => {
+    if (!firestore) return;
+    try {
+        const postRef = doc(firestore, 'social_posts', post.id);
+        await deleteDoc(postRef);
+        toast({ title: 'Post deleted successfully.'});
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        toast({ variant: 'destructive', title: 'Failed to delete post.'});
+    }
+  }
 
   return (
     <Card>
@@ -285,6 +321,37 @@ function PostCard({ post }: { post: SocialPost }) {
                     <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-muted">
                         <span className="text-xs font-bold text-primary">IGC</span>
                     </div>
+                )}
+                {(isAuthor || isAdmin) && (
+                     <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete Post
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this post from our servers.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 )}
             </div>
         </div>
@@ -369,12 +436,14 @@ export default function SocialMediaPage() {
     const firestore = useFirestore();
 
     const postsQuery = useMemoFirebase(() => {
-        // **FIX:** Only create the query if the user is authenticated.
-        if (!firestore || !user) return null;
+        if (!firestore) return null; // No query if firestore is not ready
         return query(collection(firestore, 'social_posts'), orderBy('timestamp', 'desc'));
-    }, [firestore, user]);
+    }, [firestore]);
 
-    const { data: socialPosts, isLoading } = useCollection<SocialPost>(postsQuery);
+    const { data: socialPosts, isLoading: arePostsLoading } = useCollection<SocialPost>(postsQuery);
+
+    const isLoading = isUserLoading || (user && arePostsLoading);
+
 
   return (
       <div className="flex flex-col gap-8">
@@ -389,17 +458,17 @@ export default function SocialMediaPage() {
             <main className="lg:col-span-2 space-y-6">
                 <CreatePostCard />
                 <div className="space-y-6">
-                    {(isLoading || isUserLoading) && (
+                    {isLoading && (
                         <>
                             <PostSkeleton />
                             <PostSkeleton />
                         </>
                     )}
-                    {socialPosts && socialPosts.length > 0 ? (
+                    {!isLoading && socialPosts && socialPosts.length > 0 ? (
                         socialPosts.map((post) => (
-                            <PostCard key={post.id} post={post} />
+                            <PostCard key={post.id} post={post} currentUser={user} />
                         ))
-                    ) : !isLoading && !isUserLoading && (
+                    ) : !isLoading && (
                         <Card>
                             <CardContent className="p-10 text-center">
                                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
