@@ -306,7 +306,7 @@ export default function AirdropsRewardsPage() {
                         <div className="text-xs text-yellow-300">TOTAL SLOTS</div>
                       </div>
                       <div className="text-center p-4 bg-slate-700/50 rounded-lg border border-yellow-500/20">
-                        <div className="text-2xl font-bold text-yellow-400">32,500</div>
+                        <div className="text-2xl font-bold text-yellow-400">35,000</div>
                         <div className="text-xs text-yellow-300">TOTAL PGC REWARD</div>
                       </div>
                     </div>
