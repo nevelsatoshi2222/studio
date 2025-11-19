@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -17,10 +18,12 @@ import {
   Gift,
   UserPlus,
   Video,
-  Coins
+  Coins,
+  Crown
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { RequestOfferCard } from '@/components/request-offer-card';
 
 // --- DATA FOR ALL REWARD TIERS ---
 
@@ -70,8 +73,9 @@ const INFLUENCER_REWARDS = {
   ],
 };
 const INFLUENCER_TOTAL_PGC = 250000;
+const ADMIN_OFFER_TOTAL_PGC = 262187.5;
 
-const TOTAL_REWARD_POOL = AIRDROP_TOTAL_PGC + QUIZ_TOTAL_PGC + AFFILIATE_TOTAL_PGC + INFLUENCER_TOTAL_PGC;
+const TOTAL_REWARD_POOL = 1000000;
 
 const WORKING_LINKS = {
   airdrop: '/register',
@@ -232,6 +236,26 @@ export default function AirdropsRewardsPage() {
                   </div>
                 </div>
               </CardContent>
+            </Card>
+            <Card className="border border-indigo-500/30 shadow-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <CardHeader className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white pb-4">
+                    <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                    <Crown className="h-5 w-5" />
+                    ADMIN OFFER REWARD
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                    <div className="space-y-8">
+                    <div className="text-center">
+                        <div className="text-4xl font-bold text-indigo-400 mb-2">
+                        {ADMIN_OFFER_TOTAL_PGC.toLocaleString()} PGC
+                        </div>
+                        <div className="text-base font-semibold text-indigo-300">RESERVED FOR SPECIAL OFFERS</div>
+                        <p className="text-sm text-gray-400 mt-2">This dedicated pool is for top influencers and networkers who can request special deals directly from the admin team.</p>
+                    </div>
+                    <RequestOfferCard />
+                    </div>
+                </CardContent>
             </Card>
           </div>
         )}

@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -15,6 +16,10 @@ const faqs = [
   {
     question: "How does the affiliate program work?",
     answer: "Share your unique referral link to invite new users. When they join and participate, you earn commissions and rewards based on your team's size and activity. You can track your team and earnings on the 'My Team' page."
+  },
+  {
+    question: "What is the Admin Offer Reward?",
+    answer: "The Admin Offer Reward is a special PGC pool reserved for top-performing influencers and networkers. If you have a large social media following or a significant referral network, you can contact the admin team directly to request a custom reward package or deal. This allows us to create special partnerships with key community builders."
   },
   {
     question: "Where can I vote on issues?",

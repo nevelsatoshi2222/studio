@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Users, Star, Award, Gem, Shield, Crown, UserPlus, DollarSign, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { RequestOfferCard } from '@/components/request-offer-card';
 
 const AffiliateRewardCard = ({ tier, isPaid = false }: { tier: any; isPaid?: boolean }) => {
   const getIcon = (level: string) => {
@@ -159,6 +160,8 @@ export default function AffiliateMarketingPage() {
           ))}
         </CardContent>
       </Card>
+      
+      <RequestOfferCard />
 
       {/* How It Works */}
       <Card>

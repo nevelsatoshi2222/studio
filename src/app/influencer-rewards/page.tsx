@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Video } from 'lucide-react';
+import { RequestOfferCard } from '@/components/request-offer-card';
+
 
 const INFLUENCER_REWARDS = {
   followerTiers: [
@@ -168,6 +170,7 @@ export default function InfluencerRewardsPage() {
           </div>
         </CardContent>
       </Card>
+      <RequestOfferCard />
     </div>
   );
 }
