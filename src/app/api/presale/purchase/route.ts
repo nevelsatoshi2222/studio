@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, Keypair } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, createTransferInstruction } from '@solana/spl-token';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   const connection = new Connection(process.env.SOLANA_RPC_URL!, 'confirmed');
   const treasurySecretKey = Uint8Array.from(JSON.parse(process.env.TREASURY_WALLET_SECRET_KEY as string));
-  const treasuryKeypair = null; // Keypair.fromSecretKey(treasurySecretKey); // This line will cause an error if Keypair is not imported from @solana/web3.js
+  const treasuryKeypair = Keypair.fromSecretKey(treasurySecretKey);
 
   try {
     // 1. Verify the USDT transaction
