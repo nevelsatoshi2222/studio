@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   const connection = new Connection(process.env.SOLANA_RPC_URL!, 'confirmed');
-  // **SECURITY NOTE**: Your TREASURY_WALLET_SECRET_KEY for the PGC Reserve Wallet must be in your environment variables
+  // **SECURITY NOTE**: Your PGC_RESERVE_WALLET_SECRET_KEY for the PGC Reserve Wallet must be in your environment variables
   const treasurySecretKey = Uint8Array.from(JSON.parse(process.env.PGC_RESERVE_WALLET_SECRET_KEY as string));
   const pgcReserveKeypair = Keypair.fromSecretKey(treasurySecretKey);
 
