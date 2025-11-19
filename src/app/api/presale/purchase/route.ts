@@ -4,7 +4,7 @@ import { Connection, PublicKey, Transaction, Keypair } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, createTransferInstruction } from '@solana/spl-token';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { PGC_TOKEN_MINT_ADDRESS, USDT_MINT_ADDRESS, CREATOR_TREASURY_SOLANA_USDT } from '@/lib/config';
+import { PGC_TOKEN_MINT_ADDRESS, USDT_MINT_ADDRESS, CREATOR_TREASURY_SOLANA_USDT, PGC_PRESALE_RESERVE_WALLET } from '@/lib/config';
 
 // Initialize Firebase Admin SDK
 // Make sure to have your service account key in the environment variables
@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
   }
 
   const connection = new Connection(process.env.SOLANA_RPC_URL!, 'confirmed');
-  const treasurySecretKey = Uint8Array.from(JSON.parse(process.env.TREASURY_WALLET_SECRET_KEY as string));
-  const treasuryKeypair = Keypair.fromSecretKey(treasurySecretKey);
+  // **SECURITY NOTE**: Your TREASURY_WALLET_SECRET_KEY for the PGC Reserve Wallet must be in your environment variables
+  const treasurySecretKey = Uint8Array.from(JSON.parse(process.env.PGC_RESERVE_WALLET_SECRET_KEY as string));
+  const pgcReserveKeypair = Keypair.fromSecretKey(treasurySecretKey);
 
   try {
     // 1. Verify the USDT transaction
@@ -50,8 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Basic verification logic (in a real app, this would be much more robust)
-    const treasuryAddress = new PublicKey(CREATOR_TREASURY_SOLANA_USDT);
-    const usdtMintAddress = new PublicKey(USDT_MINT_ADDRESS);
+    const usdtReceiverAddress = new PublicKey(CREATOR_TREASURY_SOLANA_USDT);
     let paymentVerified = false;
 
     for(const instruction of tx.transaction.message.instructions) {
@@ -74,22 +74,23 @@ export async function POST(request: NextRequest) {
 
     const pgcAmount = selectedPkg.instantPgc * (10 ** 9); // PGC has 9 decimals
     const pgcMint = new PublicKey(PGC_TOKEN_MINT_ADDRESS);
-    const userPublicKey = new PublicKey(tx.meta?.preTokenBalances?.[0]?.owner!);
+    // The user who sent the USDT is the first signer of the transaction
+    const userPublicKey = new PublicKey(tx.transaction.message.accountKeys[0].pubkey);
     
     // Get or create token accounts for PGC
-    const fromPgcAta = await getOrCreateAssociatedTokenAccount(connection, treasuryKeypair, pgcMint, treasuryKeypair.publicKey);
-    const toPgcAta = await getOrCreateAssociatedTokenAccount(connection, treasuryKeypair, pgcMint, userPublicKey);
+    const fromPgcAta = await getOrCreateAssociatedTokenAccount(connection, pgcReserveKeypair, pgcMint, pgcReserveKeypair.publicKey);
+    const toPgcAta = await getOrCreateAssociatedTokenAccount(connection, pgcReserveKeypair, pgcMint, userPublicKey);
     
     const pgcTransaction = new Transaction().add(
       createTransferInstruction(
         fromPgcAta.address,
         toPgcAta.address,
-        treasuryKeypair.publicKey,
+        pgcReserveKeypair.publicKey,
         pgcAmount
       )
     );
     
-    const pgcSignature = await connection.sendTransaction(pgcTransaction, [treasuryKeypair]);
+    const pgcSignature = await connection.sendTransaction(pgcTransaction, [pgcReserveKeypair]);
     await connection.confirmTransaction(pgcSignature, 'confirmed');
 
     // 3. Record the presale in Firestore, which will trigger commissions
@@ -116,5 +117,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
-
     
