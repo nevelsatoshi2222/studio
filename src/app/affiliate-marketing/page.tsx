@@ -17,6 +17,7 @@ import { RequestOfferCard } from '@/components/request-offer-card';
 const AffiliateRewardCard = ({ tier, isPaid = false }: { tier: any; isPaid?: boolean }) => {
   const getIcon = (level: string) => {
     switch (level) {
+      case 'Bronze': return <UserPlus className="h-5 w-5 text-amber-500" />;
       case 'Bronze Star': return <Star className="h-5 w-5 text-amber-500" />;
       case 'Silver':
       case 'Silver Star': 
@@ -42,34 +43,35 @@ const AffiliateRewardCard = ({ tier, isPaid = false }: { tier: any; isPaid?: boo
 
   return (
     <div className="flex items-start gap-4 rounded-lg border p-4 hover:border-primary transition-colors">
-      <div className={`flex h-12 w-12 items-center justify-center rounded-md ${tier.color} text-white mt-1`}>
+      <div className={`flex h-12 w-12 items-center justify-center rounded-md ${isPaid ? 'bg-green-100' : 'bg-blue-100'} ${tier.color} text-white mt-1`}>
         {getIcon(tier.level)}
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <h4 className="font-semibold text-lg">{tier.level}</h4>
-          <div className="text-lg font-bold text-primary">{tier.pgc} PGC</div>
+          <div className="text-lg font-bold text-primary">{tier.pgc}</div>
         </div>
         <p className="text-sm text-muted-foreground mt-1">{tier.requirement}</p>
         <div className="flex justify-between items-center mt-2">
           <span className="text-xs font-semibold text-primary/80">{tier.icon} {tier.users} users needed</span>
-          {isPaid && (
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              Paid Track
-            </Badge>
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-// Reward tiers configuration - CORRECTED VALUES
-const REWARD_TIERS = {
-  BRONZE_STAR: { level: 'Bronze Star', pgc: 2.5, requirement: '5 direct paid members', color: 'bg-amber-500', icon: '⭐', users: 5 },
-  SILVER_STAR: { level: 'Silver Star', pgc: 5, requirement: '5 Bronze Star in team', color: 'bg-gray-400', icon: '🔹', users: 5 },
-  GOLD_STAR: { level: 'Gold Star', pgc: 10, requirement: '5 Silver Star in team', color: 'bg-yellow-500', icon: '🔶', users: 5 },
-};
+const freeTrackRewards = [
+  { level: 'Bronze', pgc: '1 PGC', requirement: '5 direct free referrals', color: 'bg-amber-500', icon: '⭐', users: 5 },
+  { level: 'Silver', pgc: '2.5 PGC', requirement: '5 Bronze in team', color: 'bg-gray-400', icon: '🔹', users: 5 },
+  { level: 'Gold', pgc: '10 PGC', requirement: '5 Silver in team', color: 'bg-yellow-500', icon: '🔶', users: 5 },
+];
+
+const paidTrackRewards = [
+  { level: 'Bronze Star', pgc: '2.5 PGC', requirement: '5 direct paid members', color: 'bg-amber-500', icon: '⭐', users: 5 },
+  { level: 'Silver Star', pgc: '5 PGC', requirement: '5 Bronze Star in team', color: 'bg-gray-400', icon: '🔹', users: 5 },
+  { level: 'Gold Star', pgc: '10 PGC', requirement: '5 Silver Star in team', color: 'bg-yellow-500', icon: '🔶', users: 5 },
+];
+
 
 export default function AffiliateMarketingPage() {
   return (
@@ -136,30 +138,43 @@ export default function AffiliateMarketingPage() {
         </CardContent>
       </Card>
 
-      {/* Reward Tiers */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <Badge variant="secondary" className="mb-2 bg-green-100 text-green-800">
+       <div className="grid md:grid-cols-2 gap-8">
+        {/* Free Track Rewards */}
+        <Card>
+          <CardHeader>
+              <Badge variant="secondary" className="mb-2 bg-blue-100 text-blue-800 w-fit">
+                Free User Track
+              </Badge>
+              <CardTitle className="text-2xl font-headline">Free Affiliate Rewards</CardTitle>
+              <CardDescription>
+                Earn PGC tokens by inviting free users to the platform.
+              </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {freeTrackRewards.map((tier) => (
+              <AffiliateRewardCard key={tier.level} tier={tier} isPaid={false} />
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Paid Track Rewards */}
+        <Card>
+          <CardHeader>
+              <Badge variant="secondary" className="mb-2 bg-green-100 text-green-800 w-fit">
                 Paid User Track
               </Badge>
-              <CardTitle className="text-2xl font-headline">Affiliate Reward Tiers</CardTitle>
+              <CardTitle className="text-2xl font-headline">Paid Affiliate Rewards</CardTitle>
               <CardDescription>
-                Earn PGC tokens as you advance through affiliate tiers by building your team
+                Earn PGC tokens as you build your team of paid members.
               </CardDescription>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
-              <TrendingUp className="h-6 w-6" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {Object.values(REWARD_TIERS).map((tier) => (
-            <AffiliateRewardCard key={tier.level} tier={tier} isPaid={true} />
-          ))}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {paidTrackRewards.map((tier) => (
+              <AffiliateRewardCard key={tier.level} tier={tier} isPaid={true} />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
       
       <RequestOfferCard />
 
@@ -234,3 +249,5 @@ export default function AffiliateMarketingPage() {
     </div>
   );
 }
+
+    
