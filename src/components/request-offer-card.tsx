@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -65,16 +66,16 @@ export function RequestOfferCard() {
 
 
   return (
-    <Card className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0">
+    <Card className="border-2 border-amber-500 bg-amber-50/10">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-amber-500">
                     <Crown className="h-6 w-6" />
                     Request a Direct Offer
                     </CardTitle>
-                    <CardDescription className="text-white/90">
-                    Are you a top performer? Fill out the form below to request a special offer from our admin team.
+                    <CardDescription>
+                    Are you a top performer? Do you have a significant network or social media following? You may be eligible for a special direct offer from our admin team.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -86,7 +87,7 @@ export function RequestOfferCard() {
                                 <FormLabel>1. Select Your Role</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                        <SelectTrigger>
                                             <SelectValue placeholder="I am a..." />
                                         </SelectTrigger>
                                     </FormControl>
@@ -108,7 +109,7 @@ export function RequestOfferCard() {
                             <FormItem>
                                 <FormLabel>2. Subject</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g., Partnership Proposal" {...field} className="bg-white/10 border-white/20 text-white placeholder:text-white/60"/>
+                                    <Input placeholder="e.g., Partnership Proposal" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -123,7 +124,7 @@ export function RequestOfferCard() {
                                 <FormControl>
                                     <Textarea
                                         placeholder="Describe your network, social media presence, and why you believe you qualify for a direct offer..."
-                                        className="resize-none bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                        className="resize-none"
                                         rows={6}
                                         maxLength={2000}
                                         {...field}
@@ -135,7 +136,7 @@ export function RequestOfferCard() {
                     />
                 </CardContent>
                 <CardFooter>
-                     <Button type="submit" size="lg" variant="secondary" className="w-full text-amber-700">
+                     <Button type="submit" size="lg" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
                         <Send className="h-5 w-5 mr-2" />
                         Submit Request to Admin
                     </Button>
